@@ -4,3 +4,6 @@ exclude plover_cat/*_ui.py
 include plover_cat/*.ui
 recursive-include plover_cat/resources *
 exclude *.rmd
+
+include LICENSE
+include README.md
