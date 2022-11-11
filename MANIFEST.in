@@ -1,0 +1,6 @@
+# UI.
+exclude plover_cat/*_rc.py
+exclude plover_cat/*_ui.py
+include plover_cat/*.ui
+recursive-include plover_cat/resources *
+exclude *.rmd

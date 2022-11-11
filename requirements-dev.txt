@@ -1,0 +1,1 @@
+pyqt-distutils==0.7.2
