@@ -40,6 +40,10 @@ Once Plover is enabled, writing to the main editor will be possible. The main fu
 
 A custom dictionary for the transcript is loaded into Plover, prepopulated with shortcuts for common actions. When File --> Close is used to close the transcript, the custom dictionary will be removed from Plover.
 
+## Default CAT behaviour
+
+Check "Lock Cursor at End" and "Capture All Steno Input" to only write to end of document and to still write even when editor window is not in focus. By default, writing is inserted into any part of text, and only when window is in focus.
+
 ## Opening Audiovisual Files
 
 Select an audio file on the computer by Audio --> Open Audio (`Ctrl + Shift + O`). When audio is playing, steno strokes will be timestamped with the audio time. Open the "Paragraph Properties Editor" in the Toolbox pane to see the timestamps associated with each paragraph.
@@ -90,6 +94,24 @@ This menu contains items related to file management, import and export.
 - Close: This closes the transcript.
 - Quit: This quits Plover2CAT.
 
+### The Edit Menu
+
+For more detail, go to the [editing](#editing) section. There is a 10-action history for undo/redo.
+
+- Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
+- Capture All Steno Input: If checked, all writing through Plover will be tracked, and text emitted into editor, regardless of whether editor window is in focus. By default, no writing to editor when window is not in focus.
+- Add Custom Dict: Add a custom dictionary to the transcript. See  [transcript dictionaries](#transcript-dictionaries) for details.
+- Remove Transcript Dictionary: Removes a loaded transcript dictionary. This will remove both from the Plover instance and the configuration file, but not delete the actual file.
+- Merge Paragraphs: Merges two paragraphs together.
+- Split Paragraphs: Splits one paragraph into two.
+- Cut: cut text (and underlying steno) from paragraph.
+- Copy: copy text (and underlying steno) from paragraph.
+- Paste: paste text (and underlying steno) into paragraph.
+- Normal Copy: copies text only.
+- Undo: Undo one action ie merge, cut if available.
+- Redo: Redo the undone action if available.
+- Find/Replace Pane: shows the "Find and Replace" pane if visible. See [Find and Replace](#find-and-replace) section for details.
+
 ### The Audiovisual Menu
 
 This menu contains items related to audiovisual files.
@@ -112,22 +134,6 @@ This menu contains items related to view.
 - Zoom In: This increases the zoom on the main editor. The size from this and `Zoom Out` are "temporary", meaning they will fall back to normal if a document is loaded, such as opening/closing projects.
 - Zoom Out: This decreases the zoom on the main editor.
 - Font: This controls the actual font and size. This is saved when exiting and will be maintained across sessions.
-
-### The Edit Menu
-
-For more detail, go to the [editing](#editing) section. There is a 10-action history for undo/redo.
-
-- Add Custom Dict: Add a custom dictionary to the transcript. See  [transcript dictionaries](#transcript-dictionaries) for details.
-- Remove Transcript Dictionary: Removes a loaded transcript dictionary. This will remove both from the Plover instance and the configuration file, but not delete the actual file.
-- Merge Paragraphs: Merges two paragraphs together.
-- Split Paragraphs: Splits one paragraph into two.
-- Cut: cut text (and underlying steno) from paragraph.
-- Copy: copy text (and underlying steno) from paragraph.
-- Paste: paste text (and underlying steno) into paragraph.
-- Normal Copy: copies text only.
-- Undo: Undo one action ie merge, cut if available.
-- Redo: Redo the undone action if available.
-- Find/Replace Pane: shows the "Find and Replace" pane if visible. See [Find and Replace](#find-and-replace) section for details.
 
 ## Toolbar
 
