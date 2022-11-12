@@ -33,6 +33,7 @@ from plover.config import Config, DictionaryConfig
 from plover.engine import StenoEngine
 from plover.steno import Stroke
 from plover.dictionary.base import load_dictionary
+from plover_dict_commands import toggle_dict
 from plover import log
 
 from plover_cat.plover_cat_ui import Ui_PloverCAT
@@ -651,7 +652,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 pass
             else:
                 log.info("Abort project close because of unsaved changes.")
-                return
+                return False
         # restore dictionaries back to original
         self.restore_dictionary_from_backup()
         if self.recorder.status() == QMediaRecorder.RecordingState:
@@ -665,6 +666,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.strokeList.clear()
         self.suggestTable.clearContents()
         self.statusBar.showMessage("Project closed")
+        return True
 
     def action_close(self):
         log.info("User selected quit.")
@@ -673,9 +675,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         settings.setValue("windowstate", self.saveState())
         settings.setValue("windowfont", self.font().toString())
         log.info("Saved window settings")
-        self.close_file()
-        log.info("Closing window.")
-        self.parent().close()
+        choice = self.close_file()
+        if choice:
+            log.info("Closing window.")
+            self.parent().close()
 
     def open_root(self):
         selected_folder = pathlib.Path(self.file_name)
@@ -1050,7 +1053,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         tapey_tape_location = config_dir.joinpath('tapey_tape.txt')
         log.info("Trying to load tapey tape from default location")
         if not tapey_tape_location.exists():
-            return        
+            return
         stroke_search = [re.findall(re_strokes,line) for line in open(tapey_tape_location)]
         stroke_search = [x[0] for x in stroke_search if x]
         ## number maybe adjusted in future? both number of occurrences and number of words to place into table
@@ -1078,12 +1081,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not self.file_name:
             return
         # do nothing if window not in focus
-        if not self.textEdit.isActiveWindow():
+        if not self.textEdit.isActiveWindow() and not self.actionCapture_All_Output.isChecked():
             return
         # insert 
         current_cursor = self.textEdit.textCursor()
         # always keep cursor at end of document
-        # current_cursor.movePosition(QTextCursor.End)
+        if self.actionCursor_At_End.isChecked():
+            current_cursor.movePosition(QTextCursor.End)
+            self.textEdit.setTextCursor(current_cursor)
         self.cursor_block = self.textEdit.textCursor().blockNumber()
         self.cursor_block_position = self.textEdit.textCursor().positionInBlock()
         # gather all variables to be logged into stroke
@@ -1136,6 +1141,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     stroke = [datetime.now().isoformat("T", "milliseconds"), raw_steno, segment]
                 else:
                     stroke = [datetime.now().isoformat("T", "milliseconds"), "", segment]
+                if self.player.state() == QMediaPlayer.PlayingState: stroke.append(real_time)
+                if self.recorder.state() == QMediaRecorder.RecordingState: stroke.append(real_time)
                 dummy_action_dict = {"action": "steno", "block": self.cursor_block, "position_in_block": current_cursor.positionInBlock(),
                             "text": segment.rstrip("\n"), "length": len(string_sent), "steno": stroke}
                 self.cutcopy_storage = dummy_action_dict
@@ -1148,6 +1155,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.info("Cursor in middle. Insert steno rather than append.")
             hold_cutcopy = self.cutcopy_storage
             stroke = [datetime.now().isoformat("T", "milliseconds"), raw_steno, string_sent]
+            if self.player.state() == QMediaPlayer.PlayingState: stroke.append(real_time)
+            if self.recorder.state() == QMediaRecorder.RecordingState: stroke.append(real_time)
             dummy_action_dict = {"action": "steno", "block": self.cursor_block, "position_in_block": current_cursor.positionInBlock(),
                             "text": string_sent, "length": len(string_sent), "steno": stroke}
             self.cutcopy_storage = dummy_action_dict
@@ -2180,7 +2189,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         textdoc.save(selected_file[0])
         self.statusBar.showMessage("Exported to {filename} in OpenTextDocument format".format(filename = str(selected_file[0])))
         # os.startfile(selected_file[0])
-
     # import rtf
     def import_rtf(self):
         selected_folder = pathlib.Path(self.file_name)
@@ -2243,3 +2251,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.styles = style_dict
         self.statusBar.showMessage("Finished loading transcript data from rtf {filename}".format(filename = str(selected_file[0])))
         log.info("Loading finished.")                
+
+
+
