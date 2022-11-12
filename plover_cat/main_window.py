@@ -1049,6 +1049,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
         tapey_tape_location = config_dir.joinpath('tapey_tape.txt')
         log.info("Trying to load tapey tape from default location")
+        if not tapey_tape_location.exists():
+            return        
         stroke_search = [re.findall(re_strokes,line) for line in open(tapey_tape_location)]
         stroke_search = [x[0] for x in stroke_search if x]
         ## number maybe adjusted in future? both number of occurrences and number of words to place into table
