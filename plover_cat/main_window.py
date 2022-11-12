@@ -33,7 +33,6 @@ from plover.config import Config, DictionaryConfig
 from plover.engine import StenoEngine
 from plover.steno import Stroke
 from plover.dictionary.base import load_dictionary
-from plover_dict_commands import toggle_dict
 from plover import log
 
 from plover_cat.plover_cat_ui import Ui_PloverCAT
