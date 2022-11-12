@@ -30,8 +30,6 @@ On MacOS and Unix systems, use `plover` rather than `plover_console.exe`.
 
 # Getting Started
 
-On MacOS and Unix systems, use `plover` rather than `plover_console.exe`.
-
 ## Starting a New Transcript
 
 Open Plover2CAT from within Plover after installation, by Tools --> Plover2CAT. A window with a main editor, and dockable containers for suggestions, paper tape, and other functions will appear. Create a new transcript with File --> New (or `Ctrl + N`). A folder selection dialog will appear. Plover2CAT will create a transcript folder with a timestamp at the selected location.
@@ -39,6 +37,10 @@ Open Plover2CAT from within Plover after installation, by Tools --> Plover2CAT. 
 Once Plover is enabled, writing to the main editor will be possible. The main function of Plover2CAT is for writing steno, and by default, only steno translated by Plover will be written (and deleted with the `*`). 
 
 A custom dictionary for the transcript is loaded into Plover, prepopulated with shortcuts for common actions. When File --> Close is used to close the transcript, the custom dictionary will be removed from Plover.
+
+## Default CAT behaviour
+
+Check "Lock Cursor at End" and "Capture All Steno Input" to only write to end of document and to still write even when editor window is not in focus. By default, writing is inserted into any part of text, and only when window is in focus.
 
 ## Opening Audiovisual Files
 
