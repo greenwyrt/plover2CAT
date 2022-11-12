@@ -18,14 +18,17 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
 
+# Installation
+
+Open the terminal following instructions here [on the command-line](https://github.com/openstenoproject/plover/wiki/Invoke-Plover-from-the-command-line). On Windows, paste in:
+
+```
+ .\plover_console.exe -s plover_plugins install git+https://github.com/greenwyrt/plover2CAT.git
+```
+
+On MacOS and Unix systems, use `plover` rather than `plover_console.exe`.
+
 # Getting Started
-
-Download the code from this repository. Open the terminal following instructions here [on the command-line](https://github.com/openstenoproject/plover/wiki/Invoke-Plover-from-the-command-line). On Windows, use:
-
-```
- .\plover_console.exe -s plover_plugins install plover2CAT
- ## use install -e for development
-```
 
 On MacOS and Unix systems, use `plover` rather than `plover_console.exe`.
 
