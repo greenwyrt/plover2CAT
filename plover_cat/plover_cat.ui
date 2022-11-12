@@ -105,6 +105,9 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionCursor_At_End"/>
+    <addaction name="actionCapture_All_Output"/>
+    <addaction name="separator"/>
     <addaction name="actionMerge_Paragraphs"/>
     <addaction name="actionSplit_Paragraph"/>
     <addaction name="separator"/>
@@ -115,8 +118,8 @@
     <addaction name="actionCut"/>
     <addaction name="actionPaste"/>
     <addaction name="actionNormal_Copy"/>
-    <addaction name="separator"/>
     <addaction name="actionFind_Replace_Pane"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuAudio">
     <property name="title">
@@ -1442,6 +1445,22 @@ time from next paragraph.</string>
   <action name="actionImport_RTF">
    <property name="text">
     <string>Import RTF</string>
+   </property>
+  </action>
+  <action name="actionCursor_At_End">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Lock Cursor At End</string>
+   </property>
+  </action>
+  <action name="actionCapture_All_Output">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Capture All Steno Output</string>
    </property>
   </action>
  </widget>
