@@ -234,6 +234,19 @@ position.</string>
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="strokeLocate">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Select stroke and locate in editor text</string>
+       </property>
+       <property name="text">
+        <string>Locate</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>

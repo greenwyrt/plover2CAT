@@ -446,8 +446,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.blockCountChanged.connect(lambda: self.to_next_style())
         self.suggest_sort.toggled.connect(lambda: self.get_tapey_tape())
         self.numbers = {number: letter for letter, number in plover.system.NUMBERS.items()}
-        # self.strokeList.cursorPositionChanged.connect(lambda: self.stroke_to_text_move())
-        # self.textEdit.cursorPositionChanged.connect(lambda: self.text_to_stroke_move())
+        self.strokeLocate.clicked.connect(lambda: self.stroke_to_text_move())
+        self.textEdit.cursorPositionChanged.connect(lambda: self.text_to_stroke_move())
         # help
         self.actionUser_Manual.triggered.connect(lambda: self.open_help())
         # status bar
@@ -1110,7 +1110,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             par = int(cursor_position_stroke[0].replace("(", ""))
             col = int(cursor_position_stroke[1].replace(")", ""))
             edit_cursor.movePosition(QTextCursor.Start)
-            for i in range(par-1):
+            for i in range(par):
                 edit_cursor.movePosition(QTextCursor.NextBlock)
             for i in range(col):
                 edit_cursor.movePosition(QTextCursor.NextCharacter)
@@ -1131,16 +1131,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         try:
             if edit_cursor.atBlockStart():
                 stroke_time = block_data["strokes"][0][0]
+                stroke = block_data["strokes"][0][1]
             elif edit_cursor.atBlockEnd():
                 stroke_time = block_data["strokes"][-1][0]
+                stroke = block_data["strokes"][0][1]
             else:
                 before, after = split_stroke_data(block_data["strokes"], pos)
                 stroke_time = before[-1][0]
+                stroke = block_data["strokes"][0][1]
             # no idea how fast this will be with many many more lines
             for index, i in enumerate(stroke_text):
                 if i.startswith(stroke_time):
                     stroke_pos = index
-                    break       
             stroke_cursor.movePosition(QTextCursor.Start)
             for i in range(stroke_pos):
                 stroke_cursor.movePosition(QTextCursor.NextBlock)
@@ -1216,9 +1218,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             for i, segment in enumerate(list_segments):
                 # because this is all occurring in one stroke, only first segment gets the stroke
                 if i == 0:
-                    stroke = [datetime.now().isoformat("T", "milliseconds"), raw_steno, segment]
+                    stroke = [self.stroke_time, raw_steno, segment]
                 else:
-                    stroke = [datetime.now().isoformat("T", "milliseconds"), "", segment]
+                    stroke = [self.stroke_time, "", segment]
                 if self.player.state() == QMediaPlayer.PlayingState: stroke.append(real_time)
                 if self.recorder.state() == QMediaRecorder.RecordingState: stroke.append(real_time)
                 dummy_action_dict = {"action": "steno", "block": self.cursor_block, "position_in_block": current_cursor.positionInBlock(),
@@ -1232,7 +1234,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if string_sent and not current_cursor.atEnd():
             log.info("Cursor in middle. Insert steno rather than append.")
             hold_cutcopy = self.cutcopy_storage
-            stroke = [datetime.now().isoformat("T", "milliseconds"), raw_steno, string_sent]
+            stroke = [self.stroke_time, raw_steno, string_sent]
             if self.player.state() == QMediaPlayer.PlayingState: stroke.append(real_time)
             if self.recorder.state() == QMediaRecorder.RecordingState: stroke.append(real_time)
             dummy_action_dict = {"action": "steno", "block": self.cursor_block, "position_in_block": current_cursor.positionInBlock(),
@@ -1284,7 +1286,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if backspaces_sent != 0:
             strokes_data = remove_strings(strokes_data, backspaces_sent)
         if string_sent:
-            stroke = [datetime.now().isoformat("T", "milliseconds"), raw_steno, string_sent]
+            stroke = [self.stroke_time, raw_steno, string_sent]
             if self.player.state() == QMediaPlayer.PlayingState: stroke.append(real_time)
             if self.recorder.state() == QMediaRecorder.RecordingState: stroke.append(real_time)
             if type(strokes_data) is str:
@@ -1294,7 +1296,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         focus_block.setUserData(block_dict)
         # mimic keyboard actions
         if backspaces_sent != 0:
-            stroke = [datetime.now().isoformat("T", "milliseconds"), raw_steno, ""]
+            stroke = [self.stroke_time, raw_steno, ""]
             # select backward the number of backspaces
             current_cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor, backspaces_sent)
             deleted_text = current_cursor.selectedText()
@@ -1392,6 +1394,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         before, after = split_stroke_data(block_data["strokes"], start_pos)
         log.debug("Paste: Splitting pieces %s and %s with %s" % (before, after, action_dict["steno"]))
         steno = action_dict["steno"]
+        if len(steno) > 0:
+            if not all(isinstance(el, list) for el in steno):
+                steno = [steno]
         if before and after:
             before = before + steno
             before = before + after
