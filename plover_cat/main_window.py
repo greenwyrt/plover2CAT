@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import QMainWindow, QFileDialog, QListWidgetItem, QTableWid
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer, QMediaMetaData, QMediaRecorder, QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtCore import Qt, QFile, QTextStream, QUrl, QTime, QDateTime, QSettings, QRegExp, QSize
-_ = lambda txt: QtCore.QCoreApplication.translate("PloverCAT", txt)
+_ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 
 import plover
 from plover.config import Config, DictionaryConfig
@@ -359,7 +359,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.audio_bitrate.addItem("96000", 96000)
         self.audio_bitrate.addItem("128000", 128000)
         # vars for startup
-        settings = QSettings("PloverCAT", "OpenCAT")
+        settings = QSettings("Plover2CAT", "OpenCAT")
         if settings.contains("geometry"):
             self.restoreGeometry(settings.value("geometry"))
         if settings.contains("windowstate"):
@@ -383,7 +383,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cutcopy_storage = {}
         self.last_action = deque(maxlen = 10)
         self.redone_action = deque(maxlen = 10)
-        self.textEdit.setPlainText("Welcome to PloverCAT\nOpen or create a translation folder first with File->New...\n A dated transcript folder will be created.")
+        self.textEdit.setPlainText("Welcome to Plover2CAT\nOpen or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")
         self.menu_enabling()
         # connections:
         ## file setting/saving
@@ -446,16 +446,26 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.blockCountChanged.connect(lambda: self.to_next_style())
         self.suggest_sort.toggled.connect(lambda: self.get_tapey_tape())
         self.numbers = {number: letter for letter, number in plover.system.NUMBERS.items()}
+        self.strokeList.cursorPositionChanged.connect(lambda: self.stroke_to_text_move())
+        self.textEdit.cursorPositionChanged.connect(lambda: self.text_to_stroke_move())
+        # help
+        self.actionUser_Manual.triggered.connect(lambda: self.open_help())
+        # status bar
+        self.statusBar.showMessage("Create New Transcript or Open Existing...")
+        self.cursor_status = QLabel("Par,Char: {line},{char}".format(line = 0, char = 0))
+        self.cursor_status.setObjectName("cursor_status")
+        self.statusBar.addPermanentWidget(self.cursor_status)
         ## engine connections
         engine.signal_connect("stroked", self.on_stroke) 
         engine.signal_connect("stroked", self.log_to_tape) 
         engine.signal_connect("send_string", self.on_send_string)
         engine.signal_connect("send_backspaces", self.count_backspaces)
-        self.statusBar.showMessage("Create New Transcript or Open Existing...")
-        self.cursor_status = QLabel("Par,Char: {line},{char}".format(line = 0, char = 0))
-        self.cursor_status.setObjectName("cursor_status")
-        self.statusBar.addPermanentWidget(self.cursor_status)
+        engine.signal_connect("translated", self.on_translation)
         log.info("Main window open")
+
+    def open_help(self):
+        user_manual_link = QUrl("https://github.com/greenwyrt/plover2CAT/blob/main/user_manual.md")
+        QtGui.QDesktopServices.openUrl(user_manual_link)
 
     def menu_enabling(self, value = True):
         self.actionNew.setEnabled(value)
@@ -483,6 +493,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not project_dir:
             log.info("No directory selected, passing")
             return
+        if not pathlib.Path(project_dir).exists:
+            user_choice = QMessageBox.question(self, "Create New", "Specified file path does not exist. Create new?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if user_choice == QMessageBox.Yes:
+                log.info("Creating new dir from provided path")
+                pathlib.Path(project_dir).mkdir(parents = True)
+            else:
+                log.info("Abort new transcript creation because path does not exist.")
+                return            
         log.info("Selected directory for new project.")
         project_dir = pathlib.Path(project_dir)
         transcript_dir_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
@@ -563,6 +581,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     document_cursor.insertText("\n")
             current_cursor.movePosition(QTextCursor.End)
             self.textEdit.setDocument(new_document)
+            self.textEdit.setCursorWidth(5)
             self.textEdit.moveCursor(QTextCursor.End)
             self.statusBar.showMessage("Finished loading transcript data at {filename}".format(filename = str(transcript)))
             log.info("Loaded transcript.")
@@ -661,7 +680,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cursor_block = 0
         self.cursor_block_position = 0        
         self.menu_enabling()
-        self.textEdit.setPlainText("Welcome to PloverCAT\nSet up or create a translation folder first with File->New...\n A dated transcript folder will be created.")        
+        self.textEdit.setPlainText("Welcome to Plover2CAT\nSet up or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")        
         self.strokeList.clear()
         self.suggestTable.clearContents()
         self.statusBar.showMessage("Project closed")
@@ -669,7 +688,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     def action_close(self):
         log.info("User selected quit.")
-        settings = QSettings("PloverCAT", "OpenCAT")
+        settings = QSettings("Plover2CAT", "OpenCAT")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowstate", self.saveState())
         settings.setValue("windowfont", self.font().toString())
@@ -931,13 +950,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         self.editorParagraphLabel.setText(str(block_number))
         if block_data["creationtime"]:
-            self.editorCreationTime.setDateTime(QDateTime.fromString(block_data["creationtime"],  "yyyy-MM-ddTHH:mm:ss.zzz"))
+            self.editorCreationTime.setDateTime(QDateTime.fromString(block_data["creationtime"],  "yyyy-MM-ddTHH:mm:ss.zzz")) 
         if block_data["edittime"]:
             self.editorEditTime.setDateTime(QDateTime.fromString(block_data["edittime"],  "yyyy-MM-ddTHH:mm:ss.zzz"))
         if block_data["audiostarttime"]:
             self.editorAudioStart.setTime(QTime.fromString(block_data["audiostarttime"], "HH:mm:ss.zzz"))
+        else:
+            self.editorAudioStart.setTime(QTime(0, 0, 0, 0))
         if block_data["audioendtime"]:
             self.editorAudioEnd.setTime(QTime.fromString(block_data["audioendtime"], "HH:mm:ss.zzz"))
+        else:
+            self.editorAudioEnd.setTime(QTime(0, 0, 0, 0))
+        if block_data["notes"]:
+            self.editorNotes.setText(block_data["notes"])
+        else:
+            self.editorNotes.clear()
         if block_data["style"]:
             self.style_selector.setCurrentText(block_data["style"])
         self.cursor_status.setText("Par,Char: {line},{char}".format(line = block_number, char = current_cursor.positionInBlock())) 
@@ -1072,6 +1099,59 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.suggestTable.setItem(row, 0, QTableWidgetItem(words[row]))
             self.suggestTable.setItem(row, 1, QTableWidgetItem(most_common_strokes[row]))
         self.suggestTable.resizeColumnsToContents()
+
+    def stroke_to_text_move(self):
+        stroke_cursor = self.strokeList.textCursor()
+        edit_cursor = self.textEdit.textCursor()
+        self.textEdit.blockSignals(True)
+        try:
+            stroke_cursor.movePosition(QTextCursor.StartOfBlock)
+            stroke_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+            cursor_position_stroke = stroke_cursor.selectedText().split("|")[2].split(",")
+            par = int(cursor_position_stroke[0].replace("(", ""))
+            col = int(cursor_position_stroke[1].replace(")", ""))
+            edit_cursor.movePosition(QTextCursor.Start)
+            for i in range(par-1):
+                edit_cursor.movePosition(QTextCursor.NextBlock)
+            for i in range(col):
+                edit_cursor.movePosition(QTextCursor.NextCharacter)
+            self.textEdit.setTextCursor(edit_cursor)
+        except:
+            pass
+        self.textEdit.blockSignals(False)
+
+    def text_to_stroke_move(self):
+        stroke_cursor = self.strokeList.textCursor()
+        edit_cursor = self.textEdit.textCursor()
+        edit_block = edit_cursor.block()
+        block_data = edit_block.userData()
+        self.strokeList.blockSignals(True)
+        stroke_text = self.strokeList.document().toPlainText().split("\n")
+        pos = edit_cursor.positionInBlock()
+        log.debug(pos)
+        try:
+            if edit_cursor.atBlockStart():
+                stroke_time = block_data["strokes"][0][0]
+            elif edit_cursor.atBlockEnd():
+                stroke_time = block_data["strokes"][-1][0]
+            else:
+                before, after = split_stroke_data(block_data["strokes"], pos)
+                stroke_time = before[-1][0]
+            # no idea how fast this will be with many many more lines
+            for index, i in enumerate(stroke_text):
+                if i.startswith(stroke_time):
+                    stroke_pos = index
+                    break       
+            stroke_cursor.movePosition(QTextCursor.Start)
+            for i in range(stroke_pos):
+                stroke_cursor.movePosition(QTextCursor.NextBlock)
+            stroke_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+            self.strokeList.setTextCursor(stroke_cursor)
+            self.strokeList.setCursorWidth(5)
+            self.strokeList.ensureCursorVisible()
+        except:
+            pass
+        self.strokeList.blockSignals(False)
     # steno functions
     def on_stroke(self, stroke_pressed):
         self.editorCheck.setChecked(True)
@@ -2228,6 +2308,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 document_cursor.insertText("\n")
             document_cursor.movePosition(QTextCursor.End)
         self.textEdit.setDocument(new_document)
+        self.textEdit.setCursorWidth(5)
         self.textEdit.moveCursor(QTextCursor.End)
         styles = []
         for k, v in parse_results.styles.items():
