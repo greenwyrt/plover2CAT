@@ -460,7 +460,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         engine.signal_connect("stroked", self.log_to_tape) 
         engine.signal_connect("send_string", self.on_send_string)
         engine.signal_connect("send_backspaces", self.count_backspaces)
-        engine.signal_connect("translated", self.on_translation)
         log.info("Main window open")
 
     def open_help(self):
