@@ -70,6 +70,10 @@ Use File --> Close to close the transcript and File --> Quit (`Ctrl+Q`) to quit 
 
 # Layout
 
+Hover over items to see tooltips.
+
+![Example of hovering](images/tooltips.gif)
+
 ## Status Bar
 
 The status bar at the bottom of the window shows important events and warning messages.
@@ -96,6 +100,8 @@ This menu contains items related to file management, import and export.
 
 ### The Edit Menu
 
+![Example of lock cursor at end](images/lock_cursor.gif)
+
 For more detail, go to the [editing](#editing) section. There is a 10-action history for undo/redo.
 
 - Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
@@ -113,6 +119,10 @@ For more detail, go to the [editing](#editing) section. There is a 10-action his
 - Find/Replace Pane: shows the "Find and Replace" pane if visible. See [Find and Replace](#find-and-replace) section for details.
 
 ### The Audiovisual Menu
+
+![Show/Hide video window](images/show_hide_video.gif)
+
+![Skipping and playback rate changes](images/video_slowdown_skip.gif)
 
 This menu contains items related to audiovisual files.
 
@@ -137,13 +147,15 @@ This menu contains items related to view.
 
 ## Toolbar
 
+![Toolbars can float and move around](images/toolbar.gif)
+
 The toolbar (located under the menu) contains shortcuts to commonly used items in the menu, and each item is described in the [menu](#menu) section. The different segments of the toolbar can be re-arranged or pulled out to float independently.
 
 ## Panes
 
 Plover2CAT has multiple panes which are arranged around the main editor on startup. These panes are "dockable", and can be moved independently by clicking and dragging on the window bar. As with all Qt dockable widgets, these panes can be 1) floating, 2) placed on the top, left, right, or bottom of the window, and 3) stacked on top of each other. Each pane can be closed if not needed. To re-open the panes, right-click the toolbar and select the desired pane. 
 
-Hovering over panes/controls will activate a tooltip with a short description for less obvious items.
+![Example of moving and stacking docks](images/floating_stacking_docks.gif)
 
 ### Paper Tape
 
