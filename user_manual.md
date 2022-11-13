@@ -163,6 +163,12 @@ This pane shows an alternative version of the Plover Paper Tape.
 Each time a stroke is pressed, the stroke is saved to a `.tape` file in the `transcript-YYYY-MM-DDTHHMMSS` folder. 
 See [Tape](#tape) for a description of the format.
 
+The paper tape is linked to the text and will scroll to the corresponding stroke when the cursor in the editor moves.
+
+![Example of Linking](images/paper_text_link.gif)
+
+Highlight a stroke in the paper tape, and click "Locate" to move to that position in the main text editor. 
+
 ### Suggestions
 
 Plover2CAT uses the [Plover Tapey Tape plugin](https://github.com/rabbitgrowth/plover-tapey-tape) for suggestions, in the default format and in the default location (`tapey-tape.txt`). If the plugin is not installed, or the location and format of the file is not the default, suggestions within Plover2CAT will likely not work. 
