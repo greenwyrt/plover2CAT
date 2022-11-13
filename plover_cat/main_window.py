@@ -446,8 +446,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.blockCountChanged.connect(lambda: self.to_next_style())
         self.suggest_sort.toggled.connect(lambda: self.get_tapey_tape())
         self.numbers = {number: letter for letter, number in plover.system.NUMBERS.items()}
-        self.strokeList.cursorPositionChanged.connect(lambda: self.stroke_to_text_move())
-        self.textEdit.cursorPositionChanged.connect(lambda: self.text_to_stroke_move())
+        # self.strokeList.cursorPositionChanged.connect(lambda: self.stroke_to_text_move())
+        # self.textEdit.cursorPositionChanged.connect(lambda: self.text_to_stroke_move())
         # help
         self.actionUser_Manual.triggered.connect(lambda: self.open_help())
         # status bar
