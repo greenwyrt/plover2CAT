@@ -147,7 +147,8 @@ default_dict = {
     "TKPW-FRLGS":"{#control(shift(g))}", # speed up
     "S-FRLGS":"{#control(shift(s))}", # slow down
     "STKPW-FRLG":"{#controls(z)}", # undo
-    "KWR-FRLG":"{#controls(y)}" # redo
+    "KWR-FRLG":"{#controls(y)}", # redo
+    "R-FRLGS":"{#control(shift(s))}" # define last
     # "-FRLG":"{#controls()}", FRLGS for ctrol + shift
     # "-PSZ":"{#control()}" alternative template with PSZ, FPSZ for control + shift
 }
