@@ -7,9 +7,10 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] a plain text editor with steno hidden underneath
 - [x] timestamps for each stroke and associated with each piece of text
 - [x] conventional editing features such as cut/copy/paste while keeping steno data attached
-- [x] undo/redo history for ten "actions"
+- [x] undo/redo history
 - [x] automatic creation and loading of transcript-specific dictionaries for each transcript
 - [x] find and replace for simple text, steno stroke, and untrans.
+- [x] retroactive define, and define last translate with replacement of all previous occurrences and new outline sent to transcript dictionary
 - [x] an audiovisual player, with controls for timing offset, playback rate, skipping forward and back
 - [x] synchronization of steno with the audio/video file for transcription
 - [x] audio recording synchronized with steno (file format dependent on codecs in operating system)
@@ -84,7 +85,7 @@ The main editor is located at the center of the window. This is where the writin
 
 ## Menu
 
-The menu is the top bar of the window. Items which have shortcuts will show the keyboard combination next to the name.
+The menu is the top bar of the window. A brief summary is outlined for each menu item. More complicated menu items and their use will be described in the [editing](#editing) section.
 
 ### The File Menu
 
@@ -104,10 +105,6 @@ This menu contains items related to file management, import and export.
 
 For more detail, go to the [editing](#editing) section. There is a 10-action history for undo/redo.
 
-- Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
-- Capture All Steno Input: If checked, all writing through Plover will be tracked, and text emitted into editor, regardless of whether editor window is in focus. By default, no writing to editor when window is not in focus.
-- Add Custom Dict: Add a custom dictionary to the transcript. See  [transcript dictionaries](#transcript-dictionaries) for details.
-- Remove Transcript Dictionary: Removes a loaded transcript dictionary. This will remove both from the Plover instance and the configuration file, but not delete the actual file.
 - Merge Paragraphs: Merges two paragraphs together.
 - Split Paragraphs: Splits one paragraph into two.
 - Cut: cut text (and underlying steno) from paragraph.
@@ -117,6 +114,25 @@ For more detail, go to the [editing](#editing) section. There is a 10-action his
 - Undo: Undo one action ie merge, cut if available.
 - Redo: Redo the undone action if available.
 - Find/Replace Pane: shows the "Find and Replace" pane if visible. See [Find and Replace](#find-and-replace) section for details.
+- Reset Paragraph: Removes all paragraph text and steno data. Used as the last option when text and steno data go out of sync.
+
+### The Steno Actions Menu
+
+This menu is for steno-related menu items.
+
+- Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
+- Capture All Steno Input: If checked, all writing through Plover will be tracked, and text emitted into editor, regardless of whether editor window is in focus. By default, no writing to editor when window is not in focus.
+- Retroactive Define: Define an outline after writing it.
+- Define Last: Define last preceding untranslate before cursor.
+- Autocompletion: start up autocompletion. Requires a `wordlist.json` in a `sources/` dictionary.
+
+### The Dictionary Menu
+
+This menu is for transcript dictionary management.
+
+- Add Custom Dict: Add a custom dictionary to the transcript. See  [transcript dictionaries](#transcript-dictionaries) for details.
+- Remove Transcript Dictionary: Removes a loaded transcript dictionary. This will remove both from the Plover instance and the configuration file, but not delete the actual file.
+
 
 ### The Audiovisual Menu
 
@@ -144,6 +160,16 @@ This menu contains items related to view.
 - Zoom In: This increases the zoom on the main editor. The size from this and `Zoom Out` are "temporary", meaning they will fall back to normal if a document is loaded, such as opening/closing projects.
 - Zoom Out: This decreases the zoom on the main editor.
 - Font: This controls the actual font and size. This is saved when exiting and will be maintained across sessions.
+- Docks: Toggle the visibility of each dock.
+
+### The Help Menu
+
+This menu contains help:
+
+- Online User Manual: click to go to the online user manual (this document).
+- Acknowledgements
+
+One of the goals in future development is to replace the online user manual with an offline manual packaged with the plugin using the QHelpEngine in Qt. 
 
 ## Toolbar
 
@@ -179,6 +205,14 @@ Entries will show up to the ten most common/recent entries, only if Tapey Tape h
 
 The truly nitty-gritty: for users who have a custom output format defined for Tapey Tape, if `%s` is part of the format, the suggestions should be extracted properly as the regex relies on the presence of the two spaces and `>` before a suggestion.
 
+### Reveal Steno
+
+This is a table which shows the current paragraph's text, and the steno underlying the text. It will update when the cursor moves, and the paragraph is non-empty.
+
+### History
+
+Plover2CAT keeps track of all editing in the editor. The History Pane lists the actions performed, with new actions appended to the end. Clicking on an action before the end will undo all actions to that action, and clicking below will redo actions. 
+
 ### Audiovisual Controls
 
 By default, the audio controls pane is located at the bottom of the window. 
@@ -201,23 +235,27 @@ The Toolbox pane contains pages of different controls. See the [tools](#tools) s
 
 Many of the editing functions work exactly like they do in normal word processors, with certain caveats. The work in keeping the steno organized occur in the background.
 
-## Add Custom Dictionary
-
-Select a dictionary from the filesystem and load into Plover. Use this instead of the Plover Add Dictionary as this will copy the dictionary into the `dict/` folder so it will be loaded and removed from Plover automatically when the transcript is opened or closed while remaining self-contained.
-
-The `default.json` is a good place to add transcript-specific outlines if there is only a few.
-
 ## Normal Writing
 
 Write into the editor pane in the middle. The cursor is placed at the end after creating/opening a transcript. Click at other places in the text to move the cursor and insert text.
 
+## Add Custom Dictionary
+
+Select a dictionary from the filesystem and load into Plover2CAT. Use this instead of the Plover Add Dictionary as this will copy the dictionary into the `dict/` folder so it will be loaded and removed from Plover automatically when the transcript is opened or closed while remaining self-contained.
+
+The `default.json` is a good place to add transcript-specific outlines if there is only a few.
+
+## Remove Transcript Dictionary
+
+Plover2CAT keeps track of the transcript dictionary and all other added custom dictionaries. The editor will load them into Plover when the transcript is opened. To remove a dictionary, use this rather than Plover's "Remove Selected Dictionary". A file dialog will open in the transcript's dictionaries directory for selection of a dictionary to remove. This will prevent Plover2CAT from loading the removed dictionary the next time. 
+
 ## Split Paragraphs
 
-Click to set the cursor or click and drag to select characters. The "split" will occur at the beginning of the selection or the visible cursor. If the selection includes an entry at the start, and the option `Before Output` for space placement in Plover, then the initial space will be removed in the new paragraph. `space_placement` is set as part of the `config.config` file when the project is first created. This option should not be changed after any steno has been input as it will mess up the underlying steno rearrangements.
+Click to set the cursor or click and drag to select characters. The "split" will occur at the beginning of the selection or the visible cursor. A newline character sent through Plover will cause the same effect. If the selection includes an entry at the start, and the option `Before Output` for space placement in Plover, then the initial space will be removed in the new paragraph. `space_placement` is set as part of the `config.config` file when the project is first created. This option should not be changed after any steno has been input as it will mess up the underlying steno rearrangements.
 
 ## Merge Paragraphs
 
-Select text in the *second* of the paragraphs for the merge. This paragraph will be appended to the previous paragraph. By default, an empty space is added between the two paragraphs.
+Select text or place cursor in the *second* of the paragraphs for the merge. This paragraph will be appended to the previous paragraph. By default, an empty space is added between the two paragraphs. Alternatively with the keyboard, set the cursor to the beginning of the second paragraph and stroke to have Plover send a backspace (but a space will not be added inbetween).
 
 ## Copy
 
@@ -237,9 +275,15 @@ This is a convenience for copying to other applications as only *regular text* i
 
 ## Undo/Redo
 
-Plover2CAT keeps track of the last 10 actions for undo/redo.
+Plover2CAT keeps track of all the actions performed in the editor such as writing, "deleting" and cut/paste. This is visualized in the `History` Pane.
 
-Note that cut and paste will count as two separate actions. Undo only undoes *text* changes, not other actions such as setting style or modifying paragraph properties.
+The normal shortcuts `Ctrl + Z` and `Ctrl + Y` can be used to undo/redo. 
+
+## Autocompletion
+
+An autocompletion feature has to be toggled through the Steno Actions menu. The choices for completion have to be provided by a `wordlist.json` in a `sources/` folder within the transcript folder. The format for the file is described in [Wordlist Format](#autocomplete-wordlist). 
+
+Choices can be scrolled using arrow keys on the pop-up. It is **essential** that an outline is mapped to `{#return}` in one of Plover's loaded dictionaries. That outline/stroke has to be used to select the autocomplete choice. Using an outline mapping to `\n` will cause a new paragraph to be started in addition to making the selection.
 
 # Tools
 
@@ -299,7 +343,7 @@ If any of the three find methods has a match, it will be highlighted in the edit
 
 ### Replace All
 
-Each replace is a "cut" and a "paste" action in history. As history contains 10 actions at max, only 5 replacements can be undone.
+This will search and replace all matches with the replacement text. This counts as one action, so undo will undo all replacements.
 
 ## Audio Recording
 
@@ -383,6 +427,12 @@ strokes = [
 ]
 ```
 
+### Modifying on the `stroked` hook in Plover
+
+Of the three engine hooks with data for `strokes`, `stroked`, `send_string` and `send_backspace`, the two `send_*` hooks will trigger before `stroked`. Therefore, `stroked` is used as the trigger to update the `strokes` data, as by then the number of backspaces and text string Plover emits for the stroke are available. If done the other way around, `send_string` will not know the present stroke, and the code becomes more complicated with the `strokes` data always a step behind. 
+
+The `on_stroked` function in the code is the workhorse of the entire editor. It sets properties of the paragraph and modifies them before inserting the text Plover outputs, and also deleting text based on the number of backspaces Plover outputs.
+
 ### Lossy `stroke` data
 
 Each time a stroke is written, Plover2CAT will first parse the the number of backspaces and/or text string the Plover engine outputs. The text string element (third) in the `strokes` sub-lists will be modified. The resulting `strokes` list will contain a *lossy* representation of the steno and the text as the backspaces Plover emits are used, but not recorded explicitly. 
@@ -407,16 +457,13 @@ strokes = [
 ```
 One benefit of doing this is that the user can still search the steno for the stroke `PHRES` and find `pleasing`. 
 
+## Actions
 
-### Modifying on the `stroked` hook in Plover
-
-Of the three engine hooks with data for `strokes`, `stroked`, `send_string` and `send_backspace`, the two `send_*` hooks will trigger before `stroked`. Therefore, `stroked` is used as the trigger to update the `strokes` data, as by then the number of backspaces and text string Plover emits for the stroke are available. If done the other way around, `send_string` will not know the present stroke, and the code becomes more complicated with the `strokes` data always a step behind. 
-
-The `on_stroked` function in the code is the workhorse of the entire editor. It sets properties of the paragraph and modifies them before inserting the text Plover outputs, and also deleting text based on the number of backspaces Plover outputs.
+Writing/removal of steno has been implemented using custom `QUndoCommand` classes. They are `steno_insert`, `steno_remove`, `split_steno_par` and `merge_steno_par`. The former two commands simply insert/remove text and associated steno from the `stroke` data.
 
 ### Merging and splitting paragraphs
 
-With the QPlainTextEdit, when a paragraph is deleted, so is the data associated with it. But when the QT undo is used to restore the deleted paragraph, the data is still gone. This creates problems when a user merges paragraphs (by backspacing) or creates a new paragraph in the middle (pressing `enter`), common operations in a word processor. If two paragraphs are merged, the steno data stored in the second paragraph will disappear, and the first paragraph will have text from two different paragraphs, but the steno will only be of the first paragraph. Because of this limitation, `Merge Paragraph` and `Split Paragraph` should be used when collapsing two paragraphs together, or splitting a paragraph in the middle into two. Using the functions, the underlying steno will be merged and set properly rather than being lost.
+With the QPlainTextEdit, when a paragraph is deleted, so is the data associated with it. But when the QT undo is used to restore the deleted paragraph, the data is still gone. This creates problems when a user merges paragraphs (by backspacing) or creates a new paragraph in the middle (pressing `enter`), common operations in a word processor. If two paragraphs are merged, the steno data stored in the second paragraph will disappear, and the first paragraph will have text from two different paragraphs, but the steno will only be of the first paragraph. Because of this limitation, there are two commands `split_steno_par` and `merge_steno_par` to be used when merging/splitting paragraphs. This way, the underlying steno will be merged and set properly rather than being lost.
 
 For example, a merge should be like placing the cursor at the beginning of the paragraph and then pressing backspace:
 
@@ -452,38 +499,12 @@ strokes = [
 
 When the cursor is at the end of the document, stroke data is appended to the end. When the cursor is in the middle of text, a cut and paste action is used to mimic the writing. When backspacing across paragraphs, the editor calculates and using as many cut actions as needed together with the merge paragraph action. Similarly, when the writing contains new lines, the split paragraph action is used together with paste to create new paragraphs in the middle of text without erasing steno data from later paragraphs that are already written.
 
-## Actions
+### Steno across paragraphs
 
-To achieve undo/redo, each action is contained into a dict. The elements are:
+Sometimes, a stroke will have a translation that includes newlines `\n`. In cases like this, Plover2CAT will break up the string based on the `\n` into separate insertions. So `Line one\ntwo\nthree` will be three separate calls to `steno_insert`, with a call to `split_steno_par` between to generate a new paragraph. This is treated as one action for undo/redo even though there are actually five separate actions. It is not possible to undo in the middle.
 
-- action: the style of action, ie cut, copy, paste, steno, backspace
-- block: the paragraph the action occurred in
-- position_in_block: the position in block when the action occurred
-- text: text if there is any text associated with the action
-- length: length of text, or number of backspaces if `action = "backspace"`
-- strokes: associated strokes if there is any stroke data associated with action
+The opposite of strings with newlines are `*` commands for Plover undo that crosses paragraph. This might be the result of the previous stroke containing new lines or in editing where the number of backspaces is greater than the number of characters in the paragraph. Plover2CAT calculates the position reached by the number of backspaces. Each time, `steno_remove` is used to remove as much text as possible until the cursor reaches the beginning of the paragraph, followed by a `merge_steno_par` call to merge the paragraphs, repeating until the number of backspaces is reached. This will also be treated as one action for undo/redo.
 
-```
-{
-  "action": "steno",
-  "block": "11",
-  "position_in_block": "4",
-  "text": "The",
-  "length": "3",
-  "strokes": "[["2001-01-01T01:23:45.678", "-T", "The"]]"
-}
-```
-
-```
-{
-  "action": "cut",
-  "block": "2",
-  "position_in_block": "3",
-  "text": "cat",
-  "length": "3",
-  "strokes": "[["2001-01-01T01:23:45.678", "-T", "The"]]"
-}
-```
 ## Configuration File
 
 The configuration JSON file contains transcript level settings. It is also the file selected in order to open a previously saved transcript. When a new transcript is created, the file is automatically generated. The file is placed in the root directory, with keys for page margins, space placement, style file used for ODT export, and a list of the dictionaries to be loaded when the transcript is opened.
@@ -577,6 +598,24 @@ default_styles = {
 
 These parameters attempt to recreate the NCRA's [transcript format guidelines](https://www.ncra.org/About/Transcript-Format-Guidelines).
 
+## Autocomplete Wordlist
+
+Autocomplete can be toggled on and a `wordlist.json` file in a `sources` directory within the transcript directory is needed. This has to be a JSON with the format `completion` : `steno`. Spaces are allowed in `completion`, but all whitespace (tabs and new lines) will be replaced by spaces.
+
+An example is:
+```
+{
+	"doctor": "TKR",
+	"England": "EPBG/HRAPBD",
+	"English": "EPBG/HREURB",
+	"Europe": "AO*URP",
+	"French": "TPREFRPB",
+	"God": "TKPO*D"
+
+}
+
+```
+
 ## Supported RTF Import
 
 Import of RTF/CRE transcript files produced by other CAT software is untested. Plover2Cat will only import style names, stroke data, associated time code, and translation. These are the contents of the `\cxs` and `\cxt` control groups in the RTF/CRE spec, but any text in other groups are ignored.
@@ -621,16 +660,6 @@ Plover2CAT at present, is one gigantic class, and with absolutely no tests. Cert
 There is no autosave. This should be done with a QTimer on regular intervals.
 
 Alternatively, what about git/PyGithub?
-
-## Undo/Redo stack is in a hacky way
-
-At present, the default undo/redo stack that comes with QT is disabled, and undo/redo is carried out using a custom "action" dict, circumventing the native undo/redo
-
-QT uses QUndoCommand to "undo" within an undo framework. This requires creating a custom "Undo" command class to make sure the steno is manage. See the [doc](https://doc.qt.io/qt-6/qtwidgets-tools-undoframework-example.html). Cut, Copy and Paste have to be refactored into the custom class. The steno "writing" might all have to be reimplemented as command classes.
-
-If the steno-aware undo/redo can be reimplemented using the QUndoCommand classes, the undo stack can go back to being used for other actions too.
-
-Another benefit is that QUndoCommands can be put into "groups"/macros with compression.
 
 ## Plain Text vs WYSIWYG
 
