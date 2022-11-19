@@ -924,7 +924,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     # open/close/save
     def create_new(self):
         ## make new dir, sets gui input
-        project_dir = QFileDialog.getExistingDirectory(self, "Select Directory", os.getcwd())
+        project_dir = QFileDialog.getExistingDirectory(self, "Select Directory", plover.oslayer.config.CONFIG_DIR)
         if not project_dir:
             log.info("No directory selected, passing")
             return
@@ -973,7 +973,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def open_file(self):
         name = "Config"
         extension = "config"
-        selected_folder = QFileDialog.getOpenFileName( self, _("Open " + name), os.getcwd(), _(name + "(*." + extension + ")"))[0]
+        selected_folder = QFileDialog.getOpenFileName( self, _("Open " + name), plover.oslayer.config.CONFIG_DIR, _(name + "(*." + extension + ")"))[0]
         if not selected_folder:
             log.info("No config file was selected for loading.")
             return
@@ -1912,6 +1912,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage("Paste to paragraph {par_num}, at position {start}".format(par_num = current_block_num, start = start_pos))       
 
     def reset_paragraph(self):
+        user_choice = QMessageBox.critical(self, "Reset Paragraph", "This will clear all data from this paragraph. This cannot be undone. You will lose all history. Are you sure?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if user_choice == QMessageBox.Yes:
+            pass
+        else:
+            return
+        self.undo_stack.clear()
         current_cursor = self.textEdit.textCursor()
         current_block = current_cursor.block()
         current_block.setUserData(BlockUserData())
