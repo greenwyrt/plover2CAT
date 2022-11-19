@@ -2568,6 +2568,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             # set page layout
             automatic_styles = textdoc.automaticstyles
             page_layout = PageLayout(name = "Transcript")
+            print(self.page_width.value())
+            print(self.page_width.text())
             page_layout_dict = {"pagewidth": "%.2fin" % self.page_width.value(), 
                                 "pageheight": "%.2fin" % self.page_height.value(), "printorientation": "portrait",
                                 "margintop": "%.2fin" % self.page_top_margin.value(), 
