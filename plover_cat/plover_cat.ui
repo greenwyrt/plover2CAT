@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>963</width>
-    <height>623</height>
+    <width>859</width>
+    <height>663</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,7 +30,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPlainTextEdit" name="textEdit">
+       <widget class="PloverCATEditor" name="textEdit">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -74,7 +74,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>963</width>
+     <width>859</width>
      <height>21</height>
     </rect>
    </property>
@@ -82,9 +82,15 @@
     <property name="title">
      <string>File</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
     <widget class="QMenu" name="menuExport_as">
      <property name="title">
       <string>Export as...</string>
+     </property>
+     <property name="toolTipsVisible">
+      <bool>true</bool>
      </property>
      <addaction name="actionPlainText"/>
      <addaction name="actionASCII"/>
@@ -108,9 +114,9 @@
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionCursor_At_End"/>
-    <addaction name="actionCapture_All_Output"/>
-    <addaction name="separator"/>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
     <addaction name="actionMerge_Paragraphs"/>
     <addaction name="actionSplit_Paragraph"/>
     <addaction name="separator"/>
@@ -123,10 +129,14 @@
     <addaction name="actionNormal_Copy"/>
     <addaction name="actionFind_Replace_Pane"/>
     <addaction name="separator"/>
+    <addaction name="actionClear_Paragraph"/>
    </widget>
    <widget class="QMenu" name="menuAudio">
     <property name="title">
      <string>Audiovisual</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
     </property>
     <addaction name="actionOpen_Audio"/>
     <addaction name="actionPlay_Pause"/>
@@ -146,13 +156,31 @@
     <property name="title">
      <string>View</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <widget class="QMenu" name="menuDocks">
+     <property name="title">
+      <string>Docks</string>
+     </property>
+     <addaction name="actionPaper_Tape"/>
+     <addaction name="actionSuggestions"/>
+     <addaction name="actionHistory"/>
+     <addaction name="actionReveal_Steno"/>
+     <addaction name="actionAudio_Controls"/>
+     <addaction name="actionToolbox"/>
+    </widget>
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
     <addaction name="actionWindowFont"/>
+    <addaction name="menuDocks"/>
    </widget>
    <widget class="QMenu" name="menuDictionary">
     <property name="title">
      <string>Dictionary</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
     </property>
     <addaction name="actionAdd_Custom_Dict"/>
     <addaction name="actionRemove_Transcript_Dict"/>
@@ -161,19 +189,35 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <addaction name="actionAbout"/>
     <addaction name="actionUser_Manual"/>
+    <addaction name="actionAcknowledgements"/>
+   </widget>
+   <widget class="QMenu" name="menuSteno_Actions">
+    <property name="title">
+     <string>Steno Actions</string>
+    </property>
+    <addaction name="actionCursor_At_End"/>
+    <addaction name="actionCapture_All_Output"/>
+    <addaction name="actionRetroactive_Define"/>
+    <addaction name="actionDefine_Last"/>
+    <addaction name="actionAutocompletion"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuSteno_Actions"/>
+   <addaction name="menuDictionary"/>
    <addaction name="menuAudio"/>
    <addaction name="menuView"/>
-   <addaction name="menuDictionary"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QToolBar" name="toolBar">
+  <widget class="QToolBar" name="toolbar_file">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>File Toolbar</string>
    </property>
    <property name="toolTip">
     <string/>
@@ -210,7 +254,7 @@ position.</string>
       <widget class="QPlainTextEdit" name="strokeList">
        <property name="minimumSize">
         <size>
-         <width>300</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
@@ -222,6 +266,9 @@ position.</string>
        </property>
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
        </property>
        <property name="readOnly">
         <bool>true</bool>
@@ -238,6 +285,9 @@ position.</string>
       <widget class="QPushButton" name="strokeLocate">
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
        </property>
        <property name="toolTip">
         <string>Select stroke and locate in editor text</string>
@@ -291,6 +341,9 @@ position.</string>
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
        </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
        <property name="rowCount">
         <number>0</number>
        </property>
@@ -309,6 +362,9 @@ position.</string>
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockAudio">
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
    <property name="toolTip">
     <string>Audio seeker and other controls</string>
    </property>
@@ -424,6 +480,9 @@ position.</string>
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockProp">
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
    <property name="toolTip">
     <string>Contains various controls</string>
    </property>
@@ -443,6 +502,9 @@ position.</string>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QToolBox" name="toolBox">
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
        <property name="toolTip">
         <string/>
        </property>
@@ -453,7 +515,7 @@ position.</string>
         <enum>QFrame::Plain</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="paragraph_pane">
         <property name="geometry">
@@ -461,7 +523,7 @@ position.</string>
           <x>0</x>
           <y>0</y>
           <width>251</width>
-          <height>270</height>
+          <height>310</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -642,7 +704,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>141</width>
-          <height>270</height>
+          <height>310</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -670,6 +732,9 @@ time from next paragraph.</string>
             </item>
             <item>
              <widget class="QPushButton" name="style_file_select">
+              <property name="focusPolicy">
+               <enum>Qt::NoFocus</enum>
+              </property>
               <property name="toolTip">
                <string>Select style file (JSON or ODF)</string>
               </property>
@@ -716,7 +781,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>206</width>
-          <height>272</height>
+          <height>310</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -917,7 +982,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>317</width>
-          <height>270</height>
+          <height>310</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1099,7 +1164,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>167</width>
-          <height>279</height>
+          <height>310</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1250,7 +1315,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>141</width>
-          <height>270</height>
+          <height>310</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1263,9 +1328,9 @@ time from next paragraph.</string>
     </layout>
    </widget>
   </widget>
-  <widget class="QToolBar" name="toolBar_2">
+  <widget class="QToolBar" name="toolbar_edit">
    <property name="windowTitle">
-    <string>toolBar_2</string>
+    <string>Edit Toolbar</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -1275,10 +1340,12 @@ time from next paragraph.</string>
    </attribute>
    <addaction name="actionMerge_Paragraphs"/>
    <addaction name="actionSplit_Paragraph"/>
+   <addaction name="actionRetroactive_Define"/>
+   <addaction name="actionDefine_Last"/>
   </widget>
-  <widget class="QToolBar" name="toolBar_3">
+  <widget class="QToolBar" name="toolbar_audio">
    <property name="windowTitle">
-    <string>toolBar_3</string>
+    <string>Audio Toolbar</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -1290,7 +1357,7 @@ time from next paragraph.</string>
    <addaction name="actionStop_Audio"/>
    <addaction name="actionRecord_Pause"/>
   </widget>
-  <widget class="QDockWidget" name="dockHistory_2">
+  <widget class="QDockWidget" name="dockHistoryStack">
    <property name="windowTitle">
     <string>History</string>
    </property>
@@ -1301,8 +1368,45 @@ time from next paragraph.</string>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <widget class="QUndoView" name="undoView">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
        <property name="toolTip">
         <string>Placeholder for new development</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockStenoData">
+   <property name="windowTitle">
+    <string>Reveal Steno</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_7">
+    <layout class="QHBoxLayout" name="horizontalLayout_8">
+     <item>
+      <widget class="QListWidget" name="parSteno">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="flow">
+        <enum>QListView::LeftToRight</enum>
        </property>
       </widget>
      </item>
@@ -1585,7 +1689,9 @@ time from next paragraph.</string>
     <string>Merge Paragraphs</string>
    </property>
    <property name="toolTip">
-    <string>Merge two paragraphs by selecting across two paragraphs, or place cursor in second of paragraphs to merge</string>
+    <string>Merge two paragraphs by selecting across 
+two paragraphs, or place cursor in second of 
+paragraphs to merge</string>
    </property>
   </action>
   <action name="actionSplit_Paragraph">
@@ -1726,7 +1832,133 @@ time from next paragraph.</string>
     <string>Open online user manual on GitHub</string>
    </property>
   </action>
+  <action name="actionAcknowledgements">
+   <property name="text">
+    <string>Acknowledgements</string>
+   </property>
+  </action>
+  <action name="actionPaper_Tape">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Paper Tape</string>
+   </property>
+  </action>
+  <action name="actionSuggestions">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Suggestions</string>
+   </property>
+  </action>
+  <action name="actionHistory">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>History</string>
+   </property>
+  </action>
+  <action name="actionReveal_Steno">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Reveal Steno</string>
+   </property>
+  </action>
+  <action name="actionAudio_Controls">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Audio Controls</string>
+   </property>
+  </action>
+  <action name="actionToolbox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Toolbox</string>
+   </property>
+  </action>
+  <action name="actionClear_Paragraph">
+   <property name="text">
+    <string>Reset Paragraph</string>
+   </property>
+  </action>
+  <action name="actionRetroactive_Define">
+   <property name="text">
+    <string>Retroactive Define</string>
+   </property>
+   <property name="toolTip">
+    <string>Set new translation for strokes under selected text, replaces all occurrences of text</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionChanglog">
+   <property name="text">
+    <string>Changlog</string>
+   </property>
+  </action>
+  <action name="actionDefine_Last">
+   <property name="text">
+    <string>Define Last</string>
+   </property>
+   <property name="toolTip">
+    <string>Scan to find last untranslate, and define it for past and future occurrences</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+R</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionAutocompletion">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Autocompletion</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle to enable autocomplete</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PloverCATEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>plover_cat.TextEditor</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources/resources.qrc"/>
  </resources>
@@ -1808,6 +2040,198 @@ time from next paragraph.</string>
     <hint type="destinationlabel">
      <x>474</x>
      <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPaper_Tape</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dockPaper</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>158</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSuggestions</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dockSuggest</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>158</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHistory</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dockHistoryStack</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>158</x>
+     <y>380</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionReveal_Steno</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dockStenoData</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>158</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAudio_Controls</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dockAudio</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>481</x>
+     <y>599</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionToolbox</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dockProp</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>883</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockAudio</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionAudio_Controls</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>481</x>
+     <y>599</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockHistoryStack</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionHistory</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>158</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockPaper</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionPaper_Tape</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>158</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockProp</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionToolbox</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>883</x>
+     <y>298</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockStenoData</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionReveal_Steno</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>158</x>
+     <y>497</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dockSuggest</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>actionSuggestions</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>158</x>
+     <y>252</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>
