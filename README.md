@@ -62,7 +62,7 @@ The available export formats are:
   - ASCII
   - Plain Text
 
-For more details on each format and the different requirements, see the User Manual. 
+For more details on each format and the different requirements, see the [User Manual](user_manual.md). 
 
 ## Close Transcript
 
