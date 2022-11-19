@@ -148,7 +148,7 @@ default_dict = {
     "S-FRLGS":"{#control(shift(s))}", # slow down
     "STKPW-FRLG":"{#controls(z)}", # undo
     "KWR-FRLG":"{#controls(y)}", # redo
-    "R-FRLGS":"{#control(shift(s))}" # define last
+    "R-FRLGS":"{#control(shift(r))}" # define last
     # "-FRLG":"{#controls()}", FRLGS for ctrol + shift
     # "-PSZ":"{#control()}" alternative template with PSZ, FPSZ for control + shift
 }
@@ -1723,6 +1723,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 block_dict = update_user_data(block_dict, key = "audiostarttime", value = audio_time)
             if self.recorder.state() == QMediaRecorder.RecordingState:
                 block_dict = update_user_data(block_dict, key = "audiostarttime", value = audio_time)
+        block_dict["strokes"] = strokes_data
+        focus_block.setUserData(block_dict)
         if backspaces_sent != 0 and not current_cursor.atEnd():
             cursor_pos = current_cursor.positionInBlock()
             remaining_text_len = len(focus_block.text()) - cursor_pos
