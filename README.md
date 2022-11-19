@@ -5,15 +5,17 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] a plain text editor with steno hidden underneath
 - [x] timestamps for each stroke and associated with each piece of text
 - [x] conventional editing features such as cut/copy/paste while keeping steno data attached
-- [x] undo/redo history for ten "actions"
+- [x] undo/redo history
 - [x] automatic creation and loading of transcript-specific dictionaries for each transcript
 - [x] find and replace for simple text, steno stroke, and untrans.
+- [x] retroactive define, and define last translate with replacement of all previous occurrences and new outline sent to transcript dictionary
 - [x] an audiovisual player, with controls for timing offset, playback rate, skipping forward and back
 - [x] synchronization of steno with the audio/video file for transcription
 - [x] audio recording synchronized with steno (file format dependent on codecs in operating system)
 - [x] export transcript to plain text, Eclipse ASCII, SubRip, and Open Text Document formats (with style templates)
 - [x] saves paper tape with keys pressed, position of cursor in document, and timestamps at each stroke
 - [x] suggestions based on stroke history (powered by Tapey Tape), updated every paragraph
+- [x] basic import of RTF/CRE transcript
 
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
