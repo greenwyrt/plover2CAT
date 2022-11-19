@@ -503,6 +503,29 @@ class merge_steno_par(QUndoCommand):
         second_block.setUserData(second_data)
         self.document.setTextCursor(current_cursor)
 
+class set_par_style(QUndoCommand):
+    """Set paragraph style"""
+    block = None
+    old_style = ""
+    style = ""
+    def __init__(self, block, style, document):
+        super().__init__()
+        self.block = block
+        self.style = style
+        self.document = document
+    def redo(self):
+        current_block = self.document.document().findBlockByNumber(self.block)
+        block_data = current_block.userData()
+        self.old_style = block_data["style"]
+        block_data = update_user_data(block_data, "style", self.style)
+        current_block.setUserData(block_data)
+        self.setText("Style: Par. %d set style %s" % (self.block, self.style))
+    def undo(self):
+        current_block = self.document.document().findBlockByNumber(self.block)
+        block_data = current_block.userData()
+        block_data = update_user_data(block_data, "style", self.old_style)
+        current_block.setUserData(block_data)
+
 def add_custom_dicts(custom_dict_paths, dictionaries):
     """Takes list of dictionary paths, returns Plover dict config"""
     dictionaries = dictionaries[:]
@@ -903,6 +926,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         QtGui.QDesktopServices.openUrl(user_manual_link)
 
     def menu_enabling(self, value = True):
+        self.menuEdit.setEnabled(not value)
+        self.menuSteno_Actions.setEnabled(not value)
+        self.menuDictionary.setEnabled(not value)
+        self.menuAudio.setEnabled(not value)
         self.actionNew.setEnabled(value)
         self.actionSave.setEnabled(not value)
         self.actionSave_As.setEnabled(not value)
@@ -914,11 +941,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionAdd_Custom_Dict.setEnabled(not value)
         self.actionMerge_Paragraphs.setEnabled(not value)
         self.actionSplit_Paragraph.setEnabled(not value)
+        self.actionRetroactive_Define.setEnabled(not value)
+        self.actionDefine_Last.setEnabled(not value)
         self.actionPlay_Pause.setEnabled(not value)
         self.actionStop_Audio.setEnabled(not value)
         self.actionRecord_Pause.setEnabled(not value)
-        self.menuAudio.setEnabled(not value)
-        self.menuEdit.setEnabled(not value)
         self.actionOpen_Transcript_Folder.setEnabled(not value)
         self.actionImport_RTF.setEnabled(not value)
     # open/close/save
@@ -1453,17 +1480,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.parSteno.addItems(steno_names)
 
     def update_paragraph_style(self):
-        # this only activates for user interaction
-        focus_block = self.textEdit.document().findBlockByNumber(self.cursor_block)
-        block_dict = focus_block.userData()
-        if not block_dict:
-            block_dict = BlockUserData()
-        selected_style = self.style_selector.currentText()
-        block_dict = update_user_data(block_dict, key = "style", value = selected_style)
-        log.info("Set paragraph style.")
-        log.debug(block_dict.return_all())
-        self.statusBar.showMessage("Update paragraph {block_num} style to {style}".format(block_num = self.cursor_block, style = str(selected_style)))
-        focus_block.setUserData(block_dict)
+        current_cursor = self.textEdit.textCursor()
+        style_cmd = set_par_style(current_cursor.blockNumber(), self.style_selector.currentText(), self.textEdit)
+        self.undo_stack.push(style_cmd)
 
     def to_next_style(self):
         current_cursor = self.textEdit.textCursor()
@@ -2569,11 +2588,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             # go through every style, get all font declarations, set the fontfamily as fontname
             doc_fonts = []
             for k, v in set_styles.items():
-                try:
+                if v.get("textproperties"):
                     doc_fonts.append(v["textproperties"]["fontfamily"])
-                except:
-                    log.info("Exporting ODT: cannot set font family for ", k)
-                    self.statusBar.showMessage("Cannot set font for style {style}".format(style = k))
             # here, the fontfamily gets single quotes because it won't work when font string has spaces
             # default font is set as modern, with fixed pitch
             for style_font in doc_fonts:
