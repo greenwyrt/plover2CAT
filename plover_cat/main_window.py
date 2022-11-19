@@ -2574,6 +2574,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                                 "marginbottom": "%.2fin" % self.page_bottom_margin.value(), 
                                 "marginleft":  "%.2fin" % self.page_left_margin.value(), 
                                 "marginright": "%.2fin" % self.page_right_margin.value(), "writingmode": "lr-tb"}
+            print(page_layout_dict)
             page_layout.addElement(PageLayoutProperties(attributes=page_layout_dict))
             automatic_styles.addElement(page_layout) 
             master_style = textdoc.masterstyles
