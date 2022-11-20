@@ -41,6 +41,10 @@ Once Plover is enabled, writing to the main editor will be possible. The main fu
 
 A custom dictionary for the transcript is loaded into Plover, prepopulated with shortcuts for common actions. When File --> Close is used to close the transcript, the custom dictionary will be removed from Plover.
 
+## Opening an Existing Transcript
+
+Select the `config.CONFIG` in the transcript folder to open the transcript.
+
 ## Default CAT behaviour
 
 Check "Lock Cursor at End" and "Capture All Steno Input" to only write to end of document and to still write even when editor window is not in focus. By default, writing is inserted into any part of text, and only when window is in focus.

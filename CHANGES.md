@@ -1,5 +1,14 @@
 CHANGES
 
+Ver 1.2.1 (2022-11-20):
+- Bug fix: Menu bar is now non-native. Otherwise, some menu items might get eaten up on macOS (thanks yann).
+- Bug fix: Reset paragraph now has a critical warning dialog before executing. It will also erase action history for the session.
+- Bug fix: Disable steno actions when no transcript is open. 
+- Feature: Style setting in paragraphs now an undo-able action
+- Bug fix: Fixed ODF problem exporting due to checking fonts.
+- Feature: Icons for select menu items. Tool bars were getting too big, and icons save space.
+
+
 2022-11-18:
 - Feature: A history pane, with click to undo/redo. There is no longer a limit on the number of undo/redo "actions". Logically grouped actions such as replace all can now be undone/redone together. Behind the scenes, management of steno data and writing has been re-implemented into the QUndoStack framework using `QUndoCommand`. (Code is less repetitive, but still repetitive)
 - Feature: "Reveal Steno" pane shows the strokes and text underlying the paragraph the cursor is on. 

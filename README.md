@@ -62,12 +62,20 @@ The available export formats are:
   - ASCII
   - Plain Text
 
-For more details on each format and the different requirements, see the [User Manual](user_manual.md). 
+For more details on each format and the different requirements, see the User Manual. 
 
 ## Close Transcript
 
 Use File --> Close to close the transcript and File --> Quit (`Ctrl+Q`) to quit the editor, with optional check to save if changes have been made. **DO NOT** use the `Alt+ F4` as that causes an instant exit without saving.
 
+
+# Acknowledgements
+
+This plugin is under the MIT license.
+
+Plover and PyQt are both under the GPL license. 
+
+Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.
 
 # Development
 
