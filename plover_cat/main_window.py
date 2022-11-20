@@ -831,6 +831,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         ## editor related connections
         self.actionClear_Paragraph.triggered.connect(lambda: self.reset_paragraph())
         self.textEdit.cursorPositionChanged.connect(self.display_block_data)
+        self.textEdit.complete.connect(self.insert_autocomplete)
         self.editorCheck.stateChanged.connect(self.editor_lock)
         self.submitEdited.clicked.connect(self.edit_user_data)
         self.actionCopy.triggered.connect(lambda: self.copy_steno())
@@ -869,6 +870,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # help
         self.actionUser_Manual.triggered.connect(lambda: self.open_help())
         self.actionAbout.triggered.connect(lambda: self.about())
+        self.actionAcknowledgements.triggered.connect(lambda: self.acknowledge())
         # status bar
         self.statusBar.showMessage("Create New Transcript or Open Existing...")
         self.cursor_status = QLabel("Par,Char: {line},{char}".format(line = 0, char = 0))
@@ -881,11 +883,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         engine.signal_connect("send_string", self.on_send_string)
         engine.signal_connect("send_backspaces", self.count_backspaces)
         log.info("Main window open")
-        self.textEdit.complete.connect(self.insert_autocomplete)
+        
 
     def about(self):
         QMessageBox.about(self, "About",
                 "This is Plover2CAT version 1.2.0, a computer aided transcription plugin for Plover.")
+
+    def acknowledge(self):
+        QMessageBox.about(self, "Acknowledgements",
+                        "Plover2CAT is built on top of Plover, the open source stenotype engine. "
+                        "It owes its development to the members of the Plover discord group who provided suggestions and bug finding. "
+                        "PyQt5 and Plover are both licensed under the GPL. Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
 
     def setup_completion(self, checked):
         log.info("Setting up autocompletion.")
@@ -1486,11 +1494,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     def to_next_style(self):
         current_cursor = self.textEdit.textCursor()
-        current_block = current_cursor.blockNumber()
-        if current_block == 0:
+        current_block = current_cursor.block()
+        if current_cursor.blockNumber() == 0:
             return
-        focus_block = self.textEdit.document().findBlockByNumber(current_block)
-        block_dict = focus_block.userData()
+        block_dict = current_block.userData()
         if not block_dict:
             block_dict = BlockUserData()
         style_data = self.styles
@@ -1499,7 +1506,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # use the first style as default if nothing is set
         previous_style = None
         new_style = [*style_data][0]
-        previous_block = focus_block.previous()
+        previous_block = current_block.previous()
         if previous_block:
             previous_dict = previous_block.userData()
             previous_style = previous_dict["style"]
@@ -1507,7 +1514,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             new_style = style_data[previous_style]["nextstylename"]
         block_dict = update_user_data(block_dict, key = "style", value = new_style)
         self.style_selector.setCurrentText(new_style)
-        focus_block.setUserData(block_dict)
+        style_cmd = set_par_style(current_cursor.blockNumber(), self.style_selector.currentText(), self.textEdit)
+        self.undo_stack.push(style_cmd)
         self.statusBar.showMessage("Paragraph style set to {style}".format(style = new_style))
 
     def editor_lock(self):
@@ -2568,15 +2576,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             # set page layout
             automatic_styles = textdoc.automaticstyles
             page_layout = PageLayout(name = "Transcript")
-            print(self.page_width.value())
-            print(self.page_width.text())
             page_layout_dict = {"pagewidth": "%.2fin" % self.page_width.value(), 
                                 "pageheight": "%.2fin" % self.page_height.value(), "printorientation": "portrait",
                                 "margintop": "%.2fin" % self.page_top_margin.value(), 
                                 "marginbottom": "%.2fin" % self.page_bottom_margin.value(), 
                                 "marginleft":  "%.2fin" % self.page_left_margin.value(), 
                                 "marginright": "%.2fin" % self.page_right_margin.value(), "writingmode": "lr-tb"}
-            print(page_layout_dict)
+            log.debug(page_layout_dict)
             page_layout.addElement(PageLayoutProperties(attributes=page_layout_dict))
             automatic_styles.addElement(page_layout) 
             master_style = textdoc.masterstyles

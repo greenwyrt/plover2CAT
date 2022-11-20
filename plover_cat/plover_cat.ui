@@ -22,6 +22,11 @@
     <height>0</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>8</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -42,7 +47,7 @@
         </property>
         <property name="font">
          <font>
-          <pointsize>12</pointsize>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="contextMenuPolicy">
@@ -75,7 +80,7 @@
      <x>0</x>
      <y>0</y>
      <width>859</width>
-     <height>21</height>
+     <height>19</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -232,9 +237,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
-   <addaction name="separator"/>
-   <addaction name="actionAdd_Custom_Dict"/>
   </widget>
   <widget class="QDockWidget" name="dockPaper">
    <property name="toolTip">
@@ -263,7 +267,7 @@ position.</string>
        </property>
        <property name="font">
         <font>
-         <family>Consolas</family>
+         <family>Courier New</family>
          <pointsize>8</pointsize>
         </font>
        </property>
@@ -285,20 +289,24 @@ position.</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="strokeLocate">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
-       </property>
-       <property name="toolTip">
-        <string>Select stroke and locate in editor text</string>
-       </property>
-       <property name="text">
-        <string>Locate</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <item>
+        <widget class="QPushButton" name="strokeLocate">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::NoContextMenu</enum>
+         </property>
+         <property name="toolTip">
+          <string>Select stroke and locate in editor text</string>
+         </property>
+         <property name="text">
+          <string>Locate</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -339,6 +347,7 @@ position.</string>
        <property name="font">
         <font>
          <family>Consolas</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="focusPolicy">
@@ -518,7 +527,7 @@ position.</string>
         <enum>QFrame::Plain</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="paragraph_pane">
         <property name="geometry">
@@ -526,7 +535,7 @@ position.</string>
           <x>0</x>
           <y>0</y>
           <width>251</width>
-          <height>310</height>
+          <height>303</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -707,7 +716,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>141</width>
-          <height>310</height>
+          <height>303</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -784,7 +793,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>206</width>
-          <height>310</height>
+          <height>303</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -985,7 +994,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>317</width>
-          <height>310</height>
+          <height>303</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1167,7 +1176,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>167</width>
-          <height>310</height>
+          <height>303</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1318,7 +1327,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>141</width>
-          <height>310</height>
+          <height>303</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1341,6 +1350,7 @@ time from next paragraph.</string>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionAdd_Custom_Dict"/>
    <addaction name="actionMerge_Paragraphs"/>
    <addaction name="actionSplit_Paragraph"/>
    <addaction name="actionRetroactive_Define"/>
@@ -1361,6 +1371,11 @@ time from next paragraph.</string>
    <addaction name="actionRecord_Pause"/>
   </widget>
   <widget class="QDockWidget" name="dockHistoryStack">
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
    <property name="windowTitle">
     <string>History</string>
    </property>
@@ -1427,6 +1442,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/folder-open-document-text.png</normaloff>:/folder-open-document-text.png</iconset>
+   </property>
    <property name="text">
     <string>Open...</string>
    </property>
@@ -1446,6 +1465,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionNew">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/document.png</normaloff>:/document.png</iconset>
+   </property>
    <property name="text">
     <string>New</string>
    </property>
@@ -1457,6 +1480,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/disk-black.png</normaloff>:/disk-black.png</iconset>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
@@ -1487,6 +1514,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionAdd_Custom_Dict">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/plus-button.png</normaloff>:/plus-button.png</iconset>
+   </property>
    <property name="text">
     <string>Add Custom Dict</string>
    </property>
@@ -1529,6 +1560,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionCut">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/scissors-blue.png</normaloff>:/scissors-blue.png</iconset>
+   </property>
    <property name="text">
     <string>Cut</string>
    </property>
@@ -1540,6 +1575,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/clipboard--plus.png</normaloff>:/clipboard--plus.png</iconset>
+   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -1551,6 +1590,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/clipboard-paste-document-text.png</normaloff>:/clipboard-paste-document-text.png</iconset>
+   </property>
    <property name="text">
     <string>Paste</string>
    </property>
@@ -1562,6 +1605,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionZoom_In">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/magnifier-zoom-in.png</normaloff>:/magnifier-zoom-in.png</iconset>
+   </property>
    <property name="text">
     <string>Zoom In</string>
    </property>
@@ -1570,6 +1617,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionZoom_Out">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/magnifier-zoom-out.png</normaloff>:/magnifier-zoom-out.png</iconset>
+   </property>
    <property name="text">
     <string>Zoom Out</string>
    </property>
@@ -1578,6 +1629,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/arrow-curve-180.png</normaloff>:/arrow-curve-180.png</iconset>
+   </property>
    <property name="text">
     <string>Undo</string>
    </property>
@@ -1592,6 +1647,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/arrow-curve.png</normaloff>:/arrow-curve.png</iconset>
+   </property>
    <property name="text">
     <string>Redo</string>
    </property>
@@ -1611,6 +1670,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionOpen_Audio">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/folder-open-document-music.png</normaloff>:/folder-open-document-music.png</iconset>
+   </property>
    <property name="text">
     <string>Open Audiovisual</string>
    </property>
@@ -1622,6 +1685,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionSkip_Back">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/control-skip-180.png</normaloff>:/control-skip-180.png</iconset>
+   </property>
    <property name="text">
     <string>Skip Back</string>
    </property>
@@ -1633,6 +1700,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionSkip_Forward">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/control-skip.png</normaloff>:/control-skip.png</iconset>
+   </property>
    <property name="text">
     <string>Skip Forward</string>
    </property>
@@ -1644,6 +1715,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionStop_Audio">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/control-stop-square.png</normaloff>:/control-stop-square.png</iconset>
+   </property>
    <property name="text">
     <string>Stop</string>
    </property>
@@ -1677,6 +1752,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionPlay_Pause">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/control-stop.png</normaloff>:/control-stop.png</iconset>
+   </property>
    <property name="text">
     <string>Play/Pause</string>
    </property>
@@ -1688,6 +1767,10 @@ time from next paragraph.</string>
    </property>
   </action>
   <action name="actionMerge_Paragraphs">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/arrow-join.png</normaloff>:/arrow-join.png</iconset>
+   </property>
    <property name="text">
     <string>Merge Paragraphs</string>
    </property>
@@ -1698,6 +1781,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionSplit_Paragraph">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/arrow-split.png</normaloff>:/arrow-split.png</iconset>
+   </property>
    <property name="text">
     <string>Split Paragraph</string>
    </property>
@@ -1706,6 +1793,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionWindowFont">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
+   </property>
    <property name="text">
     <string>Font</string>
    </property>
@@ -1722,6 +1813,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionNormal_Copy">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/clipboard.png</normaloff>:/clipboard.png</iconset>
+   </property>
    <property name="text">
     <string>Normal Copy</string>
    </property>
@@ -1755,6 +1850,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionRecord_Pause">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/control-record.png</normaloff>:/control-record.png</iconset>
+   </property>
    <property name="text">
     <string>Record/Pause</string>
    </property>
@@ -1790,6 +1889,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionRemove_Transcript_Dict">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/minus-button.png</normaloff>:/minus-button.png</iconset>
+   </property>
    <property name="text">
     <string>Remove Transcript Dict</string>
    </property>
@@ -1808,6 +1911,10 @@ paragraphs to merge</string>
   <action name="actionCursor_At_End">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/control-cursor.png</normaloff>:/control-cursor.png</iconset>
    </property>
    <property name="text">
     <string>Lock Cursor At End</string>
@@ -1828,6 +1935,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionUser_Manual">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/book-question.png</normaloff>:/book-question.png</iconset>
+   </property>
    <property name="text">
     <string>Online User Manual</string>
    </property>
@@ -1912,6 +2023,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionRetroactive_Define">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/card--plus.png</normaloff>:/card--plus.png</iconset>
+   </property>
    <property name="text">
     <string>Retroactive Define</string>
    </property>
@@ -1928,6 +2043,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionDefine_Last">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/arrow-stop-180.png</normaloff>:/arrow-stop-180.png</iconset>
+   </property>
    <property name="text">
     <string>Define Last</string>
    </property>
@@ -1939,6 +2058,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/information.png</normaloff>:/information.png</iconset>
+   </property>
    <property name="text">
     <string>About</string>
    </property>
