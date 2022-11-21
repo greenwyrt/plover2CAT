@@ -840,6 +840,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionRedo.triggered.connect(self.undo_stack.redo)
         self.actionUndo.triggered.connect(self.undo_stack.undo)
         self.actionFind_Replace_Pane.triggered.connect(lambda: self.show_find_replace())
+        self.parSteno.setStyleSheet("alternate-background-color: darkGray;")
+        self.strokeList.setStyleSheet("selection-background-color: darkGray;")        
         ## steno related edits
         self.actionMerge_Paragraphs.triggered.connect(lambda: self.merge_paragraphs())
         self.actionSplit_Paragraph.triggered.connect(lambda: self.split_paragraph())
