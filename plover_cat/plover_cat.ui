@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>859</width>
-    <height>663</height>
+    <width>933</width>
+    <height>672</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -51,10 +51,16 @@
          </font>
         </property>
         <property name="contextMenuPolicy">
-         <enum>Qt::NoContextMenu</enum>
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+        <property name="acceptDrops">
+         <bool>false</bool>
         </property>
         <property name="toolTip">
          <string>Editor</string>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
         </property>
         <property name="documentTitle">
          <string/>
@@ -79,7 +85,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>859</width>
+     <width>933</width>
      <height>19</height>
     </rect>
    </property>
@@ -125,8 +131,8 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
-    <addaction name="actionMerge_Paragraphs"/>
-    <addaction name="actionSplit_Paragraph"/>
+    <addaction name="actionAutocompletion"/>
+    <addaction name="actionFind_Replace_Pane"/>
     <addaction name="separator"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
@@ -135,7 +141,6 @@
     <addaction name="actionCut"/>
     <addaction name="actionPaste"/>
     <addaction name="actionNormal_Copy"/>
-    <addaction name="actionFind_Replace_Pane"/>
     <addaction name="separator"/>
     <addaction name="actionClear_Paragraph"/>
    </widget>
@@ -181,6 +186,8 @@
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
     <addaction name="actionWindowFont"/>
+    <addaction name="actionPaper_Tape_Font"/>
+    <addaction name="actionEditor_Font"/>
     <addaction name="menuDocks"/>
    </widget>
    <widget class="QMenu" name="menuDictionary">
@@ -208,11 +215,13 @@
     <property name="title">
      <string>Steno Actions</string>
     </property>
-    <addaction name="actionCursor_At_End"/>
-    <addaction name="actionCapture_All_Output"/>
+    <addaction name="actionMerge_Paragraphs"/>
+    <addaction name="actionSplit_Paragraph"/>
     <addaction name="actionRetroactive_Define"/>
     <addaction name="actionDefine_Last"/>
-    <addaction name="actionAutocompletion"/>
+    <addaction name="separator"/>
+    <addaction name="actionCursor_At_End"/>
+    <addaction name="actionCapture_All_Output"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -527,7 +536,7 @@ position.</string>
         <enum>QFrame::Plain</enum>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>5</number>
        </property>
        <widget class="QWidget" name="paragraph_pane">
         <property name="geometry">
@@ -535,7 +544,7 @@ position.</string>
           <x>0</x>
           <y>0</y>
           <width>251</width>
-          <height>303</height>
+          <height>312</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -716,7 +725,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>141</width>
-          <height>303</height>
+          <height>312</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -793,7 +802,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>206</width>
-          <height>303</height>
+          <height>312</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -994,7 +1003,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>317</width>
-          <height>303</height>
+          <height>312</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1176,7 +1185,7 @@ time from next paragraph.</string>
           <x>0</x>
           <y>0</y>
           <width>167</width>
-          <height>303</height>
+          <height>312</height>
          </rect>
         </property>
         <attribute name="label">
@@ -1321,19 +1330,115 @@ time from next paragraph.</string>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="assorted_pane">
+       <widget class="QWidget" name="spellcheck_pane">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>141</width>
-          <height>303</height>
+          <width>361</width>
+          <height>312</height>
          </rect>
         </property>
         <attribute name="label">
-         <string>Assorted</string>
+         <string>Spellcheck</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_8"/>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_18">
+             <item>
+              <widget class="QComboBox" name="dict_selection">
+               <item>
+                <property name="text">
+                 <string>en-US</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="spell_search">
+               <property name="text">
+                <string>Search</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="spell_skip">
+               <property name="text">
+                <string>Skip</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="spell_ignore_all">
+               <property name="text">
+                <string>Ignore All</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="spell_change">
+               <property name="text">
+                <string>Change</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_19">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_11">
+               <item>
+                <widget class="QLabel" name="label_21">
+                 <property name="text">
+                  <string>Detected:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="spellcheck_result"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QListWidget" name="spellcheck_suggestions">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::NoContextMenu</enum>
+               </property>
+               <property name="toolTip">
+                <string>Double click on choice to replace</string>
+               </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::DoubleClicked</set>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectColumns</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </widget>
       </widget>
      </item>
@@ -1798,7 +1903,7 @@ paragraphs to merge</string>
      <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Font</string>
+    <string>Window Font</string>
    </property>
    <property name="toolTip">
     <string>Set font and size</string>
@@ -2075,6 +2180,16 @@ paragraphs to merge</string>
    </property>
    <property name="toolTip">
     <string>Toggle to enable autocomplete</string>
+   </property>
+  </action>
+  <action name="actionPaper_Tape_Font">
+   <property name="text">
+    <string>Paper Tape Font</string>
+   </property>
+  </action>
+  <action name="actionEditor_Font">
+   <property name="text">
+    <string>Editor Font</string>
    </property>
   </action>
  </widget>

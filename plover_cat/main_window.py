@@ -13,6 +13,10 @@ from collections import Counter, deque
 from shutil import copyfile
 from copy import deepcopy
 from sys import platform
+from spylls.hunspell import Dictionary
+from dulwich.repo import Repo
+from dulwich.errors import NotGitRepository
+from dulwich import porcelain
 
 from odf.opendocument import OpenDocumentText, load
 from odf.office import FontFaceDecls
@@ -25,7 +29,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QTextBlockUserData, QFont, QTextDocument, 
 QCursor, QStandardItem, QStandardItemModel)
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
-QStyle, QMessageBox, QFontDialog, QPlainTextDocumentLayout, QUndoCommand, QUndoStack, QLabel, 
+QStyle, QMessageBox, QFontDialog, QPlainTextDocumentLayout, QUndoCommand, QUndoStack, QLabel, QMenu,
 QDockWidget, QVBoxLayout, QCompleter, QApplication)
 from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaMetaData, QMediaRecorder, 
 QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
@@ -50,10 +54,11 @@ from plover_cat.rtf_parsing import steno_rtf
 #         transcript.json
 #         custom.json
 #         dictionaries_backup
-#     exports/
-#     info/
-#     spellcheck/
-#     sources/
+#     exports/ - txt, srt, odf
+#     info/ - likely a holding folder for assorted things
+#     resources/ - in future, images
+#     spellcheck/ - hunspell dictionaries
+#     sources/ - json autocomplete
 #     styles/
 #         default.json
 #     transcript.transcript
@@ -516,7 +521,10 @@ class set_par_style(QUndoCommand):
     def redo(self):
         current_block = self.document.document().findBlockByNumber(self.block)
         block_data = current_block.userData()
-        self.old_style = block_data["style"]
+        if not block_data:
+            block_data = BlockUserData()
+        if block_data["style"]:
+            self.old_style = block_data["style"]
         block_data = update_user_data(block_data, "style", self.style)
         current_block.setUserData(block_data)
         self.setText("Style: Par. %d set style %s" % (self.block, self.style))
@@ -774,6 +782,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             font = QFont()
             font.fromString(font_string)
             self.setFont(font)
+        if settings.contains("tapefont"):
+            font_string = settings.value("tapefont")
+            font = QFont()
+            font.fromString(font_string)
+            self.strokeList.setFont(font)
+        if settings.contains("editorfont"):
+            font_string = settings.value("editorfont")
+            font = QFont()
+            font.fromString(font_string)
+            self.textEdit.setFont(font)
         # ssheet = QFile(":/dark/stylesheet.qss")
         # ssheet.open(QFile.ReadOnly | QFile.Text)
         # ts = QTextStream(ssheet)
@@ -794,8 +812,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.undo_stack = QUndoStack(self)
         self.undoView.setStack(self.undo_stack)
         self.cutcopy_storage = {}
-        self.last_action = deque(maxlen = 10)
-        self.redone_action = deque(maxlen = 10)
+        self.spell_ignore = []
         self.textEdit.setPlainText("Welcome to Plover2CAT\nOpen or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")
         self.menu_enabling()
         # connections:
@@ -806,7 +823,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionOpen.triggered.connect(lambda: self.open_file())
         self.actionSave.triggered.connect(lambda: self.save_file())
         self.actionSave_As.triggered.connect(lambda: self.save_as_file())
-        self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
         self.actionPlainText.triggered.connect(lambda: self.export_text())
         self.actionASCII.triggered.connect(lambda: self.export_ascii())
         self.actionSubRip.triggered.connect(lambda: self.export_srt())
@@ -840,8 +856,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionRedo.triggered.connect(self.undo_stack.redo)
         self.actionUndo.triggered.connect(self.undo_stack.undo)
         self.actionFind_Replace_Pane.triggered.connect(lambda: self.show_find_replace())
+        self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
+        self.actionPaper_Tape_Font.triggered.connect(lambda: self.change_tape_font())
+        self.actionEditor_Font.triggered.connect(lambda: self.change_editor_font())
+        self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.parSteno.setStyleSheet("alternate-background-color: darkGray;")
-        self.strokeList.setStyleSheet("selection-background-color: darkGray;")        
+        self.strokeList.setStyleSheet("selection-background-color: darkGray;")
         ## steno related edits
         self.actionMerge_Paragraphs.triggered.connect(lambda: self.merge_paragraphs())
         self.actionSplit_Paragraph.triggered.connect(lambda: self.split_paragraph())
@@ -862,6 +882,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.search_backward.clicked.connect(lambda: self.search(-1))
         self.replace_selected.clicked.connect(lambda: self.replace())
         self.replace_all.clicked.connect(lambda: self.replace_everything())
+        ## spellcheck
+        self.dictionary = Dictionary.from_files('en_US')
+        self.spell_search.clicked.connect(lambda: self.spellcheck())
+        self.spell_skip.clicked.connect(lambda: self.spellcheck())
+        self.spell_ignore_all.clicked.connect(lambda: self.sp_ignore_all())
+        self.spellcheck_suggestions.itemDoubleClicked.connect(self.sp_insert_suggest)
+        self.dict_selection.activated.connect(self.set_sp_dict)
         ## tape
         self.textEdit.blockCountChanged.connect(lambda: self.get_tapey_tape())
         self.textEdit.blockCountChanged.connect(lambda: self.to_next_style())
@@ -878,6 +905,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cursor_status = QLabel("Par,Char: {line},{char}".format(line = 0, char = 0))
         self.cursor_status.setObjectName("cursor_status")
         self.statusBar.addPermanentWidget(self.cursor_status)
+        self.repo = None
         ## engine connections
         self.textEdit.setEnabled(True)
         engine.signal_connect("stroked", self.on_stroke) 
@@ -886,7 +914,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         engine.signal_connect("send_backspaces", self.count_backspaces)
         log.info("Main window open")
         
-
     def about(self):
         QMessageBox.about(self, "About",
                 "This is Plover2CAT version 1.2.0, a computer aided transcription plugin for Plover.")
@@ -953,11 +980,25 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionSplit_Paragraph.setEnabled(not value)
         self.actionRetroactive_Define.setEnabled(not value)
         self.actionDefine_Last.setEnabled(not value)
+        self.actionCut.setEnabled(not value)
+        self.actionCopy.setEnabled(not value)
+        self.actionPaste.setEnabled(not value)
         self.actionPlay_Pause.setEnabled(not value)
         self.actionStop_Audio.setEnabled(not value)
         self.actionRecord_Pause.setEnabled(not value)
         self.actionOpen_Transcript_Folder.setEnabled(not value)
         self.actionImport_RTF.setEnabled(not value)
+
+    def context_menu(self, pos):
+        menu = QMenu()
+        menu.addAction(self.actionRetroactive_Define)
+        menu.addAction(self.actionMerge_Paragraphs)
+        menu.addAction(self.actionSplit_Paragraph)
+        menu.addAction(self.actionCut)
+        menu.addAction(self.actionCopy)
+        menu.addAction(self.actionPaste)
+        menu.exec_(self.textEdit.viewport().mapToGlobal(pos))
+
     # open/close/save
     def create_new(self):
         ## make new dir, sets gui input
@@ -993,6 +1034,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.styles = self.load_check_styles(style_file_name)
         default_dict_path = transcript_dir_path / "dict"
         self.create_default_dict()
+        default_spellcheck_path = transcript_dir_path / "spellcheck"
+        default_spellcheck_path.mkdir(parents=True)
+        # self.repo = Repo.init(str(transcript_dir_path))
         # try:
         #     # check that the question meta is there, hack to see that "plover-speaker-id" metas are installed
         #     plug = registry.get_plugin("meta", "question")
@@ -1031,6 +1075,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.info("Loading styles for transcript")
         self.styles = self.load_check_styles(style_path)
         self.set_dictionary_config(config_contents["dictionaries"])
+        default_spellcheck_path = selected_folder / "spellcheck"
+        if default_spellcheck_path.exists():
+            available_dicts = [file.stem for file in default_spellcheck_path.iterdir() if str(file).endswith("dic")]
+            if available_dicts:
+                self.dict_selection.addItems(available_dicts)
         # self.setup_speaker_ids()
         current_cursor = self.textEdit.textCursor()
         if pathlib.Path(transcript_tape).is_file():
@@ -1047,7 +1096,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             with open(transcript, "r") as f:
                 self.statusBar.showMessage("Reading transcript data at {filename}".format(filename = str(transcript)))
                 json_document = json.loads(f.read())
-            new_document = QTextDocument()
+            new_document = QTextDocument(self)
             new_document.setDocumentLayout(QPlainTextDocumentLayout(new_document))
             document_cursor = QTextCursor(new_document)
             self.statusBar.showMessage("Loading transcript data at {filename}".format(filename = str(transcript)))
@@ -1060,6 +1109,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 if "\n" in block_data["strokes"][-1][2]:
                     document_cursor.insertText("\n")
             current_cursor.movePosition(QTextCursor.End)
+            new_document.setDefaultFont(self.textEdit.font())
             self.textEdit.setDocument(new_document)
             self.textEdit.setCursorWidth(5)
             self.textEdit.moveCursor(QTextCursor.End)
@@ -1073,6 +1123,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             block_dict["creationtime"] = datetime.now().isoformat("T", "milliseconds")
             new_block.setUserData(block_dict)
         log.info("Project files, if exist, have been loaded.")
+        # try:
+        #     self.repo = Repo(selected_folder)
+        # except NotGitRepository:
+        #     self.repo = Repo.init(selected_folder)
         self.statusBar.showMessage("Setup complete. Ready for work.")    
 
     def save_file(self):
@@ -1112,8 +1166,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         with open(transcript, "w") as f:
             json.dump(json_document, f)
             log.info("Transcript data successfully saved")
-        self.textEdit.document().setModified(False) 
+        self.textEdit.document().setModified(False)
+        self.undo_stack.setClean()
+        # self.dulwich_save()
         self.statusBar.showMessage("Saved project data at {filename}".format(filename = str(selected_folder)))  
+
+    def dulwich_save(self):
+        transcript_dicts = self.file_name / "dict"
+        available_dicts = [file.stem for file in transcript_dicts.iterdir()]
+        transcript = self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript")
+        transcript_tape = self.file_name.joinpath(self.file_name.stem).with_suffix(".tape")
+        files = [transcript, transcript_tape] + available_dicts
+        # add files, regardless of modified, to stage
+        # porcelain.add(self.repo, paths = files)
+        # commit
+        # porcelain.commit(self.repo, "plover2CAT commit")
 
     def save_as_file(self):
         ## select dir and save tape and file to different location, path is then set to new location
@@ -1170,7 +1237,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage("Saved transcript data at {filename}".format(filename = str(selected_folder)))
 
     def close_file(self):
-        if self.textEdit.document().isModified():
+        if not self.undo_stack.isClean():
             user_choice = QMessageBox.question(self, "Close", "Are you sure you want to close without saving changes?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if user_choice == QMessageBox.Yes:
                 log.info("User choice to close without saving")
@@ -1200,6 +1267,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowstate", self.saveState())
         settings.setValue("windowfont", self.font().toString())
+        settings.setValue("tapefont", self.strokeList.font().toString())
+        settings.setValue("editorfont", self.textEdit.font().toString())
         log.info("Saved window settings")
         choice = self.close_file()
         if choice:
@@ -1449,6 +1518,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if valid:
             self.setFont(font)
             log.info("Font set for window")       
+
+    def change_tape_font(self):
+        font, valid = QFontDialog.getFont()
+        if valid:
+            self.strokeList.setFont(font)
+            log.info("Font set for paper tape.")
+
+    def change_editor_font(self):
+        font, valid = QFontDialog.getFont()
+        if valid:
+            self.textEdit.setFont(font)
+            log.info("Font set for editor.")
 
     def display_block_data(self):
         current_cursor = self.textEdit.textCursor()
@@ -2035,7 +2116,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             len(text), autocomplete_steno, self.textEdit)
         self.undo_stack.push(insert_cmd)
         self.undo_stack.endMacro()
-
     # search functions
     def show_find_replace(self):
         if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
@@ -2239,22 +2319,24 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.search_whole.setChecked(False)
             self.search_whole.setEnabled(False)           
 
-    def replace(self, to_next = True, steno = ""):
+    def replace(self, to_next = True, steno = "", replace_term = None):
         log.info("Perform replacement.")
+        if not replace_term:
+            replace_term = self.replace_term.text()
         if self.textEdit.textCursor().hasSelection():
-            log.info("Replace: Replace %s with %s", self.textEdit.textCursor().selectedText(), self.replace_term.text())
+            log.info("Replace: Replace %s with %s", self.textEdit.textCursor().selectedText(), replace_term)
             self.undo_stack.beginMacro("Replace")
             current_cursor = self.textEdit.textCursor()
             current_block = current_cursor.block()
             start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
             end_pos = start_pos + len(self.textEdit.textCursor().selectedText())
             # cut_steno = extract_stroke_data(current_block.userData(), start_pos, end_pos, True)
-            fake_steno = [datetime.now().isoformat("T", "milliseconds"), steno, self.replace_term.text()] 
+            fake_steno = [datetime.now().isoformat("T", "milliseconds"), steno, replace_term] 
             remove_cmd = steno_remove(current_cursor.blockNumber(), start_pos, self.textEdit.textCursor().selectedText(), 
                                         len(self.textEdit.textCursor().selectedText()), fake_steno, self.textEdit)
             self.undo_stack.push(remove_cmd)    
-            insert_cmd = steno_insert(current_cursor.blockNumber(), start_pos, self.replace_term.text(), 
-                                        len(self.replace_term.text()), fake_steno, self.textEdit)
+            insert_cmd = steno_insert(current_cursor.blockNumber(), start_pos, replace_term, 
+                                        len(replace_term), fake_steno, self.textEdit)
             self.undo_stack.push(insert_cmd)
             self.undo_stack.endMacro()
         if to_next:
@@ -2289,6 +2371,49 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         cursor.setPosition(old_cursor_position)
         self.textEdit.setTextCursor(cursor)
         self.search_wrap.setChecked(old_wrap_state)
+
+    def spellcheck(self):
+        current_cursor = self.textEdit.textCursor()
+        old_cursor_position = current_cursor.block().position()
+        # current_cursor.movePosition(QTextCursor.Start)
+        self.textEdit.setTextCursor(current_cursor)
+        while not current_cursor.atEnd():
+            current_cursor.movePosition(QTextCursor.NextWord)
+            current_cursor.movePosition(QTextCursor.EndOfWord, QTextCursor.KeepAnchor)
+            result = self.sp_check(current_cursor.selectedText())
+            if not result and current_cursor.selectedText() not in self.spell_ignore:
+                self.textEdit.setTextCursor(current_cursor)
+                log.debug("Spellcheck: this word %s not in dictionary." % current_cursor.selectedText())
+                suggestions = [sug for sug in self.dictionary.suggest(current_cursor.selectedText())]
+                self.spellcheck_result.setText(current_cursor.selectedText())
+                self.spellcheck_suggestions.clear()
+                self.spellcheck_suggestions.addItems(suggestions)
+                break
+        if current_cursor.atEnd():
+            QMessageBox.information(self, "Spellcheck", "End of document.")
+
+    def sp_ignore_all(self):
+        if self.spellcheck_result.text() != "":
+            self.spell_ignore.append(self.spellcheck_result.text())
+            log.debug("Ignored spellcheck words: %s" % self.spell_ignore)
+        self.spellcheck()
+
+    def sp_check(self, word):
+        return self.dictionary.lookup(word)
+
+    def sp_insert_suggest(self, item = None):
+        if not item:
+            item = self.spellcheck_suggestions.currentItem()
+        log.debug("Spellcheck correction: %s" % item.text())
+        self.undo_stack.beginMacro("Spellcheck: correct to %s" % item.text())
+        self.replace(to_next= False, steno = "", replace_term= item.text())
+        self.undo_stack.endMacro()       
+
+    def set_sp_dict(self, index):
+        lang = self.dict_selection.itemText(index)
+        log.debug("Selecting %s dictionary for spellcheck" % lang)
+        dict_path = self.file_name / "spellcheck" / lang
+        self.dictionary = Dictionary.from_files(str(dict_path))
     # audio functions
     def open_audio(self):
         if not self.file_name:
