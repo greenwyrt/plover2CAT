@@ -1,5 +1,11 @@
 CHANGES
 
+Ver 1.2.2 (2022-11-22):
+- Feature: Context menu (right click) for editing.
+- Change: Made the light gray of selection in paper tape and alternating elements in reveal steno "darkGray" instead.
+- Feature: Spellcheck with the `spylls` library, ability to select from dictionaries in `spellcheck`
+- Bug fix: style setting complains about lack of block data when setting style on new paragraph
+
 Ver 1.2.1 (2022-11-20):
 - Bug fix: Menu bar is now non-native. Otherwise, some menu items might get eaten up on macOS (thanks yann).
 - Bug fix: Reset paragraph now has a critical warning dialog before executing. It will also erase action history for the session.

@@ -17,6 +17,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] export transcript to plain text, Eclipse ASCII, SubRip, and Open Text Document formats (with style templates)
 - [x] saves paper tape with keys pressed, position of cursor in document, and timestamps at each stroke
 - [x] suggestions based on stroke history (powered by Tapey Tape), updated every paragraph
+- [x] spellcheck using the `spylls` library, ability to select spellcheck dictionaries 
 - [ ] basic import of RTF/CRE transcript
 
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
@@ -73,9 +74,71 @@ For more details on each format and the different requirements, see the User Man
 
 Use File --> Close to close the transcript and File --> Quit (`Ctrl+Q`) to quit the editor, with optional check to save if changes have been made. **DO NOT** use the `Alt+ F4` as that causes an instant exit without saving.
 
+# Folder Structure
+
+The transcript folder is created through `Create New` on the menu. By default, it is named `transcript-{timestamp}`. Several default folders and files are created within this transcript folder.
+
+The basic structure is:
+
+```
+transcript folder/
+    audio/
+    dictionaries/
+        transcript.json
+        custom.json
+        dictionaries_backup
+    exports/
+    sources/
+    styles/
+        default.json
+        styles.odf
+    transcript.transcript
+    transcript.tape
+    config.CONFIG
+```
+
+Here is a description of what each folder contains (file formats are described in [formats](#formats)):
+- audio: audio recording files
+- dictionaries: transcript-specific JSON files in Plover dictionary format that will be loaded when the transcript is opened
+- exports: not yet implemented, will contain all exported files
+- sources: a `wordlist.json` that contains autocomplete suggestions.
+- styles: style files (JSON or ODF), used in exporting
+
+The `.tape` file holds all strokes for the transcript.
+The `.transcript` file is a JSON holding stroke and styling information for the transcript.
+`config.CONFIG` is the configuration file containing settings for the transcript.
+
+# Shortcuts
+
+| Menu Item             | Shortcut         |
+|-----------------------|------------------|
+| New                   | Ctrl + N         |
+| Open                  | Ctrl + O         |
+| Save                  | Ctrl + S         |
+| Quit                  | Ctrl + Q         |
+| Find/Replace Pane     | Ctrl + F         |
+| Undo                  | Ctrl + Z         |
+| Redo                  | Ctrl + Y         |
+| Copy                  | Ctrl + C         |
+| Cut                   | Ctrl + X         |
+| Paste                 | Ctrl + V         |
+| Normal Copy           | Ctrl + Shift + C |
+| Retroactive Define    | Ctrl + R         |
+| Define Last           | Ctrl + Shift + R |
+| Open Audiovisual File | Ctrl + Shift + O |
+| Play/Pause            | Ctrl + P         |
+| Stop                  | Ctrl + W         |
+| Skip Forward          | Ctrl + J         |
+| Skip Back             | Ctrl + L         |
+| Speed Up              | Ctrl + Shift + G |
+| Slow Down             | Ctrl + Shift + S |
+| Record/Pause          | Ctrl + Shift + P |
+| Zoom In               | Ctrl + =         |
+| Zoom Out              | Ctrl + -         |
+
 # Layout
 
-Hover over items to see tooltips.
+Hover with the mouse to see tooltips on items in the window.
 
 ![Example of hovering](images/tooltips.gif)
 
@@ -363,6 +426,9 @@ The options in the dropdown boxes will vary depending on the individual operatin
   - Constant Quality: The recording will be done based on the quality slider, varying the bitrate to keep the same quality.
   - Constant Bitrate: The recording will use the same bitrate throughout, but quality of the recording will vary.
 
+## Spellcheck
+
+Spellcheck in the editor is powered by the [`spylls`](https://github.com/zverok/spylls) package. `Spylls` comes with the `en-US` dictionary from Hunspell for spellchecking. To use a different language dictionary, such as `en-GB`, download the desired dictionary extension from LibreOffice. LibreOffice packages all English dictionaries together as one `oxt` zip file ([link](https://extensions.libreoffice.org/en/extensions/show/english-dictionaries)). For Windows, after downloading, modify the file ending from `oxt` to `zip` to open. The files are paired together, one `*.dic` file with one `*.aff` file, both with the same file name. For `en-GB`, this will be `en_GB.dic` and `en_GB.aff`. Copy the `*.dic` and `*.aff` file into the `spellcheck` folder within the transcript folder. Then re-open the transcript and select the desired dictionary for spellcheck from the dropdown list.
 
 # Formats
 
@@ -604,7 +670,7 @@ These parameters attempt to recreate the NCRA's [transcript format guidelines](h
 
 ## Autocomplete Wordlist
 
-Autocomplete can be toggled on and a `wordlist.json` file in a `sources` directory within the transcript directory is needed. This has to be a JSON with the format `completion` : `steno`. Spaces are allowed in `completion`, but all whitespace (tabs and new lines) will be replaced by spaces.
+Autocomplete can be toggled on and off. A `wordlist.json` file in a `sources` directory within the transcript directory is needed containing prospective suggestions. This has to be a JSON with the format `suggestion` : `steno`. Spaces are allowed in `suggestion`, but all whitespace (tabs and new lines) will be replaced by spaces.
 
 An example is:
 ```
@@ -685,15 +751,13 @@ If there are formatting edits, then the undo/redo stack has to be done first, si
 
 There is QPDFwriter in QT, but it is likely more useful to go Transcript --> odf --> user format and additions --> save as PDF.
 
-## Autocompletion
-
-QPlainTextEdit or QTextEdit can get a QCompleter for autocompletion. Strings / Text files can be provided. But this does not have any "steno" data.
-It is possible to use an "empty" stroke and just insert text, but this hampers the steno stroke search.
-First, there has to be a dict-like list of autocompletion words with steno data. The editor also has to be subclassed for the autocompletion. Then every autocomplete will get the steno stroke added to the data.
-
 ## Steno-Annotated ODF
 
 Plover2CAT should produce an annotated document, putting raw steno in the `ruby` element to annotate the corresponding words. This takes advantage of the annotations which are originally for Asian language pronunciation.
+
+## Spellcheck
+
+The free spellcheck dictionaries are the hunspell dictionaries. Should use [spylls](https://github.com/zverok/spylls) for checking and suggestions.
 
 ### RTF/CRE
 
