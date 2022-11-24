@@ -7,6 +7,8 @@ from plover_cat.plover_cat_ui import Ui_PloverCAT
 
 from plover_cat.main_window import PloverCATWindow
 
+from . __version__ import __version__
+
 class PloverCAT(Tool):
 
     TITLE = "Plover2CAT"

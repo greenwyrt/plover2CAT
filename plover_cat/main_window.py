@@ -8,8 +8,9 @@ import textwrap
 import html
 import collections
 from time import perf_counter
+import time
 from datetime import datetime, timezone
-from collections import Counter, deque
+from collections import Counter, deque, namedtuple
 from shutil import copyfile
 from copy import deepcopy
 from sys import platform
@@ -17,7 +18,7 @@ from spylls.hunspell import Dictionary
 from dulwich.repo import Repo
 from dulwich.errors import NotGitRepository
 from dulwich import porcelain
-
+from dulwich.porcelain import open_repo_closing
 from odf.opendocument import OpenDocumentText, load
 from odf.office import FontFaceDecls
 from odf.style import (Style, TextProperties, ParagraphProperties, FontFace, PageLayout, 
@@ -45,6 +46,7 @@ from plover.dictionary.base import load_dictionary
 from plover.registry import registry
 from plover import log
 
+from . __version__ import __version__
 from plover_cat.plover_cat_ui import Ui_PloverCAT
 from plover_cat.rtf_parsing import steno_rtf
 
@@ -534,6 +536,17 @@ class set_par_style(QUndoCommand):
         block_data = update_user_data(block_data, "style", self.old_style)
         current_block.setUserData(block_data)
 
+def return_commits(repo):
+    with open_repo_closing(repo) as r:
+        walker = r.get_walker(max_entries=100, paths=None, reverse=False)
+        commit_strs = []
+        for entry in walker:
+            time_tuple = time.gmtime(entry.commit.author_time + entry.commit.author_timezone)
+            time_str = time.strftime("%a %b %d %Y %H:%M:%S", time_tuple)
+            commit_info = (entry.commit.id, time_str)
+            commit_strs.append(commit_info)
+    return(commit_strs)
+            
 def add_custom_dicts(custom_dict_paths, dictionaries):
     """Takes list of dictionary paths, returns Plover dict config"""
     dictionaries = dictionaries[:]
@@ -862,6 +875,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.parSteno.setStyleSheet("alternate-background-color: darkGray;")
         self.strokeList.setStyleSheet("selection-background-color: darkGray;")
+        self.revert_version.clicked.connect(self.revert_file)
         ## steno related edits
         self.actionMerge_Paragraphs.triggered.connect(lambda: self.merge_paragraphs())
         self.actionSplit_Paragraph.triggered.connect(lambda: self.split_paragraph())
@@ -916,7 +930,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         
     def about(self):
         QMessageBox.about(self, "About",
-                "This is Plover2CAT version 1.2.0, a computer aided transcription plugin for Plover.")
+                "This is Plover2CAT version %s, a computer aided transcription plugin for Plover." % __version__)
 
     def acknowledge(self):
         QMessageBox.about(self, "Acknowledgements",
@@ -1036,7 +1050,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.create_default_dict()
         default_spellcheck_path = transcript_dir_path / "spellcheck"
         default_spellcheck_path.mkdir(parents=True)
-        # self.repo = Repo.init(str(transcript_dir_path))
+        self.repo = Repo.init(str(transcript_dir_path))
         # try:
         #     # check that the question meta is there, hack to see that "plover-speaker-id" metas are installed
         #     plug = registry.get_plugin("meta", "question")
@@ -1123,10 +1137,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             block_dict["creationtime"] = datetime.now().isoformat("T", "milliseconds")
             new_block.setUserData(block_dict)
         log.info("Project files, if exist, have been loaded.")
-        # try:
-        #     self.repo = Repo(selected_folder)
-        # except NotGitRepository:
-        #     self.repo = Repo.init(selected_folder)
+        try:
+            self.repo = Repo(selected_folder)
+            self.dulwich_save()
+        except NotGitRepository:
+            self.repo = Repo.init(selected_folder)
         self.statusBar.showMessage("Setup complete. Ready for work.")    
 
     def save_file(self):
@@ -1164,23 +1179,63 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         transcript = selected_folder.joinpath(selected_folder.stem).with_suffix(".transcript")
         log.info("Saved transcript data to %s", str(transcript))
         with open(transcript, "w") as f:
-            json.dump(json_document, f)
+            json.dump(json_document, f, indent = 4)
             log.info("Transcript data successfully saved")
         self.textEdit.document().setModified(False)
         self.undo_stack.setClean()
-        # self.dulwich_save()
+        self.dulwich_save(message = "user save")
         self.statusBar.showMessage("Saved project data at {filename}".format(filename = str(selected_folder)))  
 
-    def dulwich_save(self):
+    def dulwich_save(self, message = "autosave"):
         transcript_dicts = self.file_name / "dict"
-        available_dicts = [file.stem for file in transcript_dicts.iterdir()]
+        available_dicts = [transcript_dicts / file for file in transcript_dicts.iterdir()]
         transcript = self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript")
         transcript_tape = self.file_name.joinpath(self.file_name.stem).with_suffix(".tape")
         files = [transcript, transcript_tape] + available_dicts
         # add files, regardless of modified, to stage
-        # porcelain.add(self.repo, paths = files)
+        porcelain.add(self.repo.path, paths = files)
         # commit
-        # porcelain.commit(self.repo, "plover2CAT commit")
+        porcelain.commit(self.repo, message = message, author = "plover2CAT <fake_email@fakedomain.com>", committer= "plover2CAT <fake_email@fakedomain.com>")
+        commit_choices = return_commits(self.repo)
+        self.versions.clear()
+        for commit_id, commit_time in commit_choices:
+            self.versions.addItem(commit_time, commit_id)            
+
+    def revert_file(self):
+        if not self.repo:
+            return
+        QMessageBox.warning(self, "Revert", "The transcript will be reverted back to the version on %s. All unsaved changes will be destroyed. Session history will be erased. Do you wish to continue?" % self.versions.itemText(self.versions.currentIndex()))
+        selected_commit_id = self.versions.itemData(self.versions.currentIndex())
+        transcript = str(self.file_name.stem) + (".transcript")
+        porcelain.reset_file(self.repo, transcript, selected_commit_id)
+        new_commit_message = "revert to %s" % selected_commit_id.decode("ascii")
+        self.dulwich_save(message=new_commit_message)
+        self.undo_stack.clear()
+        transcript = self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript")
+        if pathlib.Path(transcript).is_file():
+            log.info("Transcript file found, loading")
+            with open(transcript, "r") as f:
+                self.statusBar.showMessage("Reading transcript data at {filename}".format(filename = str(transcript)))
+                json_document = json.loads(f.read())
+            new_document = QTextDocument(self)
+            new_document.setDocumentLayout(QPlainTextDocumentLayout(new_document))
+            document_cursor = QTextCursor(new_document)
+            self.statusBar.showMessage("Loading transcript data at {filename}".format(filename = str(transcript)))
+            for key, value in json_document.items():
+                document_cursor.insertText(value["text"])
+                block_data = BlockUserData()
+                for k, v in value["data"].items():
+                    block_data[k] = v
+                document_cursor.block().setUserData(block_data)
+                if "\n" in block_data["strokes"][-1][2]:
+                    document_cursor.insertText("\n")
+            # current_cursor.movePosition(QTextCursor.End)
+            new_document.setDefaultFont(self.textEdit.font())
+            self.textEdit.setDocument(new_document)
+            self.textEdit.setCursorWidth(5)
+            self.textEdit.moveCursor(QTextCursor.End)
+            self.statusBar.showMessage("Finished loading transcript data at {filename}".format(filename = str(transcript)))
+            log.info("Loaded transcript.")
 
     def save_as_file(self):
         ## select dir and save tape and file to different location, path is then set to new location
@@ -1226,7 +1281,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # elapsed_time = perf_counter() - start_time
         # print(elapsed_time)      
         with open(transcript, "w") as f:
-            json.dump(json_document, f)
+            json.dump(json_document, f, indent = 4)
             log.info("Transcript data saved in new location" + str(transcript))
         with open(transcript_tape, "w") as f:
             f.write(tape_contents)
@@ -1580,9 +1635,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_block = current_cursor.block()
         if current_cursor.blockNumber() == 0:
             return
-        block_dict = current_block.userData()
-        if not block_dict:
-            block_dict = BlockUserData()
         style_data = self.styles
         if len(style_data) == 0:
             return
@@ -1595,7 +1647,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             previous_style = previous_dict["style"]
         if previous_style:
             new_style = style_data[previous_style]["nextstylename"]
-        block_dict = update_user_data(block_dict, key = "style", value = new_style)
+        # block_dict = update_user_data(block_dict, key = "style", value = new_style)
         self.style_selector.setCurrentText(new_style)
         style_cmd = set_par_style(current_cursor.blockNumber(), self.style_selector.currentText(), self.textEdit)
         self.undo_stack.push(style_cmd)
@@ -2814,7 +2866,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         file_path = pathlib.Path(pathlib.Path(selected_file[0]).name).with_suffix(".transcript")
         file_path = self.file_name / file_path
         with open(file_path, "w") as f:
-            json.dump(parse_results.paragraphs, f)
+            json.dump(parse_results.paragraphs, f, indent = 4)
         new_document = QTextDocument()
         new_document.setDocumentLayout(QPlainTextDocumentLayout(new_document))
         document_cursor = QTextCursor(new_document)
