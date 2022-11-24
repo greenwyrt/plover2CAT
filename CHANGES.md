@@ -1,5 +1,12 @@
 CHANGES
 
+Ver 1.3.0 (2022-11-24)
+
+- Feature: Versioning. Powered by [`dulwich`](https://github.com/jelmer/dulwich/). Versions are made when the transcript is opened, and each time on user save. It is possible to jump back and forth between versions. Only the transcript is modified, the paper tape does not change.
+- Change: Transcripts are now in pretty JSON format. Makes it easy to do `diff` between versions for git users.
+- Bug fix: pull version from one source for "about" dialog and setup.cfg
+- Possible fix for lag, uncertain.
+
 Ver 1.2.2 (2022-11-22):
 - Feature: Context menu (right click) for editing.
 - Change: Made the light gray of selection in paper tape and alternating elements in reveal steno "darkGray" instead.

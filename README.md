@@ -15,6 +15,8 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] export transcript to plain text, Eclipse ASCII, SubRip, and Open Text Document formats (with style templates)
 - [x] saves paper tape with keys pressed, position of cursor in document, and timestamps at each stroke
 - [x] suggestions based on stroke history (powered by Tapey Tape), updated every paragraph
+- [x] spellcheck using the `spylls` library, ability to select spellcheck dictionaries 
+- [x] versioning using the `dulwich` library, switch between previously saved transcript states.
 - [x] basic import of RTF/CRE transcript
 
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 

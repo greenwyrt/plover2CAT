@@ -18,7 +18,8 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] saves paper tape with keys pressed, position of cursor in document, and timestamps at each stroke
 - [x] suggestions based on stroke history (powered by Tapey Tape), updated every paragraph
 - [x] spellcheck using the `spylls` library, ability to select spellcheck dictionaries 
-- [ ] basic import of RTF/CRE transcript
+- [x] versioning using the `dulwich` library, switch between previously saved transcript states.
+- [x] basic import of RTF/CRE transcript
 
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
@@ -170,7 +171,7 @@ This menu contains items related to file management, import and export.
 
 ![Example of lock cursor at end](images/lock_cursor.gif)
 
-For more detail, go to the [editing](#editing) section. There is a 10-action history for undo/redo.
+For more detail, go to the [editing](#editing) section.
 
 - Merge Paragraphs: Merges two paragraphs together.
 - Split Paragraphs: Splits one paragraph into two.
@@ -278,7 +279,12 @@ This is a table which shows the current paragraph's text, and the steno underlyi
 
 ### History
 
-Plover2CAT keeps track of all editing in the editor. The History Pane lists the actions performed, with new actions appended to the end. Clicking on an action before the end will undo all actions to that action, and clicking below will redo actions. 
+Plover2CAT keeps track of all editing in the editor. The History Pane first lists the actions performed in the session, with new actions appended to the end. Clicking on an action before the end will undo all actions to that action, and clicking below will redo actions. 
+
+The second part of the pane is the "Version History". Here, it is possible to switch to previously saved versions of the transcript. Only the `*.transcript` file is modified, the paper tape is unchanged. For most, the user interface is enough as it provides up to 100 versions to switch to.
+
+Under the hood, versioning is powered by [`dulwich`](https://github.com/jelmer/dulwich/), a purely Python implementation of git. Commits made by the editor are done with the author being "plover2CAT." For power users, they can use all git commands possible, such as assess all the changes through git, revert files past 100 revisions, and even set up remote repositories. (Pushing to remote repositories is outside the scope of this plugin.)
+
 
 ### Audiovisual Controls
 
