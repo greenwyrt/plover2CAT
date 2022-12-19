@@ -22,7 +22,6 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 
 - [Write only to end of document](howto/lockcursor.md)
 - [Write even when window is not in focus](howto/captureoutput.md)
-- [View underlying steno](howto/revealsteno.md)
 - [Merge paragraphs](howto/mergepar.md)
 - [Split a paragraph](howto/splitpar.md)
 - [Retroactive Define for selection in editor](howto/retrodefine.md)
