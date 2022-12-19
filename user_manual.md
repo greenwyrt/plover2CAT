@@ -867,21 +867,15 @@ The styles from the original RTF can be re-used as templates for transcripts.
 
 Similar to the editor description, this section may go into detail not necessary for most users depending on the format. The table below summarizes what features are available for each export format.
 
-+-------------+----------+---------+-----------+---------+---------------+-----------+------------+
 | Format      | Richtext | Line \# | Timestamp | Page \# | Header/Footer | Char/Line | Lines/Page |
-+=============+==========+=========+===========+=========+===============+===========+============+
+|-------------|----------|---------|-----------|---------|---------------|-----------|------------|
 | Plain Text  | No       | No      | No        | No      | No            | No        | No         |
-+-------------+----------+---------+-----------+---------+---------------+-----------+------------+
-| Basic ASCII | No       | ✓       | No        | ✓       | No            | No        | No         |
-+-------------+----------+---------+-----------+---------+---------------+-----------+------------+
-| ASCII       | ✓\*      | ✓       | ✓         | *No*    | *No*          | ✓         | ✓          |
-+-------------+----------+---------+-----------+---------+---------------+-----------+------------+
-| HTML        | ✓\*      | ✓       | ✓         | *No*    | *No*          | ✓         | ✓          |
-+-------------+----------+---------+-----------+---------+---------------+-----------+------------+
-| ODT         | ✓        | ✓       | ✓         | *No*    | *No*          | *No*      | *No*       |
-+-------------+----------+---------+-----------+---------+---------------+-----------+------------+
+| Basic ASCII | No       | &check; | No        | &check; | No            | No        | No         |
+| ASCII       | &check;\*| &check; | &check;   | *No*    | *No*          | &check;   | &check;    |
+| HTML        | &check;\*| &check; | &check;   | *No*    | *No*          | &check;   | &check;    |
+| ODT         | &check;  | &check; | &check;   | *No*    | *No*          | *No*      | *No*       |
 | *RTF/CRE*   |          |         |           |         |               |           |            |
-+-------------+----------+---------+-----------+---------+---------------+-----------+------------+
+
 
 \* No font support, indents and other layout is converted to closest approximation using spaces for padding.
 
