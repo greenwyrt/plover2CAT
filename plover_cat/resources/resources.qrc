@@ -1,5 +1,20 @@
 <RCC>
   <qresource>
+    <file>document-resize-actual.png</file>
+    <file>spell-check.png</file>
+    <file>edit-style.png</file>
+    <file>microphone.png</file>
+    <file>magnifier.png</file>
+    <file>wand.png</file>
+    <file>edit-pilcrow.png</file>
+    <file>lock.png</file>
+    <file>edit-underline.png</file>
+    <file>edit-bold.png</file>
+    <file>edit-italic.png</file>
+    <file>edit-alignment-justify-distribute.png</file>
+    <file>edit-alignment.png</file>
+    <file>edit-alignment-center.png</file>
+    <file>edit-alignment-right.png</file>
     <file>book-question.png</file>
     <file>information.png</file>
     <file>arrow-curve.png</file>
