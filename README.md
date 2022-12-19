@@ -22,54 +22,17 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
 
-# Installation
+## Get Started
 
-Open the terminal following instructions here [on the command-line](https://github.com/openstenoproject/plover/wiki/Invoke-Plover-from-the-command-line). On Windows, paste in:
+Start with #3 if you already have Plover installed and know how to install Plover2CAT from the command line.
 
-```
- .\plover_console.exe -s plover_plugins install git+https://github.com/greenwyrt/plover2CAT.git
-```
+1. [Install Plover](docs/tutorials/install-plover.md)
+2. [Install Plover2CAT as a Plover plugin](docs/tutorials/install-plover2cat.md)
+3. [Create new transcript in Plover2CAT](docs/tutorials/create-transcript.md)
+4. [Write in the Plover2CAT editor](docs/tutorials/writing-editor.md)
+5. [Export to text and Open Document Format](docs/tutorials/export-file.md)
 
-On MacOS and Unix systems, use `plover` rather than `plover_console.exe`.
-
-# Getting Started
-
-## Starting a New Transcript
-
-Open Plover2CAT from within Plover after installation, by Tools --> Plover2CAT. A window with a main editor, and dockable containers for suggestions, paper tape, and other functions will appear. Create a new transcript with File --> New (or `Ctrl + N`). A folder selection dialog will appear. Plover2CAT will create a transcript folder with a timestamp at the selected location.
-
-Once Plover is enabled, writing to the main editor will be possible. The main function of Plover2CAT is for writing steno, and by default, only steno translated by Plover will be written (and deleted with the `*`). 
-
-A custom dictionary for the transcript is loaded into Plover, prepopulated with shortcuts for common actions. When File --> Close is used to close the transcript, the custom dictionary will be removed from Plover.
-
-## Default CAT behaviour
-
-Check "Lock Cursor at End" and "Capture All Steno Input" to only write to end of document and to still write even when editor window is not in focus. By default, writing is inserted into any part of text, and only when window is in focus.
-
-## Opening Audiovisual Files
-
-Select an audio file on the computer by Audio --> Open Audio (`Ctrl + Shift + O`). When audio is playing, steno strokes will be timestamped with the audio time. Open the "Paragraph Properties Editor" in the Toolbox pane to see the timestamps associated with each paragraph.
-
-## Recording Audio
-
-Open "Audio Recording" in the Toolbox Pane to select parameters for recording such as the input device. Click Record/Pause on the toolbar or through Audiovisual --> Record/Pause to start recording. Use Audiovisual --> Stop Recording to stop recording. 
-
-## Saving and Export
-
-The transcript will be saved as an JSON file within the created transcript folder when File --> Save (`Ctrl + S`) is used.
-
-The available export formats are:
-  - Open Document Text
-  - SubRip
-  - ASCII
-  - Plain Text
-
-For more details on each format and the different requirements, see the User Manual. 
-
-## Close Transcript
-
-Use File --> Close to close the transcript and File --> Quit (`Ctrl+Q`) to quit the editor, with optional check to save if changes have been made. **DO NOT** use the `Alt+ F4` as that causes an instant exit without saving.
-
+Then review the available [how to ____](docs/README.md) articles.
 
 # Acknowledgements
 
@@ -80,7 +43,6 @@ Plover and PyQt are both under the GPL license.
 Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.
 
 # Development
-
 
 Plover2CAT at present, is one gigantic class, and with absolutely no tests. See the user manual for details of formats such as stroke data, and wished-for features.
 

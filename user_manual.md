@@ -4,7 +4,8 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 
 # Features Overview:
 
-- [x] a plain text editor with steno hidden underneath
+- [x] a rich text editor with steno hidden underneath
+- [x] conventional styling of paragraphs, with formatting translated to exported files such as Open Document Text
 - [x] timestamps for each stroke and associated with each piece of text
 - [x] conventional editing features such as cut/copy/paste while keeping steno data attached
 - [x] undo/redo history
@@ -14,7 +15,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] an audiovisual player, with controls for timing offset, playback rate, skipping forward and back
 - [x] synchronization of steno with the audio/video file for transcription
 - [x] audio recording synchronized with steno (file format dependent on codecs in operating system)
-- [x] export transcript to plain text, Eclipse ASCII, SubRip, and Open Text Document formats (with style templates)
+- [x] export transcript, with formatting when possible, to plain text, basic ASCII, formatted ASCII, HTML, SubRip, and Open Text Document formats (with style templates)
 - [x] saves paper tape with keys pressed, position of cursor in document, and timestamps at each stroke
 - [x] suggestions based on stroke history (powered by Tapey Tape), updated every paragraph
 - [x] spellcheck using the `spylls` library, ability to select spellcheck dictionaries 
@@ -51,6 +52,15 @@ Select the `config.CONFIG` in the transcript folder to open the transcript.
 
 Check "Lock Cursor at End" and "Capture All Steno Input" to only write to end of document and to still write even when editor window is not in focus. By default, writing is inserted into any part of text, and only when window is in focus.
 
+## Styling and Page Formatting
+
+Plover2CAT comes with preset styles and page formatting. These controls are located in the toolbox dock. Users can see the style of the current paragraph in `Current Paragraph Style`. Switching styles is done by selecting a different style from the drop down. It is also possible to switch among the first 10 styles using `Ctrl + {0,9}`. An example to switch style after new paragraph is `end\nQ.{#control(2)}` when the styles in the style selector are `Normal, Question, Answer, Paren`. Writing this stroke will add the string `end` to the present paragraph, create a new 
+line, inserts `Q.`, and then the `Ctrl+2` emitted by Plover causes the editor to apply the 3rd style, `Answer`.
+
+Users can change font, style, alignment and other properties for each paragraph and then pressing `Modify Style` to confirm. The changes will be applied to the whole document for all paragraphs using the style. See [style settings](#style-settings) for an explanation of the controls.
+
+Page dimensions and margins can be changed under the `Page  Format` pane. Options such as `maximum characters per line`, `max lines per page`, `line numbering` and `line timestamps` can be enabled and set for the export formats that support them. (See table in [export formats](#export-formats))
+
 ## Opening Audiovisual Files
 
 Select an audio file on the computer by Audio --> Open Audio (`Ctrl + Shift + O`). When audio is playing, steno strokes will be timestamped with the audio time. Open the "Paragraph Properties Editor" in the Toolbox pane to see the timestamps associated with each paragraph.
@@ -66,14 +76,16 @@ The transcript will be saved as an JSON file within the created transcript folde
 The available export formats are:
   - Open Document Text
   - SubRip
+  - Plain ASCII
   - ASCII
+  - HTML
   - Plain Text
 
-For more details on each format and the different requirements, see the User Manual. 
+For more details on each format and supported features, see the relevant section below on [export formats](#export-formats)
 
 ## Close Transcript
 
-Use File --> Close to close the transcript and File --> Quit (`Ctrl+Q`) to quit the editor, with optional check to save if changes have been made. **DO NOT** use the `Alt+ F4` as that causes an instant exit without saving.
+Use File --> Close to close the transcript and File --> Quit (`Ctrl+Q`) to quit the editor, with optional check to save if changes have been made. **DO NOT** use the `Alt+ F4` or `ESC` as that causes an instant exit without saving.
 
 # Folder Structure
 
@@ -126,6 +138,10 @@ The `.transcript` file is a JSON holding stroke and styling information for the 
 | Normal Copy           | Ctrl + Shift + C |
 | Retroactive Define    | Ctrl + R         |
 | Define Last           | Ctrl + Shift + R |
+| Refresh Editor        | F5               |
+| Set style 0 - 9       | Ctrl + {0, 9}    |
+| Insert Plain Text     | Ins              |
+| Delete Char to right  | Del              |
 | Open Audiovisual File | Ctrl + Shift + O |
 | Play/Pause            | Ctrl + P         |
 | Stop                  | Ctrl + W         |
@@ -173,8 +189,6 @@ This menu contains items related to file management, import and export.
 
 For more detail, go to the [editing](#editing) section.
 
-- Merge Paragraphs: Merges two paragraphs together.
-- Split Paragraphs: Splits one paragraph into two.
 - Cut: cut text (and underlying steno) from paragraph.
 - Copy: copy text (and underlying steno) from paragraph.
 - Paste: paste text (and underlying steno) into paragraph.
@@ -182,17 +196,26 @@ For more detail, go to the [editing](#editing) section.
 - Undo: Undo one action ie merge, cut if available.
 - Redo: Redo the undone action if available.
 - Find/Replace Pane: shows the "Find and Replace" pane if visible. See [Find and Replace](#find-and-replace) section for details.
+- Insert normal text: to insert normal text
 - Reset Paragraph: Removes all paragraph text and steno data. Used as the last option when text and steno data go out of sync.
 
 ### The Steno Actions Menu
 
 This menu is for steno-related menu items.
 
-- Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
-- Capture All Steno Input: If checked, all writing through Plover will be tracked, and text emitted into editor, regardless of whether editor window is in focus. By default, no writing to editor when window is not in focus.
+- Merge Paragraphs: Merges two paragraphs together.
+- Split Paragraphs: Splits one paragraph into two.
+- Autocompletion: start up autocompletion. Requires a `wordlist.json` in a `sources/` dictionary.
 - Retroactive Define: Define an outline after writing it.
 - Define Last: Define last preceding untranslate before cursor.
-- Autocompletion: start up autocompletion. Requires a `wordlist.json` in a `sources/` dictionary.
+- Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
+- Capture All Steno Input: If checked, all writing through Plover will be tracked, and text emitted into editor, regardless of whether editor window is in focus. By default, no writing to editor when window is not in focus.
+
+### The Styling Menu
+
+- Select style file: Select the JSON/ODT file containing desired styles to use
+- Create New Style: Create a new style based on the currently selected style. User will input new style name.
+- Refresh Editor: This will update the visual styling foreach paragraph if not already done.
 
 ### The Dictionary Menu
 
@@ -227,8 +250,10 @@ This menu contains items related to view.
 
 - Zoom In: This increases the zoom on the main editor. The size from this and `Zoom Out` are "temporary", meaning they will fall back to normal if a document is loaded, such as opening/closing projects.
 - Zoom Out: This decreases the zoom on the main editor.
-- Font: This controls the actual font and size. This is saved when exiting and will be maintained across sessions.
-- Docks: Toggle the visibility of each dock.
+- Show All Characters: Toggle to view whitespace charactes (spaces with dots, tabs with left arrows, paragraph endings with pilcrow symbol)
+- Window Font: This controls the font and size for the window. This is saved when exiting and will be maintained across sessions.
+- Paper Tape Font: This controls the font and size for the paper tape. This is savd when exiting and will be maintained across sessions.
+- Docks: Toggle the visibility of each dock. A user can also right click on the toolbar and toggle dock visibility that way.
 
 ### The Help Menu
 
@@ -358,35 +383,83 @@ An autocompletion feature has to be toggled through the Steno Actions menu. The 
 
 Choices can be scrolled using arrow keys on the pop-up. It is **essential** that an outline is mapped to `{#return}` in one of Plover's loaded dictionaries. That outline/stroke has to be used to select the autocomplete choice. Using an outline mapping to `\n` will cause a new paragraph to be started in addition to making the selection.
 
+## Styling
+
+Plover2CAT currently uses a `block-based` styling approach. This means that formatting changes can only be applied to paragraphs, not sections of text within paragraphs. In other words, it's not possible to have two different fonts used within one paragraph.
+
+Font, margins and other common word processor styling can be set through Plover2CAT. Following other word processors, styles can be based on other styles and it is possible to specify the style of the new paragraph following the present one.
+
 # Tools
-
-## Paragraph Properties Editor
-
-The editor will automatically fill in paragraph properties such as when a paragraph is created, or the associated audio time. However, sometimes finer control is needed. 
-
-By default, the properties are locked. Uncheck the `Lock` checkbox in order to edit `Creation Time`, `Audio Start Time` and `Audio End Time` and `Notes`. For what these properties mean and how they are created, see the [Editor](#the-editor) section. `Paragraph` and `Edit Time` are uneditable fields. Submit edits by pressing the `Edit Paragraph Properties` button. 
-
-Any new steno input will cause the lock to be re-enabled (and editing disabled).
 
 ## Styling
 
-Select the paragraph formatting styles when exporting to OpenDocumentText format. The default styles appear under "Current Paragraph Style" to set the style for the current paragraph.
+The styling pane contains formatting controls for paragraphs. The styling elements are applied to exported files when possible. Changes will appear visually in the editor (like other word processing software) even if some export formats do not support such formatting.
 
-Default styles are provided in the `default.json` file within the `styles` directory. This file contains text and paragraph properties for the common styles using OpenTextDocument element names, such as "Normal", "Question", and "Answer." 
+Default styles are provided in the `default.json` file within the `styles` directory. This file contains text and paragraph properties for the common styles using OpenTextDocument element names, such as "Normal", "Question", and "Answer." The default styles appear under "Current Paragraph Style" drop-down menu when a transcript folder is newly created.
 
-It is possible to indicate a `nextstylename` element. Once this style is used, Plover2CAT will automatically switch to the next style when a new paragraph is created, so it is possible to alternate `Question` and `Answer` paragraphs.
+### Style Files
+
+To select a different style file, use `Styling` --> `Select Style File` from the menu, and select the desired style file.
 
 Any ODF elements allowed in the text and paragraph properties can be specified within the `style.json` styles (the odfpy library uses the element name without the hyphens ie `margin-left` to `marginleft`). Unknown elements will be ignored.
 
 If a `ODT` file is supplied as a template, the drop-down box will be repopulated with the document's styles. Paragraphs with pre-existing styles will not be changed so it is best to supply the ODT before writing, or match the names of the styles in the `ODT` document to the default style names. The page format of `ODT` will override the page format parameters as well. 
 
+It is possible to indicate a `nextstylename` element. Once this style is used, Plover2CAT will automatically switch to the next style when a new paragraph is created, so it is possible to alternate `Question` and `Answer` paragraphs.
+
 Much more customization can be done using an `ODT` file as a template. Plover2CAT will append the transcript contents to the document, so if an `ODT` with a title page is supplied, the transcript contents will appear after the title page. 
 
 Any style file (`JSON` or `ODF`) will be copied to the `styles` directory in order to keep the project self-contained.
 
+
+
+### Style Settings
+
+After making changes to the following controls, the `Modify Style` button has to be clicked to activate the change.
+
+#### Text Properties
+
+There is a dropdown box for font selection (based on installed system fonts). Font size can only be specified in integer format (it is not possible to supply something such as 12.5pt). 
+
+Bold, italic, and underline buttons can be toggled. They can be used separately and in combination.
+
+There are four different alignment buttons: left, center, right, and justified. Only one of the four buttons is able to be selected at one time.
+
+Line spacing is measured as a % of line height. Single spacing would be 100%, and double spacing 200%.
+
+`Average Char Width` is a read-only box. This displays the average width of a character in inches for the selected font. This is useful for setting characters per inch. However, actual characters per inch may vary if a proportional font is used (as characters will have varying width) compared to a monospace font (all characters have the same width).
+
+#### Paragraph Properties
+
+`First line indent` specifies how much the first line is indented compared to the rest of the paragraph.
+
+`Tab Stop Distance` specifies the position of the tab stop if a tab appears in the text. If there is only one tab stop specified for the style, it will be editable. If there are multiple tab stops (such as when the style file is from ODF/RTF), it is not possible to edit tab stops within the editor. 
+
+`Left Margin (Indent)` specifies the left margin of the paragraph. This is separate from the `left margin` of the page. It indents the entire paragraph relative to the `left margin` of the *page*.
+
+`Right Margin (Indent)` is similar to the `Left Margin (Indent)`, but for the right.
+
+`Top Margin` and `Bottom Margin` add space to the top and bottom of a paragragh, hence `(Padding)`. Microsoft Word calls this `Space before paragraph` and `space after paragraph`.
+
+`Parent Style` is a drop down list containing all styles *except the current style*. The current style inherits formatting from the parent style, and will use those settings if nothing has been set for the current style. 
+
+`Next Style` refers to the style to be set on the new paragraph following the current one. If a following paragraph already exists and has a style, the style will not be modified. One can for example set `Answer` as the style following `Question` and `Question` as the next style for `Answer`.
+
 ## Page Format
 
-This is used for exporting to OpenDocumentText format. The different fields should be self explanatory, controlling the different page margins and page dimensions. Line numbering can be checked or unchecked depending on need. This page format will apply to the entire document. The values are stored in the `config.config` file, along with other project attributes.
+This is used for setting the page format used for export. The different fields should be self explanatory, controlling the different page margins and page dimensions. 
+
+`Max char per line` sets the maximum characters allowed per line. 
+
+`Max lines per page` sets the maximum number of text lines allowed per page. 
+
+Both `max char per line` and `max lines per page` can have an `automatic value`. In this case, it is left to the editor to determine these values based on page parameters.
+
+`Line numbering` can be checked or unchecked depending on need. The `frequency` refers to how often a line is numbered. Setting to `5` means every fifth line is numbered.
+
+`Line timestamp` will add a timestamp to the beginning of the line. This value is based on the earliest chronological stroke time of the line. Depending on editing, timestamps across lines may not be in order if sections of text (and steno) were moved around.
+
+This page format will apply to the entire document. The values are stored in the `config.config` file, along with other project attributes. 
 
 If an `ODT` file is used to set styling, page format parameters are overridden. 
 
@@ -432,9 +505,19 @@ The options in the dropdown boxes will vary depending on the individual operatin
   - Constant Quality: The recording will be done based on the quality slider, varying the bitrate to keep the same quality.
   - Constant Bitrate: The recording will use the same bitrate throughout, but quality of the recording will vary.
 
+## Paragraph Properties Editor
+
+The editor will automatically fill in paragraph properties such as when a paragraph is created, or the associated audio time. However, sometimes finer control is needed. 
+
+By default, the properties are locked. Uncheck the `Lock` checkbox in order to edit `Creation Time`, `Audio Start Time` and `Audio End Time` and `Notes`. For what these properties mean and how they are created, see the [Editor](#the-editor) section. `Paragraph` and `Edit Time` are uneditable fields. Submit edits by pressing the `Edit Paragraph Properties` button. 
+
+Any new steno input will cause the lock to be re-enabled (and editing disabled).
+
 ## Spellcheck
 
-Spellcheck in the editor is powered by the [`spylls`](https://github.com/zverok/spylls) package. `Spylls` comes with the `en-US` dictionary from Hunspell for spellchecking. To use a different language dictionary, such as `en-GB`, download the desired dictionary extension from LibreOffice. LibreOffice packages all English dictionaries together as one `oxt` zip file ([link](https://extensions.libreoffice.org/en/extensions/show/english-dictionaries)). For Windows, after downloading, modify the file ending from `oxt` to `zip` to open. The files are paired together, one `*.dic` file with one `*.aff` file, both with the same file name. For `en-GB`, this will be `en_GB.dic` and `en_GB.aff`. Copy the `*.dic` and `*.aff` file into the `spellcheck` folder within the transcript folder. Then re-open the transcript and select the desired dictionary for spellcheck from the dropdown list.
+Spellcheck in the editor is powered by the [`spylls`](https://github.com/zverok/spylls) package. `Spylls` comes with the `en-US` dictionary from Hunspell for spellchecking. To use a different language dictionary, such as `en-GB`, download the desired dictionary extension from LibreOffice. LibreOffice packages all English dictionaries together as one `oxt` zip file ([link](https://extensions.libreoffice.org/en/extensions/show/english-dictionaries)). 
+
+For Windows, after downloading, modify the file ending from `oxt` to `zip` to open. The files are paired together, one `*.dic` file with one `*.aff` file, both with the same file name. For `en-GB`, this will be `en_GB.dic` and `en_GB.aff`. Copy the `*.dic` and `*.aff` file into the `spellcheck` folder within the transcript folder. Then re-open the transcript and select the desired dictionary for spellcheck from the dropdown list.
 
 # Formats
 
@@ -442,24 +525,24 @@ This section goes into detail on how these formats are implemented in the plugin
 
 ## The Editor
 
-The editor is a QPlainTextEdit component. To most users, the only relevant aspect is that the text is organized into paragraphs, and data is stored on a per-paragraph basis.
+The editor is a QTextEdit component. To most users, the only relevant aspect is that the text is organized into paragraphs, and data is stored on a per-paragraph basis.
 
-There are several base properties:
+There are several properties for each paragraph:
 
 - Creation Time: this is the time that the paragraph is created. If it does not exist, the default is the time for the first stroke (see `steno data` below).
 - Edit Time: this is the time of the last change to the paragraph. In the Paragraph Properties Editor, this property is not editable. the time will be modified each time there is a change to the paragraph and as a result, any manual edits will be overwritten.
 - Audio Start Time: this is the time from the audio playing when the paragraph is created. This property can be edited, and should be used when trying to match timing, such as for captions.
 - Audio End Time: this is the time when the audio has "passed on" from this paragraph. By default, if a paragraph does not have this property set, the audio end time for the paragraph is the audio start time of the subsequent paragraph. When `Stop Audio` is pressed, the time of the audio at the stop will be set as audio end time of the paragraph. Having one audio end time at the end of the transcript is important for making valid SRT caption files.
-- Style: this is mostly useful for associating an ODF paragraph style with the given block for exporting to an Open Document Text file. See [styles](#styles) for the format and how to use.
+- Style: this is mostly useful for associating a paragraph style with the given block for exporting. See [styles](#styles) for the format and how to use.
 - Notes: this is a text property for the user to make notes.
 
 ## Steno data
 
-This section below describes in some detail how QPlainTextEdit and the data structures is used, which may not be so apparent in the code.
+This section below describes in some detail QTextEdit and the data structures is used, which may not be so apparent in the code.
 
 ### `stroke` data
 
-The most important hidden property of each paragraph is the steno.
+The most important property of each paragraph is the steno.
 
 For each paragraph, there is a user data object (subclassing `defaultdict`) containing the base properties from above, and also holding the steno strokes (`strokes`) with corresponding text strings. The `strokes` entry is a list of lists, each element list having either three (or four) elements:
 - time of stroke
@@ -667,12 +750,52 @@ default_styles = {
         "nextstylename": "Normal",
         "paragraphproperties": {
             "marginleft": "1.5in"
-        }        
+        }     
     }
 }
 ```
 
 These parameters attempt to recreate the NCRA's [transcript format guidelines](https://www.ncra.org/About/Transcript-Format-Guidelines).
+
+
+Plover2CAT uses the Open Document Format names for paragraph and text properties, and also uses style inheritance in a similar manner. If a property such as `linespacing` is not set (in the case of the `Question` style above), if the parent style has the setting (`Normal` has `linespacing` of `200%`), then the current style `inherits` that setting (`Question` style will also have `linespacing 200%`). If a style has a property set, and so does the parent style, the current style's property value overrides the parent style's value.
+
+This means that when creating a style file by hand, there should be at least one base style that other styles inherit from. It also means that styles should not have themselves set as their own parent style as that causes a loop.
+
+This is the complete list of attributes that can be set in Plover2CAT, with comments explaining possible values. This is based on the Open Document Format spec which contains even more details.
+
+```
+
+{
+    "Name": { # name of the style
+        "family": "paragraph",  # set to "paragraph"
+        "defaultoutlinelevel": "", # heading level, 1-10, ordinary text has no level
+        "parentstylename": "", # name of style the current style inherits properties from
+        "nextstylename": "", # name of style for new paragraph after this one
+        "paragraphproperties": {
+            "textalign": "left/center/right/aligned", # has to be one of these four choices
+            "textindent": "", # first line indent distance in inches ie "1in"
+            "marginleft": "", # paragraph left margin in inches
+            "marginright":"", # paragraph right margin in inches
+            "margintop": "", # paragraph top margin in inches
+            "marginbottom": "", # paragraph bottom margin in inches
+            "linespacing": "" # line spacing using %, ie 200% for double space
+            "tabstop": "" # can be one value ("2.0in") or a list for values ["1.0in", "1.5in", "2.0in"] for tabstops
+        }
+        "textproperties": {
+            "fontname": "", # name of font
+            "fontfamily": "", # font family
+            "fontsize": "", # integer value for font size in pt, ie "12pt"
+            "fontweight": "none/bold", # the style may not have "fontweight", but if it does, it has to be set as "bold"
+            "fontstyle": "none/normal/italic", # the style may not have "fontsize" or set as "normal" or "italic"
+            "textunderlinetype": "none/single", # the style may not have "textunderlinetyle" or it has to be set as "single"
+            "textunderlinestyle": "none/solid" # the style may not have "textunderstyle" or it has to be set as "solid", but only if "textunderlinetype" is set
+        }
+    }
+}
+
+
+```
 
 ## Autocomplete Wordlist
 
@@ -694,7 +817,42 @@ An example is:
 
 ## Supported RTF Import
 
-Import of RTF/CRE transcript files produced by other CAT software is untested. Plover2Cat will only import style names, stroke data, associated time code, and translation. These are the contents of the `\cxs` and `\cxt` control groups in the RTF/CRE spec, but any text in other groups are ignored.
+Import of RTF/CRE transcript files produced by other CAT software is not fully supported.
+
+`pyparsing` is used to import RTF/CRE files. Only a subset of the RTF/CRE spec is supported.
+
+Recognized RTF flags
+
+    Default font (\deffont)
+    Paper height (\paperh)
+    Paper width (\paperw)
+    Top margin (\margt)
+    Bottom margin (\margb)
+    Left margin (\margl)
+    Right margin (\margr)
+    New paragraph (\par)
+    Stylesheet (\stylesheet)
+    Style (\s)
+    Next Style (\snext)
+    Parent Style (\sbasedon)
+    Style margins (\li \ri \fi \sb \sa)
+    Text alignment (\ql \qr \qj \qc)
+    Tabstops (\tx)
+    Font table (\fonttbl)
+    Font family (\froman \fswiss \fmodern \fscript \fdecor)
+    Font (\f)
+    Font size (\fs)
+    Bold and italic (\b \i)
+    Underline (\ul) (Only single solid line)
+    Creation time (\creatim \yr \mo \dy)
+
+Recognized RTF/CRE flags
+
+    Timecode (\cxt)
+    Steno (\cxs)
+    Frame rate per second (\cxframes)
+    Automatic Text (\cxa)
+
 
 The styles from the original RTF can be re-used as templates for transcripts.
 
@@ -705,17 +863,44 @@ The styles from the original RTF can be re-used as templates for transcripts.
 5. Load into Plover2CAT by selecting it as a style source file in the Styling pane before exporting to ODT.
 
 
-## Export Formats
+## Export Formats Overview
 
-Similar to the editor description, this section may go into detail not necessary for most users depending on the format.
+Similar to the editor description, this section may go into detail not necessary for most users depending on the format. The table below summarizes what features are available for each export format.
 
-### ASCII
++-------------+----------+---------+-----------+---------+---------------+-----------+------------+
+| Format      | Richtext | Line \# | Timestamp | Page \# | Header/Footer | Char/Line | Lines/Page |
++=============+==========+=========+===========+=========+===============+===========+============+
+| Plain Text  | No       | No      | No        | No      | No            | No        | No         |
++-------------+----------+---------+-----------+---------+---------------+-----------+------------+
+| Basic ASCII | No       | ✓       | No        | ✓       | No            | No        | No         |
++-------------+----------+---------+-----------+---------+---------------+-----------+------------+
+| ASCII       | ✓\*      | ✓       | ✓         | *No*    | *No*          | ✓         | ✓          |
++-------------+----------+---------+-----------+---------+---------------+-----------+------------+
+| HTML        | ✓\*      | ✓       | ✓         | *No*    | *No*          | ✓         | ✓          |
++-------------+----------+---------+-----------+---------+---------------+-----------+------------+
+| ODT         | ✓        | ✓       | ✓         | *No*    | *No*          | *No*      | *No*       |
++-------------+----------+---------+-----------+---------+---------------+-----------+------------+
+| *RTF/CRE*   |          |         |           |         |               |           |            |
++-------------+----------+---------+-----------+---------+---------------+-----------+------------+
 
-This is the ASCII format as specified in Ipos Eclipse. Page numbers begin on column 1, and are padded to 4 places. Each line of the text begins with line numbers starting on column 2, with text beginning on column 7 and is < 78 characters in length. Hard-coded into the code at this time is 25 lines per page. 
+\* No font support, indents and other layout is converted to closest approximation using spaces for padding.
+
+Italics for features not yet supported but planned.
 
 ### Plain Text
 
 The plain text format contains just pure text, without any property information. This format does not require any properties in paragraphs. Each paragraph becomes one line in the text document.
+
+### Basic ASCII
+
+This is the ASCII format as specified in Ipos Eclipse. Page numbers begin on column 1, and are padded to 4 places. Each line of the text begins with line numbers starting on column 2, with text beginning on column 7 and is < 78 characters in length. Hard-coded into the code at this time is 25 lines per page. This export format will ignore style formatting.
+
+
+### ASCII
+
+This is an ASCII format with support for line numbers and timestamps, using the style formatting.
+
+Not all formatting can exported to all formats. For example, text files cannot have multiple fonts or different font sizes. Plover2CAT will do its best to emulate formatting for ASCII files. For example, line spacing settings will be rounded, so line spacing of 150% would become a line of text and an empty line (like double space). Tabstops, paragragh left and right margins, indents are all converted from inches to spaces (using 10 spaces per inch). Top and bottom padding for paragraphs are converted from inches to empty lines (using 6 lines per inch). As a result, the text file contains a best-effort attempt to mimic formatting using text and spaces.
 
 ### SubRip
 
@@ -729,47 +914,50 @@ A user can write the transcript in Plover2CAT, do some simple editing and format
 
 # Development
 
-Plover2CAT at present, is one gigantic class, and with absolutely no tests. Certain features should be factored out into their own classes/functions in the future.
-
-## Autosave
-
-There is no autosave. This should be done with a QTimer on regular intervals.
-
-Alternatively, what about git/PyGithub?
-
-## Plain Text vs WYSIWYG
-
-The main text widget is QPlainTextEdit, a plain-text editor. While styles can be set, and style files loaded, this is not a WYSIWYG editor.
-
-QT has a QTextEdit class with rich-text functionality. It *should* be possible to style QTextBlocks and show this on the editor.
-
-QTextEdit can set formats for parts of a block, creating multiple QTextFragments within a QTextBlock that can be iterated through. (See [doc](https://doc.qt.io/qtforpython/overviews/richtext-structure.html), one [example](https://listed.to/@kobra/26268/how-to-process-export-rich-text-in-qt)).
-
-With added formatting, it means when creating a formatted ODF document, all QTextFragments have to be iterated over, and character styles set. 
-The formatting options listed for [QTextBlockFormat](https://doc.qt.io/qtforpython-5/PySide2/QtGui/QTextBlockFormat.html) should have ODF equivalents.
-Same with char level formats for [QTextFormat](https://doc.qt.io/qtforpython-5/PySide2/QtGui/QTextCharFormat.html). Process might be ODF template --> QTextEdit --> User Modifications --> ODF transcript. There are also tables/lists.
-
-QT has its own odf writer [C++ source here](https://github.com/qt/qtbase/blob/5.8/src/gui/text/qtextodfwriter.cpp), [doc](https://www.riverbankcomputing.com/static/Docs/PyQt5/api/qtgui/qtextdocumentwriter.html). It will work out of the box with qtextedit elements but won't be possible to add other elements ie header/footer, line number, possibly with second passthrough. Also cannot "append".
-
-If a QTextEdit is used with RTF, all the UI for RTF editing have to be included (font, size, indent, justification, line spacing)
-
-If there are formatting edits, then the undo/redo stack has to be done first, since QT is able do undo/redo formatting changes out-of-the-box.
-
-There is QPDFwriter in QT, but it is likely more useful to go Transcript --> odf --> user format and additions --> save as PDF.
+Plover2CAT at present, is one gigantic class, and with absolutely no tests.
 
 ## Steno-Annotated ODF
 
 Plover2CAT should produce an annotated document, putting raw steno in the `ruby` element to annotate the corresponding words. This takes advantage of the annotations which are originally for Asian language pronunciation.
 
-## Spellcheck
-
-The free spellcheck dictionaries are the hunspell dictionaries. Should use [spylls](https://github.com/zverok/spylls) for checking and suggestions.
-
-### RTF/CRE
+## RTF/CRE
 
 RTF/CRE appears to be the common exchange format for CAT software.
 
 The specs are on the [internet archive](https://web.archive.org/web/20201017075356/http://www.legalxml.org/workgroups/substantive/transcripts/cre-spec.htm)
 
-[PyRTF3](https://github.com/jwaschkau/pyrtf) writes RTF files.
+RTF import has been implemented selectively. Next step should be RTF export.
 
+More RTF example files from different companies are needed to test import capabilities as different cat software have their own own flags.
+
+## Richtext Features
+
+While richtext editing has been enabled, some common features of word processors and professional CAT software are missing. Primary ones are 1) embedding images, 2) table of contents/index and 3) tables.
+
+QTextEdit is able to work with images out of the box (just need to implement certain features in code for exporting, and also folders for saving image data.)
+
+Indexes (in reality, a table of contents) for ODF depends on having "heading" styles. This can be integrated. RTF table of contents is possible (based on the spec). The difficulty will be keeping track of the text in the editor selected for table of contents if there is custom text. 
+
+Tables are likely more difficult to implement and may require an editor widget
+
+## Header/Footer
+
+This should use JSON to implement in its own folder. ODF has support for both, so does RTF. UI controls have to be created, and an option for first page special.
+
+## Alternative formats
+
+HTML: The present HTML format is just the ASCII text in a code block wrappd up with html tags. HTML can be much more flexible (ie table of contents, search, images, embedded audio etc), even if the plain text structure has to be kept.
+Latex: suggested
+Epub?
+
+## Customizable shortcuts
+
+Shortcuts are hardcoded, but user specifying shortcuts may be possible. (see qkeysequenceedit). This is more in case hardcoded key sequences are in conflict with other user shortcuts, not that shortcuts are difficult to use (since the keys are emitted by plover and the outline can be set to anything).
+
+## Preview of search and replace
+
+Search and replace is done "blindly" in the case of replace all, and also more timeconsuming if done one by one. A preview might allow for a quick check, summarizing the number and showing the context.
+
+## Autocomplete enhancement
+
+Right now, autocomplete suggestions come from a pre-set list. The engine should update in near-realtime and take suggestions from the present text, or other transcript json/rtf.
