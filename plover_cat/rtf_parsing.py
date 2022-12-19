@@ -1,6 +1,8 @@
 import codecs
 import struct
-
+import re
+from PyQt5.QtGui import QFont, QFontDatabase
+from copy import deepcopy
 from pyparsing import (
     Literal, 
     Word, 
@@ -21,6 +23,8 @@ from pyparsing import (
     Forward,
     ParseResults
 )
+
+from plover import log
 
 # control chars \ { }
 
@@ -86,7 +90,14 @@ def control_parse(s, l, t):
         pass
     return(command_dict)
 
-control = Group(BKS + Combine(Word(alphas)("control") + Opt(Word(nums + '-').set_parse_action(common.convert_to_integer))("num") + Opt(Literal(";"))("ending")))
+control = Group(
+    BKS + 
+    Combine(
+        Word(alphas)("control") + 
+        Opt(Word(nums + '-').set_parse_action(common.convert_to_integer))("num") + 
+        Opt(Literal(";"))("ending")
+        )
+    )
 control.set_name("control")
 control.set_parse_action(control_parse)
 
@@ -102,22 +113,41 @@ ignore.set_parse_action(control_parse_ignore)
 expr <<= OneOrMore(ignore("ignore*") | hex_char("hex_char*") | control("control*") | text_and_chars("text*") | Group(LBRACE + expr + RBRACE)("group*"))
 expr.set_name("RTF")
 
+style_string = Suppress(Literal("\par\pard")) + OneOrMore(control("control*"))
+
 def twip_to_in(twips):
     return(twips / 1440)
+
+def append_value(dict_obj, key, value):
+    # Check if key exist in dict or not
+    if key in dict_obj:
+        # Key exist in dict.
+        # Check if type of value of key is list or not
+        if not isinstance(dict_obj[key], list):
+            # If type is not list then make it list
+            dict_obj[key] = [dict_obj[key]]
+        # Append the value in list
+        dict_obj[key].append(value)
+    else:
+        # As key is not in dict,
+        # so, add key-value pair
+        dict_obj[key] = value
+
 
 def collapse_dict(element):
     new_dict = {}
     for i in element:
-        try:
-            new_dict[i["control"]] = i["value"]
-        except:
-            pass
+        if "value" in i:
+            append_value(new_dict, i["control"], i["value"])
+        else:
+            append_value(new_dict, i["control"], "")
     return(new_dict)
 
 class steno_rtf:
     def __init__(self, file_name):
         self.rtf_file = file_name
         self.parse_results = None
+        self.scanned_styles = {}
         self.framerate = 30
         self.fonts = {}
         self.styles = {}
@@ -129,10 +159,12 @@ class steno_rtf:
         self.par_style = ""
         self.date = ""
         # dict of timecodes to bump off
-        self.timecode = { "milli": "", "sec": "", "min": "", "hour": ""}
+        self.timecode = { "milli": "000", "sec": "00", "min": "00", "hour": "00"}
         self.steno = ""
         self.text = ""
         self.start_parsing_text = False
+        self.defaultfont = ""
+        self.fonts = {}
     def parse_framerate(self, element):
         element_dict = element[0]
         self.framerate = element_dict["value"]
@@ -153,8 +185,10 @@ class steno_rtf:
             elif i["control"] == "dy":
                 day = i["value"]
         self.date = "%s-%s-%s" % (year, month, day)
-    def parse_font(self):
-        pass
+    def parse_font(self, element):
+        for i in element[1:len(element)]:
+            new_font_dict = collapse_dict(i)
+            self.fonts[str(new_font_dict["f"])] = new_font_dict
     def parse_styles(self, element):
         for i in element[1:len(element)]:
             new_style_dict = collapse_dict(i)
@@ -178,6 +212,11 @@ class steno_rtf:
         style_index = str(element["value"])
         style_name = self.styles[style_index]["text"]
         self.par_style = style_name
+    def parse_cxa(self, element):
+        cxa_dict = collapse_dict(element)
+        self.steno = ""
+        self.text = cxa_dict["text"]
+        self.append_stroke()
     def parse_steno(self, element):
         try:
             stroke = element[1]["value"]
@@ -216,6 +255,8 @@ class steno_rtf:
                 command_name = i["control"]
                 if command_name in ["paperh", "paperw", "margt", "margb", "margl", "margr"]:
                     self.parse_page(i)
+                if command_name == "deffont":
+                    self.defaultfont = i["value"] # this is a number representing index into fonts
                 if command_name == "par":
                     if not self.start_parsing_text:
                         self.start_parsing_text = True
@@ -232,13 +273,119 @@ class steno_rtf:
                     self.parse_styles(i)
                 if command_name == "info":
                     self.parse_date(i)
-                elif command_name == "cxframes":
+                if command_name == "cxframes":
                     self.parse_framerate(i)
                 if command_name == "cxt":
                     self.parse_timecode(i)
                 if command_name == "cxs":
                     self.parse_steno(i)
+                if command_name == "fonttbl":
+                    self.parse_font(i)
+                if command_name == "cxa":
+                    self.parse_cxa(i)
             else:
                 pass
         self.set_new_paragraph()
+        self.scan_par_styles()
+    def scan_par_styles(self):
+        with open(self.rtf_file, 'r') as f:
+            data = f.read().rstrip()
+        style_list = []
+        for i in style_string.scanString(data):
+            style_list.append(i[0].asList())
+        par_style_index = 0
+        for ind, el in enumerate(style_list):
+            new_style_dict = collapse_dict(el)
+            # print(new_style_dict)
+            if "s" in new_style_dict:
+                self.scanned_styles[str(par_style_index)] = new_style_dict
+                par_style_index += 1
+                
+
+# test_rtf = steno_rtf("plover_cat/test.rtf")
+# test_rtf.parse_document()
+# test_rtf.scan_par_styles()
+# test_rtf.parse_results[0][9]
+
+def rtf_to_qfont(font):
+    font_dict = {}
+    if "text" in font:
+        qt_font = QFont(text)
+    else:
+        qt_font = QFont()
+    if "froman" in font:
+        qt_font.setStyleHint(QFont.Times)
+    if "fswiss" in font:
+        qt_font.setStyleHint(QFont.SansSerif)
+    if "fmodern" in font:
+        qt_font.setStyleHint(QFont.Courier)
+    if "fscript" in font:
+        qt_font.setStyleHint(QFont.Cursive)
+    if "fdecor" in font:
+        qt_font.setStyleHint(QFont.Decorative)
+    return(qt_font)
+
+def modify_styleindex_to_name(styles, style_names):
+    for key, i in styles.items():
+        if "parentstylename" in i:
+            style_names[i["parentstylename"]]
+            i["parentstylename"] = style_names[i["parentstylename"]]
+        if "nextstylename" in i:
+            i["nextstylename"] = style_names[int(i["nextstylename"])]
+        styles[key] = i
+    return(styles)
+
+def modify_fontindex_to_name(font,font_name):
+    pass 
+
+def extract_par_style(style_dict):
+    one_style_dict = {}
+    one_part_dict = {}
+    one_text_dict = {}
+    if "s" in style_dict:
+        one_style_dict["styleindex"] = str(style_dict["s"])
+    if "sbasedon" in style_dict:
+        one_style_dict["parentstylename"] = style_dict["sbasedon"]
+    if "snext" in style_dict:
+        one_style_dict["nextstylename"] = style_dict["snext"]
+    if "li" in style_dict:
+        one_part_dict["marginleft"] = "%.2fin" % twip_to_in(style_dict["li"])
+    if "ri" in style_dict:
+        one_part_dict["marginright"] = "%.2fin" % twip_to_in(style_dict["ri"])
+    if "fi" in style_dict:
+        one_part_dict["textindent"] = "%.2fin" % twip_to_in(style_dict["fi"])
+    if "ql" in style_dict:
+        one_part_dict["textalign"] = "left"
+    if "qr" in style_dict:
+        one_part_dict["textalign"] = "right"
+    if "qj" in style_dict:
+        one_part_dict["textalign"] = "justify"
+    if "qc" in style_dict:
+        one_part_dict["textalign"] = "center"
+    if "sb" in style_dict:
+        one_part_dict["margintop"] = "%.2fin" % twip_to_in(style_dict["sb"])
+    if "sa" in style_dict:
+        one_part_dict["marginbottom"] = "%.2fin" % twip_to_in(style_dict["sa"])
+    if "tx" in style_dict:
+        if isinstance(style_dict["tx"], list):
+            tab_pos = ["%.2fin" % twip_to_in(i) for i in style_dict["tx"]]
+        else:
+            tab_pos = ["%.2fin" % twip_to_in(style_dict["tx"])]
+        one_part_dict["tabstop"] = tab_pos
+    if "f" in style_dict:
+        one_text_dict["fontindex"] = style_dict["f"]
+    if "fs" in style_dict:
+        one_text_dict["fontsize"] = str(style_dict["fs"]/2)
+    if "i" in style_dict:
+        one_text_dict["fontstyle"] = "italic"
+    if "b" in style_dict:
+        one_text_dict["fontweight"] = "bold"
+    if "ul" in style_dict:
+        one_text_dict["textunderlinetype"] = "single"
+        one_text_dict["textunderlinestyle"] = "solid"
+    one_style_dict["paragraphproperties"] = one_part_dict
+    one_style_dict["textproperties"] = one_text_dict
+    return(one_style_dict)
+
+
 

@@ -3,15 +3,18 @@ import string
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor
 from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal
-from PyQt5.QtWidgets import QPlainTextEdit, QCompleter
+from PyQt5.QtWidgets import QPlainTextEdit, QCompleter, QTextEdit
 
 from plover_cat.main_window import BlockUserData, steno_insert, stroke_pos_at_pos
 
-class PloverCATEditor(QPlainTextEdit):
+num_keys = [Qt.Key_0, Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5, Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9]
+
+class PloverCATEditor(QTextEdit):
     complete = pyqtSignal(QModelIndex)
+    ins = pyqtSignal(int)
+    send_del = pyqtSignal()
     def __init__(self, widget):
         super().__init__(widget)
-    #    self.test = "This is a string"
         self._completer = None
     def setCompleter(self, c):
         if self._completer is not None:
@@ -29,17 +32,6 @@ class PloverCATEditor(QPlainTextEdit):
         if self._completer.widget() is not self:
             return
         self.complete.emit(completion)
-        # steno = completion.data(QtCore.Qt.UserRole)
-        # text = completion.data()
-        # current_cursor = self.textCursor()
-        # print(self.parent().undo_stack.count())
-        # print(completion_item.data())
-        # tc = self.textCursor()
-        # extra = len(completion) - len(self._completer.completionPrefix())
-        # tc.movePosition(QTextCursor.Left)
-        # tc.movePosition(QTextCursor.EndOfWord)
-        # tc.insertText(completion[-extra:])
-        # self.setTextCursor(tc)
     def textUnderCursor(self):
         tc = self.textCursor()
         tc.select(QTextCursor.WordUnderCursor)
@@ -59,3 +51,10 @@ class PloverCATEditor(QPlainTextEdit):
         if self._completer is not None:
             self._completer.setWidget(self)
         super(PloverCATEditor, self).focusInEvent(e)
+    def keyPressEvent(self, event):
+        if event.key() in num_keys and event.modifiers() == Qt.ControlModifier:
+            self.ins.emit(event.key())
+        elif event.key() == Qt.Key_Delete:
+            self.send_del.emit()
+        else:
+            QTextEdit.keyPressEvent(self, event)
