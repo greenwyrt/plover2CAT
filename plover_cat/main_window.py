@@ -694,7 +694,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.setCursorWidth(5)
         self.textEdit.moveCursor(QTextCursor.End)
         self.setup_page()
-        self.menu_enabling(False) 
+        self.menu_enabling(False)
+        export_path = selected_folder / "export"
+        pathlib.Path(export_path).mkdir(parents = True)
         ## manually set first block data  
         new_block = self.textEdit.document().firstBlock()
         if not new_block.userData():
