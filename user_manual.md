@@ -24,17 +24,23 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
+## Get Started
 
-# Getting Started
+Plover2CAT's documentation is moving from a one-file user manual to more structured help.
 
-Download the code from this repository. Open the terminal following instructions here [on the command-line](https://github.com/openstenoproject/plover/wiki/Invoke-Plover-from-the-command-line). On Windows, use:
+To get started, go through the following tutorials that will go through writing into the editor, adding formatting, and exporting the transcript.
 
-```
- .\plover_console.exe -s plover_plugins install plover2CAT
- ## use install -e for development
-```
+Start with #3 if you already have Plover installed and know how to install Plover2CAT from the command line.
 
-On MacOS and Unix systems, use `plover` rather than `plover_console.exe`.
+1. [Install Plover](tutorials/install-plover.md)
+2. [Install Plover2CAT as a Plover plugin](tutorials/install-plover2cat.md)
+3. [Create new transcript in Plover2CAT](tutorials/create-transcript.md)
+4. [Write in the Plover2CAT editor](tutorials/writing-editor.md)
+5. [Export to text and Open Document Format](tutorials/export-file.md)
+
+Then review the available [how to ____](docs/README.md) articles.
+
+The content below will be moved to the new documentation over time.
 
 ## Starting a New Transcript
 
