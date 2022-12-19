@@ -60,7 +60,7 @@ Switch to the window you want to write into. Place your cursor.
 
 Press the `w` key on your keyboard. Then release the key and press `p`. The words `with` and `the` should have appeared in the window.
 
-![Test Plover output](image/plovertest.png)
+![Test Plover output](images/plovertest.png)
 
 
 ## Learning Stenography
