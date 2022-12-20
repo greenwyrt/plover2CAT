@@ -696,7 +696,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.setup_page()
         self.menu_enabling(False)
         export_path = selected_folder / "export"
-        pathlib.Path(export_path).mkdir(parents = True)
+        pathlib.Path(export_path).mkdir(parents = True, exist_ok=True)
         ## manually set first block data  
         new_block = self.textEdit.document().firstBlock()
         if not new_block.userData():
