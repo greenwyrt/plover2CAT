@@ -1070,8 +1070,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         width = float(self.config["page_width"])
         height = float(self.config["page_height"])
         log.info("Setting editor page size to %sin and %sin (WxH)." % (str(width), str(height)))
-        width_pt = in_to_pt(width)
-        height_pt = in_to_pt(height)
+        width_pt = int(in_to_pt(width))
+        height_pt = int(in_to_pt(height))
         self.textEdit.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.textEdit.setLineWrapColumnOrWidth(width_pt)
         page_size = QPageSize(QSizeF(width, height), QPageSize.Inch, matchPolicy = QPageSize.FuzzyMatch) 
@@ -1235,7 +1235,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         block_style = self.par_formats[style]
         text_style = self.txt_formats[style]
         self.blockFont.setCurrentFont(text_style.font())
-        self.blockFontSize.setValue(text_style.fontPointSize())
+        self.blockFontSize.setValue(int(text_style.fontPointSize()))
         self.blockFontBold.setChecked(text_style.font().bold())
         self.blockFontItalic.setChecked(text_style.font().italic())
         self.blockFontUnderline.setChecked(text_style.font().underline())
@@ -1270,7 +1270,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         right_margin = block_style.rightMargin() if block_style.rightMargin() else 0
         top_margin = block_style.topMargin() if block_style.topMargin() else 0
         bottom_margin = block_style.bottomMargin() if block_style.bottomMargin() else 0
-        line_spacing = block_style.lineHeight() if block_style.lineHeight() else 100
+        line_spacing = int(block_style.lineHeight() if block_style.lineHeight() else 100)
         self.blockTextIndent.setValue(pixel_to_in(text_indent))
         self.blockLeftMargin.setValue(pixel_to_in(left_margin))
         self.blockRightMargin.setValue(pixel_to_in(right_margin))
