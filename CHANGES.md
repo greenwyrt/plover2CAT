@@ -1,5 +1,27 @@
 CHANGES
 
+ver 1.4.1
+
+- Change: Added status bar messages for importing rtf. When actually parsing rtf file, cursor is set to loading so users know that program is not stuck.
+
+- Bug: Progress bar updates for refresh style and loading transcript were not being processed.
+
+- Bug: ODF export do not have accurate line breaking. Part of this was due to `steno_wrap_plain` not accounting for number of indent spaces properly.
+
+- Bug: ODF export do not have accurate line breaking. Sometimes one word would be squeezed out of the line. The problem is likely the rounding used to estimate max chars per line. The fix is `max char` calculated from text span `- 1` char (which appears to resolve the problem.)
+
+- Feature: Add autocompletion term from within editor. Will reload autocompletion model if autocompletion is enabled. Added documentation.
+
+- Feature: Generate style json from ODT or RTF/CRE files. Added documentation.
+
+- Feature: Headers and footers for export. 
+
+- Feature: Implement `max characters/line` and `max lines per page` for ODF
+
+- Feature: Add `Jump to Paragraph...` to edit menu for fast navigation to specified paragraph by number.
+
+- Bug fix: Thanks @dnaq, [fixed problem](https://github.com/greenwyrt/plover2CAT/pull/1) with type error when interfacing with Qt due to python 3.10 changing extension interface.
+
 ver 1.4.0 (2022-12-19)
 
 - Feature: Rich text editor display

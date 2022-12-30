@@ -128,36 +128,37 @@ The `.transcript` file is a JSON holding stroke and styling information for the 
 `config.CONFIG` is the configuration file containing settings for the transcript.
 
 # Shortcuts
-
-| Menu Item             | Shortcut         |
-|-----------------------|------------------|
-| New                   | Ctrl + N         |
-| Open                  | Ctrl + O         |
-| Save                  | Ctrl + S         |
-| Quit                  | Ctrl + Q         |
-| Find/Replace Pane     | Ctrl + F         |
-| Undo                  | Ctrl + Z         |
-| Redo                  | Ctrl + Y         |
-| Copy                  | Ctrl + C         |
-| Cut                   | Ctrl + X         |
-| Paste                 | Ctrl + V         |
-| Normal Copy           | Ctrl + Shift + C |
-| Retroactive Define    | Ctrl + R         |
-| Define Last           | Ctrl + Shift + R |
-| Refresh Editor        | F5               |
-| Set style 0 - 9       | Ctrl + {0, 9}    |
-| Insert Plain Text     | Ins              |
-| Delete Char to right  | Del              |
-| Open Audiovisual File | Ctrl + Shift + O |
-| Play/Pause            | Ctrl + P         |
-| Stop                  | Ctrl + W         |
-| Skip Forward          | Ctrl + J         |
-| Skip Back             | Ctrl + L         |
-| Speed Up              | Ctrl + Shift + G |
-| Slow Down             | Ctrl + Shift + S |
-| Record/Pause          | Ctrl + Shift + P |
-| Zoom In               | Ctrl + =         |
-| Zoom Out              | Ctrl + -         |
+  
+| Menu Item               | Shortcut         |
+|-------------------------|------------------|
+| New                     | Ctrl + N         |
+| Open                    | Ctrl + O         |
+| Save                    | Ctrl + S         |
+| Quit                    | Ctrl + Q         |
+| Find/Replace Pane       | Ctrl + F         |
+| Undo                    | Ctrl + Z         |
+| Redo                    | Ctrl + Y         |
+| Copy                    | Ctrl + C         |
+| Cut                     | Ctrl + X         |
+| Paste                   | Ctrl + V         |
+| Normal Copy             | Ctrl + Shift + C |
+| Retroactive Define      | Ctrl + R         |
+| Define Last             | Ctrl + Shift + R |
+| Add Autocompletion Term | Ctrl + Alt + R   |
+| Refresh Editor          | F5               |
+| Set style 0 - 9         | Ctrl + {0, 9}    |
+| Insert Plain Text       | Ins              |
+| Delete Char to right    | Del              |
+| Open Audiovisual File   | Ctrl + Shift + O |
+| Play/Pause              | Ctrl + P         |
+| Stop                    | Ctrl + W         |
+| Skip Forward            | Ctrl + J         |
+| Skip Back               | Ctrl + L         |
+| Speed Up                | Ctrl + Shift + G |
+| Slow Down               | Ctrl + Shift + S |
+| Record/Pause            | Ctrl + Shift + P |
+| Zoom In                 | Ctrl + =         |
+| Zoom Out                | Ctrl + -         |
 
 # Layout
 
@@ -858,6 +859,7 @@ Recognized RTF/CRE flags
     Steno (\cxs)
     Frame rate per second (\cxframes)
     Automatic Text (\cxa)
+    Delete space (\cxds)
 
 
 The styles from the original RTF can be re-used as templates for transcripts.
@@ -877,9 +879,9 @@ Similar to the editor description, this section may go into detail not necessary
 |-------------|----------|---------|-----------|---------|---------------|-----------|------------|
 | Plain Text  | No       | No      | No        | No      | No            | No        | No         |
 | Basic ASCII | No       | &check; | No        | &check; | No            | No        | No         |
-| ASCII       | &check;\*| &check; | &check;   | *No*    | *No*          | &check;   | &check;    |
-| HTML        | &check;\*| &check; | &check;   | *No*    | *No*          | &check;   | &check;    |
-| ODT         | &check;  | &check; | &check;   | *No*    | *No*          | *No*      | *No*       |
+| ASCII       | &check;\*| &check; | &check;   | &check; | &check;       | &check;   | &check;    |
+| HTML        | &check;\*| &check; | &check;   | &check; | &check;       | &check;   | &check;    |
+| ODT         | &check;  | &check; | &check;   | &check; | &check;       | &check;   | &check;    |
 | *RTF/CRE*   |          |         |           |         |               |           |            |
 
 
