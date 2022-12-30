@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>820</width>
-    <height>775</height>
+    <width>891</width>
+    <height>705</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -31,7 +31,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_5">
+   <layout class="QVBoxLayout" name="verticalLayout_12">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -85,7 +85,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>820</width>
+     <width>891</width>
      <height>19</height>
     </rect>
    </property>
@@ -143,6 +143,7 @@
     <addaction name="actionPaste"/>
     <addaction name="actionNormal_Copy"/>
     <addaction name="separator"/>
+    <addaction name="actionJumpToParagraph"/>
     <addaction name="actionInsertNormalText"/>
     <addaction name="actionClear_Paragraph"/>
    </widget>
@@ -221,6 +222,7 @@
     <addaction name="actionSplit_Paragraph"/>
     <addaction name="separator"/>
     <addaction name="actionAutocompletion"/>
+    <addaction name="actionAddAutocompletionTerm"/>
     <addaction name="actionRetroactive_Define"/>
     <addaction name="actionDefine_Last"/>
     <addaction name="separator"/>
@@ -363,7 +365,7 @@ position.</string>
     <string>Suggestions</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -420,8 +422,8 @@ position.</string>
   <widget class="QDockWidget" name="dockAudio">
    <property name="minimumSize">
     <size>
-     <width>256</width>
-     <height>89</height>
+     <width>0</width>
+     <height>0</height>
     </size>
    </property>
    <property name="contextMenuPolicy">
@@ -606,7 +608,7 @@ position.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>363</width>
+          <width>340</width>
           <height>472</height>
          </rect>
         </property>
@@ -1156,9 +1158,9 @@ and margin positions. Less accurate with proportional fonts.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
-          <width>192</width>
-          <height>391</height>
+          <y>-194</y>
+          <width>326</width>
+          <height>415</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1306,37 +1308,10 @@ and margin positions. Less accurate with proportional fonts.</string>
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
-            <widget class="QLabel" name="label_35">
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_15">
              <property name="text">
-              <string>Line Numbering</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0">
-            <widget class="QLabel" name="label_34">
-             <property name="text">
-              <string>Frequency</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="1">
-            <widget class="QSpinBox" name="line_num_freq">
-             <property name="toolTip">
-              <string>Show line number every nth line</string>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="1">
-            <widget class="QCheckBox" name="enable_line_num">
-             <property name="toolTip">
-              <string>Enable line number in applicable formats</string>
-             </property>
-             <property name="text">
-              <string/>
+              <string>Max Char per Line</string>
              </property>
             </widget>
            </item>
@@ -1351,10 +1326,10 @@ excluding line number and timestamps</string>
              </property>
             </widget>
            </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_15">
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_14">
              <property name="text">
-              <string>Max Char per Line</string>
+              <string>Max Lines per Page</string>
              </property>
             </widget>
            </item>
@@ -1365,10 +1340,44 @@ excluding line number and timestamps</string>
              </property>
             </widget>
            </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="label_14">
+           <item row="8" column="0">
+            <widget class="QLabel" name="label_35">
              <property name="text">
-              <string>Max Lines per Page</string>
+              <string>Line Numbering</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QCheckBox" name="enable_line_num">
+             <property name="toolTip">
+              <string>Enable line number in applicable formats</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0">
+            <widget class="QLabel" name="label_34">
+             <property name="text">
+              <string>Frequency</string>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="1">
+            <widget class="QSpinBox" name="line_num_freq">
+             <property name="toolTip">
+              <string>Show line number every nth line for ODF</string>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QLabel" name="label_36">
+             <property name="text">
+              <string>Line Timestamp</string>
              </property>
             </widget>
            </item>
@@ -1379,10 +1388,109 @@ excluding line number and timestamps</string>
              </property>
             </widget>
            </item>
-           <item row="10" column="0">
-            <widget class="QLabel" name="label_36">
-             <property name="text">
-              <string>Line Timestamp</string>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_37">
+           <property name="text">
+            <string>Header:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QLineEdit" name="header_left">
+             <property name="focusPolicy">
+              <enum>Qt::ClickFocus</enum>
+             </property>
+             <property name="toolTip">
+              <string>Header text to be aligned left. 
+Use %p for page number.</string>
+             </property>
+             <property name="placeholderText">
+              <string>Left</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="header_center">
+             <property name="focusPolicy">
+              <enum>Qt::ClickFocus</enum>
+             </property>
+             <property name="toolTip">
+              <string>Header text to be centered. 
+Use %p for page number.</string>
+             </property>
+             <property name="placeholderText">
+              <string>Center</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="header_right">
+             <property name="focusPolicy">
+              <enum>Qt::ClickFocus</enum>
+             </property>
+             <property name="toolTip">
+              <string>Header text to be aligned right. 
+Use %p for page number.</string>
+             </property>
+             <property name="placeholderText">
+              <string>Right</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_38">
+           <property name="text">
+            <string>Footer:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_17">
+           <item>
+            <widget class="QLineEdit" name="footer_left">
+             <property name="focusPolicy">
+              <enum>Qt::ClickFocus</enum>
+             </property>
+             <property name="toolTip">
+              <string>Footer text to be aligned left. 
+Use %p for page number.</string>
+             </property>
+             <property name="placeholderText">
+              <string>Left</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="footer_center">
+             <property name="focusPolicy">
+              <enum>Qt::ClickFocus</enum>
+             </property>
+             <property name="toolTip">
+              <string>Footer text to be aligned center. 
+Use %p for page number.</string>
+             </property>
+             <property name="placeholderText">
+              <string>Center</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="footer_right">
+             <property name="focusPolicy">
+              <enum>Qt::ClickFocus</enum>
+             </property>
+             <property name="toolTip">
+              <string>Footer text to be aligned right. 
+Use %p for page number.</string>
+             </property>
+             <property name="placeholderText">
+              <string>Right</string>
              </property>
             </widget>
            </item>
@@ -1421,8 +1529,8 @@ excluding line number and timestamps</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>317</width>
-          <height>391</height>
+          <width>326</width>
+          <height>217</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1607,8 +1715,8 @@ excluding line number and timestamps</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>251</width>
-          <height>391</height>
+          <width>326</width>
+          <height>215</height>
          </rect>
         </property>
         <property name="toolTip">
@@ -1795,8 +1903,8 @@ time from next paragraph.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>167</width>
-          <height>391</height>
+          <width>326</width>
+          <height>279</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -1950,8 +2058,8 @@ time from next paragraph.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>361</width>
-          <height>391</height>
+          <width>326</width>
+          <height>164</height>
          </rect>
         </property>
         <attribute name="icon">
@@ -2080,6 +2188,7 @@ time from next paragraph.</string>
    <addaction name="actionAdd_Custom_Dict"/>
    <addaction name="actionMerge_Paragraphs"/>
    <addaction name="actionSplit_Paragraph"/>
+   <addaction name="actionAddAutocompletionTerm"/>
    <addaction name="actionRetroactive_Define"/>
    <addaction name="actionDefine_Last"/>
   </widget>
@@ -2171,8 +2280,8 @@ time from next paragraph.</string>
   <widget class="QDockWidget" name="dockStenoData">
    <property name="minimumSize">
     <size>
-     <width>91</width>
-     <height>113</height>
+     <width>0</width>
+     <height>0</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -2894,7 +3003,7 @@ paragraphs to merge</string>
   </action>
   <action name="actionGenerateStyleFromTemplate">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Generate Style File From Template</string>
@@ -2964,6 +3073,23 @@ dialog box at cursor location</string>
    </property>
    <property name="toolTip">
     <string>Export transcript as HTML</string>
+   </property>
+  </action>
+  <action name="actionAddAutocompletionTerm">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/lightning.png</normaloff>:/lightning.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Autocompletion Term</string>
+   </property>
+   <property name="toolTip">
+    <string>Store text to use in autocompletion</string>
+   </property>
+  </action>
+  <action name="actionJumpToParagraph">
+   <property name="text">
+    <string>Jump to Paragraph ...</string>
    </property>
   </action>
  </widget>

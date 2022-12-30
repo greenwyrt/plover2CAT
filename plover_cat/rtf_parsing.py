@@ -2,6 +2,7 @@ import codecs
 import struct
 import re
 from PyQt5.QtGui import QFont, QFontDatabase
+from PyQt5.QtWidgets import QProgressBar, QApplication
 from copy import deepcopy
 from pyparsing import (
     Literal, 
@@ -133,7 +134,6 @@ def append_value(dict_obj, key, value):
         # so, add key-value pair
         dict_obj[key] = value
 
-
 def collapse_dict(element):
     new_dict = {}
     for i in element:
@@ -144,7 +144,7 @@ def collapse_dict(element):
     return(new_dict)
 
 class steno_rtf:
-    def __init__(self, file_name):
+    def __init__(self, file_name, progress_bar):
         self.rtf_file = file_name
         self.parse_results = None
         self.scanned_styles = {}
@@ -165,6 +165,7 @@ class steno_rtf:
         self.start_parsing_text = False
         self.defaultfont = ""
         self.fonts = {}
+        self.progress_bar = progress_bar
     def parse_framerate(self, element):
         element_dict = element[0]
         self.framerate = element_dict["value"]
@@ -249,8 +250,10 @@ class steno_rtf:
         self.par = []
     def parse_document(self):
         parse_results = expr.parse_file(self.rtf_file)
+        self.progress_bar.setMaximum(len(parse_results[0]))
+        # self.progress_bar.setFormat("Load transcript paragraph %v")
         self.parse_results = parse_results
-        for i in parse_results[0]:
+        for num, i in enumerate(parse_results[0]):
             if isinstance(i, dict):
                 command_name = i["control"]
                 if command_name in ["paperh", "paperw", "margt", "margb", "margl", "margr"]:
@@ -285,6 +288,8 @@ class steno_rtf:
                     self.parse_cxa(i)
             else:
                 pass
+            self.progress_bar.setValue(num)
+            QApplication.processEvents()
         self.set_new_paragraph()
         self.scan_par_styles()
     def scan_par_styles(self):
@@ -387,5 +392,63 @@ def extract_par_style(style_dict):
     one_style_dict["textproperties"] = one_text_dict
     return(one_style_dict)
 
-
+def load_rtf_styles(parse_results):
+    styles = []
+    for k, v in parse_results.styles.items():
+        styles.append(v["text"])
+    style_dict = {}
+    for k, v in parse_results.styles.items():
+        style_name = v["text"]
+        style_dict[style_name] = extract_par_style(v)
+    style_dict = modify_styleindex_to_name(style_dict, styles)
+    font_names = []
+    for i, font in parse_results.fonts.items():
+        font_names.append(font["text"])
+    indiv_style = {}
+    for key, par_style in parse_results.scanned_styles.items():
+        par_dict = extract_par_style(par_style)
+        # indiv_style[key] = extract_par_style(par_style)
+        if "textproperties" in par_dict and "fontindex" in par_dict["textproperties"]:
+            fontindex = str(par_dict["textproperties"]["fontindex"])
+            font_dict = parse_results.fonts[fontindex]
+            if "text" in font_dict:
+                par_dict["textproperties"]["fontname"] = font_dict["text"].replace(";", "")
+                par_dict["textproperties"]["fontfamily"] = font_dict["text"].replace(";", "")
+            if "froman" in font_dict:
+                par_dict["textproperties"]["fontfamilygeneric"] = "roman"
+            if "fswiss" in font_dict:
+                par_dict["textproperties"]["fontfamilygeneric"] = "swiss"
+            if "fmodern" in font_dict:
+                par_dict["textproperties"]["fontfamilygeneric"] = "modern"
+            if "fscript" in font_dict:
+                par_dict["textproperties"]["fontfamilygeneric"] = "script"
+            if "fdecor" in font_dict:
+                par_dict["textproperties"]["fontfamilygeneric"] = "decorative"
+        indiv_style[key] = par_dict
+    renamed_indiv_style = []
+    for index, style in indiv_style.items():
+        par_style = style
+        doc_style = deepcopy(list(style_dict.values())[int(style["styleindex"])])
+        doc_style.update(par_style)
+        found_style = False
+        for k, v in style_dict.items():
+            if doc_style == v:
+                renamed_indiv_style.append(k)
+                found_style = True
+                break
+        if found_style:
+            continue
+        style_parent_name = list(style_dict.keys())[int(style["styleindex"])]
+        detect_int = re.search("\\d+$", style_parent_name)
+        if detect_int:
+            style_num = int(detect_int.group()) + 1
+        else:
+            style_num = 0
+        new_style_name = re.sub("\\d+$", "", style_parent_name) + str(style_num)
+        while new_style_name in list(style_dict.keys()):
+            style_num += 1
+            new_style_name = re.sub("\\d+$", "",style_parent_name) + str(style_num)
+        style_dict[new_style_name] = doc_style
+        renamed_indiv_style.append(new_style_name)
+    return(style_dict, renamed_indiv_style)    
 

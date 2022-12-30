@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from collections import Counter
 from shutil import copyfile
+from math import trunc
 from copy import deepcopy
 from sys import platform
 from spylls.hunspell import Dictionary
@@ -20,8 +21,8 @@ from dulwich import porcelain
 from odf.opendocument import OpenDocumentText, load
 from odf.office import FontFaceDecls, Styles
 from odf.style import (Style, TextProperties, ParagraphProperties, FontFace, PageLayout, 
-PageLayoutProperties, MasterPage, TabStops, TabStop, GraphicProperties)
-from odf.text import H, P, Span, Tab, LinenumberingConfiguration
+PageLayoutProperties, MasterPage, TabStops, TabStop, GraphicProperties, Header, Footer)
+from odf.text import H, P, Span, Tab, LinenumberingConfiguration, PageNumber
 from odf.teletype import addTextToElement
 from odf.draw import Frame, TextBox
 
@@ -92,6 +93,7 @@ def format_odf_text(block, style, chars_in_inch, page_width, line_num = 0):
             r_marg = inch_to_spaces(style["paragraphproperties"]["marginright"], chars_in_inch)
         if "textindent" in style["paragraphproperties"]:
             first_indent = inch_to_spaces(style["paragraphproperties"]["textindent"], chars_in_inch)
+            spaces_to_insert = first_indent
     max_char = inch_to_spaces(page_width, chars_in_inch) - l_marg - r_marg
     # print(max_char)
     # this only deals with a tab at the start of the paragraph
@@ -126,16 +128,17 @@ def format_odf_text(block, style, chars_in_inch, page_width, line_num = 0):
             spaces_to_insert = (tabs - begin_pos) + first_indent
         else:
             spaces_to_insert = (tabs - begin_pos)
-        # print("spaces to insert")
-        # print(spaces_to_insert)
-        # print("max char")
-        # print(max_char)
+    # print("spaces to insert")
+    # print(spaces_to_insert)
+    # print("max char")
+    # print(max_char)
     par_text = steno_wrap_plain(text = text, block_data = block_data, max_char = max_char,
                                 tab_space=4, first_line_indent=" " * spaces_to_insert, par_indent = "", starting_line_num=line_num)
     # print(par_text)
     for k, v in par_text.items():
         par_text[k]["text"] = par_text[k]["text"].lstrip(" ") + "\n"
-    par_text[list(par_text.keys())[-1]]["text"] = par_text[list(par_text.keys())[-1]]["text"].rstrip("\n")
+    if list(par_text.keys()):
+        par_text[list(par_text.keys())[-1]]["text"] = par_text[list(par_text.keys())[-1]]["text"].rstrip("\n")
     return(par_text)
 
 def format_text(block, style, max_char = 80, line_num = 0):
@@ -218,20 +221,28 @@ def format_text(block, style, max_char = 80, line_num = 0):
 
 def steno_wrap_plain(text, block_data, max_char = 80, tab_space = 4, first_line_indent = "", 
                         par_indent = "", timestamp = False, starting_line_num = 0):
-    wrapped = textwrap.wrap(text, width = max_char, initial_indent= first_line_indent,
+    # the -1 in max char is because the rounding is not perfect, might have some lines that just tip over
+    wrapped = textwrap.wrap(text, width = max_char - 1, initial_indent= first_line_indent,
                 subsequent_indent= par_indent, expand_tabs = False, tabsize = tab_space, replace_whitespace=False)
     begin_pos = 0
     par_dict = {}
     for ind, i in enumerate(wrapped):
-        matches = re.finditer(re.escape(i.strip()), text)
+        matches = re.finditer(re.escape(i.strip()), text[begin_pos:])
         for i in matches:
-            if i.start() >= begin_pos:
+            if i.start() >= 0:
                 match = i
                 break
         end_pos = match.end()
+        print(begin_pos)
+        print(end_pos)
+        ## try very desperately to recover
+        if end_pos == begin_pos:
+            end_pos = begin_pos + len(wrapped[ind]) - 1
         extracted_data = extract_stroke_data(block_data["strokes"], begin_pos, end_pos, copy = True)
         timecodes = [stroke[0] for stroke in extracted_data]
         timecodes.sort()
+        print(wrapped[ind])
+        print(timecodes)
         begin_pos = match.end()
         par_dict[starting_line_num + ind + 1] = {}
         par_dict[starting_line_num + ind + 1]["text"] = wrapped[ind]
@@ -440,6 +451,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionUndo.triggered.connect(self.undo_stack.undo)
         self.actionFind_Replace_Pane.triggered.connect(lambda: self.show_find_replace())
         self.actionInsertNormalText.triggered.connect(self.insert_text)
+        self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
         self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
         self.actionPaper_Tape_Font.triggered.connect(lambda: self.change_tape_font())
@@ -456,12 +468,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionRetroactive_Define.triggered.connect(lambda: self.define_retroactive())
         self.actionDefine_Last.triggered.connect(lambda: self.define_scan())
         self.actionAutocompletion.triggered.connect(self.setup_completion)
+        self.actionAddAutocompletionTerm.triggered.connect(self.add_autocomplete_item)
         ## style connections
         self.edit_page_layout.clicked.connect(self.update_config)
         self.editCurrentStyle.clicked.connect(self.style_edit)
         self.actionCreateNewStyle.triggered.connect(self.new_style)
         self.actionRefreshEditor.triggered.connect(self.refresh_editor_styles)
         self.actionStyleFileSelect.triggered.connect(self.select_style_file)
+        self.actionGenerateStyleFromTemplate.triggered.connect(self.style_from_template)
         self.style_selector.activated.connect(self.update_paragraph_style)
         self.blockFont.currentFontChanged.connect(self.calculate_space_width)
         self.textEdit.ins.connect(self.change_style)
@@ -555,6 +569,34 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             words.appendRow(item)
         return(words)
 
+    def add_autocomplete_item(self):
+        current_cursor = self.textEdit.textCursor()
+        if not current_cursor.hasSelection():
+            self.statusBar.showMessage("No text selected for autocomplete")
+            return
+        current_block = current_cursor.block()
+        selected_text = current_cursor.selectedText()        
+        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        # end_pos is in prep for future multi-stroke untrans
+        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_stroke_pos = stroke_pos_at_pos(current_block.userData()["strokes"], start_pos)
+        end_stroke_pos = stroke_pos_at_pos(current_block.userData()["strokes"], end_pos)
+        underlying_strokes = extract_stroke_data(current_block.userData()["strokes"], start_stroke_pos[0], end_stroke_pos[1], copy = True)
+        underlying_steno = "/".join([stroke[1] for stroke in underlying_strokes])
+        text, ok = QInputDialog().getText(self, "Add Autocomplete Term", "Text: %s \nSteno:" % selected_text, text = underlying_steno)
+        if not ok:
+            return
+        log.debug("Adding term to autocompletion")
+        wordlist_path = self.file_name / "sources" / "wordlist.json"
+        if wordlist_path.exists():
+            with open(wordlist_path, "r") as f:
+                completer_dict = json.loads(f.read())
+        else:
+            completer_dict = {}
+        completer_dict[selected_text.strip()] = text
+        save_json(completer_dict, wordlist_path)
+        self.setup_completion(self.actionAutocompletion.isChecked())
+
     def open_help(self):
         user_manual_link = QUrl("https://github.com/greenwyrt/plover2CAT/blob/main/user_manual.md")
         QtGui.QDesktopServices.openUrl(user_manual_link)
@@ -579,6 +621,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionSplit_Paragraph.setEnabled(not value)
         self.actionRetroactive_Define.setEnabled(not value)
         self.actionDefine_Last.setEnabled(not value)
+        self.actionAddAutocompletionTerm.setEnabled(not value)
         self.actionCut.setEnabled(not value)
         self.actionCopy.setEnabled(not value)
         self.actionPaste.setEnabled(not value)
@@ -779,9 +822,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             for k, v in value["data"].items():
                 block_data[k] = v
             document_cursor.block().setUserData(block_data)
-            if "\n" in block_data["strokes"][-1][2]:
+            if len(block_data["strokes"]) > 0 and "\n" in block_data["strokes"][-1][2]:
                 document_cursor.insertText("\n")
             self.progressBar.setValue(document_cursor.blockNumber())
+            QApplication.processEvents()
         self.textEdit.document().blockSignals(True)
         self.textEdit.blockSignals(False)
         self.refresh_editor_styles()
@@ -1030,6 +1074,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.page_max_char.setValue(int(config_contents["page_max_char"]))
         if "page_max_line" in config_contents:
             self.page_max_lines.setValue(int(config_contents["page_max_line"]))
+        if "header_left" in config_contents:
+            self.header_left.setText(config_contents["header_left"])
+        if "header_center" in config_contents:
+            self.header_center.setText(config_contents["header_center"])
+        if "header_right" in config_contents:
+            self.header_right.setText(config_contents["header_right"])
+        if "footer_left" in config_contents:
+            self.footer_left.setText(config_contents["footer_left"])
+        if "footer_center" in config_contents:
+            self.footer_center.setText(config_contents["footer_center"])
+        if "footer_right" in config_contents:
+            self.footer_right.setText(config_contents["footer_right"])
         log.info("Configuration successfully loaded.")
         return config_contents
 
@@ -1049,6 +1105,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         config_contents["page_timestamp"] = self.enable_timestamp.isChecked()
         config_contents["page_max_char"] = self.page_max_char.value()
         config_contents["page_max_line"] = self.page_max_lines.value()
+        config_contents["header_left"] = self.header_left.text()
+        config_contents["header_center"] = self.header_center.text()
+        config_contents["header_right"] = self.header_right.text()
+        config_contents["footer_left"] = self.footer_left.text()
+        config_contents["footer_center"] = self.footer_center.text()
+        config_contents["footer_right"] = self.footer_right.text()
         self.config = config_contents
         log.debug(config_contents)
         self.save_config(self.file_name)
@@ -1151,9 +1213,31 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             str(self.file_name), _("Style (*.json *.odt)"))[0]
         if not selected_file:
             return
-        log.info("User selected style file at %s", selected_file)
+        log.info("User selected style file at %s" % selected_file)
         self.styles = self.load_check_styles(selected_file)
         self.gen_style_formats()
+
+    def style_from_template(self):
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Select Style ODT or RTF/CRE file"),
+            str(self.file_name), _("Style template file (*.odt *.rtf)"))[0]
+        if not selected_file:
+            return  
+        log.info("User selected style template %s" % selected_file)
+        if selected_file.endswith("odt"):
+            json_styles = load_odf_styles(selected_file)
+            self.statusBar.showMessage("Extracted ODF styles to styles folder.")
+        elif selected_file.endswith("rtf"):
+            self.statusBar.showMessage("Parsing RTF.")
+            self.progressBar = QProgressBar(self)
+            self.statusBar.addWidget(self.progressBar)
+            parse_results = steno_rtf(selected_file, self.progressBar)
+            parse_results.parse_document()
+            json_styles, renamed_indiv_style = load_rtf_styles(parse_results)
+            self.statusBar.showMessage("Extracted RTF styles to styles folder.")
+        style_file_path = self.file_name / "styles" / pathlib.Path(pathlib.Path(selected_file).name).with_suffix(".json")
+        save_json(remove_empty_from_dict(json_styles), style_file_path)
 
     def change_window_font(self):
         font, valid = QFontDialog.getFont()
@@ -1373,6 +1457,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             style_cmd = set_par_style(block.blockNumber(), block_style, self.textEdit, self.par_formats, self.txt_formats)
             self.undo_stack.push(style_cmd)
             self.progressBar.setValue(block.blockNumber())
+            QApplication.processEvents()
             if block == self.textEdit.document().lastBlock():
                 break
             block = block.next()
@@ -1433,6 +1518,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # log.debug(block_data.return_all())
         self.textEdit.document().findBlockByNumber(self.cursor_block).setUserData(block_data)
         self.statusBar.showMessage("Updated paragraph {par_num} data".format(par_num = self.cursor_block))
+
+    def jump_par(self):
+        current_cursor = self.textEdit.textCursor()
+        max_blocks = self.textEdit.document().blockCount()
+        current_block_num = current_cursor.blockNumber()
+        block_num, ok = QInputDialog().getInt(self, "Jump to paragraph...", "Paragraph (0-based): ", current_block_num, 0, max_blocks)
+        if ok:
+            new_block = self.textEdit.document().findBlockByNumber(block_num)
+            current_cursor.setPosition(new_block.position())
+            self.textEdit.setTextCursor(current_cursor)
     # engine hooked functions
     def on_send_string(self, string):
         log.debug("Plover engine sent string: %s", string)
@@ -2459,8 +2554,27 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         file_path = pathlib.Path(selected_file[0])
         with open(file_path, "w", encoding="utf-8") as f:
             for key, line in doc_lines.items():
+                if key % page_vspan == 0:
+                    # header
+                    quotient, mod = divmod(key, page_vspan)
+                    header_left = self.header_left.text().replace("%p", str(quotient + 1))
+                    header_center = self.header_center.text().replace("%p", str(quotient + 1))
+                    header_right = self.header_right.text().replace("%p", str(quotient + 1))
+                    header_text = header_center.center(page_hspan)
+                    header_text = header_left + header_text[len(header_left):]
+                    header_text = header_text[:(len(header_text)-len(header_right))] + header_right
+                    f.write(f"{header_text}\n")
                 text_line = line["text"]
                 f.write(f"{text_line}\n")
+                if key % page_vspan == (page_vspan - 1):
+                    quotient, mod = divmod(key, page_vspan)
+                    footer_left = self.footer_left.text().replace("%p", str(quotient + 1))
+                    footer_center = self.footer_center.text().replace("%p", str(quotient + 1))
+                    footer_right = self.footer_right.text().replace("%p", str(quotient + 1))
+                    footer_text = footer_center.center(page_hspan)
+                    footer_text = footer_left + footer_text[len(footer_left):]
+                    footer_text = footer_text[:(len(footer_text)-len(footer_right))] + footer_right
+                    f.write(f"{footer_text}\n")
 
     def export_html(self):
         selected_folder = pathlib.Path(self.file_name) / "export"
@@ -2515,13 +2629,32 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         pre = ET.SubElement(body, "pre")
         for_html = []
         for k, v in doc_lines.items():
+            if k % page_vspan == 0:
+                # header
+                quotient, mod = divmod(key, page_vspan)
+                header_left = self.header_left.text().replace("%p", str(quotient + 1))
+                header_center = self.header_center.text().replace("%p", str(quotient + 1))
+                header_right = self.header_right.text().replace("%p", str(quotient + 1))
+                header_text = header_center.center(page_hspan)
+                header_text = header_left + header_text[len(header_left):]
+                header_text = header_text[:(len(header_text)-len(header_right))] + header_right
+                for_html.append(header_text)
             for_html.append(doc_lines[k]["text"])
+            if k % page_vspan == (page_vspan - 1):
+                quotient, mod = divmod(key, page_vspan)
+                footer_left = self.footer_left.text().replace("%p", str(quotient + 1))
+                footer_center = self.footer_center.text().replace("%p", str(quotient + 1))
+                footer_right = self.footer_right.text().replace("%p", str(quotient + 1))
+                footer_text = footer_center.center(page_hspan)
+                footer_text = footer_left + footer_text[len(footer_left):]
+                footer_text = footer_text[:(len(footer_text)-len(footer_right))] + footer_right
+                for_html.append(footer_text)
         for_html_string = "\n".join(for_html)
-        print(for_html_string)
+        # print(for_html_string)
         pre.text = for_html_string
         html_string = ET.tostring(element = root, encoding = "unicode", method = "html")
         log.info("Export HTML to %s.", str(file_path))
-        print(html_string)
+        # print(html_string)
         with open(file_path, "w+", encoding="utf-8") as f:
             f.write(html_string)
         self.statusBar.showMessage("Exported in HTML format")
@@ -2632,12 +2765,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                                 "marginbottom": "%.2fin" % self.page_bottom_margin.value(), 
                                 "marginleft":  "%.2fin" % self.page_left_margin.value(), 
                                 "marginright": "%.2fin" % self.page_right_margin.value(), "writingmode": "lr-tb"}
+            if self.page_max_lines.value() != 0:
+                page_layout_dict["layoutgridlines"] = str(self.page_max_lines.value())
+                page_layout_dict["layoutgridmode"] = "line"
             log.debug(page_layout_dict)
             page_layout.addElement(PageLayoutProperties(attributes=page_layout_dict))
             automatic_styles.addElement(page_layout) 
             master_style = textdoc.masterstyles
             master_page = MasterPage(name = "Standard", pagelayoutname = "Transcript")
-            master_style.addElement(master_page) 
+            master_style.addElement(master_page)             
             # set paragraph styles
             s = textdoc.styles
             if self.enable_line_num.isChecked():
@@ -2703,6 +2839,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             textdoc = load(self.styles_path)
             s = textdoc.styles
+            master_page = textdoc.getElementsByType(MasterPage)
         frame_style = Style(name = "Frame", family = "graphic")
         frame_prop = GraphicProperties(attributes = {"verticalpos": "middle", "verticalrel": "char", "horizontalpos": "from-left", "horizontalrel": "paragraph", "opacity": "0%"})
         frame_style.addElement(frame_prop)
@@ -2722,59 +2859,42 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # print("text_width")
         # print(text_width)
         text_height = float(page_height.replace("in", "")) - float(page_tmarg.replace("in", "")) - float(page_bmarg.replace("in", ""))
-        if not self.enable_timestamp.isChecked():
-            while True:
-                block_data = block.userData()
-                block_text = block.text()
-                if not block_data["style"]:
-                    log.info("Paragraph %s has no style, setting to first style %s" % (i, next(iter(set_styles))))
-                    par_block = P(stylename = next(iter(set_styles)))
-                else:
-                    par_block = P(stylename = block_data["style"])
-                # this function is important to respect \t and other whitespace properly. 
-                addTextToElement(par_block, block_text)
-                textdoc.text.addElement(par_block)
-                if block == self.textEdit.document().lastBlock():
-                    break
-                block = block.next()
-        else:
-            while True:
-                style_name = block.userData()["style"]
-                block_style = {
-                        "paragraphproperties": recursive_style_format(self.styles, style_name),
-                        "textproperties": recursive_style_format(self.styles, style_name, prop = "textproperties")
-                    }
-                txt_format = txtprop_to_textformat(block_style["textproperties"])
-                font_metrics = QFontMetrics(txt_format.font())
-                # print("font char width")
-                # print(font_metrics.averageCharWidth())
-                # print(font_metrics.lineSpacing())
-                chars_in_inch = round(1 / pixel_to_in(font_metrics.averageCharWidth()))
-                height_in_inch = round(1 / pixel_to_in(font_metrics.lineSpacing()))
-                page_hspan = inch_to_spaces(text_width, chars_in_inch)
-                # print("page_hspan")
-                # print(page_hspan)
-                page_vspan = inch_to_spaces(text_height, height_in_inch)
-                if self.page_max_char.value() != 0:
-                    # page_hspan = self.page_max_char.value()
-                    log.debug("Max char set, not implemented for ODF format")
-                if self.page_max_lines.value() != 0:
-                    # page_vspan = self.page_max_lines.value()
-                    log.debug("Max lines per page set, not implemented for ODF format")
-                # print(page_hspan)
-                # print(page_vspan) 
-                par_dict = format_odf_text(block, block_style, chars_in_inch, text_width, line)
-                doc_lines.update(par_dict)
-                # print(doc_lines)
-                line = line + len(par_dict)
-                if not block.userData()["style"]:
-                    log.info("Paragraph %s has no style, setting to first style %s" % (i, next(iter(set_styles))))
-                    par_block = P(stylename = next(iter(set_styles)))
-                else:
-                    par_block = P(stylename = block.userData()["style"])
-                # this function is important to respect \t and other whitespace properly. 
-                for k, v in par_dict.items():
-                    # the new line causes an automatic line break
+        while True:
+            style_name = block.userData()["style"]
+            block_style = {
+                    "paragraphproperties": recursive_style_format(self.styles, style_name),
+                    "textproperties": recursive_style_format(self.styles, style_name, prop = "textproperties")
+                }
+            txt_format = txtprop_to_textformat(block_style["textproperties"])
+            font_metrics = QFontMetrics(txt_format.font())
+            # print("font char width")
+            # print(font_metrics.averageCharWidth())
+            # print(font_metrics.lineSpacing())
+            chars_in_inch = round(1 / pixel_to_in(font_metrics.averageCharWidth()))
+            height_in_inch = round(1 / pixel_to_in(font_metrics.lineSpacing()))
+            page_hspan = inch_to_spaces(text_width, chars_in_inch)
+            # print("page_hspan")
+            # print(page_hspan)
+            page_vspan = inch_to_spaces(text_height, height_in_inch)
+            if self.page_max_char.value() != 0:
+                # page_hspan = self.page_max_char.value()
+                if page_vspan > self.page_max_char.value():
+                    text_width = self.page_max_char.value() / chars_in_inch
+            # print(page_hspan)
+            # print(page_vspan) 
+            par_dict = format_odf_text(block, block_style, chars_in_inch, text_width, line)
+            doc_lines.update(par_dict)
+            # print(doc_lines)
+            line = line + len(par_dict)
+            if not block.userData()["style"]:
+                log.info("Paragraph %s has no style, setting to first style %s" % (i, next(iter(set_styles))))
+                par_block = P(stylename = next(iter(set_styles)))
+            else:
+                par_block = P(stylename = block.userData()["style"])
+            # this function is important to respect \t and other whitespace properly. 
+            for k, v in par_dict.items():
+                # the new line causes an automatic line break
+                if self.enable_timestamp.isChecked():
                     line_time = par_dict[k]["time"]
                     time_text = datetime.strptime(line_time, "%Y-%m-%dT%H:%M:%S.%f").strftime('%H:%M:%S')
                     line_frame = Frame(attributes = {"stylename": "Frame", "anchortype": "char", "x": "-1.5in", "width": "0.9in"})
@@ -2782,12 +2902,46 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     line_frame.addElement(line_textbox)
                     line_textbox.addElement(P(text = time_text, stylename = next(iter(set_styles))))
                     par_block.addElement(line_frame)
-                    line_text = par_dict[k]["text"]
-                    addTextToElement(par_block, line_text)
-                textdoc.text.addElement(par_block)
-                if block == self.textEdit.document().lastBlock():
-                    break
-                block = block.next()
+                line_text = par_dict[k]["text"]
+                addTextToElement(par_block, line_text)
+            textdoc.text.addElement(par_block)
+            if block == self.textEdit.document().lastBlock():
+                break
+            block = block.next()
+        header = Header()
+        header_text = self.header_left.text() + "\t" + self.header_center.text() + "\t" + self.header_right.text()
+        header_par = P(stylename = "Header_20_Footer")
+        if "%p" in header_text:
+            split_htext = header_text.split("%p")
+            for i in split_htext:
+                addTextToElement(header_par, i)
+                if i != split_htext[-1]:
+                    header_par.addElement(PageNumber(selectpage = "current"))
+        else:
+            addTextToElement(header_par, header_text)
+        header.addElement(header_par)
+        footer = Footer()
+        footer_text = self.footer_left.text() + "\t" + self.footer_center.text() + "\t" + self.footer_right.text()
+        footer_par = P(stylename = "Header_20_Footer")
+        if "%p" in footer_text:
+            split_ftext = footer_text.split("%p")
+            for i in split_ftext:
+                addTextToElement(footer_par, i)
+                if i != split_ftext[-1]:
+                    footer_par.addElement(PageNumber(selectpage = "current"))
+        else:
+            addTextToElement(footer_par, footer_text)
+        footer.addElement(footer_par)
+        master_page.addElement(header)
+        master_page.addElement(footer)
+        hf_style = Style(name = "Header_20_Footer", family = "paragraph", parentstylename = next(iter(set_styles)))
+        hf_properties = ParagraphProperties(numberlines = "false")
+        hf_tabstops = TabStops()
+        hf_tabstops.addElement(TabStop(position = "%.2fin" % (trunc(text_width)/2)))
+        hf_tabstops.addElement(TabStop(position = "%.2fin" % trunc(text_width)))
+        hf_properties.addElement(hf_tabstops)
+        hf_style.addElement(hf_properties)
+        s.addElement(hf_style)
         textdoc.save(selected_file[0])
         self.statusBar.showMessage("Exported in OpenTextDocument format")
         # os.startfile(selected_file[0])
@@ -2811,68 +2965,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 log.info("Abort import.")
                 return
         self.textEdit.clear()
-        parse_results = steno_rtf(selected_file[0])
+        self.statusBar.showMessage("Parsing RTF.")
+        self.progressBar = QProgressBar(self)
+        self.statusBar.addWidget(self.progressBar)
+        parse_results = steno_rtf(selected_file[0], self.progressBar)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         parse_results.parse_document()
-        styles = []
-        for k, v in parse_results.styles.items():
-            styles.append(v["text"])
-        style_dict = {}
-        for k, v in parse_results.styles.items():
-            style_name = v["text"]
-            style_dict[style_name] = extract_par_style(v)
-        style_dict = modify_styleindex_to_name(style_dict, styles)
-        # if len(parse_results.paragraphs) != len(parse_results.scanned_styles):
-        #     log.info("Detected individual paragraph styles do not match number of paragraphs. Falling back to document level styles.")
-        #     return
-        font_names = []
-        for i, font in parse_results.fonts.items():
-            font_names.append(font["text"])
-        indiv_style = {}
-        for key, par_style in parse_results.scanned_styles.items():
-            par_dict = extract_par_style(par_style)
-            # indiv_style[key] = extract_par_style(par_style)
-            if "textproperties" in par_dict and "fontindex" in par_dict["textproperties"]:
-                fontindex = str(par_dict["textproperties"]["fontindex"])
-                font_dict = parse_results.fonts[fontindex]
-                if "text" in font_dict:
-                    par_dict["textproperties"]["fontname"] = font_dict["text"].replace(";", "")
-                    par_dict["textproperties"]["fontfamily"] = font_dict["text"].replace(";", "")
-                if "froman" in font_dict:
-                    par_dict["textproperties"]["fontfamilygeneric"] = "roman"
-                if "fswiss" in font_dict:
-                    par_dict["textproperties"]["fontfamilygeneric"] = "swiss"
-                if "fmodern" in font_dict:
-                    par_dict["textproperties"]["fontfamilygeneric"] = "modern"
-                if "fscript" in font_dict:
-                    par_dict["textproperties"]["fontfamilygeneric"] = "script"
-                if "fdecor" in font_dict:
-                    par_dict["textproperties"]["fontfamilygeneric"] = "decorative"
-            indiv_style[key] = par_dict
-        renamed_indiv_style = []
-        for index, style in indiv_style.items():
-            par_style = style
-            doc_style = deepcopy(list(style_dict.values())[int(style["styleindex"])])
-            doc_style.update(par_style)
-            found_style = False
-            for k, v in style_dict.items():
-                if doc_style == v:
-                    renamed_indiv_style.append(k)
-                    found_style = True
-                    break
-            if found_style:
-                continue
-            style_parent_name = list(style_dict.keys())[int(style["styleindex"])]
-            detect_int = re.search("\\d+$", style_parent_name)
-            if detect_int:
-                style_num = int(detect_int.group()) + 1
-            else:
-                style_num = 0
-            new_style_name = re.sub("\\d+$", "", style_parent_name) + str(style_num)
-            while new_style_name in list(style_dict.keys()):
-                style_num += 1
-                new_style_name = re.sub("\\d+$", "",style_parent_name) + str(style_num)
-            style_dict[new_style_name] = doc_style
-            renamed_indiv_style.append(new_style_name)
+        QApplication.restoreOverrideCursor()
+        style_dict, renamed_indiv_style = load_rtf_styles(parse_results)
         rtf_paragraphs = parse_results.paragraphs
         for ind, par in rtf_paragraphs.items():
             par["data"]["style"] = renamed_indiv_style[int(ind)]
