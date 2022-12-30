@@ -27,7 +27,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Retroactive Define for selection in editor](howto/retrodefine.md)
 - [Scan for last untranslated and add outline to dictionary](nowto/definelast.md)
 - [Import RTF/CRE transcript file](howto/importrtf.md)
-- Enable autocompletion
+- [Enable autocompletion and add terms](howto/autocompletion.md)
 
 ### Configure the editor
 
@@ -67,6 +67,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Modifying existing style](howto/modstyle.md)
 - [Create a new style](howto/newstyle.md)
 - [Select a style file other than the default](howto/selectstylefile.md)
+- [Generate styles from template](howto/generatestyletemplate.md)
 
 ### Manage transcript dictionaries
 
@@ -76,8 +77,9 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 ### Set and modify page layout properties
 
 - [Set page size and margins](howto/pagesetup.md)
-- Control max characters per line and max lines per page
-- Enable line numbering and timestamps
+- [Create headers and footers for export](howto/headerfooter.md)
+- [Set max characters per line and max lines per page](howto/maxlinemaxchar.md)
+- [Enable line numbering and timestamps](howto/linenumtimestamp.md)
 
 ## Reference
 
