@@ -1,5 +1,6 @@
 <RCC>
   <qresource>
+    <file>lightning.png</file>
     <file>document-resize-actual.png</file>
     <file>spell-check.png</file>
     <file>edit-style.png</file>
