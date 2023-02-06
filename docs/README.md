@@ -2,7 +2,7 @@
 
 Plover2CAT's documentation is moving from a one-file user manual to more structured help.
 
-To get started, go through the following tutorials that will go through writing into the editor, adding formatting, and exporting the transcript.
+To get started, go through the following tutorials that will go through installing, writing into the editor, adding formatting, and exporting the transcript.
 
 ## Get Started
 
@@ -28,6 +28,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Scan for last untranslated and add outline to dictionary](nowto/definelast.md)
 - [Import RTF/CRE transcript file](howto/importrtf.md)
 - [Enable autocompletion and add terms](howto/autocompletion.md)
+- [Translate tape files](howto/translatetape.md)
 
 ### Configure the editor
 
@@ -38,6 +39,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Zoom in/Zoom Out](howto/zoom.md)
 - [Show invisible characters](howto/showall.md)
 - [Move cursor](howto/cursormove.md)
+- [Set custom shortcuts for menu items](howto/setcustomshortcuts.md)
 
 ### Do common editing tasks
 
@@ -83,20 +85,23 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 
 ## Reference
 
-### Menu Items (toggleable, disabled)
+- [Window Layout](reference/editorlayout.md)
+- [Menu](reference/menu.md)
+- [Docks](reference/docks.md)
+- [Transcript folder structure](reference/folderstructure.md)
+- [Data Formats](reference/dataformat.md)
+- [Export formats](reference/export.md)
+- [Supported RTF/CRE Features](reference/rtf_support.md)
 
-### Editor Layout
 
-### Shortcuts
 
-### Transcript Folder Structure
+## Discussions of design, development, and descriptions
 
-### Data Formats
-
-### Supported RTF/CRE Features
-
-### Commands
-
+- [Challenges of a steno-aware editor](discussion/stenoeditor.md)
+- [Lossy steno data](discussion/lossysteno.md)
+- [Plover engine hooks](discussion/enginehooks.md)
+- [Transcript data formats](discussion/transcriptdata.md)
+- [Future development goals](discussion/development.md)
 
 ## Getting help
 
