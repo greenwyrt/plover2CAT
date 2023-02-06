@@ -81,14 +81,6 @@ class steno_insert(QUndoCommand):
             new_stroke_data = self.steno + after
         else:
             new_stroke_data = self.steno
-        # if before:
-        #     new_stroke_data = before + self.steno
-        # else:
-        #     new_stroke_data = self.steno
-        # if not self.text.endswith("\n") and after:
-        #     new_stroke_data = new_stroke_data + after
-        # else:
-        #     continue
         log.info("Insert: Insert text at %s" % str(current_block.position() + self.position_in_block))
         block_data["strokes"] = new_stroke_data
         block_data = update_user_data(block_data, "edittime")

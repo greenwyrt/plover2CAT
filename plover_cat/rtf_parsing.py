@@ -4,6 +4,7 @@ import re
 from PyQt5.QtGui import QFont, QFontDatabase
 from PyQt5.QtWidgets import QProgressBar, QApplication
 from copy import deepcopy
+from datetime import datetime
 from pyparsing import (
     Literal, 
     Word, 
@@ -119,6 +120,11 @@ style_string = Suppress(Literal("\par\pard")) + OneOrMore(control("control*"))
 def twip_to_in(twips):
     return(twips / 1440)
 
+def in_to_twip(inches):
+    if isinstance(inches, str):
+        inches = float(inches.replace("in", ""))
+    return(int(inches * 1440))
+
 def append_value(dict_obj, key, value):
     # Check if key exist in dict or not
     if key in dict_obj:
@@ -143,7 +149,7 @@ def collapse_dict(element):
             append_value(new_dict, i["control"], "")
     return(new_dict)
 
-class steno_rtf:
+class rtf_steno:
     def __init__(self, file_name, progress_bar):
         self.rtf_file = file_name
         self.parse_results = None
@@ -251,7 +257,6 @@ class steno_rtf:
     def parse_document(self):
         parse_results = expr.parse_file(self.rtf_file)
         self.progress_bar.setMaximum(len(parse_results[0]))
-        # self.progress_bar.setFormat("Load transcript paragraph %v")
         self.parse_results = parse_results
         for num, i in enumerate(parse_results[0]):
             if isinstance(i, dict):
@@ -298,6 +303,7 @@ class steno_rtf:
         style_list = []
         for i in style_string.scanString(data):
             style_list.append(i[0].asList())
+        print(len(style_list))
         par_style_index = 0
         for ind, el in enumerate(style_list):
             new_style_dict = collapse_dict(el)
@@ -307,7 +313,7 @@ class steno_rtf:
                 par_style_index += 1
                 
 
-# test_rtf = steno_rtf("plover_cat/test.rtf")
+# test_rtf = rtf_steno("plover_cat/test.rtf")
 # test_rtf.parse_document()
 # test_rtf.scan_par_styles()
 # test_rtf.parse_results[0][9]
@@ -393,13 +399,17 @@ def extract_par_style(style_dict):
     return(one_style_dict)
 
 def load_rtf_styles(parse_results):
-    styles = []
-    for k, v in parse_results.styles.items():
-        styles.append(v["text"])
     style_dict = {}
     for k, v in parse_results.styles.items():
         style_name = v["text"]
+        style_num = 0
+        while style_name in list(style_dict.keys()):
+            style_num += 1
+            style_name = re.sub("\\d+$", "", style_name) + str(style_num)
         style_dict[style_name] = extract_par_style(v)
+    styles = []
+    for k, v in style_dict.items():
+        styles.append(k)
     style_dict = modify_styleindex_to_name(style_dict, styles)
     font_names = []
     for i, font in parse_results.fonts.items():
@@ -452,3 +462,19 @@ def load_rtf_styles(parse_results):
         renamed_indiv_style.append(new_style_name)
     return(style_dict, renamed_indiv_style)    
 
+def generate_stroke_rtf(stroke):
+    time_string = datetime.strptime(stroke[0], "%Y-%m-%dT%H:%M:%S.%f").strftime('%H:%M:%S')
+    string = write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", stroke[1], visible = False, group = True) + stroke[2]
+    return(string)
+
+def write_command(control, text = None, value = None, visible = True, group = False):
+    command = "\\" + control
+    if value:
+        command = command + str(value)
+    if text:
+        command = command + " " + text
+    if not visible:
+        command = "\\*" + command
+    if group:
+        command = "{" + command + "}"
+    return(command)
