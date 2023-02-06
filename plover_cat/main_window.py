@@ -6,7 +6,6 @@ import pathlib
 import json
 import textwrap
 import html
-import bisect
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from collections import Counter
@@ -29,10 +28,10 @@ from odf.draw import Frame, TextBox
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
 QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, QTextBlockFormat, 
-QTextOption, QTextCharFormat)
+QTextOption, QTextCharFormat, QKeySequence)
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
 QStyle, QMessageBox, QFontDialog, QPlainTextDocumentLayout, QUndoStack, QLabel, QMenu,
-QDockWidget, QVBoxLayout, QCompleter, QApplication, QTextEdit, QProgressBar)
+QDockWidget, QVBoxLayout, QCompleter, QApplication, QTextEdit, QProgressBar, QAction)
 from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaMetaData, QMediaRecorder, 
 QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -42,7 +41,7 @@ _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 import plover
 
 from plover.engine import StenoEngine
-from plover.steno import Stroke, normalize_steno
+from plover.steno import Stroke, normalize_steno, normalize_stroke
 from plover.dictionary.base import load_dictionary
 from plover.registry import registry
 from plover import log
@@ -54,302 +53,7 @@ from plover_cat.constants import *
 from plover_cat.qcommands import *
 from plover_cat.stroke_funcs import *
 from plover_cat.helpers import * 
-
-# base folder/
-#     audio/
-#     dictionaries/
-#         transcript.json
-#         custom.json
-#         dictionaries_backup
-#     exports/ - txt, srt, odf
-#     info/ - likely a holding folder for assorted things
-#     resources/ - in future, images
-#     spellcheck/ - hunspell dictionaries
-#     sources/ - json autocomplete
-#     styles/
-#         default.json
-#     transcript.transcript
-#     transcript.tape
-#     transcript.config
-
-def inch_to_spaces(inch, chars_per_in = 10):
-    if isinstance(inch, str):
-        inch = float(inch.replace("in", ""))
-    return round((inch * chars_per_in))
-
-def format_odf_text(block, style, chars_in_inch, page_width, line_num = 0):
-    # block is QTextBlock
-    # max_char fed into function is converted from page width or user setting (line num digits and timestamp digits are "outside of page")
-    text = block.text()
-    l_marg = 0
-    r_marg = 0
-    first_indent = 0
-    block_data = block.userData().return_all()
-    spaces_to_insert = 0
-    if "paragraphproperties" in style:
-        if "marginleft" in style["paragraphproperties"]:
-            l_marg = inch_to_spaces(style["paragraphproperties"]["marginleft"], chars_in_inch)
-        if "marginright" in style["paragraphproperties"]:
-            r_marg = inch_to_spaces(style["paragraphproperties"]["marginright"], chars_in_inch)
-        if "textindent" in style["paragraphproperties"]:
-            first_indent = inch_to_spaces(style["paragraphproperties"]["textindent"], chars_in_inch)
-            spaces_to_insert = first_indent
-    max_char = inch_to_spaces(page_width, chars_in_inch) - l_marg - r_marg
-    # print(max_char)
-    # this only deals with a tab at the start of the paragraph
-    if "\t" in text[0:3]:
-        mat = re.search("\t", text)
-        # print(first_indent)
-        # print(l_marg)
-        # print(mat.start())
-        begin_pos = first_indent + l_marg + mat.start()
-        # print(begin_pos)
-        if "tabstop" in style["paragraphproperties"]:
-        # example with 0.5 par indent, 0.5 text indent
-        # original string: Q.\tABC
-        # formatted:
-        # ----------Q.\tABC
-        # tabstop at 1.5in
-        # ----------Q.---ABC
-        # ---------------{start}
-            tabs = style["paragraphproperties"]["tabstop"]
-            if isinstance(tabs, list):
-                tabs = [inch_to_spaces(i, chars_in_inch) for i in tabs]
-                tab_index = bisect.bisect_left(tabs, begin_pos)
-                tabs = tabs[tab_index]
-            else:
-                tabs = inch_to_spaces(tabs, chars_in_inch)
-        else:
-            # just use the python default tab expansion value
-            tabs = 8
-        # print("tabs")
-        # print(tabs)
-        if first_indent > 0:
-            spaces_to_insert = (tabs - begin_pos) + first_indent
-        else:
-            spaces_to_insert = (tabs - begin_pos)
-    # print("spaces to insert")
-    # print(spaces_to_insert)
-    # print("max char")
-    # print(max_char)
-    par_text = steno_wrap_plain(text = text, block_data = block_data, max_char = max_char,
-                                tab_space=4, first_line_indent=" " * spaces_to_insert, par_indent = "", starting_line_num=line_num)
-    # print(par_text)
-    for k, v in par_text.items():
-        par_text[k]["text"] = par_text[k]["text"].lstrip(" ") + "\n"
-    if list(par_text.keys()):
-        par_text[list(par_text.keys())[-1]]["text"] = par_text[list(par_text.keys())[-1]]["text"].rstrip("\n")
-    return(par_text)
-
-def format_text(block, style, max_char = 80, line_num = 0):
-    # block is QTextBlock
-    # max_char fed into function is converted from page width or user setting (line num digits and timestamp digits are "outside of page")
-    text = block.text()
-    l_marg = 0
-    r_marg = 0
-    t_marg = 0
-    b_marg = 0
-    align = "left"
-    linespacing = "100%"
-    first_indent = 0
-    block_data = block.userData().return_all()
-    # all measurements converted to spaces, for horizontal, 10 chars per inch, for vertical, 6 chars per inch
-    if "paragraphproperties" in style:
-        if "marginleft" in style["paragraphproperties"]:
-            l_marg = inch_to_spaces(style["paragraphproperties"]["marginleft"])
-        if "marginright" in style["paragraphproperties"]:
-            r_marg = inch_to_spaces(style["paragraphproperties"]["marginright"])
-        if "margintop" in style["paragraphproperties"]:
-            t_marg = inch_to_spaces(style["paragraphproperties"]["margintop"], 6)
-        if "marginbottom" in style["paragraphproperties"]:
-            b_margin = inch_to_spaces(style["paragraphproperties"]["marginbottom"], 6)
-        if "linespacing" in style["paragraphproperties"]:
-            linespacing = style["paragraphproperties"]["linespacing"]
-        if "textalign" in style["paragraphproperties"]:
-            align = style["paragraphproperties"]["textalign"]
-            # do not support justified text for now
-            if align == "justify":
-                align = "left"
-        if "textindent" in style["paragraphproperties"]:
-            first_indent = inch_to_spaces(style["paragraphproperties"]["textindent"])
-        # todo: tabstop conversion
-    # since plaintext, none of the textproperties apply
-    max_char = max_char - l_marg - r_marg
-    # this only deals with a tab at the start of the paragraph
-    if "\t" in text[0:3] and "tabstop" in style["paragraphproperties"]:
-        # example with 0.5 par indent, 0.5 text indent
-        # original string: Q.\tABC
-        # formatted:
-        # ----------Q.\tABC
-        # tabstop at 1.5in
-        # ----------Q.---ABC
-        # ---------------{start}
-        tabs = style["paragraphproperties"]["tabstop"]
-        mat = re.search("\t", text)
-        begin_pos = first_indent + l_marg + mat.start()
-        if isinstance(tabs, list):
-            tabs = [inch_to_spaces(i) for i in tabs]
-            tab_index = bisect.bisect_left(tabs, begin_pos)
-            tabs = tabs[tab_index]
-        else:
-            tabs = inch_to_spaces(tabs)
-        # tabs_to_space_pos = inch_to_spaces(tabs)
-        spaces_to_insert = (tabs - begin_pos) * " "
-        text = re.sub("\t", spaces_to_insert, text, count = 1)
-        for i, stroke in enumerate(block_data["strokes"]):
-            if "\t" in stroke[2]:
-                block_data["strokes"][i][2] = re.sub("\t",  spaces_to_insert, block_data["strokes"][i][2], count = 1)
-                break
-    par_text = steno_wrap_plain(text = text, block_data = block_data, max_char = max_char,
-                                tab_space=4, first_line_indent=" " * (first_indent + l_marg), par_indent = " " * l_marg, starting_line_num=line_num)
-    for k, v in par_text.items():
-        if align == "center":
-            par_text[k]["text"] = par_text[k]["text"].center(max_char)
-        elif align == "right":
-            par_text[k]["text"] = par_text[k]["text"].rjust(max_char)
-        else:
-            par_text[k]["text"] = par_text[k]["text"].ljust(max_char)
-    if t_marg > 0:
-        par_text[line_num+1]["text"] = "\n" * t_marg + par_text[line_num+1]["text"]
-    if b_marg > 0:
-        par_text[-1]["text"] = par_text[-1]["text"] + "\n" * b_marg
-    # decide whether to add extra line(s) due to linespacing, will round to two extra empty lines if over 149%
-    line_spaces = int(int(linespacing.replace("%", "")) / 100) - 1
-    for k, v in par_text.items():
-        par_text[k]["text"] = par_text[k]["text"] + "\n" * line_spaces
-    return(par_text)
-
-def steno_wrap_plain(text, block_data, max_char = 80, tab_space = 4, first_line_indent = "", 
-                        par_indent = "", timestamp = False, starting_line_num = 0):
-    # the -1 in max char is because the rounding is not perfect, might have some lines that just tip over
-    wrapped = textwrap.wrap(text, width = max_char - 1, initial_indent= first_line_indent,
-                subsequent_indent= par_indent, expand_tabs = False, tabsize = tab_space, replace_whitespace=False)
-    begin_pos = 0
-    par_dict = {}
-    for ind, i in enumerate(wrapped):
-        matches = re.finditer(re.escape(i.strip()), text[begin_pos:])
-        for i in matches:
-            if i.start() >= 0:
-                match = i
-                break
-        end_pos = match.end()
-        print(begin_pos)
-        print(end_pos)
-        ## try very desperately to recover
-        if end_pos == begin_pos:
-            end_pos = begin_pos + len(wrapped[ind]) - 1
-        extracted_data = extract_stroke_data(block_data["strokes"], begin_pos, end_pos, copy = True)
-        timecodes = [stroke[0] for stroke in extracted_data]
-        timecodes.sort()
-        print(wrapped[ind])
-        print(timecodes)
-        begin_pos = match.end()
-        par_dict[starting_line_num + ind + 1] = {}
-        par_dict[starting_line_num + ind + 1]["text"] = wrapped[ind]
-        # par_dict[ind]["line_num"] = starting_line_num + ind + 1
-        par_dict[starting_line_num + ind + 1]["time"] = timecodes[0]
-    return(par_dict)
-
-def load_odf_styles(path):
-    # log.info("Loading ODF style file from %s", str(path))
-    style_text = load(path)
-    json_styles = {}
-    for style in style_text.getElementsByType(Styles)[0].getElementsByType(Style):
-        if style.getAttribute("family") != "paragraph":
-             continue
-        # print(style.getAttribute("name"))
-        json_styles[style.getAttribute("name")] = {"family": style.getAttribute("family"), "nextstylename": style.getAttribute("nextstylename"), "defaultoutlinelevel": style.getAttribute("defaultoutlinelevel"), "parentstylename": style.getAttribute("parentstylename")}
-        if style.getElementsByType(ParagraphProperties):
-            par_prop = style.getElementsByType(ParagraphProperties)[0]
-            par_dict = {"textalign": par_prop.getAttribute("textalign"), "textindent": par_prop.getAttribute("textindent"), 
-                        "marginleft": par_prop.getAttribute("marginleft"), "marginright": par_prop.getAttribute("marginright"), 
-                        "margintop": par_prop.getAttribute("margintop"), "marginbottom": par_prop.getAttribute("marginbottom"), "linespacing": par_prop.getAttribute("linespacing")}
-            if par_prop.getElementsByType(TabStops):
-                tabstop = []
-                for i in par_prop.getElementsByType(TabStop):
-                    tabstop.append(i.getAttribute("position"))
-                par_dict["tabstop"] = tabstop
-            json_styles[style.getAttribute("name")]["paragraphproperties"] = par_dict
-        if style.getElementsByType(TextProperties):
-            txt_prop = style.getElementsByType(TextProperties)[0]
-            txt_dict = {"fontname": txt_prop.getAttribute("fontname"), "fontfamily": txt_prop.getAttribute("fontfamily"), 
-                        "fontsize": txt_prop.getAttribute("fontsize"), "fontweight": txt_prop.getAttribute("fontweight"), 
-                        "fontstyle": txt_prop.getAttribute("fontstyle"), "textunderlinetype": txt_prop.getAttribute("textunderlinetype"), 
-                        "textunderlinestyle": txt_prop.getAttribute("textunderlinestyle")}
-            json_styles[style.getAttribute("name")]["textproperties"] = txt_dict
-    json_styles = remove_empty_from_dict(json_styles)
-    return(json_styles)
-
-def recursive_style_format(style_dict, style, prop = "paragraphproperties"):
-    if "parentstylename" in style_dict[style]:
-        parentstyle = recursive_style_format(style_dict, style_dict[style]["parentstylename"], prop = prop)
-        if prop in style_dict[style]:
-            parentstyle.update(style_dict[style][prop])
-        return(deepcopy(parentstyle))
-    else:
-        if prop in style_dict[style]:
-            return(deepcopy(style_dict[style][prop]))
-        else:
-            return({})
-
-def parprop_to_blockformat(par_dict):
-    par_format = QTextBlockFormat()
-    if "textalign" in par_dict:
-        if par_dict["textalign"] == "justify":
-            par_format.setAlignment(Qt.AlignJustify)
-        elif par_dict["textalign"] == "right":
-            par_format.setAlignment(Qt.AlignRight)
-        elif par_dict["textalign"] == "center":
-            par_format.setAlignment(Qt.AlignHCenter)
-        else:
-            # set default to left
-            par_format.setAlignment(Qt.AlignLeft)
-    if "textindent" in par_dict:
-        par_format.setTextIndent(in_to_pixel(par_dict["textindent"].replace("in","")))
-    if "marginleft" in par_dict:
-        par_format.setLeftMargin(in_to_pixel(par_dict["marginleft"].replace("in", "")))
-    if "marginright" in par_dict:
-        par_format.setRightMargin(in_to_pixel(par_dict["marginright"].replace("in", "")))
-    if "marginbottom" in par_dict:
-        par_format.setBottomMargin(in_to_pixel(par_dict["marginbottom"].replace("in", "")))
-    if "linespacing" in par_dict:
-        par_format.setLineHeight(
-            float(par_dict["linespacing"].replace("%", "")),
-            QTextBlockFormat.ProportionalHeight
-        )
-    if "tabstop" in par_dict:
-        tab_list = par_dict["tabstop"]
-        blocktabs = []
-        if isinstance(tab_list, str):
-            tab_list = [tab_list]
-        for i in tab_list:
-            tab_pos = in_to_pixel(i.replace("in", ""))
-            blocktabs.append(QTextOption.Tab(tab_pos, QTextOption.LeftTab))
-        par_format.setTabPositions(blocktabs)
-    return(par_format)
-
-def txtprop_to_textformat(txt_dict):
-    txt_format = QTextCharFormat()
-    if "fontfamily" in txt_dict:
-        potential_font = QFont(txt_dict["fontfamily"])
-    else:
-        # if no font, then set a default
-        potential_font = QFont("Courier New")
-    if "fontsize" in txt_dict:
-        potential_font.setPointSize(int(float(txt_dict["fontsize"].replace("pt", ""))))
-    else:
-        # must have a font size
-        potential_font.setPointSize(12)
-    if "fontweight" in txt_dict and txt_dict["fontweight"] == "bold":
-        # boolean for now, odf has weights and so does qt
-        potential_font.setBold(True)
-    if "fontstyle" in txt_dict and txt_dict["fontstyle"] == "italic":
-        potential_font.setItalic(True)
-    if "textunderlinetype" in txt_dict and txt_dict["textunderlinestyle"] == "solid":
-        potential_font.setUnderline(True)
-    txt_format.setFont(potential_font, QTextCharFormat.FontPropertiesAll)
-    return(txt_format)
-    
+  
 class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def __init__(self, engine):
         super().__init__()
@@ -413,6 +117,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.spell_ignore = []
         self.textEdit.setPlainText("Welcome to Plover2CAT\nOpen or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")
         self.menu_enabling()
+        self.set_shortcuts()
         # connections:
         ## file setting/saving
         self.actionQuit.triggered.connect(lambda: self.action_close())
@@ -420,26 +125,26 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionClose.triggered.connect(lambda: self.close_file())
         self.actionOpen.triggered.connect(lambda: self.open_file())
         self.actionSave.triggered.connect(lambda: self.save_file())
-        self.actionSave_As.triggered.connect(lambda: self.save_as_file())
-        self.actionOpen_Transcript_Folder.triggered.connect(lambda: self.open_root())
-        self.actionImport_RTF.triggered.connect(lambda: self.import_rtf())
+        self.actionSaveAs.triggered.connect(lambda: self.save_as_file())
+        self.actionOpenTranscriptFolder.triggered.connect(lambda: self.open_root())
+        self.actionImportRTF.triggered.connect(lambda: self.import_rtf())
         ## audio connections
-        self.actionOpen_Audio.triggered.connect(lambda: self.open_audio())
-        self.actionPlay_Pause.triggered.connect(self.play_pause)
-        self.actionStop_Audio.triggered.connect(self.stop_play)
+        self.actionOpenAudio.triggered.connect(lambda: self.open_audio())
+        self.actionPlayPause.triggered.connect(self.play_pause)
+        self.actionStopAudio.triggered.connect(self.stop_play)
         self.playRate.valueChanged.connect(self.update_playback_rate)
         self.player.durationChanged.connect(self.update_duration)
         self.player.positionChanged.connect(self.update_seeker_track)
         self.audio_seeker.sliderMoved.connect(self.set_position)
-        self.actionSkip_Forward.triggered.connect(lambda: self.seek_position())
-        self.actionSkip_Back.triggered.connect(lambda: self.seek_position(-1))
-        self.actionRecord_Pause.triggered.connect(lambda: self.record_or_pause())
-        self.actionStop_Recording.triggered.connect(lambda: self.stop_record())
+        self.actionSkipForward.triggered.connect(lambda: self.seek_position())
+        self.actionSkipBack.triggered.connect(lambda: self.seek_position(-1))
+        self.actionRecordPause.triggered.connect(lambda: self.record_or_pause())
+        self.actionStopRecording.triggered.connect(lambda: self.stop_record())
         self.recorder.error.connect(lambda: self.recorder_error())
         self.recorder.durationChanged.connect(self.update_record_time)
-        self.actionShow_Video.triggered.connect(lambda: self.show_hide_video())
+        self.actionShowVideo.triggered.connect(lambda: self.show_hide_video())
         ## editor related connections
-        self.actionClear_Paragraph.triggered.connect(lambda: self.reset_paragraph())
+        self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
         self.textEdit.cursorPositionChanged.connect(self.display_block_data)
         self.textEdit.complete.connect(self.insert_autocomplete)
         self.editorCheck.stateChanged.connect(self.editor_lock)
@@ -449,26 +154,27 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionPaste.triggered.connect(lambda: self.paste_steno())
         self.actionRedo.triggered.connect(self.undo_stack.redo)
         self.actionUndo.triggered.connect(self.undo_stack.undo)
-        self.actionFind_Replace_Pane.triggered.connect(lambda: self.show_find_replace())
+        self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
         self.actionInsertNormalText.triggered.connect(self.insert_text)
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
         self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
-        self.actionPaper_Tape_Font.triggered.connect(lambda: self.change_tape_font())
+        self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.textEdit.send_del.connect(self.mock_del)
         self.parSteno.setStyleSheet("alternate-background-color: darkGray;")
         self.strokeList.setStyleSheet("selection-background-color: darkGray;")
         self.revert_version.clicked.connect(self.revert_file)
         ## steno related edits
-        self.actionMerge_Paragraphs.triggered.connect(lambda: self.merge_paragraphs())
-        self.actionSplit_Paragraph.triggered.connect(lambda: self.split_paragraph())
-        self.actionAdd_Custom_Dict.triggered.connect(lambda: self.add_dict())
-        self.actionRemove_Transcript_Dict.triggered.connect(lambda: self.remove_dict())
-        self.actionRetroactive_Define.triggered.connect(lambda: self.define_retroactive())
-        self.actionDefine_Last.triggered.connect(lambda: self.define_scan())
+        self.actionMergeParagraphs.triggered.connect(lambda: self.merge_paragraphs())
+        self.actionSplitParagraph.triggered.connect(lambda: self.split_paragraph())
+        self.actionAddCustomDict.triggered.connect(lambda: self.add_dict())
+        self.actionRemoveTranscriptDict.triggered.connect(lambda: self.remove_dict())
+        self.actionRetroactiveDefine.triggered.connect(lambda: self.define_retroactive())
+        self.actionDefineLast.triggered.connect(lambda: self.define_scan())
         self.actionAutocompletion.triggered.connect(self.setup_completion)
         self.actionAddAutocompletionTerm.triggered.connect(self.add_autocomplete_item)
+        self.actionTranslateTape.triggered.connect(self.tape_translate)
         ## style connections
         self.edit_page_layout.clicked.connect(self.update_config)
         self.editCurrentStyle.clicked.connect(self.style_edit)
@@ -507,8 +213,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionHTML.triggered.connect(lambda: self.export_html())
         self.actionSubRip.triggered.connect(lambda: self.export_srt())
         self.actionODT.triggered.connect(lambda: self.export_odt())
+        self.actionRTF.triggered.connect(lambda: self.export_rtf())
         # help
-        self.actionUser_Manual.triggered.connect(lambda: self.open_help())
+        self.actionUserManual.triggered.connect(lambda: self.open_help())
         self.actionAbout.triggered.connect(lambda: self.about())
         self.actionAcknowledgements.triggered.connect(lambda: self.acknowledge())
         # status bar
@@ -524,6 +231,23 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         engine.signal_connect("send_string", self.on_send_string)
         engine.signal_connect("send_backspaces", self.count_backspaces)
         log.info("Main window open")
+
+    def set_shortcuts(self):
+        shortcut_file = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "shortcuts.json"
+        if not shortcut_file.exists():
+            log.debug("No shortcut file exists, using default menu shortcuts.")
+            return
+        else:
+            with open(shortcut_file, "r") as f:
+                shortcuts = json.loads(f.read())
+        for identifier, keysequence in shortcuts.items():
+            try:
+                select_action = self.findChild(QAction, identifier)
+                select_action.setShortcut(QKeySequence(keysequence)) 
+            except:
+                pass   
+        # test_action = self.findChild(QAction, "actionSaveAs")
+        # test_action.setShortcut(QKeySequence("Ctrl+L"))
 
     def about(self):
         QMessageBox.about(self, "About",
@@ -598,7 +322,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.setup_completion(self.actionAutocompletion.isChecked())
 
     def open_help(self):
-        user_manual_link = QUrl("https://github.com/greenwyrt/plover2CAT/blob/main/user_manual.md")
+        user_manual_link = QUrl("https://github.com/greenwyrt/plover2CAT/tree/main/docs")
         QtGui.QDesktopServices.openUrl(user_manual_link)
 
     def menu_enabling(self, value = True):
@@ -606,9 +330,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.menuSteno_Actions.setEnabled(not value)
         self.menuDictionary.setEnabled(not value)
         self.menuAudio.setEnabled(not value)
+        self.menuStyling.setEnabled(not value)
         self.actionNew.setEnabled(value)
         self.actionSave.setEnabled(not value)
-        self.actionSave_As.setEnabled(not value)
+        self.actionSaveAs.setEnabled(not value)
         self.actionOpen.setEnabled(value)
         self.actionPlainText.setEnabled(not value)
         self.actionASCII.setEnabled(not value)
@@ -616,26 +341,26 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionHTML.setEnabled(not value)
         self.actionPlainASCII.setEnabled(not value)
         self.actionODT.setEnabled(not value)
-        self.actionAdd_Custom_Dict.setEnabled(not value)
-        self.actionMerge_Paragraphs.setEnabled(not value)
-        self.actionSplit_Paragraph.setEnabled(not value)
-        self.actionRetroactive_Define.setEnabled(not value)
-        self.actionDefine_Last.setEnabled(not value)
+        self.actionAddCustomDict.setEnabled(not value)
+        self.actionMergeParagraphs.setEnabled(not value)
+        self.actionSplitParagraph.setEnabled(not value)
+        self.actionRetroactiveDefine.setEnabled(not value)
+        self.actionDefineLast.setEnabled(not value)
         self.actionAddAutocompletionTerm.setEnabled(not value)
         self.actionCut.setEnabled(not value)
         self.actionCopy.setEnabled(not value)
         self.actionPaste.setEnabled(not value)
-        self.actionPlay_Pause.setEnabled(not value)
-        self.actionStop_Audio.setEnabled(not value)
-        self.actionRecord_Pause.setEnabled(not value)
-        self.actionOpen_Transcript_Folder.setEnabled(not value)
-        self.actionImport_RTF.setEnabled(not value)
+        self.actionPlayPause.setEnabled(not value)
+        self.actionStopAudio.setEnabled(not value)
+        self.actionRecordPause.setEnabled(not value)
+        self.actionOpenTranscriptFolder.setEnabled(not value)
+        self.actionImportRTF.setEnabled(not value)
 
     def context_menu(self, pos):
         menu = QMenu()
-        menu.addAction(self.actionRetroactive_Define)
-        menu.addAction(self.actionMerge_Paragraphs)
-        menu.addAction(self.actionSplit_Paragraph)
+        menu.addAction(self.actionRetroactiveDefine)
+        menu.addAction(self.actionMergeParagraphs)
+        menu.addAction(self.actionSplitParagraph)
         menu.addAction(self.actionCut)
         menu.addAction(self.actionCopy)
         menu.addAction(self.actionPaste)
@@ -1232,7 +957,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.statusBar.showMessage("Parsing RTF.")
             self.progressBar = QProgressBar(self)
             self.statusBar.addWidget(self.progressBar)
-            parse_results = steno_rtf(selected_file, self.progressBar)
+            parse_results = rtf_steno(selected_file, self.progressBar)
             parse_results.parse_document()
             json_styles, renamed_indiv_style = load_rtf_styles(parse_results)
             self.statusBar.showMessage("Extracted RTF styles to styles folder.")
@@ -1652,6 +1377,53 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             pass
         self.strokeList.blockSignals(False)
     # steno functions
+    def tape_translate(self):
+        if not self.engine.output:
+            self.statusBar.showMessage("Plover is not enabled.")
+            return
+        # do not erase any content before, case of too many asterisks for example
+        self.engine.clear_translator_state()
+        # bit of a hack since triggering stroked hook through code
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Select tape file to translate"),
+            str(self.file_name), _("Tape (*.tape *.txt)"))[0]
+        if not selected_file:
+            return
+        transcript_dir = self.file_name 
+        if pathlib.Path(selected_file) == transcript_dir.joinpath(transcript_dir.stem).with_suffix(".tape"):
+            self.statusBar.showMessage("Cannot translate from own transcript tape.")
+            return
+        selected_file = pathlib.Path(selected_file)
+        log.debug("Translating tape from %s" % selected_file)    
+        paper_format, ok = QInputDialog.getItem(self, "Translate Tape", "Format of tape file:", ["Plover2CAT", "Plover (raw)", "Plover (paper)"], editable = False)
+        if paper_format == "Plover (raw)":
+            with open(selected_file) as f:
+                for line in f:
+                    stroke = Stroke(normalize_stroke(line.strip().replace(" ", "")))
+                    self.engine._translator.translate(stroke)
+                    self.engine._trigger_hook('stroked', stroke)
+        elif paper_format == "Plover2CAT":
+            with open(selected_file) as f:
+                for line in f:
+                    stroke_contents = line.strip().split("|")[3]
+                    keys = []
+                    for i in range(len(stroke_contents)):
+                        if not stroke_contents[i].isspace() and i < len(plover.system.KEYS):
+                            keys.append(plover.system.KEYS[i])                    
+                    self.engine._translator.translate(Stroke(keys))
+                    self.engine._trigger_hook('stroked', Stroke(keys))
+        elif paper_format == "Plover (paper)":
+            with open(selected_file) as f:
+                for line in f:
+                    keys = []
+                    for i in range(len(line)):
+                        if not line[i].isspace() and i < len(plover.system.KEYS):
+                            keys.append(plover.system.KEYS[i])
+                    self.engine._translator.translate(Stroke(keys))
+                    self.engine._trigger_hook('stroked', Stroke(keys))
+        # todo, if format has time data, that should be inserted into stroke data of editor too
+
     def on_stroke(self, stroke_pressed):
         self.editorCheck.setChecked(True)
         if not self.engine.output:
@@ -1659,13 +1431,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not self.file_name:
             return
         # do nothing if window not in focus
-        if not self.textEdit.isActiveWindow() and not self.actionCapture_All_Output.isChecked():
+        if not self.textEdit.isActiveWindow() and not self.actionCaptureAllOutput.isChecked():
             return
         if not self.last_string_sent and self.last_backspaces_sent == 0:
             return
         current_document = self.textEdit
         current_cursor = current_document.textCursor()
-        if self.actionCursor_At_End.isChecked():
+        if self.actionCursorAtEnd.isChecked():
             current_cursor.movePosition(QTextCursor.End)
             self.textEdit.setTextCursor(current_cursor)
         self.cursor_block = current_cursor.blockNumber()
@@ -1743,6 +1515,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.cut_steno(store=False)
             self.last_backspaces_sent = 0
             self.undo_stack.endMacro()
+            current_cursor = self.textEdit.textCursor()
+            self.cursor_block = current_cursor.blockNumber()
+            self.cursor_block_position = current_cursor.positionInBlock()
             return         
         if self.last_backspaces_sent != 0:
             stroke = [self.stroke_time, raw_steno, ""]
@@ -1755,6 +1530,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                                         deleted_text, backspaces_sent, stroke, current_document)
             self.undo_stack.push(remove_cmd)
             self.last_backspaces_sent = 0
+            current_cursor = self.textEdit.textCursor()
+            self.cursor_block = current_cursor.blockNumber()
+            self.cursor_block_position = current_cursor.positionInBlock()
         if "\n" in string_sent and string_sent != "\n":
             list_segments = string_sent.splitlines(True)
             print(list_segments)
@@ -2012,8 +1790,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             else:
                 current_cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor)
                 self.textEdit.setTextCursor(current_cursor)
-                self.cut_steno(store = False)
-            
+                self.cut_steno(store = False)            
     # search functions
     def show_find_replace(self):
         if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
@@ -2407,7 +2184,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.player.setPlaybackRate(rate)
 
     def record_controls_enable(self, value = True):
-        self.actionStop_Recording.setEnabled(not value)
+        self.actionStopRecording.setEnabled(not value)
         self.audio_device.setEnabled(value)
         self.audio_codec.setEnabled(value)
         self.audio_container.setEnabled(value)
@@ -2887,7 +2664,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             # print(doc_lines)
             line = line + len(par_dict)
             if not block.userData()["style"]:
-                log.info("Paragraph %s has no style, setting to first style %s" % (i, next(iter(set_styles))))
+                log.info("Paragraph has no style, setting to first style %s" % next(iter(set_styles)))
                 par_block = P(stylename = next(iter(set_styles)))
             else:
                 par_block = P(stylename = block.userData()["style"])
@@ -2968,7 +2745,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage("Parsing RTF.")
         self.progressBar = QProgressBar(self)
         self.statusBar.addWidget(self.progressBar)
-        parse_results = steno_rtf(selected_file[0], self.progressBar)
+        parse_results = rtf_steno(selected_file[0], self.progressBar)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         parse_results.parse_document()
         QApplication.restoreOverrideCursor()
@@ -3006,3 +2783,158 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage("Finished loading transcript data from rtf")
         log.info("Loading finished.")                
 
+    def export_rtf(self):
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".rtf"))
+            , _("RTF/CRE (*.rtf)")
+        )
+        if not selected_file[0]:
+            return
+        # automatically update config and save in case changes were not saved before
+        self.update_config()
+        set_styles = deepcopy(self.styles)
+        font_list = []
+        for k, v in set_styles.items():
+            if "textproperties" in v and "fontfamily" in v["textproperties"]:
+                if v["textproperties"]["fontfamily"]:
+                    font_list.append(v["textproperties"]["fontfamily"])
+                    v["f"] = font_list.index(v["textproperties"]["fontfamily"])
+                else:
+                    font_list.append(v["textproperties"]["fontfamily"])
+                    v["f"] = len(font_list) - 1
+        style_string = ""
+        style_names = [sname for sname, data in set_styles.items()]
+        for i, k in enumerate(style_names):
+            set_styles[k]["styleindex"] = str(i)
+        for sname, v in set_styles.items():
+            if "nextstylename" in v:
+                v["snext"] = str(style_names.index(v["nextstylename"]))
+            if "parentstylename" in v:
+                v["sbasedon"] = str(style_names.index(v["parentstylename"]))
+            rtf_par_string = ""
+            if "paragraphproperties" in v:
+                par_dict = v["paragraphproperties"]
+                if "marginleft" in par_dict:
+                    rtf_par_string += write_command("li", value = in_to_twip(par_dict["marginleft"]))
+                if "marginright" in par_dict:
+                    rtf_par_string += write_command("ri", value = in_to_twip(par_dict["marginright"]))
+                if "textindent" in par_dict:
+                    rtf_par_string += write_command("fi", value = in_to_twip(par_dict["textindent"]))
+                if "textalign" in par_dict:
+                    if par_dict["textalign"] == "left":
+                        rtf_par_string += write_command("ql")
+                    if par_dict["textalign"] == "right":
+                        rtf_par_string += write_command("qr")
+                    if par_dict["textalign"] == "justify":
+                        rtf_par_string += write_command("qj")
+                    if par_dict["textalign"] == "center":
+                        rtf_par_string += write_command("qc")
+                if "margintop" in par_dict:
+                    rtf_par_string += write_command("sb", value = in_to_twip(par_dict["margintop"]))
+                if "marginbottom" in par_dict:
+                    rtf_par_string += write_command("sa", value = in_to_twip(par_dict["marginbottom"]))
+                if "tabstop" in par_dict:
+                    if isinstance(par_dict["tabstop"], str):
+                        tabstop = [par_dict["tabstop"]]
+                    else:
+                        tabstop = par_dict["tabstop"]
+                    for i in tabstop:
+                        rtf_par_string += write_command("tx", value = in_to_twip(i))
+            v["rtf_par_style"] = rtf_par_string
+            rtf_text_string = ""
+            if "textproperties" in v:
+                txt_dict = v["textproperties"]
+                # remember that fonts were numbered already
+                if "f" in v:
+                    rtf_text_string += write_command("f", value = str(v["f"]))
+                if "fontsize" in txt_dict:
+                    rtf_text_string += write_command("fs", value = int(float(txt_dict["fontsize"].replace("pt", ""))) * 2)
+                if "fontstyle" in txt_dict:
+                    rtf_text_string += write_command("i")
+                if "fontweight" in txt_dict:
+                    rtf_text_string += write_command("b")
+                if "textunderlinetype" in txt_dict:
+                    rtf_text_string += write_command("ul")
+            v["rtf_txt_style"] = rtf_text_string
+        fonttbl_string = ""
+        for ind, font in enumerate(font_list):
+            font_string = "{" + write_command("f", value = str(ind)) +  write_command("fmodern", text = font) + ";}"
+            fonttbl_string += font_string + "\n"
+        stylesheet_string = ""
+        for k, v in set_styles.items():
+            single_style = ""
+            single_style += write_command("s", value = v["styleindex"])
+            if "snext" in v:
+                single_style += write_command("snext", value = v["snext"])
+            if "sbasedon" in v:
+                single_style += write_command("sbasedon", value = v["sbasedon"])
+            single_style += v["rtf_par_style"]
+            stylesheet_string += "{" + single_style + " " + k + ";}\n"
+        steno_string = []
+        block = self.textEdit.document().begin()
+        stroke_count = 0
+        while True:
+            steno_string.append("\n")
+            steno_string.append(write_command("par"))
+            steno_string.append(write_command("pard"))
+            if not block.userData()["style"]:
+                log.info("Paragraph has no style, setting to first style %s" % next(iter(set_styles)))
+                par_style = next(iter(set_styles))
+            else:
+                par_style = block.userData()["style"]
+            par_style_string = write_command("s", value = set_styles[par_style]["styleindex"])
+            par_style_string += set_styles[par_style]["rtf_par_style"]
+            par_style_string += set_styles[par_style]["rtf_txt_style"]
+            steno_string.append(par_style_string)
+            strokes = block.userData()["strokes"]
+            stroke_count += len(strokes)
+            for i in strokes:
+                steno_string.append(generate_stroke_rtf(i))
+            # enter style string here
+            if block == self.textEdit.document().lastBlock():
+                break
+            block = block.next()           
+        document_string = []
+        document_string.append("{")
+        # meta
+        document_string.append(write_command("rtf", value = 1))
+        document_string.append(write_command("ansi"))
+        document_string.append(write_command("deff", value = 0))
+        commit = return_commits(self.repo)
+        last_commit = datetime.strptime(commit[-1][1], "%a %b %d %Y %H:%M:%S")
+        recent_commit = datetime.strptime(commit[0][1], "%a %b %d %Y %H:%M:%S")
+        commits = f'{len(commit):03}'
+        document_string.append(write_command("cxrev", value = commits, visible = False, group = True))
+        document_string.append(write_command("cxtranscript", visible = False, group = True))
+        document_string.append(write_command("cxsystem", "Plover2CAT", visible = False, group = True))
+        info_string = []
+        create_string = write_command("yr", value = last_commit.year) + write_command("mo", value = last_commit.month) + write_command("dy", value = last_commit.day)
+        backup_string = write_command("yr", value = recent_commit.year) + write_command("mo", value = recent_commit.month) + write_command("dy", value = recent_commit.day)
+        page_vspan = inch_to_spaces(self.config["page_height"], 6) - inch_to_spaces(self.config["page_top_margin"], 6) - inch_to_spaces(self.config["page_bottom_margin"], 6)
+        if self.page_max_lines.value() != 0:
+            page_vspan = self.page_max_lines.value()        
+        info_string.append(write_command("cxnoflines", value = page_vspan))
+        # cxlinex and cxtimex is hardcoded as it is also harcoded in odf
+        # based on rtf spec, confusing whether left text margin, or left page margin
+        info_string.append(write_command("creatim", value = create_string))
+        info_string.append(write_command("buptim", value = backup_string))
+        info_string.append(write_command("cxlinex", value = int(in_to_twip(-0.15))))
+        info_string.append(write_command("cxtimex", value = int(in_to_twip(-1.5))))
+        info_string.append(write_command("cxnofstrokes", value = stroke_count))
+        document_string.append(write_command("info", "".join(info_string), group = True))
+        document_string.append(write_command("fonttbl", text = fonttbl_string, group = True))
+        document_string.append(write_command("colortbl", value = ";", group = True))
+        document_string.append(write_command("stylesheet", text = stylesheet_string, group = True))
+        document_string.append(write_command("paperw", value = in_to_twip(self.page_width.value())))
+        document_string.append(write_command("paperh", value = in_to_twip(self.page_height.value())))
+        document_string.append(write_command("margl", value = in_to_twip(self.page_left_margin.value())))
+        document_string.append(write_command("margr", value = in_to_twip(self.page_right_margin.value())))
+        document_string.append(write_command("margt", value = in_to_twip(self.page_top_margin.value())))
+        document_string.append(write_command("margb", value = in_to_twip(self.page_bottom_margin.value())))
+        document_string.append("".join(steno_string))
+        document_string.append("}")
+        with open(selected_file[0], "w", encoding = "utf8") as f:
+            f.write("".join(document_string))
