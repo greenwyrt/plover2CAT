@@ -1,6 +1,25 @@
 CHANGES
 
-ver 1.4.1
+ver 1.4.2 (2023-02-06)
+
+- Bug: Anodyne reported that setting `after output` or some retroactive commands was throwing errors. This should now be fixed.
+
+- Feature: Read both Plover2CAT style tape, and raw/paper tape saved from Plover.
+
+- Change: Underlying object names for menu actions have been changed to camelCase for all. Previously action names were inconsistent.
+
+- Feature: User can set custom shortcuts for menu actions.
+
+- Change: the `steno_rtf` class that parsed rtf files has been renamed `rtf_steno` as the inversion is more accurate.
+
+- Feature: RTF export (basic features of spec only).
+
+- Change: Documentation has been updated and organized extensively into separate files under docs/ from user_manual.md. The How-To section should cover how to use most menu items. The Online Help menu now directs to the doc folder on github
+
+- Change: Online help now has F1 as the default shortcut.
+
+
+ver 1.4.1 (2022-12-30)
 
 - Change: Added status bar messages for importing rtf. When actually parsing rtf file, cursor is set to loading so users know that program is not stuck.
 

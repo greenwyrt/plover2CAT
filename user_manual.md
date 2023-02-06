@@ -683,7 +683,7 @@ When a new dictionary is added through `Add Dict`, the dictionary file is copied
 
 ## Transcript data
 
-The `transcript-YYYY-MM-DDTHHMMSS.transcript` contains the editor data. The data on the document is saved in JSON, the paragraph number being the name corresponding to an object of the visible text and all properties for that paragraph. The JSON is minified, so use an online JSON beautify tool if needed.
+The `transcript-YYYY-MM-DDTHHMMSS.transcript` contains the editor data. The data on the document is saved in JSON, the paragraph number being the name corresponding to an object of the visible text and all properties for that paragraph.
 
 ## Tape
 
@@ -928,7 +928,7 @@ RTF/CRE appears to be the common exchange format for CAT software.
 
 The specs are on the [internet archive](https://web.archive.org/web/20201017075356/http://www.legalxml.org/workgroups/substantive/transcripts/cre-spec.htm)
 
-RTF import has been implemented selectively. Next step should be RTF export.
+RTF import/export has been implemented selectively. 
 
 More RTF example files from different companies are needed to test import capabilities as different cat software have their own own flags.
 
@@ -942,19 +942,13 @@ Indexes (in reality, a table of contents) for ODF depends on having "heading" st
 
 Tables are likely more difficult to implement and may require an editor widget
 
-## Header/Footer
-
-This should use JSON to implement in its own folder. ODF has support for both, so does RTF. UI controls have to be created, and an option for first page special.
-
 ## Alternative formats
 
 HTML: The present HTML format is just the ASCII text in a code block wrappd up with html tags. HTML can be much more flexible (ie table of contents, search, images, embedded audio etc), even if the plain text structure has to be kept.
+
 Latex: suggested
+
 Epub?
-
-## Customizable shortcuts
-
-Shortcuts are hardcoded, but user specifying shortcuts may be possible. (see qkeysequenceedit). This is more in case hardcoded key sequences are in conflict with other user shortcuts, not that shortcuts are difficult to use (since the keys are emitted by plover and the outline can be set to anything).
 
 ## Preview of search and replace
 
@@ -962,4 +956,4 @@ Search and replace is done "blindly" in the case of replace all, and also more t
 
 ## Autocomplete enhancement
 
-Right now, autocomplete suggestions come from a pre-set list. The engine should update in near-realtime and take suggestions from the present text, or other transcript json/rtf.
+Right now, autocomplete suggestions come from a pre-set list. The engine should update in near-realtime and take suggestions from the present text, or other transcript json/rtf. However, there could be performance considerations if this is a large transcript. Engine input processing may need to be offloaded to a separate thread on regular intervals or initialized by the user (ie, when user knows that there is time to update) or both.
