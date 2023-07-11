@@ -201,8 +201,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.spellcheck_suggestions.itemDoubleClicked.connect(self.sp_insert_suggest)
         self.dict_selection.activated.connect(self.set_sp_dict)
         ## tape
-        self.textEdit.document().blockCountChanged.connect(lambda: self.get_tapey_tape())
-        self.suggest_sort.toggled.connect(lambda: self.get_tapey_tape())
+        self.textEdit.document().blockCountChanged.connect(lambda: self.get_suggestions())
+        self.suggest_sort.toggled.connect(lambda: self.get_suggestions())
         self.numbers = {number: letter for letter, number in plover.system.NUMBERS.items()}
         self.strokeLocate.clicked.connect(lambda: self.stroke_to_text_move())
         self.textEdit.cursorPositionChanged.connect(lambda: self.text_to_stroke_move())
@@ -409,7 +409,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.clear()
         self.setup_page()
         self.strokeList.clear()
-        self.suggestTable.clearContents()
+        # self.suggestTable.clearContents()
         self.menu_enabling(False)
         self.statusBar.showMessage("Created project.")
         log.info("New project successfully created and set up")
@@ -434,7 +434,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.config = config_contents
         self.textEdit.clear()
         self.strokeList.clear()
-        self.suggestTable.clearContents()
+        # self.suggestTable.clearContents()
         style_path = selected_folder / config_contents["style"]
         log.info("Loading styles for transcript")
         self.styles = self.load_check_styles(style_path)
@@ -1320,6 +1320,49 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.suggestTable.setItem(row, 0, QTableWidgetItem(words[row]))
             self.suggestTable.setItem(row, 1, QTableWidgetItem(most_common_strokes[row]))
         self.suggestTable.resizeColumnsToContents()
+
+    def get_clippy(self):
+        '''This uses a modified clippy_2 Org format that inserts a |
+        before the suggestions for ease of parsing.
+        Ideally I'd load a specific transcript-specific clippy_2 output
+        but that's currently beyond me since I have zero clue
+        how I would dynamically load settings into another plugin
+        from this one, short of bundling my own copy of it'''
+        config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
+        clippy_location = config_dir.joinpath('clippy_2.org')
+        log.debug("Trying to load clippy from default location")
+        if not clippy_location.exists():
+            log.debug("Clippy load failed")
+            return
+        raw_lines = [line for line in open(clippy_location)]
+        stroke_search = []
+        for line in raw_lines:
+            line = ansi_escape.sub('', line) # strip color codes
+            search_hit = re.search(r'\|\s+(.*)\s+<', line)
+            if search_hit:
+                  stroke_search.append(search_hit.group(1).split(", "))
+        first_stroke_search = [x[0] for x in stroke_search] # TODO: show multiple suggestions per phrase
+        log.debug("stroke_search = " + str(stroke_search))
+        if self.suggest_sort.isChecked():
+            most_common_strokes = [word for word, word_count in Counter(first_stroke_search).items() if word_count > 1]
+            most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
+            most_common_strokes = most_common_strokes[::-1]
+        else: 
+            most_common_strokes= [word for word, word_count in Counter(first_stroke_search).most_common(10) if word_count > 1]
+        log.debug("most_common_strokes = " + str(most_common_strokes))
+        words = [self.engine.lookup(tuple(stroke.split("/"))) for stroke in most_common_strokes]
+        log.debug("words = " + str(words))
+        self.suggestTable.clearContents()
+        self.suggestTable.setRowCount(len(words))
+        self.suggestTable.setColumnCount(2)
+        for row in range(len(words)):
+            self.suggestTable.setItem(row, 0, QTableWidgetItem(words[row]))
+            self.suggestTable.setItem(row, 1, QTableWidgetItem(most_common_strokes[row]))
+        self.suggestTable.resizeColumnsToContents()
+
+    def get_suggestions(self):
+        # self.get_tapey_tape()
+        self.get_clippy()
 
     def stroke_to_text_move(self):
         stroke_cursor = self.strokeList.textCursor()

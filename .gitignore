@@ -1,9 +1,5 @@
-plover2cat.egg-info/dependency_links.txt
-plover2cat.egg-info/entry_points.txt
-plover2cat.egg-info/PKG-INFO
-plover2cat.egg-info/requires.txt
-plover2cat.egg-info/SOURCES.txt
-plover2cat.egg-info/top_level.txt
-plover2cat.egg-info/zip-safe
-plover_cat/plover_cat_ui.py
+plover2cat.egg-info/*
 plover_cat/resources_rc.py
+plover_cat/__pycache__/*
+plover_cat/plover_cat_ui.py
+

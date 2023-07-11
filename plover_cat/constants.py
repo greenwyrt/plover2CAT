@@ -1,6 +1,7 @@
 import re
 re_strokes = re.compile(r"\s\s>{1,5}(.*)$")
 steno_untrans = re.compile(r"(?=[STKPWHRAO*EUFBLGDZ])S?T?K?P?W?H?R?A?O?\*?E?U?F?R?P?B?L?G?T?S?D?Z?")
+ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
 default_styles = {
     "Normal": {
