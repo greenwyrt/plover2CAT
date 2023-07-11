@@ -1342,6 +1342,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if search_hit:
                   stroke_search.append(search_hit.group(1).split(", "))
         first_stroke_search = [x[0] for x in stroke_search] # TODO: show multiple suggestions per phrase
+        combined_stroke_search = dict(zip(first_stroke_search, stroke_search))
         log.debug("stroke_search = " + str(stroke_search))
         if self.suggest_sort.isChecked():
             most_common_strokes = [word for word, word_count in Counter(first_stroke_search).items() if word_count > 1]
@@ -1357,7 +1358,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.suggestTable.setColumnCount(2)
         for row in range(len(words)):
             self.suggestTable.setItem(row, 0, QTableWidgetItem(words[row]))
-            self.suggestTable.setItem(row, 1, QTableWidgetItem(most_common_strokes[row]))
+            self.suggestTable.setItem(row, 1, QTableWidgetItem(", ".join(combined_stroke_search[most_common_strokes[row]])))
         self.suggestTable.resizeColumnsToContents()
 
     def get_suggestions(self):
