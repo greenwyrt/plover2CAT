@@ -409,7 +409,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.clear()
         self.setup_page()
         self.strokeList.clear()
-        # self.suggestTable.clearContents()
+        self.suggestTable.clearContents()
         self.menu_enabling(False)
         self.statusBar.showMessage("Created project.")
         log.info("New project successfully created and set up")
@@ -434,7 +434,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.config = config_contents
         self.textEdit.clear()
         self.strokeList.clear()
-        # self.suggestTable.clearContents()
+        self.suggestTable.clearContents()
         style_path = selected_folder / config_contents["style"]
         log.info("Loading styles for transcript")
         self.styles = self.load_check_styles(style_path)
