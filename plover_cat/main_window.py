@@ -448,7 +448,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.clear()
         self.setup_page()
         self.strokeList.clear()
-        # self.suggestTable.clearContents()
+        self.suggestTable.clearContents()
         self.menu_enabling(False)
         self.statusBar.showMessage("Created project.")
         log.info("New project successfully created and set up")
