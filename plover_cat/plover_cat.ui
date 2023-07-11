@@ -359,6 +359,9 @@ position.</string>
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
        </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
        <property name="readOnly">
         <bool>true</bool>
        </property>
