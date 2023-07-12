@@ -1,2 +1,4 @@
 plover2cat.egg-info/*
 plover_cat/__pycache__/*
+plover_cat/plover_cat_ui.py
+plover_cat/resources_rc.py
