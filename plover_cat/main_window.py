@@ -1390,11 +1390,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         combined_stroke_search = dict(zip(first_stroke_search, stroke_search))
         log.debug("stroke_search = " + str(stroke_search))
         if self.suggest_sort.isChecked():
-            most_common_strokes = [word for word, word_count in Counter(first_stroke_search).items() if word_count > 1]
+            most_common_strokes = [word for word in first_stroke_search]
             most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
             most_common_strokes = most_common_strokes[::-1]
         else: 
-            most_common_strokes= [word for word, word_count in Counter(first_stroke_search).most_common(10) if word_count > 1]
+            most_common_strokes= [word for word, word_count in Counter(first_stroke_search).most_common(10) if word_count > 0]
         log.debug("most_common_strokes = " + str(most_common_strokes))
         words = [self.engine.lookup(tuple(stroke.split("/"))) for stroke in most_common_strokes]
         log.debug("words = " + str(words))
