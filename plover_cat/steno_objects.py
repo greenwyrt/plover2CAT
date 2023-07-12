@@ -515,13 +515,21 @@ class steno_wrapper(textwrap.TextWrapper):
         # other elements just keep together
         text.remove_end()
         chunks = []
+        txt = ""
         for el in text.data:
             if el.element in ["stroke", "text"]:
-                #split
-                el_chunks = self.wordsep_simple_re.split(el.to_text())
-                chunks.extend([text_element(i) for i in el_chunks if i])
+                # keep adding to string as long as it is still "text"
+                txt = txt + el.to_text()
             else:
+                # add txt string and then append element, so list is ["text", el, "text"]
+                txt_chunks = self.wordsep_simple_re.split(txt)
+                chunks.extend([text_element(i) for i in txt_chunks if i])
+                txt = ""
                 chunks.append(el)
+        if txt:
+            # if there is remaining text, append
+            txt_chunks = self.wordsep_simple_re.split(txt)
+            chunks.extend([text_element(i) for i in txt_chunks if i])
         return chunks
 
     def _wrap_chunks(self, chunks):
