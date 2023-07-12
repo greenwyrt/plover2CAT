@@ -7,6 +7,7 @@ The basic structure has five folders and three files.
 
 ```
 transcript-{timestamp}/
+    assets/
     audio/
     dictionaries/
         transcript.json
@@ -25,6 +26,8 @@ transcript-{timestamp}/
 ```
 
 ## Folder Description
+
+- assets: contains images to load into document
 
 - audio: contains audio/video files, such as those recorded in Plover2CAT
 

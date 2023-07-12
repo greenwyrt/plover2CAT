@@ -6,15 +6,16 @@ Plover2CATs can export transcripts in several plain and formatted documents for 
 
 The table below summarizes what features are available for each export format.
 
-| Format      | Richtext | Line \# | Timestamp | Page \# | Header/Footer | Char/Line | Lines/Page |
-|-------------|----------|---------|-----------|---------|---------------|-----------|------------|
-| Plain Text  | No       | No      | No        | No      | No            | No        | No         |
-| Basic ASCII | No       | &check; | No        | &check; | No            | No        | No         |
-| ASCII       | &check;\*| &check; | &check;   | &check; | &check;       | &check;   | &check;    |
-| HTML        | &check;\*| &check; | &check;   | &check; | &check;       | &check;   | &check;    |
-| ODT         | &check;  | &check; | &check;   | &check; | &check;       | &check;   | &check;    |
-| *RTF/CRE*   |          |         |           |         |               |           |            |
-
+Format        | Plain Text | Basic ASCII | ASCII     | HTML      | ODT     | RTF/CRE
+---           | ---        | ---         | ---       | ---       | ---     | ---
+Richtext      | No         | No          | &check;\* | &check;\* | &check; | &check;
+Line \#       | No         | &check;     | &check;   | &check;   | &check; | *No*
+Timestamp     | No         | No          | &check;   | &check;   | &check; | No
+Page \#       | No         | &check;     | &check;   | &check;   | &check; | No
+Header/Footer | No         | No          | &check;   | &check;   | &check; | *No*
+Char/Line     | No         | No          | &check;   | &check;   | &check; | No
+Lines/Page    | No         | No          | &check;   | &check;   | &check; | *No*
+Images        | No         | No          | No        | No        | &check; | &check;
 
 \* No font support, indents and other layout is converted to closest approximation using spaces for padding.
 
@@ -30,9 +31,13 @@ Not all formatting can exported to all file types. For example, text files canno
 
 The plain text format contains just pure text. Each paragraph becomes one line in the text document. This file will not contain any styling/formatting. 
 
+The `export_text` method directly write the editor text to file.
+
 ### Basic ASCII
 
 This is the ASCII format as specified in Ipos Eclipse. Page numbers begin on column 1, and are padded to 4 places. Each line of the text begins with line numbers starting on column 2, with text beginning on column 7 and is < 78 characters in length. Hard-coded into the code at this time is 25 lines per page. This export format will ignore style formatting.
+
+The `export_plain_ascii` method wraps editor text and adds line numbers and page numbers according to file format.
 
 ### ASCII
 
@@ -42,12 +47,12 @@ This is an ASCII plain text format with support for line numbers and timestamps,
 
 Plover2CAT implements the simple SubRip (`*.srt`) captioning file format for exporting. This format requires all paragraphs to have an Audio Start Time property. The last paragraph for the audio needs an Audio End Time property, which can be set manually or by pressing `Stop` and having the time automatically be set for the paragraph. 
 
-This file is not ready for use as subtitles, as it does not have the proper line widths. Captioning/subtitling software will be needed to actually do syncing of text to sound.
+`export_srt` uses block-level `audiostarttime` and `audioendtime` to create `srt` file. This file is not ready for use as subtitles, as it does not have the proper line widths. Captioning/subtitling software will be needed to actually do syncing of text to sound.
 
 ### OpenDocument Text
 
-The Open Document Format (`ODF`) is an open source standard for documents based on XML. Plover2CAT will export `ODF` files which can be opened by most word processor software such as LibreOffice and Microsoft Word. `ODF` export is the most well-supported file type in terms of formatting, as Plover2CAT can [generate style templates](howto/generatestyletemplate.md) from `ODF` files and even use `ODF` files as [style templates](howto/generatestyletemplate.md) for formatting that is unsupported in Plover2CAT.
+The Open Document Format (`ODF`) is an open source standard for documents based on XML. Plover2CAT will export `ODF` files which can be opened by most word processor software such as LibreOffice and Microsoft Word. `ODF` export is the most well-supported file type in terms of formatting, as Plover2CAT can [generate style templates](howto/generatestyletemplate.md) from `ODF` files and even use `ODF` files as [style templates](../howto/generatestyletemplate.md) for formatting that is unsupported in Plover2CAT.
 
 ### RTF/CRE 
 
-Plover2CAT offers exports to RTF/CRE, the commonly used data exchange format for transcripts. As a result, it is possible to import transcripts from Plover2CAT to commercial software such as CaseCatalyst. Plover2CAT exports a [subset](reference/rtf_support.md) of the [RTF spec](https://web.archive.org/web/20201017075356/http://www.legalxml.org/workgroups/substantive/transcripts/cre-spec.htm).
+Plover2CAT offers exports to RTF/CRE, the commonly used data exchange format for transcripts. As a result, it is possible to import transcripts from Plover2CAT to commercial software such as CaseCatalyst. Plover2CAT exports a [subset](rtf_support.md) of the [RTF spec](https://web.archive.org/web/20201017075356/http://www.legalxml.org/workgroups/substantive/transcripts/cre-spec.htm).

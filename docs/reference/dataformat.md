@@ -75,18 +75,24 @@ The transcript file (named `transcript-{timestamp}.transcript`) is located in th
 
 The transcript file is in reality a JSON file. Each paragraph in the transcript is a key:value pair, with the paragraph number being the first level key, and a nested JSON object the value.
 
-The nested JSON object holds the data on the paragraph itself. It has two keys, `text` and `data`. `text` holds the text for the paragraph as a text string. `data` is a nested JSON object.
+The nested JSON object holds the data on the paragraph itself. 
 
-The keys for `data` are: 
+The keys for the nested JSON object are: 
 - `creationtime`: timestamp for when the paragraph was created
 - `edittime`: timestamp whn paragraph was last updated
 - `audiostarttime`: timestamp of audio when paragraph was created (if available)
 - `audioendtime`: timestamp of audio if audio was stopped when cursor was in paragraph (if available)
 - `style`: string stating the style of the paragraph (should be one of the keys in the style file)
-- `strokes`: array of strokes
+- `strokes`: array of serialized `text elements`
 - `notes`: string for any notes the user has added to the paragraph
 
-Each stroke in the `strokes` array is a three-element array, first element the timestamp for when the stroke occurred, second element the keys in the stroke, and third element the Plover output string.
+### Format < 2.0.0
+
+Plover2CAT version < 2.0.0 use a different JSON structure. Any files with the old format will  be parsed and then converted when saving.
+
+The nested JSON object holds the data on the paragraph itself. It has two keys, `text` and `data`. `text` holds the text for the paragraph as a text string. `data` is a nested JSON object.
+
+`strokes` is an array of strokes. Each stroke in the `strokes` array is a three-element array, first element the timestamp for when the stroke occurred, second element the keys in the stroke, and third element the Plover output string.
 
 It should be possible to recreate the `text` string by iterating through `strokes` and extracting the third elements.
 
