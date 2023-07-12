@@ -1,5 +1,8 @@
 # Transcript data formats
 
+
+## RTF/CRE
+
 The Rich Text Format (Court Reporting Extension) is the most commonly used data exchange format between professional CAT software as it is able to hold text, stroke, time, and dictionary data. Revision one (and the only) came out in 1995 and has not changed since. 
 
 As part of the spec, vendors could add their own extensions. Consequently, RTF/CRE files from one CAT software may be imported into another but on a limited basis if vendor extensions are used and not documented publically. 

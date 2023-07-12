@@ -18,6 +18,10 @@ More RTF example files from different companies are needed to test import capabi
 
 Right now, autocomplete suggestions come from a pre-set list. The engine should update in near-realtime and take suggestions from the present text, or other transcript json/rtf. However, there could be performance considerations if this is a large transcript. Engine input processing may need to be offloaded to a separate thread on regular intervals or initialized by the user (ie, when user knows that there is time to update) or both.
 
+Occurrences of words can be counted with a `Counter`, and the first occurrence can be searched for steno in the blocks.
+
+Autocomplete and next word prediction are not the same things.
+
 ## Enhancing search types
 
 Possible new search types: 
@@ -45,9 +49,11 @@ Search and replace is done "blindly" in the case of replace all, and also more t
 Paragraphs with certain styles could get a highlight color.
 
 
-## Custom classes for stroke
+## Custom classes for text objects
 
-The `userData` for each text block is just a list of three-element lists. This works well for just simple time-stroke-string. Professional CAT programs can do things such as display conflicts and index entries. However, those have either variable lengths or are zero in length and have to be treated differently than normal steno. With custom classes, non-stroke entities can emit custom len values, and be handled differently in export. 
+*This idea is only partially implemented*
+
+The `userData` for each text block is just a list of three-element lists. This works well for just simple time-stroke-string. Professional CAT programs can do things such as display conflicts and index entries. However, those have either variable lengths or are one in length and have to be treated differently than normal steno. With custom classes, non-stroke entities can emit custom len values, and be handled differently in export. 
 
 This likely requires changing the `.transcript` file format in some way, likely a major revision. This should be done before adding images/tables.
 
@@ -72,14 +78,11 @@ Class reference_object
     len is 1
     length is length of id and more
 
+Why? Image exhibit reference as "Exhibit 1. caption blah" within text. This should be treated as one character, and have unique id for referencing.
 
-BlockUserData should possibly also have methods for splitting and subsetting, and replace the capabilities of the functions in stroke_funcs.
+## Richtext Features for indexes and tables
 
-## Richtext Features for images and tables
-
-While richtext editing has been enabled, some common features of word processors and professional CAT software are missing. Primary ones are 1) embedding images, 2) table of contents/index and 3) tables.
-
-QTextEdit is able to work with images out of the box (just need to implement certain features in code for exporting, and also folders for saving image data.) The problem is how to store it in the transcript data.
+While richtext editing has been enabled, some common features of word processors and professional CAT software are missing. Primary ones are 1) embedding images (implemented), 2) table of contents/index and 3) tables.
 
 Indexes (in reality, a table of contents) for ODF depends on having "heading" styles. This can be integrated. RTF table of contents is possible (based on the spec). The difficulty will be keeping track of the text in the editor selected for table of contents if there is custom text. 
 
