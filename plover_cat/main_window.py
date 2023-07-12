@@ -1328,7 +1328,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.recorder.state() == QMediaRecorder.RecordingState:
             real_time = self.recorder.duration() - self.audioDelay.value()
             audio_time = ms_to_hours(real_time)
-        log_string = "{0}|{1}|({2},{3})|{4}".format(self.stroke_time, audio_time, self.cursor_block, self.cursor_block_position, steno)
+        log_string = "{0}|{1}|({2},{3})\t|{4}".format(self.stroke_time, audio_time, self.cursor_block, self.cursor_block_position, steno)
         self.strokeList.appendPlainText(log_string)
         if not self.file_name:
             return
