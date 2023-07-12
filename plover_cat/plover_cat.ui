@@ -368,6 +368,9 @@ position.</string>
        <property name="plainText">
         <string/>
        </property>
+       <property name="tabStopDistance">
+        <double>50.000000000000000</double>
+       </property>
        <property name="textInteractionFlags">
         <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
        </property>
