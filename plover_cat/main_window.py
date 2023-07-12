@@ -1319,7 +1319,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 keys.add(key)
         steno = ''.join(key.strip('-') if key in keys else ' ' for key in plover.system.KEYS)
         audio_time = ''
-        if self.player.state() == QMediaPlayer.PlayingState:
+        if self.player.state() == QMediaPlayer.PlayingState or self.player.state() == QMediaPlayer.PausedState:
             real_time = self.player.position() - self.audioDelay.value()
             audio_time = ms_to_hours(real_time)
         if self.recorder.state() == QMediaRecorder.RecordingState:
@@ -1487,7 +1487,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         raw_steno = self.last_raw_steno
         string_sent = self.last_string_sent
         backspaces_sent = self.last_backspaces_sent
-        if self.player.state() == QMediaPlayer.PlayingState:
+        if self.player.state() == QMediaPlayer.PlayingState or self.player.state() == QMediaPlayer.PausedState:
             real_time = self.player.position() - self.audioDelay.value()
             audio_time = ms_to_hours(real_time)
         elif self.recorder.state() == QMediaRecorder.RecordingState:
@@ -1511,7 +1511,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             strokes_data = element_collection()
         if not block_dict["audiostarttime"]:
-            if self.player.state() == QMediaPlayer.PlayingState:
+            if self.player.state() == QMediaPlayer.PlayingState or self.player.state() == QMediaPlayer.PausedState:
                 block_dict = update_user_data(block_dict, key = "audiostarttime", value = audio_time)
             if self.recorder.state() == QMediaRecorder.RecordingState:
                 block_dict = update_user_data(block_dict, key = "audiostarttime", value = audio_time)
@@ -1567,7 +1567,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             for i, segment in enumerate(list_segments):
                 stroke = stroke_text(time = self.stroke_time, stroke = raw_steno, text = segment)
                 # because this is all occurring in one stroke, only first segment gets the stroke
-                if self.player.state() == QMediaPlayer.PlayingState: 
+                if self.player.state() == QMediaPlayer.PlayingState or self.player.state() == QMediaPlayer.PausedState: 
                     stroke.audiotime = real_time
                 if self.recorder.state() == QMediaRecorder.RecordingState: 
                     stroke.audiotime = real_time
@@ -1590,7 +1590,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.undo_stack.endMacro()
         if self.last_string_sent:
             stroke = stroke_text(time = self.stroke_time, stroke = raw_steno, text = string_sent)
-            if self.player.state() == QMediaPlayer.PlayingState: 
+            if self.player.state() == QMediaPlayer.PlayingState or self.player.state() == QMediaPlayer.PausedState: 
                 stroke.audiotime = real_time
             if self.recorder.state() == QMediaRecorder.RecordingState:
                 stroke.audiotime = real_time
@@ -2561,33 +2561,34 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         )
         if not selected_file[0]:
             return
-        block_num = 1
+        line_num = 1
         doc_lines = []
         log.info("Attempting to export srt caption file.")
-        for i in range(self.textEdit.blockCount()):
-            log.debug("Setting timestamps for par %d", i)
-            current_block = self.textEdit.document().findBlockByNumber(i)
-            block_data = current_block.userData()
-            doc_lines += [str(block_num)]
-            block_num += 1
+        block = self.textEdit.document().begin()
+        while True:        
+            block_data = block.userData()
+            doc_lines += [block.blockNumber()]
             audiostarttime = block_data["audiostarttime"]
             # webvtt uses periods for ms separator
             audiostarttime = audiostarttime.replace(".", ",")
             if block_data["audioendtime"]:
                 audioendtime = block_data["audioendtime"]
-            elif current_block == self.textEdit.document().end():
-                log.debug("Block %d does not have audioendtime. Last block in document. Setting 0 as timestamp.", i)
+            elif block == self.textEdit.document().end():
+                log.debug("Block %d does not have audioendtime. Last block in document. Setting 0 as timestamp.", block.blockNumber())
                 audioendtime = ms_to_hours(0)
             else:
-                log.debug("Block %d does not have audioendtime. Attempting to use starttime from next block.", i)
+                log.debug("Block %d does not have audioendtime. Attempting to use starttime from next block.", block.blockNumber())
                 try:
-                    audioendtime = current_block.next().userData()["audiostarttime"]
+                    audioendtime = block.next().userData()["audiostarttime"]
                 except TypeError:
                     audioendtime = ms_to_hours(0)
             audioendtime = audioendtime.replace(".", ",")
             doc_lines += [audiostarttime + " --> " + audioendtime]
-            doc_lines += [current_block.text()]
+            doc_lines += [block.text()]
             doc_lines += [""]
+            if block == self.textEdit.document().lastBlock():
+                break
+            block = block.next()
         file_path = pathlib.Path(selected_file[0])
         with open(file_path, "w", encoding="utf-8") as f:
             for line in doc_lines:
