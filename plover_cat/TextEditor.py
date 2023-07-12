@@ -5,7 +5,7 @@ from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor
 from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal
 from PyQt5.QtWidgets import QPlainTextEdit, QCompleter, QTextEdit
 
-from plover_cat.main_window import BlockUserData, steno_insert, stroke_pos_at_pos
+from plover_cat.main_window import BlockUserData, steno_insert
 
 num_keys = [Qt.Key_0, Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5, Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9]
 
@@ -17,10 +17,11 @@ class PloverCATEditor(QTextEdit):
         super().__init__(widget)
         self._completer = None
     def setCompleter(self, c):
+        if not c:
+            self._completer = c
+            return
         if self._completer is not None:
             self._completer.activated.disconnect()
-        if not c:
-            return
         self._completer = c
         c.setWidget(self)
         c.setCompletionMode(QCompleter.PopupCompletion)

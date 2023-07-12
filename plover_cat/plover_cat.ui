@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>891</width>
-    <height>705</height>
+    <width>965</width>
+    <height>668</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,6 +22,43 @@
     <height>0</height>
    </size>
   </property>
+  <property name="palette">
+   <palette>
+    <active>
+     <colorrole role="AlternateBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>160</red>
+        <green>160</green>
+        <blue>160</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </active>
+    <inactive>
+     <colorrole role="AlternateBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>160</red>
+        <green>160</green>
+        <blue>160</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </inactive>
+    <disabled>
+     <colorrole role="AlternateBase">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>160</red>
+        <green>160</green>
+        <blue>160</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </disabled>
+   </palette>
+  </property>
   <property name="font">
    <font>
     <pointsize>8</pointsize>
@@ -31,7 +68,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_12">
+   <layout class="QHBoxLayout" name="horizontalLayout_14">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -85,7 +122,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>891</width>
+     <width>965</width>
      <height>19</height>
     </rect>
    </property>
@@ -135,6 +172,7 @@
      <bool>true</bool>
     </property>
     <addaction name="actionFindReplacePane"/>
+    <addaction name="actionInsertImage"/>
     <addaction name="separator"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
@@ -186,11 +224,13 @@
      <addaction name="actionRevealSteno"/>
      <addaction name="actionAudioControls"/>
      <addaction name="actionToolbox"/>
+     <addaction name="actionNavigation"/>
     </widget>
     <addaction name="actionZoomIn"/>
     <addaction name="actionZoomOut"/>
     <addaction name="actionShowAllCharacters"/>
     <addaction name="actionWindowFont"/>
+    <addaction name="actionBackgroundColor"/>
     <addaction name="actionPaperTapeFont"/>
     <addaction name="menuDocks"/>
    </widget>
@@ -603,13 +643,13 @@ position.</string>
         <enum>QFrame::Plain</enum>
        </property>
        <property name="currentIndex">
-        <number>5</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="styling_pane">
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
+          <y>-403</y>
           <width>363</width>
           <height>472</height>
          </rect>
@@ -1160,7 +1200,7 @@ and margin positions. Less accurate with proportional fonts.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-272</y>
+          <y>0</y>
           <width>414</width>
           <height>415</height>
          </rect>
@@ -1530,7 +1570,7 @@ Use %p for page number.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-74</y>
+          <y>0</y>
           <width>300</width>
           <height>217</height>
          </rect>
@@ -1716,7 +1756,7 @@ Use %p for page number.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-89</y>
+          <y>0</y>
           <width>251</width>
           <height>215</height>
          </rect>
@@ -1904,7 +1944,7 @@ time from next paragraph.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-136</y>
+          <y>0</y>
           <width>239</width>
           <height>279</height>
          </rect>
@@ -2059,7 +2099,7 @@ time from next paragraph.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-21</y>
+          <y>0</y>
           <width>344</width>
           <height>164</height>
          </rect>
@@ -2330,6 +2370,21 @@ time from next paragraph.</string>
    <addaction name="actionCopy"/>
    <addaction name="actionPaste"/>
    <addaction name="actionInsertNormalText"/>
+  </widget>
+  <widget class="QDockWidget" name="dockNavigation">
+   <property name="windowTitle">
+    <string>Navigation</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout" name="verticalLayout_12">
+     <item>
+      <widget class="QListWidget" name="navigationList"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionOpen_Stroke_Log">
    <property name="text">
@@ -2906,6 +2961,9 @@ paragraphs to merge</string>
    <property name="checked">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Audio Controls</string>
    </property>
@@ -3108,6 +3166,38 @@ dialog box at cursor location</string>
   <action name="actionRTF">
    <property name="text">
     <string>RTF/CRE (*.rtf)</string>
+   </property>
+  </action>
+  <action name="actionInsertImage">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/image--plus.png</normaloff>:/image--plus.png</iconset>
+   </property>
+   <property name="text">
+    <string>Insert Image</string>
+   </property>
+  </action>
+  <action name="actionBackgroundColor">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/palette.png</normaloff>:/palette.png</iconset>
+   </property>
+   <property name="text">
+    <string>Background Color</string>
+   </property>
+   <property name="toolTip">
+    <string>Set background color</string>
+   </property>
+  </action>
+  <action name="actionNavigation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Navigation</string>
    </property>
   </action>
  </widget>
@@ -3391,6 +3481,22 @@ dialog box at cursor location</string>
     <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNavigation</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dockNavigation</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>765</x>
+     <y>500</y>
     </hint>
    </hints>
   </connection>
