@@ -1,5 +1,23 @@
 CHANGES
 
+ver 2.0.0 
+
+Major change:
+- Custom classes to store stroke data and other text elements within `userData` in the `QTextDocument`
+- Manipulation of text + steno has been reworked to use new classes
+- `stroke_funcs.py` removed since functions are now in the custom classes
+-  `export_helpers.py` added, moved export-related helpers out 
+
+- Feature: Customizable background color.
+
+- Feature: Does not allow autocomplete enabled if there is no stroke for `{#Return}` in active dictionaries as using `\n` for confirm choice will cause new paragraph to be inserted.
+
+- Feature: Multi-stroke steno search. The search strokes has to be an exact match, ie `KPH/EU` will match `KPH/EU` but not `KPHEU` or `KPH/E`
+
+- Feature: Reveal steno now shows different labels depending on the type of element. `T` for plain text, `S` for text associated with steno, `I` for an image etc.
+
+
+
 ver 1.4.2 (2023-02-06)
 
 - Bug: Anodyne reported that setting `after output` or some retroactive commands was throwing errors. This should now be fixed.

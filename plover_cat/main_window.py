@@ -23,14 +23,14 @@ from odf.style import (Style, TextProperties, ParagraphProperties, FontFace, Pag
 PageLayoutProperties, MasterPage, TabStops, TabStop, GraphicProperties, Header, Footer)
 from odf.text import H, P, Span, Tab, LinenumberingConfiguration, PageNumber
 from odf.teletype import addTextToElement
-from odf.draw import Frame, TextBox
+from odf.draw import Frame, TextBox, Image
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
 QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, QTextBlockFormat, 
-QTextOption, QTextCharFormat, QKeySequence)
+QTextOption, QTextCharFormat, QKeySequence, QPalette)
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
-QStyle, QMessageBox, QFontDialog, QPlainTextDocumentLayout, QUndoStack, QLabel, QMenu,
+QStyle, QMessageBox, QFontDialog, QColorDialog, QPlainTextDocumentLayout, QUndoStack, QLabel, QMenu,
 QDockWidget, QVBoxLayout, QCompleter, QApplication, QTextEdit, QProgressBar, QAction)
 from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaMetaData, QMediaRecorder, 
 QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
@@ -51,9 +51,10 @@ from plover_cat.plover_cat_ui import Ui_PloverCAT
 from plover_cat.rtf_parsing import *
 from plover_cat.constants import *
 from plover_cat.qcommands import *
-from plover_cat.stroke_funcs import *
 from plover_cat.helpers import * 
-  
+from plover_cat.steno_objects import *
+from plover_cat.export_helpers import * 
+
 class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def __init__(self, engine):
         super().__init__()
@@ -81,7 +82,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         ## on very first startup, set tabs up
         ## later configs will use window settings
         self.tabifyDockWidget(self.dockHistoryStack, self.dockPaper)
-        self.tabifyDockWidget(self.dockStenoData, self.dockAudio)
+        self.tabifyDockWidget(self.dockPaper, self.dockNavigation)
+        self.tabifyDockWidget(self.dockAudio, self.dockStenoData)
         settings = QSettings("Plover2CAT", "OpenCAT")
         if settings.contains("geometry"):
             self.restoreGeometry(settings.value("geometry"))
@@ -97,6 +99,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             font = QFont()
             font.fromString(font_string)
             self.strokeList.setFont(font)
+        if settings.contains("backgroundcolor"):
+            back_color = QColor(settings.value("backgroundcolor"))
+            window_pal = self.palette()
+            window_pal.setColor(QPalette.Base, back_color)
+            self.setPalette(window_pal)
         self.config = {}
         self.file_name = ""
         self.styles = {}
@@ -114,11 +121,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.undo_stack = QUndoStack(self)
         self.undoView.setStack(self.undo_stack)
         self.cutcopy_storage = {}
+        self.repo = None        
         self.spell_ignore = []
         self.textEdit.setPlainText("Welcome to Plover2CAT\nOpen or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")
         self.menu_enabling()
         self.set_shortcuts()
         # connections:
+        ## engine connections
+        self.textEdit.setEnabled(True)
+        engine.signal_connect("stroked", self.on_stroke) 
+        engine.signal_connect("stroked", self.log_to_tape) 
+        engine.signal_connect("send_string", self.on_send_string)
+        engine.signal_connect("send_backspaces", self.count_backspaces)        
         ## file setting/saving
         self.actionQuit.triggered.connect(lambda: self.action_close())
         self.actionNew.triggered.connect(lambda: self.create_new())
@@ -145,7 +159,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionShowVideo.triggered.connect(lambda: self.show_hide_video())
         ## editor related connections
         self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
-        self.textEdit.cursorPositionChanged.connect(self.display_block_data)
         self.textEdit.complete.connect(self.insert_autocomplete)
         self.editorCheck.stateChanged.connect(self.editor_lock)
         self.submitEdited.clicked.connect(self.edit_user_data)
@@ -155,15 +168,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionRedo.triggered.connect(self.undo_stack.redo)
         self.actionUndo.triggered.connect(self.undo_stack.undo)
         self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
+        self.actionInsertImage.triggered.connect(lambda: self.insert_image())
         self.actionInsertNormalText.triggered.connect(self.insert_text)
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
+        self.actionBackgroundColor.triggered.connect(lambda: self.change_backgrounds())
         self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
         self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.textEdit.send_del.connect(self.mock_del)
-        self.parSteno.setStyleSheet("alternate-background-color: darkGray;")
-        self.strokeList.setStyleSheet("selection-background-color: darkGray;")
+        # self.parSteno.setStyleSheet("alternate-background-color: darkGray;")
+        # self.strokeList.setStyleSheet("selection-background-color: darkGray;")
         self.revert_version.clicked.connect(self.revert_file)
         ## steno related edits
         self.actionMergeParagraphs.triggered.connect(lambda: self.merge_paragraphs())
@@ -223,13 +238,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cursor_status = QLabel("Par,Char: {line},{char}".format(line = 0, char = 0))
         self.cursor_status.setObjectName("cursor_status")
         self.statusBar.addPermanentWidget(self.cursor_status)
-        self.repo = None
-        ## engine connections
-        self.textEdit.setEnabled(True)
-        engine.signal_connect("stroked", self.on_stroke) 
-        engine.signal_connect("stroked", self.log_to_tape) 
-        engine.signal_connect("send_string", self.on_send_string)
-        engine.signal_connect("send_backspaces", self.count_backspaces)
         log.info("Main window open")
 
     def set_shortcuts(self):
@@ -246,8 +254,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 select_action.setShortcut(QKeySequence(keysequence)) 
             except:
                 pass   
-        # test_action = self.findChild(QAction, "actionSaveAs")
-        # test_action.setShortcut(QKeySequence("Ctrl+L"))
 
     def about(self):
         QMessageBox.about(self, "About",
@@ -259,71 +265,19 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                         "It owes its development to the members of the Plover discord group who provided suggestions and bug finding. "
                         "PyQt5 and Plover are both licensed under the GPL. Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
 
-    def setup_completion(self, checked):
-        log.info("Setting up autocompletion.")
-        if not checked:
-            self.textEdit.setCompleter(None)
-        self.completer = QCompleter(self)
-        wordlist_path = self.file_name / "sources" / "wordlist.json"
-        if not wordlist_path.exists():
-            log.info("Wordlist does not exist.")
-            QMessageBox.warning(self, "Autocompletion", "The required file wordlist.json is not available in the sources folder. See user manual for format.")
-            self.statusBar.showMessage("Wordlist.json for autocomplete does not exist in sources directory. Passing")
-            return
-        self.completer.setModel(self.modelFromFile(str(wordlist_path)))
-        self.completer.setModelSorting(QCompleter.CaseInsensitivelySortedModel)
-        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
-        self.completer.setWrapAround(False)
-        self.textEdit.setCompleter(self.completer)
-        self.statusBar.showMessage("Autocompletion from wordlist.json enabled.")
-
-    def modelFromFile(self, fileName):
-        f = QFile(fileName)
-        if not f.open(QFile.ReadOnly):
-            return(QStringListModel(self.completer))
-        with open(fileName, "r") as f:
-            completer_dict = json.loads(f.read())
-        words = QStandardItemModel(self.completer)
-        for key, value in completer_dict.items():
-            item = QStandardItem()
-            # removes any newlines/tabs, otherwise breaks autocomplete
-            key = " ".join(key.split())
-            item.setText(key)
-            item.setData(value, QtCore.Qt.UserRole)
-            words.appendRow(item)
-        return(words)
-
-    def add_autocomplete_item(self):
-        current_cursor = self.textEdit.textCursor()
-        if not current_cursor.hasSelection():
-            self.statusBar.showMessage("No text selected for autocomplete")
-            return
-        current_block = current_cursor.block()
-        selected_text = current_cursor.selectedText()        
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-        # end_pos is in prep for future multi-stroke untrans
-        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-        start_stroke_pos = stroke_pos_at_pos(current_block.userData()["strokes"], start_pos)
-        end_stroke_pos = stroke_pos_at_pos(current_block.userData()["strokes"], end_pos)
-        underlying_strokes = extract_stroke_data(current_block.userData()["strokes"], start_stroke_pos[0], end_stroke_pos[1], copy = True)
-        underlying_steno = "/".join([stroke[1] for stroke in underlying_strokes])
-        text, ok = QInputDialog().getText(self, "Add Autocomplete Term", "Text: %s \nSteno:" % selected_text, text = underlying_steno)
-        if not ok:
-            return
-        log.debug("Adding term to autocompletion")
-        wordlist_path = self.file_name / "sources" / "wordlist.json"
-        if wordlist_path.exists():
-            with open(wordlist_path, "r") as f:
-                completer_dict = json.loads(f.read())
-        else:
-            completer_dict = {}
-        completer_dict[selected_text.strip()] = text
-        save_json(completer_dict, wordlist_path)
-        self.setup_completion(self.actionAutocompletion.isChecked())
-
     def open_help(self):
         user_manual_link = QUrl("https://github.com/greenwyrt/plover2CAT/tree/main/docs")
         QtGui.QDesktopServices.openUrl(user_manual_link)
+
+    def context_menu(self, pos):
+        menu = QMenu()
+        menu.addAction(self.actionRetroactiveDefine)
+        menu.addAction(self.actionMergeParagraphs)
+        menu.addAction(self.actionSplitParagraph)
+        menu.addAction(self.actionCut)
+        menu.addAction(self.actionCopy)
+        menu.addAction(self.actionPaste)
+        menu.exec_(self.textEdit.viewport().mapToGlobal(pos))
 
     def menu_enabling(self, value = True):
         self.menuEdit.setEnabled(not value)
@@ -331,6 +285,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.menuDictionary.setEnabled(not value)
         self.menuAudio.setEnabled(not value)
         self.menuStyling.setEnabled(not value)
+        self.menuExport_as.setEnabled(not value)
         self.actionNew.setEnabled(value)
         self.actionSave.setEnabled(not value)
         self.actionSaveAs.setEnabled(not value)
@@ -356,15 +311,99 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionOpenTranscriptFolder.setEnabled(not value)
         self.actionImportRTF.setEnabled(not value)
 
-    def context_menu(self, pos):
-        menu = QMenu()
-        menu.addAction(self.actionRetroactiveDefine)
-        menu.addAction(self.actionMergeParagraphs)
-        menu.addAction(self.actionSplitParagraph)
-        menu.addAction(self.actionCut)
-        menu.addAction(self.actionCopy)
-        menu.addAction(self.actionPaste)
-        menu.exec_(self.textEdit.viewport().mapToGlobal(pos))
+    def setup_completion(self, checked):
+        log.info("Setting up autocompletion.")
+        if not checked:
+            self.textEdit.setCompleter(None)
+            return
+        self.completer = QCompleter(self)
+        wordlist_path = self.file_name / "sources" / "wordlist.json"
+        if not wordlist_path.exists():
+            log.info("Wordlist does not exist.")
+            QMessageBox.warning(self, "Autocompletion", "The required file wordlist.json is not available in the sources folder. See user manual for format.")
+            self.statusBar.showMessage("Wordlist.json for autocomplete does not exist in sources directory. Passing.")
+            return
+        check_return = self.engine.reverse_lookup("{#Return}")
+        if not check_return:
+            log.info("Active dictionaries missing a {#Return} stroke")
+            QMessageBox.warning(self, "Autocompletion", "No active dictionaries have an outline for {#Return}. One is recommended for autocompletion. See user manual.")
+            self.actionAutocompletion.setChecked(False)
+            return
+        self.completer.setModel(self.model_from_file(str(wordlist_path)))
+        self.completer.setModelSorting(QCompleter.CaseInsensitivelySortedModel)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.completer.setWrapAround(False)
+        self.textEdit.setCompleter(self.completer)
+        self.statusBar.showMessage("Autocompletion from wordlist.json enabled.")
+
+    def model_from_file(self, fileName):
+        f = QFile(fileName)
+        if not f.open(QFile.ReadOnly):
+            return(QStringListModel(self.completer))
+        with open(fileName, "r") as f:
+            completer_dict = json.loads(f.read())
+        words = QStandardItemModel(self.completer)
+        for key, value in completer_dict.items():
+            item = QStandardItem()
+            # removes any newlines/tabs, otherwise breaks autocomplete
+            key = " ".join(key.split())
+            item.setText(key)
+            item.setData(value, QtCore.Qt.UserRole)
+            words.appendRow(item)
+        return(words)
+
+    def change_window_font(self):
+        font, valid = QFontDialog.getFont()
+        if valid:
+            self.setFont(font)
+            log.info("Font set for window")       
+
+    def change_backgrounds(self):
+        palette = self.palette()
+        old_color = palette.color(QPalette.Base)
+        print(old_color)
+        color = QColorDialog.getColor(old_color)
+        if color.isValid():
+            palette = self.palette()
+            palette.setColor(QPalette.Base, color)
+            self.setPalette(palette)
+
+    def change_tape_font(self):
+        font, valid = QFontDialog.getFont()
+        if valid:
+            self.strokeList.setFont(font)
+            log.info("Font set for paper tape.")
+
+    def show_invisible_char(self):
+        doc_options = self.textEdit.document().defaultTextOption()
+        if self.actionShowAllCharacters.isChecked():        
+            doc_options.setFlags(doc_options.flags() | QTextOption.ShowTabsAndSpaces | QTextOption.ShowLineAndParagraphSeparators)
+        else:
+            doc_options.setFlags(doc_options.flags() & ~QTextOption.ShowTabsAndSpaces & ~QTextOption.ShowLineAndParagraphSeparators)
+        self.textEdit.document().setDefaultTextOption(doc_options)
+        
+    def calculate_space_width(self, font):
+        new_font = font
+        new_font.setPointSize(self.blockFontSize.value())
+        metrics = QFontMetrics(new_font)
+        space_space = metrics.averageCharWidth()
+        self.fontspaceInInch.setValue(round(pixel_to_in(space_space), 2))
+
+    def jump_par(self):
+        current_cursor = self.textEdit.textCursor()
+        max_blocks = self.textEdit.document().blockCount()
+        current_block_num = current_cursor.blockNumber()
+        block_num, ok = QInputDialog().getInt(self, "Jump to paragraph...", "Paragraph (0-based): ", current_block_num, 0, max_blocks)
+        if ok:
+            new_block = self.textEdit.document().findBlockByNumber(block_num)
+            current_cursor.setPosition(new_block.position())
+            self.textEdit.setTextCursor(current_cursor)
+
+    def show_find_replace(self):
+        if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
+            self.search_term.setText(self.textEdit.textCursor().selectedText())
+        self.toolBox.setCurrentWidget(self.find_replace_pane)
+
     # open/close/save
     def create_new(self):
         ## make new dir, sets gui input
@@ -432,9 +471,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         config_contents = self.load_config_file(selected_folder)
         log.debug("Config contents: %s", config_contents)
         self.config = config_contents
-        self.textEdit.clear()
-        self.strokeList.clear()
-        self.suggestTable.clearContents()
         style_path = selected_folder / config_contents["style"]
         log.info("Loading styles for transcript")
         self.styles = self.load_check_styles(style_path)
@@ -446,6 +482,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if available_dicts:
                 self.dict_selection.addItems(available_dicts)
         # self.setup_speaker_ids()
+        self.textEdit.clear()
+        self.strokeList.clear()
+        self.suggestTable.clearContents()        
         current_cursor = self.textEdit.textCursor()
         if pathlib.Path(transcript_tape).is_file():
             log.info("Tape file found, loading.")
@@ -493,17 +532,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage("Saving transcript data.")
         block = self.textEdit.document().begin()
         while True:
-            block_dict = block.userData().return_all()
-            block_text = block.text()
+            block_dict = deepcopy(block.userData().return_all())
             block_num = block.blockNumber()
-            inner_dict =  {"text": block_text, "data": block_dict}
             # log.debug(inner_dict)
-            json_document[block_num] = inner_dict
+            block_dict["strokes"] = block_dict["strokes"].to_json()
+            json_document[block_num] = block_dict
             if block == self.textEdit.document().lastBlock():
                 break
             block = block.next()          
         transcript = selected_folder.joinpath(selected_folder.stem).with_suffix(".transcript")
         log.info("Saving transcript data to %s", str(transcript))
+        # print(json.dumps(json_document, indent = 4))
         save_json(json_document, transcript)
         if str(self.styles_path).endswith(".json"):
             save_json(self.styles, self.styles_path)
@@ -539,20 +578,62 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.progressBar.setMaximum(len(json_document))
         self.progressBar.setFormat("Load transcript paragraph %v")
         self.statusBar.addWidget(self.progressBar)
+        ef = element_factory()
+        ea = element_actions()
         self.textEdit.blockSignals(True)
         self.textEdit.document().blockSignals(True)
-        for key, value in json_document.items():
-            document_cursor.insertText(value["text"])
-            block_data = BlockUserData()
-            for k, v in value["data"].items():
-                block_data[k] = v
-            document_cursor.block().setUserData(block_data)
-            if len(block_data["strokes"]) > 0 and "\n" in block_data["strokes"][-1][2]:
-                document_cursor.insertText("\n")
-            self.progressBar.setValue(document_cursor.blockNumber())
-            QApplication.processEvents()
+        # check if json document is older format
+        if "data" in json_document[next(iter(json_document))]:
+            # old format json
+            for key, value in json_document.items():
+                if not key.isdigit():
+                    continue
+                document_cursor.insertText(value["text"])
+                block_data = BlockUserData()
+                el_list = []
+                for el in value["data"]["strokes"]:
+                    el_dict = {"time": el[0], "stroke": el[1], "data": el[2]}
+                    if len(el) == 4:
+                        el_dict["audiotime"] = el[4]
+                    new_stroke = stroke_text()
+                    new_stroke.from_dict(el_dict)
+                    el_list.append(new_stroke)
+                for k, v in value["data"].items():
+                    block_data[k] = v
+                block_data["strokes"] = element_collection(el_list)
+                # print(block_data.return_all())
+                document_cursor.block().setUserData(block_data)
+                if len(block_data["strokes"]) > 0 and block_data["strokes"].ends_with("\n"):
+                    document_cursor.insertText("\n")
+                self.progressBar.setValue(document_cursor.blockNumber())
+                QApplication.processEvents()
+        else:        
+            # new format json  
+            for key, value in json_document.items():
+                # skip if key is not a digit
+                if not key.isdigit():
+                    continue
+                # document_cursor.insertText(value["text"])
+                block_data = BlockUserData()
+                el_list = [ef.gen_element(element_dict = i) for i in value["strokes"]]
+                # document_cursor.movePosition(QTextCursor.Start)
+                self.textEdit.setTextCursor(document_cursor)
+                for k, v in value.items():
+                    block_data[k] = v
+                block_data["strokes"] = element_collection()
+                document_cursor.block().setUserData(block_data)
+                for el in el_list:
+                    current_block = self.textEdit.textCursor().blockNumber()
+                    current_pos = self.textEdit.textCursor().positionInBlock()
+                    cmd = ea.make_action(self.textEdit, current_block, current_pos, el)
+                    self.undo_stack.push(cmd)
+                    document_cursor.movePosition(QTextCursor.EndOfBlock)
+                    self.textEdit.setTextCursor(document_cursor)
+                self.progressBar.setValue(document_cursor.blockNumber())
+                QApplication.processEvents()
         self.textEdit.document().blockSignals(True)
         self.textEdit.blockSignals(False)
+        self.undo_stack.clear()
         self.refresh_editor_styles()
         self.statusBar.removeWidget(self.progressBar)
         log.info("Loaded transcript.")   
@@ -592,22 +673,23 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         transcript = transcript_dir_path.joinpath(transcript_dir_path.stem).with_suffix(".transcript")
         transcript_tape = transcript_dir_path.joinpath(transcript_dir_path.stem).with_suffix(".tape")
         document_blocks = self.textEdit.document().blockCount()
-        json_document = []
+        json_document = {}
         log.info("Extracting block data for transcript save")
         self.statusBar.showMessage("Saving transcript data.")
         block = self.textEdit.document().begin()
-        # start_time = perf_counter() 
         while True:
-            block_dict = block.userData().return_all()
-            block_text = block.text()
+            block_dict = deepcopy(block.userData().return_all())
             block_num = block.blockNumber()
-            inner_dict =  {"text": block_text, "data": block_dict}
             # log.debug(inner_dict)
-            json_document[block_num] = inner_dict
+            block_dict["strokes"] = block_dict["strokes"].to_json()
+            json_document[block_num] = block_dict
             if block == self.textEdit.document().lastBlock():
                 break
-            block = block.next()  
-        save_json(json_document, transcript)             
+            block = block.next()          
+        transcript = selected_folder.joinpath(selected_folder.stem).with_suffix(".transcript")
+        log.info("Saving transcript data to %s", str(transcript))
+        # print(json.dumps(json_document, indent = 4))
+        save_json(json_document, transcript)
         log.info("Transcript data saved in new location" + str(transcript))
         with open(transcript_tape, "w") as f:
             f.write(tape_contents)
@@ -650,6 +732,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         settings.setValue("windowstate", self.saveState())
         settings.setValue("windowfont", self.font().toString())
         settings.setValue("tapefont", self.strokeList.font().toString())
+        settings.setValue("backgroundcolor", self.palette().color(QPalette.Base))
         log.info("Saved window settings")
         choice = self.close_file()
         if choice:
@@ -814,6 +897,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.info("Configuration successfully loaded.")
         return config_contents
 
+    def save_config(self, dir_path):
+        config_path = pathlib.Path(dir_path) / "config.CONFIG"
+        log.info("Saving config to " + str(config_path))
+        config_contents = self.config
+        style_path = pathlib.Path(self.styles_path)
+        config_contents["style"] = str(style_path.relative_to(self.file_name))
+        with open(config_path, "w") as f:
+            json.dump(config_contents, f)
+            log.info("Config saved")
+            self.statusBar.showMessage("Saved config data")
+
     def update_config(self):
         log.info("User update config.")
         config_contents = self.config
@@ -840,17 +934,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(config_contents)
         self.save_config(self.file_name)
         self.setup_page()
-
-    def save_config(self, dir_path):
-        config_path = pathlib.Path(dir_path) / "config.CONFIG"
-        log.info("Saving config to " + str(config_path))
-        config_contents = self.config
-        style_path = pathlib.Path(self.styles_path)
-        config_contents["style"] = str(style_path.relative_to(self.file_name))
-        with open(config_path, "w") as f:
-            json.dump(config_contents, f)
-            log.info("Config saved")
-            self.statusBar.showMessage("Saved config data")
     # style related
     def setup_page(self):
         doc = self.textEdit.document()
@@ -964,39 +1047,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         style_file_path = self.file_name / "styles" / pathlib.Path(pathlib.Path(selected_file).name).with_suffix(".json")
         save_json(remove_empty_from_dict(json_styles), style_file_path)
 
-    def change_window_font(self):
-        font, valid = QFontDialog.getFont()
-        if valid:
-            self.setFont(font)
-            log.info("Font set for window")       
-
-    def change_tape_font(self):
-        font, valid = QFontDialog.getFont()
-        if valid:
-            self.strokeList.setFont(font)
-            log.info("Font set for paper tape.")
-
-    def show_invisible_char(self):
-        doc_options = self.textEdit.document().defaultTextOption()
-        if self.actionShowAllCharacters.isChecked():        
-            doc_options.setFlags(doc_options.flags() | QTextOption.ShowTabsAndSpaces | QTextOption.ShowLineAndParagraphSeparators)
-        else:
-            doc_options.setFlags(doc_options.flags() & ~QTextOption.ShowTabsAndSpaces & ~QTextOption.ShowLineAndParagraphSeparators)
-        self.textEdit.document().setDefaultTextOption(doc_options)
-        
-    def calculate_space_width(self, font):
-        new_font = font
-        new_font.setPointSize(self.blockFontSize.value())
-        metrics = QFontMetrics(new_font)
-        space_space = metrics.averageCharWidth()
-        self.fontspaceInInch.setValue(round(pixel_to_in(space_space), 2))
-
     def display_block_data(self):
         current_cursor = self.textEdit.textCursor()
         block_number = current_cursor.blockNumber()
         block_data = current_cursor.block().userData()
         if not block_data:
-            return
+            block_data = BlockUserData()
         self.editorParagraphLabel.setText(str(block_number))
         if block_data["creationtime"]:
             self.editorCreationTime.setDateTime(QDateTime.fromString(block_data["creationtime"],  "yyyy-MM-ddTHH:mm:ss.zzz")) 
@@ -1020,7 +1076,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             self.to_next_style()
             self.update_style_display(self.style_selector.currentText())
-        self.cursor_status.setText("Par,Char: {line},{char}".format(line = block_number, char = current_cursor.positionInBlock())) 
         if block_data["strokes"]:
             self.display_block_steno(block_data["strokes"])
         self.textEdit.showPossibilities()
@@ -1028,11 +1083,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def display_block_steno(self, strokes):
         # clear of last block data
         self.parSteno.clear()
-        if len(strokes) > 0:
-            if not all(isinstance(el, list) for el in strokes):
-                strokes = [strokes]
-        steno_names = ["%s\n%s" % (stroke[1], stroke[2]) for stroke in strokes]
-        self.parSteno.addItems(steno_names)
+        steno_names = strokes.to_display()
+        self.parSteno.addItems(steno_names)     
 
     def update_paragraph_style(self):
         current_cursor = self.textEdit.textCursor()
@@ -1214,7 +1266,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     def change_style(self, index):
         self.style_selector.setCurrentIndex(qt_key_nums[index])
-        print(qt_key_nums[index])
+        # print(qt_key_nums[index])
         current_cursor = self.textEdit.textCursor()
         style_cmd = set_par_style(current_cursor.blockNumber(), self.style_selector.currentText(), self.textEdit, self.par_formats, self.txt_formats)
         self.undo_stack.push(style_cmd)
@@ -1243,16 +1295,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # log.debug(block_data.return_all())
         self.textEdit.document().findBlockByNumber(self.cursor_block).setUserData(block_data)
         self.statusBar.showMessage("Updated paragraph {par_num} data".format(par_num = self.cursor_block))
-
-    def jump_par(self):
-        current_cursor = self.textEdit.textCursor()
-        max_blocks = self.textEdit.document().blockCount()
-        current_block_num = current_cursor.blockNumber()
-        block_num, ok = QInputDialog().getInt(self, "Jump to paragraph...", "Paragraph (0-based): ", current_block_num, 0, max_blocks)
-        if ok:
-            new_block = self.textEdit.document().findBlockByNumber(block_num)
-            current_cursor.setPosition(new_block.position())
-            self.textEdit.setTextCursor(current_cursor)
     # engine hooked functions
     def on_send_string(self, string):
         log.debug("Plover engine sent string: %s", string)
@@ -1351,17 +1393,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         stroke_text = self.strokeList.document().toPlainText().split("\n")
         pos = edit_cursor.positionInBlock()
         log.debug("Cursor at %d" % pos)
+        self.cursor_status.setText("Par,Char: {line},{char}".format(line = edit_cursor.blockNumber(), char = pos)) 
         try:
             if edit_cursor.atBlockStart():
-                stroke_time = block_data["strokes"][0][0]
-                stroke = block_data["strokes"][0][1]
+                stroke_time = block_data["strokes"].data[0].time
             elif edit_cursor.atBlockEnd():
-                stroke_time = block_data["strokes"][-1][0]
-                stroke = block_data["strokes"][0][1]
+                stroke_time = block_data["strokes"].data[-1].time
             else:
-                before, after = split_stroke_data(block_data["strokes"], pos)
-                stroke_time = before[-1][0]
-                stroke = block_data["strokes"][0][1]
+                stroke_data = block_data["strokes"].extract_steno(pos, pos + 1)
+                stroke_time = stroke_data.data[0].time
             # no idea how fast this will be with many many more lines
             for index, i in enumerate(stroke_text):
                 if i.startswith(stroke_time):
@@ -1469,7 +1509,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if block_dict["strokes"]:
             strokes_data = block_dict["strokes"]
         else:
-            strokes_data = []
+            strokes_data = element_collection()
         if not block_dict["audiostarttime"]:
             if self.player.state() == QMediaPlayer.PlayingState:
                 block_dict = update_user_data(block_dict, key = "audiostarttime", value = audio_time)
@@ -1479,38 +1519,28 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         focus_block.setUserData(block_dict)
         if backspaces_sent != 0 and not current_cursor.atEnd():
             cursor_pos = current_cursor.positionInBlock()
-            remaining_text_len = len(focus_block.text()) - cursor_pos
             holding_space = backspaces_sent
-            self.undo_stack.beginMacro("Remove")
-            if holding_space > cursor_pos:
-                initial_block = current_cursor.blockNumber()
-                initial_block_pos = cursor_pos
-                # check if backspacing to start of document
-                if holding_space > current_cursor.position():
-                    final_block = 0
-                    final_block_pos = 0
-                else:
-                    current_cursor.setPosition(current_cursor.position() - holding_space)
-                    final_block = current_cursor.blockNumber()
-                    final_block_pos = current_cursor.positionInBlock()
-                coords = [0] * (initial_block-final_block) + [final_block_pos]
-                print(coords)
-                current_cursor.setPosition(self.textEdit.document().findBlockByNumber(initial_block).position() + initial_block_pos)
-                for seg, coords in zip(list(range(initial_block, final_block-1, -1)), coords):
+            current_strokes = current_cursor.block().userData()["strokes"]
+            start_pos = backtrack_coord(current_cursor.positionInBlock(), backspaces_sent, 
+                        current_strokes.lens(), current_strokes.lengths())
+            self.undo_stack.beginMacro("Remove") 
+            if start_pos < 0:
+                log.debug("%d backspaces than exists on current paragraph" % start_pos)
+                while start_pos < 0:
+                    current_cursor.movePosition(QTextCursor.StartOfBlock, QTextCursor.KeepAnchor)
                     self.textEdit.setTextCursor(current_cursor)
-                    if coords == 0:
-                        current_cursor.movePosition(QTextCursor.StartOfBlock, QTextCursor.KeepAnchor)
-                        self.textEdit.setTextCursor(current_cursor)
-                        # print(current_cursor.text())
-                        self.cut_steno(store=False)
-                        self.merge_paragraphs(add_space = False)
-                        current_cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.MoveAnchor, remaining_text_len)
-                    else:
-                        current_cursor.setPosition(self.textEdit.document().findBlockByNumber(seg).position() + final_block_pos, QTextCursor.KeepAnchor)
-                        self.textEdit.setTextCursor(current_cursor)
-                        self.cut_steno(store=False)
-                self.last_backspaces_sent = 0
-            current_cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor, self.last_backspaces_sent)
+                    self.cut_steno(store=False)
+                    holding_space = -1 * start_pos
+                    log.debug("%d spaces left" % holding_space)
+                    self.merge_paragraphs(add_space = False)
+                    # the merge is technically one "backspace"
+                    holding_space -= 1
+                    current_cursor = self.textEdit.textCursor()
+                    cursor_pos = current_cursor.positionInBlock()
+                    current_strokes = current_cursor.block().userData()["strokes"]
+                    start_pos = backtrack_coord(current_cursor.positionInBlock(), holding_space, current_strokes.lens(), current_strokes.lengths())
+                    log.debug("New starting position: %d" % start_pos)
+            current_cursor.setPosition(current_cursor.block().position() + start_pos, QTextCursor.KeepAnchor)
             self.textEdit.setTextCursor(current_cursor)
             self.cut_steno(store=False)
             self.last_backspaces_sent = 0
@@ -1520,51 +1550,54 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.cursor_block_position = current_cursor.positionInBlock()
             return         
         if self.last_backspaces_sent != 0:
-            stroke = [self.stroke_time, raw_steno, ""]
-            if self.player.state() == QMediaPlayer.PlayingState: stroke.append(real_time)
-            if self.recorder.state() == QMediaRecorder.RecordingState: stroke.append(real_time)
-            current_cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor, backspaces_sent)
-            deleted_text = current_cursor.selectedText()
-            start_pos = min(current_cursor.position(), current_cursor.anchor()) - focus_block.position()
-            remove_cmd = steno_remove(current_cursor.blockNumber(), start_pos,
-                                        deleted_text, backspaces_sent, stroke, current_document)
+            # current_cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor, backspaces_sent)
+            end_pos = current_cursor.position() - focus_block.position()
+            start_pos = backtrack_coord(end_pos, backspaces_sent, focus_block.userData()["strokes"].lens(), focus_block.userData()["strokes"].lengths())
+            remove_cmd = steno_remove(current_document, current_cursor.blockNumber(), start_pos, end_pos - start_pos)
             self.undo_stack.push(remove_cmd)
+            self.display_block_data()
             self.last_backspaces_sent = 0
             current_cursor = self.textEdit.textCursor()
             self.cursor_block = current_cursor.blockNumber()
             self.cursor_block_position = current_cursor.positionInBlock()
         if "\n" in string_sent and string_sent != "\n":
             list_segments = string_sent.splitlines(True)
-            print(list_segments)
+            # print(list_segments)
             self.undo_stack.beginMacro("Insert Group")
             for i, segment in enumerate(list_segments):
+                stroke = stroke_text(time = self.stroke_time, stroke = raw_steno, text = segment)
                 # because this is all occurring in one stroke, only first segment gets the stroke
-                if self.player.state() == QMediaPlayer.PlayingState: stroke.append(real_time)
-                if self.recorder.state() == QMediaRecorder.RecordingState: stroke.append(real_time)
+                if self.player.state() == QMediaPlayer.PlayingState: 
+                    stroke.audiotime = real_time
+                if self.recorder.state() == QMediaRecorder.RecordingState: 
+                    stroke.audiotime = real_time
                 if i == 0:
-                    stroke = [self.stroke_time, raw_steno, segment.rstrip("\n")]
-                    insert_cmd = steno_insert(self.cursor_block, self.cursor_block_position,
-                                            segment.rstrip("\n"), len(segment.rstrip("\n")), stroke, current_document)
+                    insert_cmd = steno_insert(current_document, self.cursor_block, self.cursor_block_position, stroke)
                     self.undo_stack.push(insert_cmd)
                 else:
-                    stroke = [self.stroke_time, "", segment.rstrip("\n")]
-                    insert_cmd = steno_insert(self.cursor_block, self.cursor_block_position,
-                                            segment.rstrip("\n"), len(segment.rstrip("\n")), stroke, current_document)
+                    # on second and more segments, stroke is empty
+                    stroke.stroke = ""
+                    insert_cmd = steno_insert(current_document, self.cursor_block, 
+                                            self.cursor_block_position, stroke)                    
                     self.undo_stack.push(insert_cmd)
                 if segment.endswith("\n"):
                     self.split_paragraph()
                 current_cursor = self.textEdit.textCursor()
+                # update cursor position for next loop
                 self.cursor_block = current_cursor.blockNumber()
                 self.cursor_block_position = current_cursor.positionInBlock()
             self.last_string_sent = ""
             self.undo_stack.endMacro()
         if self.last_string_sent:
-            stroke = [self.stroke_time, raw_steno, string_sent]
-            if self.player.state() == QMediaPlayer.PlayingState: stroke.append(real_time)
-            if self.recorder.state() == QMediaRecorder.RecordingState: stroke.append(real_time)
-            insert_cmd = steno_insert(self.cursor_block, self.cursor_block_position,
-                                        string_sent, len(string_sent), stroke, current_document)
+            stroke = stroke_text(time = self.stroke_time, stroke = raw_steno, text = string_sent)
+            if self.player.state() == QMediaPlayer.PlayingState: 
+                stroke.audiotime = real_time
+            if self.recorder.state() == QMediaRecorder.RecordingState:
+                stroke.audiotime = real_time
+            insert_cmd = steno_insert(current_document, self.cursor_block, self.cursor_block_position,
+                                        stroke)
             self.undo_stack.push(insert_cmd)
+            self.display_block_data()
         self.last_string_sent = ""
         self.textEdit.document().setModified(True)
         self.statusBar.clearMessage()
@@ -1574,18 +1607,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = current_document.textCursor()
         self.cursor_block = current_cursor.blockNumber()
         self.cursor_block_position = current_cursor.positionInBlock()
-        split_cmd = split_steno_par(self.cursor_block, self.cursor_block_position, self.config["space_placement"], self.textEdit)
+        split_cmd = split_steno_par(self.textEdit, self.cursor_block, self.cursor_block_position, self.config["space_placement"])
         self.undo_stack.push(split_cmd)
+        self.display_block_data()
 
     def merge_paragraphs(self, add_space = True):
         current_document = self.textEdit
         current_cursor = current_document.textCursor()
         self.cursor_block = current_cursor.blockNumber() - 1
         self.cursor_block_position = current_cursor.positionInBlock()
-        merge_cmd = merge_steno_par(self.cursor_block, self.cursor_block_position, self.config["space_placement"], self.textEdit, add_space = add_space)
+        merge_cmd = merge_steno_par(self.textEdit, self.cursor_block, self.cursor_block_position, self.config["space_placement"], add_space = add_space)
         self.undo_stack.push(merge_cmd)
+        self.display_block_data()
 
-    def copy_steno(self, store = True):
+    def copy_steno(self):
         log.info("Performing copying.")
         current_cursor = self.textEdit.textCursor()
         if not current_cursor.hasSelection():
@@ -1602,17 +1637,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.statusBar.showMessage("Copying across paragraphs is not supported")
             return
         block_data = current_block.userData()
-        # log.debug(block_data.return_all())
-        copy_steno = extract_stroke_data(block_data["strokes"], start_pos, stop_pos, copy = True)
-        action_dict = {"action": "copy", "block": current_block_num, "position_in_block": start_pos, "text": selected_text,
-                        "length": len(selected_text), "steno": copy_steno}
+        self.cutcopy_storage = block_data["strokes"].extract_steno(start_pos, stop_pos)
         self.textEdit.moveCursor(QTextCursor.End)
-        log.info("Copy: %s" % str(action_dict))
-        if store:
-            self.cutcopy_storage = action_dict
-            log.info("Copy: action stored for pasting")
-            # self.last_action = action_dict
-            self.statusBar.showMessage("Copied from paragraph {par_num}, from {start} to {end}".format(par_num = current_block_num, start = start_pos, end = stop_pos))
+        log.info("Copy: action stored for pasting")
+        self.statusBar.showMessage("Copied from paragraph {par_num}, from {start} to {end}".format(par_num = current_block_num, start = start_pos, end = stop_pos))
+        # restore cursor back to original position
+        self.textEdit.setTextCursor(current_cursor)
+        current_cursor.movePosition(current_block.position() + start_pos)
+        current_cursor.movePosition(current_block.position() + stop_pos, QTextCursor.KeepAnchor)
 
     def cut_steno(self, store = True):
         log.info("Perform cutting.")
@@ -1623,6 +1655,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         current_block_num = current_cursor.blockNumber()
         current_block = self.textEdit.document().findBlockByNumber(current_block_num)
+        # get coordinates of selection in block
         start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
         stop_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
         log.info("Cut: Cut in paragraph %s from %s to %s" % (current_block_num, start_pos, stop_pos))
@@ -1632,38 +1665,43 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.statusBar.showMessage("Cutting across paragraphs is not supported")
             return
         block_data = current_block.userData()
-        # log.debug(block_data.return_all())
-        remainder, cut_steno = extract_stroke_data(block_data["strokes"], start_pos, stop_pos, copy = False)
-        action_dict = {"action": "cut", "block": current_block_num, "position_in_block": start_pos, "text": selected_text,
-                        "length": len(selected_text), "steno": cut_steno}
+        if store:
+            self.cutcopy_storage = block_strokes.extract_steno(start_pos, stop_pos)
+            log.info("Cut: data stored for pasting")
+            self.statusBar.showMessage("Cut from paragraph {par_num}, from {start} to {end}".format(par_num = current_block_num, start = start_pos, end = stop_pos))
         self.undo_stack.beginMacro("Cut")
-        remove_cmd = steno_remove(current_block_num, start_pos,
-                                selected_text, len(selected_text), cut_steno, self.textEdit)
+        remove_cmd = steno_remove(self.textEdit, current_block_num, 
+                            start_pos, len(selected_text))
         self.undo_stack.push(remove_cmd)
         self.undo_stack.endMacro()
-        log.debug("Cut: %s" % str(action_dict))
-        # store both as an action, and for pasting
-        if store:
-            self.cutcopy_storage = action_dict
-            log.info("Cut: action stored for pasting")
-            self.statusBar.showMessage("Cut from paragraph {par_num}, from {start} to {end}".format(par_num = current_block_num, start = start_pos, end = stop_pos))
+        log.debug("Cut: Cut from paragraph {par_num}, from {start} to {end}".format(par_num = current_block_num, start = start_pos, end = stop_pos))
 
     def paste_steno(self):
         log.info("Performing pasting.")
-        action_dict = deepcopy(self.cutcopy_storage)
-        if action_dict == "":
+        # action_dict = deepcopy(self.cutcopy_storage)
+        store_data = deepcopy(self.cutcopy_storage)
+        if store_data == "":
             log.info("Nothing in storage to paste, skipping")
             self.statusBar.showMessage("Cut or copy text to paste")
             return
+        ea = element_actions()
         current_cursor = self.textEdit.textCursor()
         current_block_num = current_cursor.blockNumber()
         current_block = self.textEdit.document().findBlockByNumber(current_block_num)
         start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
         log.info("Paste: Pasting in paragraph %s at position %s" % (current_block_num, start_pos))
         self.undo_stack.beginMacro("Paste")
-        insert_cmd = steno_insert(current_block_num, start_pos, action_dict["text"], 
-                                    len(action_dict["text"]), action_dict["steno"], self.textEdit)
-        self.undo_stack.push(insert_cmd)
+        self.textEdit.blockSignals(True)
+        self.textEdit.document().blockSignals(True)
+        for el in store_data.data:
+            current_block = self.textEdit.textCursor().blockNumber()
+            current_pos = self.textEdit.textCursor().positionInBlock()
+            cmd = ea.make_action(self.textEdit, current_block, current_pos, el)
+            self.undo_stack.push(cmd)
+        self.textEdit.document().blockSignals(True)
+        self.textEdit.blockSignals(False)
+        # insert_cmd = steno_insert(self.textEdit, current_block_num, start_pos, store_data)
+        # self.undo_stack.push(insert_cmd)
         self.undo_stack.endMacro()
         self.statusBar.showMessage("Paste to paragraph {par_num}, at position {start}".format(par_num = current_block_num, start = start_pos))       
 
@@ -1680,9 +1718,29 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor.select(QTextCursor.BlockUnderCursor)
         current_cursor.removeSelectedText()
 
-    def define_scan(self):
-        search_result = self.untrans_search(-1)
-        self.define_retroactive()
+    def insert_image(self):
+        log.debug("Selecting image file for insertion")
+        selected_file = QFileDialog.getOpenFileName(self, _("Select Image"), str(self.file_name), 
+                            _("Image Files(*.png *.jpg *jpeg)"))[0]
+        if not selected_file:
+            log.debug("No image selected. Aborting")
+            return
+        log.info("Selected image file: %s" % selected_file)
+        selected_file = pathlib.Path(selected_file)
+        asset_dir_path = self.file_name / "assets"
+        log.info("Create asset directory if not present.")
+        try:
+            os.mkdir(asset_dir_path)
+        except FileExistsError:
+            pass
+        asset_dir_name = asset_dir_path / selected_file.name
+        if selected_file != asset_dir_name:
+            log.info("Copying dictionary at %s to %s", str(selected_file), str(asset_dir_name))
+            copyfile(selected_file, asset_dir_name)
+        im_element = image_text(path = asset_dir_name.as_posix())
+        insert_cmd = image_insert(self.textEdit, self.textEdit.textCursor().blockNumber(), 
+                        self.textEdit.textCursor().positionInBlock(), im_element)
+        self.undo_stack.push(insert_cmd)
 
     def define_retroactive(self):
         # search_result = self.untrans_search(-1)
@@ -1695,13 +1753,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
         # end_pos is in prep for future multi-stroke untrans
         end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-        start_stroke_pos = stroke_pos_at_pos(current_block.userData()["strokes"], start_pos)
-        end_stroke_pos = stroke_pos_at_pos(current_block.userData()["strokes"], end_pos)
+        start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
+        end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
         current_cursor.setPosition(current_block.position() + start_stroke_pos[0])
         current_cursor.setPosition(current_block.position() + end_stroke_pos[1], QTextCursor.KeepAnchor)
         self.textEdit.setTextCursor(current_cursor)
-        underlying_strokes = extract_stroke_data(current_block.userData()["strokes"], start_stroke_pos[0], end_stroke_pos[1], copy = True)
-        underlying_steno = "/".join([stroke[1] for stroke in underlying_strokes])
+        underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
+        underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])
         # print(underlying_steno)
         selected_untrans = current_cursor.selectedText()
         # print(selected_untrans)
@@ -1731,16 +1789,50 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             current_cursor.movePosition(QTextCursor.End)
             self.textEdit.setTextCursor(current_cursor)
 
+    def define_scan(self):
+        search_result = self.untrans_search(-1)
+        self.define_retroactive()
+
+    def add_autocomplete_item(self):
+        current_cursor = self.textEdit.textCursor()
+        if not current_cursor.hasSelection():
+            self.statusBar.showMessage("No text selected for autocomplete")
+            return
+        current_block = current_cursor.block()
+        selected_text = current_cursor.selectedText()        
+        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        # end_pos has a one char deletion since otherwise it will include unwanted next stroke
+        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position() - 1
+        start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
+        end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
+        underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
+        underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])
+        text, ok = QInputDialog().getText(self, "Add Autocomplete Term", "Text: %s \nSteno:" % selected_text, text = underlying_steno)
+        if not ok:
+            return
+        log.debug("Adding term to autocompletion")
+        wordlist_path = self.file_name / "sources" / "wordlist.json"
+        if wordlist_path.exists():
+            with open(wordlist_path, "r") as f:
+                completer_dict = json.loads(f.read())
+        else:
+            completer_dict = {}
+        completer_dict[selected_text.strip()] = text
+        save_json(completer_dict, wordlist_path)
+        self.setup_completion(self.actionAutocompletion.isChecked())
+
     def insert_autocomplete(self, index):
         steno = index.data(QtCore.Qt.UserRole)
         text = index.data()
         current_cursor = self.textEdit.textCursor()
         current_block = current_cursor.block()
         current_cursor.select(QTextCursor.WordUnderCursor)
+        # self.textEdit.setTextCursor(current_cursor)
         start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
         end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-        start_stroke_pos = stroke_pos_at_pos(current_block.userData()["strokes"], start_pos)
-        end_stroke_pos = stroke_pos_at_pos(current_block.userData()["strokes"], end_pos)
+        log.debug("Autocomplete: autocomplete word %s from %d to %d" % (text, start_pos, end_pos))
+        start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
+        end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
         current_cursor.setPosition(current_block.position() + start_stroke_pos[0])
         current_cursor.setPosition(current_block.position() + end_stroke_pos[1], QTextCursor.KeepAnchor)
         self.textEdit.setTextCursor(current_cursor)
@@ -1752,15 +1844,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             # this is unlikely as after output would not trigger autocomplete 
             text = text + " "
-        autocomplete_steno = [datetime.now().isoformat("T", "milliseconds"), steno, text] 
+        autocomplete_steno = stroke_text(stroke = steno, text = text)
         self.undo_stack.beginMacro("Autocomplete: %s" % text)
-        remove_cmd = steno_remove(current_cursor.blockNumber(), current_cursor.anchor() - current_block.position(),
-            selected_text, len(selected_text), autocomplete_steno, self.textEdit)
+        remove_cmd = steno_remove(self.textEdit, current_cursor.blockNumber(), 
+                        current_cursor.anchor() - current_block.position(), len(selected_text))
         self.undo_stack.push(remove_cmd)
         # add steno
         current_cursor = self.textEdit.textCursor()
-        insert_cmd = steno_insert(current_cursor.blockNumber(), current_cursor.positionInBlock(), text, 
-            len(text), autocomplete_steno, self.textEdit)
+        insert_cmd = steno_insert(self.textEdit, current_cursor.blockNumber(), 
+                        current_cursor.positionInBlock(), autocomplete_steno)
         self.undo_stack.push(insert_cmd)
         self.undo_stack.endMacro()
 
@@ -1774,11 +1866,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_block = self.textEdit.document().findBlockByNumber(current_block_num)
         start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
         self.undo_stack.beginMacro("Insert normal text")
-        fake_steno = [datetime.now().isoformat("T", "milliseconds"), "", text] 
-        insert_cmd = steno_insert(current_block_num, start_pos, text, 
-                                    len(text), fake_steno, self.textEdit)
+        fake_steno = text_element(text = text)
+        insert_cmd = steno_insert(self.textEdit, current_block_num, start_pos, fake_steno)
         self.undo_stack.push(insert_cmd)
-        self.undo_stack.endMacro()       
+        self.undo_stack.endMacro()   
+        self.display_block_data()    
 
     def mock_del(self):
         current_cursor = self.textEdit.textCursor()
@@ -1788,15 +1880,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if current_cursor.atBlockEnd():
                 return
             else:
-                current_cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor)
+                block_strokes = current_cursor.block().userData()["strokes"]
+                # "delete" means removing one head, so has to "reverse" to get start pos
+                start_pos = backtrack_coord(current_cursor.positionInBlock() + 1, 1, block_strokes.lens(), block_strokes.lengths())
+                current_cursor.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor)
+                current_cursor.setPosition(current_cursor.block().position() + start_pos, QTextCursor.KeepAnchor)
                 self.textEdit.setTextCursor(current_cursor)
                 self.cut_steno(store = False)            
     # search functions
-    def show_find_replace(self):
-        if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
-            self.search_term.setText(self.textEdit.textCursor().selectedText())
-        self.toolBox.setCurrentWidget(self.find_replace_pane)
-
     def search(self, direction = 1):
         if self.search_untrans.isChecked():
             search_status = self.untrans_search(direction)
@@ -1872,26 +1963,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.MoveAnchor)
             self.textEdit.setTextCursor(cursor)
             cursor_pos = cursor.positionInBlock()
-            current_stroke_data = current_block.userData()["strokes"]
-            stroke_data, second_part = split_stroke_data(current_stroke_data, cursor_pos)
+            stroke_data = current_block.userData()["strokes"].extract_steno(0, cursor_pos)
             while True:
-                check_match = [stroke[1] == steno for stroke in stroke_data]
-                if any(check_match):
+                check_match = stroke_data.search_strokes(steno)
+                if check_match is not None:
                     break
                 if current_block == self.textEdit.document().firstBlock():
-                    # end search after searching last block
-                    stroke_data = None
+                    # end search after searching first block
+                    check_match = None
                     break
                 current_block = current_block.previous()
                 stroke_data = current_block.userData()["strokes"] 
-            if stroke_data is not None:
-                match_index = [i for i, x in enumerate(check_match) if x][-1]
+            if check_match is not None:
                 block_pos = current_block.position()
-                current_stroke_data = current_block.userData()["strokes"]
-                start_pos = block_pos + sum([len(stroke[2]) for stroke in current_stroke_data[:match_index]])
-                end_pos = start_pos + len(current_stroke_data[match_index][2])
-                cursor.setPosition(start_pos)
-                cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
+                cursor.setPosition(block_pos + check_match[0])
+                cursor.setPosition(block_pos + check_match[1], QTextCursor.KeepAnchor)
                 self.textEdit.setTextCursor(cursor)
                 log.info("Search success.")
                 self.statusBar.showMessage("Steno match found.")
@@ -1904,34 +1990,28 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             current_block = cursor.block()
             if cursor.hasSelection():
                 start_pos = max(cursor.position(), cursor.anchor())
-                cursor.setPosition(start_pos)
+                cursor.setPosition(start_pos + 1)
             cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.MoveAnchor)
             self.textEdit.setTextCursor(cursor)
             cursor_pos = cursor.positionInBlock()
-            current_stroke_data = current_block.userData()["strokes"]
-            first_part, stroke_data = split_stroke_data(current_stroke_data, cursor_pos)
+            stroke_data = current_block.userData()["strokes"].extract_steno(0, cursor_pos)
             while True:
-                check_match = [stroke[1] == steno for stroke in stroke_data]
-                if any(check_match):
+                # this is different from loop above since there is an offset 
+                # so cursor pos below has to add the offset
+                check_match = stroke_data.search_strokes(steno)
+                if check_match is not None:
                     break
                 if current_block == self.textEdit.document().lastBlock():
                     # end search after searching last block
-                    stroke_data = None
+                    check_match = None
                     break
                 current_block = current_block.next()
-                # if moving away from starting block, first part doesn't matter
-                first_part = None
-                stroke_data = current_block.userData()["strokes"]
-            if stroke_data is not None:
-                match_index = [i for i, x in enumerate(check_match) if x][0]
-                if first_part:
-                    match_index = len(first_part) - 1 + match_index
-                block_pos = current_block.position()
-                current_stroke_data = current_block.userData()["strokes"]
-                start_pos = block_pos + sum([len(stroke[2]) for stroke in current_stroke_data[:match_index]])
-                end_pos = start_pos + len(current_stroke_data[match_index][2])
-                cursor.setPosition(start_pos)
-                cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
+                stroke_data = current_block.userData()["strokes"] 
+                cursor_pos = 0
+            if check_match is not None:
+                block_pos = current_block.position()               
+                cursor.setPosition(block_pos + cursor_pos + check_match[0])
+                cursor.setPosition(block_pos + cursor_pos + check_match[1], QTextCursor.KeepAnchor)
                 self.textEdit.setTextCursor(cursor)
                 log.info("Search success.")
                 self.statusBar.showMessage("Steno match found.")
@@ -1985,7 +2065,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.search_case.setEnabled(False)
             self.search_whole.setChecked(True)
             self.search_term.setEnabled(True)
-            self.search_whole.setEnabled(True)
+            self.search_whole.setEnabled(False)
 
     def search_untrans_options(self):
         if self.search_untrans.isChecked():
@@ -2004,14 +2084,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             current_cursor = self.textEdit.textCursor()
             current_block = current_cursor.block()
             start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-            end_pos = start_pos + len(self.textEdit.textCursor().selectedText())
-            # cut_steno = extract_stroke_data(current_block.userData(), start_pos, end_pos, True)
-            fake_steno = [datetime.now().isoformat("T", "milliseconds"), steno, replace_term] 
-            remove_cmd = steno_remove(current_cursor.blockNumber(), start_pos, self.textEdit.textCursor().selectedText(), 
-                                        len(self.textEdit.textCursor().selectedText()), fake_steno, self.textEdit)
+            fake_steno = stroke_text(stroke = steno, text = replace_term)
+            remove_cmd = steno_remove(self.textEdit, current_cursor.blockNumber(), start_pos, 
+                            len(self.textEdit.textCursor().selectedText()))
             self.undo_stack.push(remove_cmd)    
-            insert_cmd = steno_insert(current_cursor.blockNumber(), start_pos, replace_term, 
-                                        len(replace_term), fake_steno, self.textEdit)
+            insert_cmd = steno_insert(self.textEdit, current_cursor.blockNumber(), start_pos, fake_steno)
             self.undo_stack.push(insert_cmd)
             self.undo_stack.endMacro()
         if to_next:
@@ -2047,6 +2124,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.setTextCursor(cursor)
         self.search_wrap.setChecked(old_wrap_state)
 
+    def sp_check(self, word):
+        return self.dictionary.lookup(word)
+
     def spellcheck(self):
         current_cursor = self.textEdit.textCursor()
         old_cursor_position = current_cursor.block().position()
@@ -2072,9 +2152,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.spell_ignore.append(self.spellcheck_result.text())
             log.debug("Ignored spellcheck words: %s" % self.spell_ignore)
         self.spellcheck()
-
-    def sp_check(self, word):
-        return self.dictionary.lookup(word)
 
     def sp_insert_suggest(self, item = None):
         if not item:
@@ -2103,12 +2180,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.audio_label.setText(label_text)
             self.statusBar.showMessage("Opened audio file")
 
-    def show_hide_video(self):
-        if self.viewer.isVisible():
-            self.viewer.hide()
-        else:
-            self.viewer.show()
-
     def set_up_video(self, avail):
         if avail:
             log.info("Video available for file.")
@@ -2124,6 +2195,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             # self.viewer.hide()
             pass
+
+    def show_hide_video(self):
+        if self.viewer.isVisible():
+            self.viewer.hide()
+        else:
+            self.viewer.show()
 
     def play_pause(self):
         log.info("User press playing/pausing audio.")
@@ -2661,7 +2738,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             # print(page_vspan) 
             par_dict = format_odf_text(block, block_style, chars_in_inch, text_width, line)
             doc_lines.update(par_dict)
-            # print(doc_lines)
+            # print(par_dict)
             line = line + len(par_dict)
             if not block.userData()["style"]:
                 log.info("Paragraph has no style, setting to first style %s" % next(iter(set_styles)))
@@ -2679,8 +2756,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     line_frame.addElement(line_textbox)
                     line_textbox.addElement(P(text = time_text, stylename = next(iter(set_styles))))
                     par_block.addElement(line_frame)
-                line_text = par_dict[k]["text"]
-                addTextToElement(par_block, line_text)
+                # todo: need odf generator for addTextToElement vs frame (image inside)
+                for el in v["text"]:
+                    el.to_odt(par_block, textdoc)
+                    # if el.element == "image":
+                    #     width_in = "{0}in".format(pixel_to_in(el.width))
+                    #     height_in = "{0}in".format(pixel_to_in(el.height))
+                    #     image_frame = Frame(attributes = {"stylename": "Graphics", "anchortype": "as-char", "width": width_in, "height": height_in})
+                    #     image_ref = textdoc.addPicture(el.path)
+                    #     image_frame.addElement(Image(href = image_ref))
+                    #     par_block.addElement(image_frame)
+                    # else:
+                    #     addTextToElement(par_block, el.to_text())
+                # line_text = par_dict[k]["text"]
+                # addTextToElement(par_block, line_text)
             textdoc.text.addElement(par_block)
             if block == self.textEdit.document().lastBlock():
                 break
@@ -2890,9 +2979,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             par_style_string += set_styles[par_style]["rtf_txt_style"]
             steno_string.append(par_style_string)
             strokes = block.userData()["strokes"]
-            stroke_count += len(strokes)
-            for i in strokes:
-                steno_string.append(generate_stroke_rtf(i))
+            stroke_count += strokes.stroke_count()
+            steno_string.append(strokes.to_rtf())
             # enter style string here
             if block == self.textEdit.document().lastBlock():
                 break

@@ -35,6 +35,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Organize, show, and hide docks](howto/dockmanagement.md)
 - [Organize, show, and hide toolbars](howto/toolbarmanagement.md)
 - [Set window font](howto/windowfont.md)
+- [Set background color](howto/backgroundcolor.md)
 - [Set paper tape font](howto/papertapefont.md)
 - [Zoom in/Zoom Out](howto/zoom.md)
 - [Show invisible characters](howto/showall.md)
@@ -44,9 +45,10 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 ### Do common editing tasks
 
 - [Find/Replace](howto/findreplace.md)
-- Undo and redo
+- [Undo and redo](howto/undoredo.md)
 - [Cut/Copy/Paste/Normal Copy](howto/copypaste.md)
 - [Insert normal text](howto/insertnorm.md)
+- [Insert images](howto/insertimages.md)
 - [Deleting text](howto/deletetext.md)
 - [Spellcheck](howto/spellcheck.md)
 - [Add extra language dictionaries](howto/addspelldict.md)
@@ -89,10 +91,15 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Menu](reference/menu.md)
 - [Docks](reference/docks.md)
 - [Transcript folder structure](reference/folderstructure.md)
-- [Data Formats](reference/dataformat.md)
+- [Data formats](reference/dataformat.md)
 - [Export formats](reference/export.md)
-- [Supported RTF/CRE Features](reference/rtf_support.md)
+- [Supported RTF/CRE features](reference/rtf_support.md)
+- [Commands](reference/commands.md)
 
+
+In development
+- [Editor class](reference/main.md)
+- [Custom text objects](reference/elements.md)
 
 
 ## Discussions of design, development, and descriptions
