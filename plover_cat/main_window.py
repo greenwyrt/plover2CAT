@@ -1767,7 +1767,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.config["space_placement"] == "Before Output":
             text = " " + text.strip()
         else:
-            text = text.strip = " "
+            text = text.strip() + " "
         # print(text)
         if ok:
             log.debug("Define: Outline %s with translation %s" % (underlying_steno, text))
