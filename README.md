@@ -21,7 +21,8 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] translation of paper tape file into transcript
 - [x] basic import of RTF/CRE transcript
 - [x] import of images and export into supported formats
-- [ ] 
+
+
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
 
