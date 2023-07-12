@@ -1377,7 +1377,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         clippy_location = config_dir.joinpath('clippy_2.org')
         log.debug("Trying to load clippy from default location")
         if not clippy_location.exists():
-            log.debug("Clippy load failed")
+            # log.debug("Clippy load failed")
             return
         raw_lines = [line for line in open(clippy_location)]
         stroke_search = []
@@ -1388,16 +1388,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                   stroke_search.append(search_hit.group(1).split(", "))
         first_stroke_search = [x[0] for x in stroke_search] # TODO: show multiple suggestions per phrase
         combined_stroke_search = dict(zip(first_stroke_search, stroke_search))
-        log.debug("stroke_search = " + str(stroke_search))
+        # log.debug("stroke_search = " + str(stroke_search))
         if self.suggest_sort.isChecked():
             most_common_strokes = [word for word in first_stroke_search]
             most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
             most_common_strokes = most_common_strokes[::-1]
         else: 
             most_common_strokes= [word for word, word_count in Counter(first_stroke_search).most_common(10) if word_count > 0]
-        log.debug("most_common_strokes = " + str(most_common_strokes))
+        # log.debug("most_common_strokes = " + str(most_common_strokes))
         words = [self.engine.lookup(tuple(stroke.split("/"))) for stroke in most_common_strokes]
-        log.debug("words = " + str(words))
+        # log.debug("words = " + str(words))
         self.suggestTable.clearContents()
         self.suggestTable.setRowCount(len(words))
         self.suggestTable.setColumnCount(2)
