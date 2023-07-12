@@ -1,5 +1,7 @@
 <RCC>
   <qresource>
+    <file>palette.png</file>
+    <file>image--plus.png</file>
     <file>lightning.png</file>
     <file>document-resize-actual.png</file>
     <file>spell-check.png</file>
