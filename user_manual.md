@@ -301,7 +301,7 @@ Plover2CAT uses the [Plover Tapey Tape plugin](https://github.com/rabbitgrowth/p
 
 Suggestions can be sorted by most common (default), or most recent (toggle the `By Recency` option). 
 
-Entries will show up to the ten most common/recent entries, only if the suggestion source has suggested an alternative outline thrice before. 
+Entries will show up to the ten most common/recent entries for which the suggestion source has suggested an alternative outline thrice before. 
 
 The truly nitty-gritty: for users who have a custom output format defined for Tapey Tape, if `%s` is part of the format, the suggestions should be extracted properly as the regex relies on the presence of the two spaces and `>` before a suggestion.
 
