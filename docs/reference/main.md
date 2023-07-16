@@ -121,7 +121,9 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `on_send_string`: hooked to Plover `send_string`, stores sent string
 - `count_backspaces`: hooked to Plover `send_backspaces`, stores number of backspaces sent
 - `log_to_tape`: hooked to Plover `stroked`, updates paper tape with most recent stroke along with timestamps and cursor position
+- `get_suggestions`: dispatches to one of the functions below based on the value of suggest_source
 - `get_tapey_tape`: summarizes suggestions from Tapey Tape plugin if available
+- `get_clippy`: summarizes suggestions from Tapey Tape plugin if available
 - `stroke_to_text_move`: move to corresponding position in editor based on cursor position in tape dock
 - `text_to_stroke_move`: move to corresponding stroke in tape based on steno data under editor cursor
 - *`tape_translate`*: extract stroke data from selected tape file, translates and overwrite current transcript

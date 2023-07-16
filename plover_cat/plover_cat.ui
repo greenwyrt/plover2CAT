@@ -431,7 +431,7 @@ position.</string>
           <bool>true</bool>
          </property>
          <property name="toolTip">
-          <string>Selects which program provides suggestions.</string>
+          <string>Selects which plugin provides suggestions.</string>
          </property>
          <item>
           <property name="text">
