@@ -104,6 +104,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             window_pal = self.palette()
             window_pal.setColor(QPalette.Base, back_color)
             self.setPalette(window_pal)
+        if settings.contains("suggestionsource"):
+            self.suggest_source.setCurrentIndex(settings.value("suggestionsource"))
         self.config = {}
         self.file_name = ""
         self.styles = {}
@@ -215,9 +217,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.spell_ignore_all.clicked.connect(lambda: self.sp_ignore_all())
         self.spellcheck_suggestions.itemDoubleClicked.connect(self.sp_insert_suggest)
         self.dict_selection.activated.connect(self.set_sp_dict)
+        ## suggestions
+        self.suggest_sort.toggled.connect(lambda: self.get_suggestions())
+        self.suggest_source.currentIndexChanged.connect(lambda: self.get_suggestions())
         ## tape
         self.textEdit.document().blockCountChanged.connect(lambda: self.get_suggestions())
-        self.suggest_sort.toggled.connect(lambda: self.get_suggestions())
         self.numbers = {number: letter for letter, number in plover.system.NUMBERS.items()}
         self.strokeLocate.clicked.connect(lambda: self.stroke_to_text_move())
         self.textEdit.cursorPositionChanged.connect(lambda: self.text_to_stroke_move())
@@ -736,6 +740,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         settings.setValue("windowfont", self.font().toString())
         settings.setValue("tapefont", self.strokeList.font().toString())
         settings.setValue("backgroundcolor", self.palette().color(QPalette.Base))
+        settings.setValue("suggestionsource", self.suggest_source.currentIndex())
         log.info("Saved window settings")
         choice = self.close_file()
         if choice:
@@ -1382,15 +1387,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 stroke_search.append(search_hit.group(1).split(", "))
         first_stroke_search = [x[0] for x in stroke_search]
         combined_stroke_search = dict(zip(first_stroke_search, stroke_search))
-        # log.debug("stroke_search = " + str(stroke_search))
+        log.debug("stroke_search = " + str(stroke_search))
         if self.suggest_sort.isChecked():
             most_common_strokes = [word for word in first_stroke_search[::-1]]
             most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
         else: 
             most_common_strokes = [word for word, word_count in Counter(first_stroke_search).most_common(10)]
-        # log.debug("most_common_strokes = " + str(most_common_strokes))
+        log.debug("most_common_strokes = " + str(most_common_strokes))
         words = [self.engine.lookup(tuple(stroke.split("/"))).strip() for stroke in most_common_strokes]
-        # log.debug("words = " + str(words))
+        log.debug("words = " + str(words))
         self.suggestTable.clearContents()
         self.suggestTable.setRowCount(len(words))
         self.suggestTable.setColumnCount(2)
@@ -1400,8 +1405,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.suggestTable.resizeColumnsToContents()
 
     def get_suggestions(self):
-        # self.get_tapey_tape()
-        self.get_clippy()
+        if self.suggest_source.currentText() == "tapey-tape":
+            self.get_tapey_tape()
+        elif self.suggest_source.currentText() == "clippy_2":
+            self.get_clippy()
+        else:
+            log.debug("Unknown suggestion source %s!" % self.suggest_source.currentText())
 
     def stroke_to_text_move(self):
         stroke_cursor = self.strokeList.textCursor()
