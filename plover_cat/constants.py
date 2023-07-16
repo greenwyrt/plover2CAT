@@ -1,7 +1,7 @@
 import re
 re_strokes = re.compile(r"\s\s>{1,5}(.*)$")
 steno_untrans = re.compile(r"(?=[STKPWHRAO*EUFBLGDZ])S?T?K?P?W?H?R?A?O?\*?E?U?F?R?P?B?L?G?T?S?D?Z?")
-clippy_strokes = re.compile(r'\x1B\[38;2;104;157;106m(.*?)\x1B\[0m')
+clippy_strokes = re.compile(r'\x1B\[38;2;104;157;106m(?!<)(.*?)\x1B\[0m')
 
 default_styles = {
     "Normal": {
