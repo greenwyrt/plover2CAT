@@ -303,7 +303,7 @@ Suggestions can be sorted by most common (default), or most recent (toggle the `
 
 Entries will show up to the ten most common/recent entries for which the suggestion source has suggested an alternative outline thrice before. 
 
-The truly nitty-gritty: for users who have a custom output format defined for Tapey Tape, if `%s` is part of the format, the suggestions should be extracted properly as the regex relies on the presence of the two spaces and `>` before a suggestion.
+The truly nitty-gritty: for users who have a custom output format defined for Tapey Tape, if `%s` is part of the format, the suggestions should be extracted properly as the regex relies on the presence of the two spaces and `>` before a suggestion. clippy_2 support relies on the default ANSI coloring of the suggestions.
 
 ### Reveal Steno
 
