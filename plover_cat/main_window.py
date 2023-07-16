@@ -1367,12 +1367,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.suggestTable.resizeColumnsToContents()
 
     def get_clippy(self):
-        '''This uses a modified clippy_2 Org format that inserts a |
-        before the suggestions for ease of parsing.
-        Ideally I'd load a specific transcript-specific clippy_2 output
-        but that's currently beyond me since I have zero clue
-        how I would dynamically load settings into another plugin
-        from this one, short of bundling my own copy of it'''
+        '''Now parses default clippy output based on color codes.'''
         config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
         clippy_location = config_dir.joinpath('clippy_2.org')
         log.debug("Trying to load clippy from default location")
@@ -1382,8 +1377,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         raw_lines = [line for line in open(clippy_location)]
         stroke_search = []
         for line in raw_lines:
-            line = ansi_escape.sub('', line) # strip color codes
-            search_hit = re.search(r'\|\s+(.*)\s+<', line)
+            search_hit = clippy_strokes.search(line)
             if search_hit:
                 stroke_search.append(search_hit.group(1).split(", "))
         first_stroke_search = [x[0] for x in stroke_search]
@@ -1393,7 +1387,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             most_common_strokes = [word for word in first_stroke_search[::-1]]
             most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
         else: 
-            most_common_strokes= [word for word, word_count in Counter(first_stroke_search).most_common(10)]
+            most_common_strokes = [word for word, word_count in Counter(first_stroke_search).most_common(10)]
         # log.debug("most_common_strokes = " + str(most_common_strokes))
         words = [self.engine.lookup(tuple(stroke.split("/"))).strip() for stroke in most_common_strokes]
         # log.debug("words = " + str(words))
