@@ -2,43 +2,41 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 
 # Features Overview:
 
-- [x] a rich text editor with steno hidden underneath:
+- a rich text editor with steno hidden underneath:
+  - paragraph "block" type formatting
+  - undo/redo history
+  - conventional editing features such as cut/copy/paste
+  - find and replace for simple text, steno stroke, and untrans
+  - spellcheck using the `spylls` library with user-selectable   dictionaries
+  - autosave transcripts
+  - image insertion
+  - navigation of heading paragraphs
 
-        - paragraph "block" type formatting
-        - undo/redo history
-        - conventional editing features such as cut/copy/paste
-        - find and replace for simple text, steno stroke, and untrans
-        - spellcheck using the `spylls` library with user-selectable dictionaries
-        - autosave transcripts
-        - image insertion
-        - navigation of heading paragraphs
+- steno related features such as:
+  - define/delete last untrans
+  - define retroactive
+  - insertion automatic paragraph affixes based on paragraph style
+  - insertion of user defined fields
+  - timestamped paper tape
+  - creation and loading of transcript-specific dictionaries for each transcript
 
-- [x] steno related features such as:
+- audiovisual synchonization and recording
 
-        - define/delete last untrans
-        - define retroactive
-        - insertion automatic paragraph affixes based on paragraph style
-        - insertion of user defined fields
-        - timestamped paper tape
-        - creation and loading of transcript-specific dictionaries for each transcript
+- export transcript formats (with style templates):
+  - plain text
+  - HTML
+  - ASCII
+  - SubRip
+  - RTF/CRE 
+  - Open Text Document formats 
 
-- [x] audiovisual synchonization and recording
+- outline suggestions based on stroke history (powered by Tapey Tape)
 
-- [x] export transcript formats (with style templates):
-        - plain text
-        - HTML
-        - ASCII
-        - SubRip
-        - RTF/CRE 
-        - Open Text Document formats 
+- transcript versioning using the `dulwich` library
 
-- [x] outline suggestions based on stroke history (powered by Tapey Tape)
+- custom shortcuts for menu items
 
-- [x] transcript versioning using the `dulwich` library
-
-- [x] custom shortcuts for menu items
-
-- [x] translation of paper tape file into transcript
+- translation of paper tape file into transcript
 
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
