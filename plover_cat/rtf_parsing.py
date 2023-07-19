@@ -399,6 +399,7 @@ def extract_par_style(style_dict):
     return(one_style_dict)
 
 def load_rtf_styles(parse_results):
+    log.debug(f"Loading RTF styles from {parse_results.rtf_file}")
     style_dict = {}
     for k, v in parse_results.styles.items():
         style_name = v["text"]

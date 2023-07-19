@@ -71,33 +71,30 @@ class steno_insert(QUndoCommand):
             block_data = current_block.userData()
         else:
             block_data = BlockUserData()
-        # log.debug("Insert: %s", block_data.return_all())
-        log.info("Insert: Insert text at %s" % str(current_block.position() + self.position_in_block))
-        # print(block_data.return_all())
+        log.debug("Insert: Insert text at %s" % str(current_block.position() + self.position_in_block))
         block_data["strokes"].insert_steno(self.position_in_block, self.steno)
-        # block_data["strokes"] = new_stroke_data
         block_data = update_user_data(block_data, "edittime")
-        # log.debug("Insert: %s", block_data.return_all())
-        # current_block.setUserData(block_data)
+        current_block.setUserData(block_data)
         current_cursor.insertText(self.steno.to_text())
         self.document.setTextCursor(current_cursor)
+        log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.steno.to_json()}
+        log.info(f"Insert: {log_dict}")
         self.setText("Insert: %s" % self.steno.to_text())
     def undo(self):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
         start_pos = current_block.position() + self.position_in_block
-        end_pos = current_block.position() + self.position_in_block + len(self.steno)
+        end_pos = current_block.position() + self.position_in_block + len(self.steno.to_text().rstrip("\n"))
         current_cursor.setPosition(start_pos)
         current_cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
         self.document.setTextCursor(current_cursor)
         block_data = current_block.userData()
-        # log.debug("Undo insert: %s", block_data.return_all())
-        res = block_data["strokes"].remove_steno(self.position_in_block, self.position_in_block + len(self.steno))
+        res = block_data["strokes"].remove_steno(self.position_in_block, self.position_in_block + len(self.steno.to_text()))
         block_data = update_user_data(block_data, "edittime")
-        # current_block.setUserData(block_data)    
-        # log.debug("Undo insert: %s", block_data.return_all())
-        log.info("Undo insert: Remove %s", current_cursor.selectedText())
+        current_block.setUserData(block_data)
         current_cursor.removeSelectedText()
+        log_dict = {"action": "remove", "block": self.block, "position_in_block": self.position_in_block, "end": self.position_in_block + len(self.steno.to_text())}
+        log.info(f"Insert (undo): {log_dict}")
         self.document.setTextCursor(current_cursor)
               
 class steno_remove(QUndoCommand):
@@ -113,37 +110,32 @@ class steno_remove(QUndoCommand):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
         start_pos = current_block.position() + self.position_in_block
-        # end_pos = current_block.position() + self.position_in_block + self.length
-        # log.debug("Remove: start pos: %d, end pos : %d" % (start_pos, end_pos))
         current_cursor.setPosition(start_pos)
         block_data = current_block.userData()
-        log.debug("Remove: %d chars" % self.length)
-        log.info("Remove: Remove in paragraph %s from %s to %s" % (self.block, self.position_in_block, self.position_in_block + self.length))
         self.steno = block_data["strokes"].remove_steno(self.position_in_block, self.position_in_block + self.length)
         block_data = update_user_data(block_data, "edittime")
-        log.debug("Remove: %s", block_data.return_all())
         current_cursor.setPosition(start_pos + len(self.steno), QTextCursor.KeepAnchor)
         self.document.setTextCursor(current_cursor)        
         current_block.setUserData(block_data)
         current_cursor.removeSelectedText()
         self.document.setTextCursor(current_cursor)
+        log_dict = {"action": "remove", "block": self.block, "position_in_block": self.position_in_block, "end": self.position_in_block + self.length}
+        log.info(f"Remove: {log_dict}")
         self.setText("Remove: %d chars" % len(self.steno))
     def undo(self):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
         start_pos = current_block.position() + self.position_in_block
         end_pos = current_block.position() + self.position_in_block + self.length
-        # log.debug("Undo remove: start pos: %d, end pos : %d" % (start_pos, end_pos))
         current_cursor.setPosition(start_pos)
         self.document.setTextCursor(current_cursor)
         block_data = current_block.userData()
-        # log.debug("Undo remove: %s", block_data.return_all())
         res = block_data["strokes"].insert_steno(self.position_in_block, self.steno)
-        log.info("Undo remove: Insert text at %s" % str(current_block.position() + self.position_in_block))
         block_data = update_user_data(block_data, "edittime")
-        # log.debug("Undo remove: %s", block_data.return_all())
         current_block.setUserData(block_data)
         current_cursor.insertText(self.steno.to_text())
+        log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.steno.to_json()}
+        log.info(f"Remove (undo): {log_dict}")
         self.document.setTextCursor(current_cursor)
 
 class image_insert(QUndoCommand):
@@ -169,12 +161,12 @@ class image_insert(QUndoCommand):
         imageFormat.setName(imageUri.toString())
         self.image_element.width = image.width()
         self.image_element.height = image.height()
-        # prep image_element
         current_block = self.document.document().findBlockByNumber(self.block)
         current_block.userData()["strokes"].insert_steno(self.position_in_block, self.image_element)
         current_cursor = self.document.textCursor()
         current_cursor.setPosition(current_block.position() + self.position_in_block)
-        log.info("Insert: Inserting image %s at position %d" % (self.image_element.path, self.position_in_block))
+        log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.image_element.to_json()}
+        log.info(f"Insert: {log_dict}")
         current_cursor.insertImage(imageFormat)
         self.setText("Insert image")
         self.document.setTextCursor(current_cursor)
@@ -185,43 +177,46 @@ class image_insert(QUndoCommand):
         current_cursor.setPosition(current_block.position() + self.position_in_block + 1, QTextCursor.KeepAnchor)
         current_block.userData()["strokes"].remove_steno(self.position_in_block, self.position_in_block + 1)
         current_cursor.removeSelectedText()
+        log_dict = {"action": "remove", "block": self.block, "position_in_block": self.position_in_block, "end": self.position_in_block + 1}
+        log.info(f"Insert image (undo): {log_dict}")        
         self.document.setTextCursor(current_cursor)
+
+# split_steno and merge_steno are using cursor movements repeatedly rather than insertText and removeSelectedText
+# otherwise image objects are replaced by OBJ chars
 
 class split_steno_par(QUndoCommand):
     """ Splits paragraphs at position in block, and puts steno properly with new textblock """
-    def __init__(self, document, block, position_in_block, space_placement):
+    def __init__(self, document, block, position_in_block, space_placement, new_line_stroke):
         super().__init__()
         self.block = block
         self.position_in_block = position_in_block
         self.document = document
         self.strokes = []
         self.space_placement = space_placement
+        self.new_line_stroke = automatic_text()
+        self.new_line_stroke.from_dict(new_line_stroke.to_json())
         self.block_text = ""
         self.block_data = ""
     def redo(self):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
         current_cursor.setPosition(current_block.position() + self.position_in_block)
-        log.info("Split: Splitting at position %d in block %d" % (self.position_in_block, self.block))
-        self.block_data = current_block.userData().return_all()
+        self.block_data = deepcopy(current_block.userData().return_all())
         self.block_text = current_block.text()
         stroke_data = self.block_data["strokes"]
-        first_part = stroke_data[0:self.position_in_block]
-        second_part = stroke_data[self.position_in_block:]
+        # first_part = stroke_data.extract_steno(0, self.position_in_block)
+        second_part = current_block.userData()["strokes"].remove_steno(self.position_in_block, len(current_block.userData()["strokes"].to_text()))
         first_data = current_block.userData()
         second_data = BlockUserData()
         first_data = update_user_data(first_data, key = "edittime")
         second_data = update_user_data(second_data, key = "edittime")
-        # first_text = self.block_text[:self.position_in_block]
-        # second_text = self.block_text[self.position_in_block:]
         if second_part and self.space_placement == "Before Output":
             if second_part.starts_with(" "):
-                log.debug("Stripping space from beginning of second piece")
+                log.debug("Split: Stripping space from beginning of second piece")
                 second_part.remove_begin(" ")
         log.debug("Split: Appending new line stroke to end of second piece")
-        fake_newline_stroke = stroke_text(stroke = "R-R", text = "\n")
-        first_part.append(fake_newline_stroke)
-        log.debug("Split: Splitting %s and %s" % (first_part, second_part))
+        fake_newline_stroke = self.new_line_stroke
+        current_block.userData()["strokes"].append(deepcopy(fake_newline_stroke))
         # this is important on last segment that has audioendtime
         if first_data["audioendtime"]:
             second_data = update_user_data(second_data, key = "audioendtime", value = first_data["audioendtime"])
@@ -237,7 +232,9 @@ class split_steno_par(QUndoCommand):
         except:
             second_data = update_user_data(second_data, key = "creationtime")
         second_data["strokes"] = second_part
-        first_data["strokes"] = first_part
+        # first_data["strokes"] = first_part
+        # mimic auto text
+        current_cursor.insertText(fake_newline_stroke.to_text().rstrip("\n"))
         current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
         current_cursor.removeSelectedText()
         current_cursor.insertBlock()
@@ -246,25 +243,28 @@ class split_steno_par(QUndoCommand):
         current_block.setUserData(first_data)
         new_block.setUserData(second_data)
         self.setText("Split: %d,%d" % (self.block, self.position_in_block))
-        log.debug("Split: %s", current_cursor.block().userData().return_all())
+        log_dict = {"action": "split", "block": self.block, "position_in_block": self.position_in_block}
+        log.info(f"Split: {log_dict}")
         current_cursor.movePosition(QTextCursor.StartOfBlock)
         self.document.setTextCursor(current_cursor)       
     def undo(self):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
-        log.info("Undo split: Merging back at %d, %d" % (self.block, self.position_in_block))
         current_cursor.setPosition(current_block.position())
-        current_cursor.setPosition(current_block.position() + self.position_in_block, QTextCursor.KeepAnchor)
-        current_cursor.insertText(self.block_data["strokes"].to_text().rstrip("\n"))
+        current_cursor.movePosition(QTextCursor.EndOfBlock)
+        current_cursor.deleteChar()
+        # removal of the auto text
+        for char in self.new_line_stroke.to_text().rstrip("\n"):
+            current_cursor.deletePreviousChar()
+        # remove the starting space that was removed
+        if self.space_placement == "Before Output":
+            current_cursor.insertText(" ")
         restore_data = BlockUserData()
         for key, item in self.block_data.items():
             restore_data = update_user_data(restore_data, key = key, value = item)
         current_block.setUserData(restore_data)
-        next_block = current_block.next()
-        current_cursor.setPosition(next_block.position())
-        current_cursor.select(QTextCursor.BlockUnderCursor)
-        current_cursor.removeSelectedText()
-        log.debug("Undo split: %s", current_cursor.block().userData().return_all())
+        log_dict = {"action": "merge", "block": self.block}
+        log.info(f"Split (undo): {log_dict}")
         self.document.setTextCursor(current_cursor)
 
 class merge_steno_par(QUndoCommand):
@@ -282,16 +282,22 @@ class merge_steno_par(QUndoCommand):
         current_cursor = self.document.textCursor()
         first_block_num = self.block
         second_block_num = self.block + 1
-        log.info("Merge: Merging paragraphs %s and %s" % (first_block_num, second_block_num))
         first_block = self.document.document().findBlockByNumber(first_block_num)
         second_block = self.document.document().findBlockByNumber(second_block_num)
         first_data = first_block.userData()
         second_data = second_block.userData()
+        self.second_data_dict = deepcopy(second_data.return_all())
+        self.first_data_dict = deepcopy(first_data.return_all())
         self.position_in_block = len(first_block.text())
         first_data = update_user_data(first_data, key = "edittime")
         # append second stroke data to first
         second_strokes = second_data["strokes"]
         first_strokes = first_data["strokes"]
+        current_cursor.setPosition(first_block.position())
+        current_cursor.movePosition(QTextCursor.EndOfBlock)
+        if first_data["strokes"].ends_with_element("automatic"):
+            for char in first_data["strokes"].data[-1].prefix:
+                current_cursor.deletePreviousChar()
         if first_data["strokes"].ends_with("\n"):
             first_data["strokes"].remove_end("\n")
             log.debug("Merge: Removing new line from first paragraph steno")
@@ -299,66 +305,49 @@ class merge_steno_par(QUndoCommand):
             second_data["strokes"].add_begin(" ")
         elif self.add_space:
             first_data["strokes"].add_end(" ")
+        if self.add_space:
+            current_cursor.insertText(" ")
         # append the second data to the first
         first_data["strokes"].extend(second_data["strokes"])
         # update the audio end time if it exists, only really needed for last block since other blocks do not have audioendtime
         if first_data["audioendtime"] != second_data["audioendtime"]:
             first_data = update_user_data(first_data, key = "audioendtime", value = second_data["audioendtime"])
-        current_cursor.setPosition(second_block.position())
-        current_cursor.select(QTextCursor.BlockUnderCursor)
-        current_cursor.removeSelectedText()
-        log.debug("Merge: Deleting second paragraph")
         first_block.setUserData(first_data)
-        new_block_text = second_data["strokes"].to_text().rstrip("\n")
-        current_cursor.insertText(new_block_text)
-        self.second_data_dict = second_data.return_all()
-        self.first_data_dict = first_data.return_all()
+        current_cursor.deleteChar()
         current_cursor.setPosition(first_block.position() + self.position_in_block)
-        log.debug("Merge: Inserting text %s into paragraph" % new_block_text)
-        log.debug("Merge: 2nd paragraph %s" % self.second_data_dict)
-        log.debug("Merge: combined paragraph %s" % first_data.return_all())
+        log_dict = {"action": "merge", "block": self.block}
+        log.info(f"Merge: {log_dict}")
         self.document.setTextCursor(current_cursor)
         self.setText("Merge: %d & %d" % (first_block_num, second_block_num))
     def undo(self):
         current_cursor = self.document.textCursor()
         first_block_num = self.block
         second_block_num = self.block + 1
-        log.info("Undo merge: splitting paragraph %s" % first_block_num)
         first_block = self.document.document().findBlockByNumber(first_block_num)
-        current_cursor.setPosition(first_block.position() + self.position_in_block)
-        # remove stroke data from cursor pos to end
-        self.first_data_dict["strokes"].remove_steno(self.position_in_block, len(self.first_data_dict["strokes"]))
-        current_cursor.insertBlock()
+        first_data = BlockUserData()
+        for key, item in self.first_data_dict.items():
+            first_data = update_user_data(first_data, key = key, value = item)
+        first_block.setUserData(first_data)
+        current_cursor.setPosition(first_block.position())
+        if first_data["strokes"].ends_with_element("automatic"):
+            current_cursor.setPosition(first_block.position() + self.position_in_block - len(first_data["strokes"].data[-1].prefix))
+            current_cursor.insertText(first_data["strokes"].data[-1].prefix)
+        else:
+            current_cursor.setPosition(first_block.position() + self.position_in_block)
+        current_cursor.insertText("\n")
+        if self.add_space:
+            current_cursor.deleteChar()
         second_block = self.document.document().findBlockByNumber(second_block_num)
         second_data = BlockUserData()
         for key, item in self.second_data_dict.items():
             second_data = update_user_data(second_data, key = key, value = item)
-        if self.space_placement == "Before Output" and self.add_space:
-            second_data["strokes"].remove_begin(" ")
-            current_cursor.setPosition(second_block.position() + 1)
-            current_cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.KeepAnchor)
-            if current_cursor.selectedText() == " ":
-                current_cursor.removeSelectedText()
-            current_cursor.movePosition(QTextCursor.StartOfBlock, QTextCursor.MoveAnchor)
-            # print(second_data["strokes"])
-        elif self.add_space:
-            self.first_data_dict["strokes"].remove_end(" ")
-        fake_newline_stroke = stroke_text(stroke = "R-R", text = "\n")
-        self.first_data_dict["strokes"].append(fake_newline_stroke)
         second_block.setUserData(second_data)
-        first_data = BlockUserData()
-        for key, item in self.first_data_dict.items():
-            first_data = update_user_data(first_data, key = key, value = item)
-        first_block.setUserData(first_data)        
-        # print(second_data.return_all())
-        # print(first_block.userData().return_all())
+        log_dict = {"action": "split", "block": self.block, "position_in_block": self.position_in_block}
+        log.info(f"Merge (undo): {log_dict}")        
         self.document.setTextCursor(current_cursor)
 
 class set_par_style(QUndoCommand):
     """Set paragraph style"""
-    block = None
-    old_style = ""
-    style = ""
     def __init__(self, block, style, document, par_formats, txt_formats):
         super().__init__()
         self.block = block
@@ -372,7 +361,6 @@ class set_par_style(QUndoCommand):
         current_cursor = self.document.textCursor()
         old_position = current_cursor.position()
         current_cursor.setPosition(current_block.position())
-        # current_cursor.setCharFormat(self.txt_formats[self.style])
         block_data = current_block.userData()
         if not block_data:
             block_data = BlockUserData()
@@ -384,8 +372,6 @@ class set_par_style(QUndoCommand):
         block_data = update_user_data(block_data, "style", self.style)
         current_block.setUserData(block_data)
         self.setText("Style: Par. %d set style %s" % (self.block, self.style))
-        log.info("Style: Par. %d set style %s" % (self.block, self.style))
-        log.debug("Style: New style is %s, old style is %s" % (self.style, self.old_style))
         current_cursor.movePosition(QTextCursor.StartOfBlock)
         current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
         current_cursor.setBlockFormat(self.par_formats[self.style])
@@ -399,6 +385,8 @@ class set_par_style(QUndoCommand):
             it += 1
         current_cursor.setPosition(old_position)
         self.document.setTextCursor(current_cursor)
+        log_dict = {"action": "set_style", "block": self.block, "style": self.style}
+        log.info(f"Style: {log_dict}")
     def undo(self):
         if self.old_style:
             current_block = self.document.document().findBlockByNumber(self.block)
@@ -411,8 +399,76 @@ class set_par_style(QUndoCommand):
             current_cursor.movePosition(QTextCursor.StartOfBlock)
             current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
             current_cursor.setBlockFormat(self.par_formats[self.old_style])
-            current_cursor.setCharFormat(self.txt_formats[self.old_style])
-            log.info("Undoing styling: %s to par %d." % (self.style, self.block))
-            log.debug("Undoing styling: from new style %s to old style %s" % (self.style, self.old_style))
+            it = current_block.begin()
+            while not it.atEnd():
+                frag = it.fragment()
+                if frag.isValid() and not frag.charFormat().isImageFormat():
+                    current_cursor.setPosition(frag.position())
+                    current_cursor.setPosition(frag.position() + frag.length(), QTextCursor.KeepAnchor)
+                    current_cursor.setCharFormat(self.txt_formats[self.old_style])
+                it += 1            
             current_cursor.setPosition(old_position)
             self.document.setTextCursor(current_cursor)
+            log_dict = {"action": "set_style", "block": self.block, "style": self.old_style}
+            log.info(f"Style: {log_dict}")
+
+class update_field(QUndoCommand):
+    def __init__(self, document, block, position, old_dict, new_dict):
+        super().__init__()
+        self.document = document
+        self.block = block
+        self.position_in_block = position
+        # first is the reference to dict to be updated
+        self.user_field_dict = old_dict
+        self.new_dict = deepcopy(new_dict)
+        # second one is the copy to be kept for undos
+        self.store_dict = deepcopy(old_dict)
+    def redo(self):
+        current_cursor = self.document.textCursor()
+        current_block = self.document.document().findBlockByNumber(self.block)
+        block = self.document.document().begin()
+        self.document.parent().parent().user_field_dict.clear()
+        self.document.parent().parent().user_field_dict.update(self.new_dict)
+        while True:     
+            block_strokes = block.userData()["strokes"]
+            for ind, el in enumerate(block_strokes.data):
+                # print(ind)
+                if el.element == "field":
+                    start_pos, end_pos = block_strokes.element_pos(ind)
+                    # print(block.position() + start_pos)
+                    current_cursor.setPosition(block.position() + start_pos)
+                    current_cursor.setPosition(block.position() + end_pos, QTextCursor.KeepAnchor)
+                    current_cursor.removeSelectedText()
+                    el.user_dict = self.document.parent().parent().user_field_dict
+                    current_cursor.insertText(el.to_text())
+            if block == self.document.document().lastBlock():
+                break
+            block = block.next()
+        current_cursor.setPosition(current_block.position() + self.position_in_block)
+        self.setText("Update fields")
+        log_dict = {"action": "field", "field": self.new_dict}
+        log.info(f"Field: {log_dict}")
+    def undo(self):
+        current_cursor = self.document.textCursor()
+        current_block = self.document.document().findBlockByNumber(self.block)
+        block = self.document.document().begin()
+        self.document.parent().parent().user_field_dict.clear()
+        self.document.parent().parent().user_field_dict.update(self.store_dict)
+        while True:     
+            block_strokes = block.userData()["strokes"]
+            for ind, el in enumerate(block_strokes.data):
+                # print(ind)
+                if el.element == "field":
+                    start_pos, end_pos = block_strokes.element_pos(ind)
+                    # print(block.position() + start_pos)
+                    current_cursor.setPosition(block.position() + start_pos)
+                    current_cursor.setPosition(block.position() + end_pos, QTextCursor.KeepAnchor)
+                    current_cursor.removeSelectedText()
+                    el.user_dict = self.document.parent().parent().user_field_dict
+                    current_cursor.insertText(el.to_text())
+            if block == self.document.document().lastBlock():
+                break
+            block = block.next()
+        current_cursor.setPosition(current_block.position() + self.position_in_block)
+        log_dict = {"action": "field", "field": self.store_dict}
+        log.info(f"Field: {log_dict}")        

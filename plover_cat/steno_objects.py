@@ -7,10 +7,11 @@ from itertools import accumulate
 from bisect import bisect_left, bisect
 from plover_cat.rtf_parsing import write_command
 from plover_cat.helpers import pixel_to_in
+from plover_cat.constants import user_field_dict
 from PyQt5.QtCore import QByteArray, QBuffer, QIODevice
 from PyQt5.QtGui import QImage, QImageReader
 from odf.teletype import addTextToElement
-from odf.text import P
+from odf.text import P, UserFieldDecls, UserFieldDecl, UserFieldGet
 from odf.draw import Frame, TextBox, Image
 
 # display letters: s for stroke, t for text, i for image, 
@@ -43,7 +44,7 @@ class text_element(UserString):
             setattr(self, k, v)
     def to_display(self):
         return("\U0001F163\n\n%s" % self.to_text())
-    def to_dict(self):
+    def to_json(self):
         return(self.__dict__)
     def to_text(self):
         return(self.data)
@@ -100,7 +101,7 @@ class image_text(text_element):
     def length(self):
         return(1)
     def to_display(self):
-        return("\U0001F158\n \n ")
+        return("\U0001F158\n%s\n " % self.path)
     def to_rtf(self):
         image = QImage(QImageReader(self.path).read())
         ba = QByteArray()
@@ -122,12 +123,16 @@ class image_text(text_element):
         paragraph.addElement(image_frame)
 
 class text_field(text_element):
-    def __init__(self, name, **kargs):
+    def __init__(self, name = None, user_dict = user_field_dict, **kargs):
         super().__init__(**kargs)
         self.element = "field"
         self.name = name
+        self.user_dict = user_dict
     def length(self):
         return(1)
+    def to_json(self):
+        new = {k: v for k, v in self.__dict__.items() if k != "user_dict"}
+        return(new)        
     def to_display(self):
         self.update()
         return("\U0001F155\n \n%s" % self.data)
@@ -135,8 +140,8 @@ class text_field(text_element):
         self.update()
         return(self.data)
     def update(self):
-        if self.name in user_field_dict:
-            self.data = user_field_dict[self.name]
+        if self.name in self.user_dict:
+            self.data = self.user_dict[self.name]
         else:
             self.data = "{%s}" % str(self.name)
     def to_rtf(self):
@@ -145,25 +150,50 @@ class text_field(text_element):
         rtf_string = rtf_string + write_command("fldrslt", self.data)
         rtf_string = write_command("fldlock", rtf_string, group = True)
         return(write_command("field", rtf_string))
+    def to_odt(self, paragraph, document):
+        self.update()
+        # move this out to actual function, since this is setting document var
+        user_declares = document.text.getElementsByType(UserFieldDecls)
+        if user_declares:
+            field_names = [i.getAttribute("name") for i in document.text.getElementsByType(UserFieldDecl)]
+            if not self.name in field_names:
+                user_declares = document.text.getElementsByType(UserFieldDecls)[0]
+                user_dec = UserFieldDecl(name = self.name, stringvalue = self.data, valuetype = "string")
+                user_declares.addElement(user_dec)                
+        else:
+            user_declares = UserFieldDecls()
+            user_dec = UserFieldDecl(name = self.name, stringvalue = self.data, valuetype = "string")
+            user_declares.addElement(user_dec)
+            document.text.addElement(user_declares)
+        user_field = UserFieldGet(name = self.name)
+        user_field.addText(self.data)
+        paragraph.addElement(user_field)
 
-class automatic_text(text_element):
+class automatic_text(stroke_text):
     """
     use for text such as Q\t, ie set directly for question style
     """
-    def __init__(self, **kargs):
+    def __init__(self, prefix = "", suffix = "", **kargs):
         super().__init__(**kargs)
         self.element = "automatic"
-    def length(self):
-        return(1)
+        self.prefix = prefix
+        self.suffix = suffix
     def __len__(self):
-        return(len(self.data))
+        return(len(self.to_text()))
     def to_text(self):
-        return(self.data)
+        return(self.prefix + self.data + self.suffix)
+    def length(self):
+        return(len(self.data))
     def to_rtf(self):
-        string = write_command("cxa",  self.data, visible = False, group = True)
+        string = ""
+        if self.prefix:
+            string = string + write_command("cxa",  self.prefix, visible = False, group = True)
+        string = string + write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", self.stroke, visible = False, group = True) + self.data
+        if self.suffix:
+            string = string + write_command("cxa",  self.suffix, visible = False, group = True)
         return(string)
     def to_display(self):
-        return("\U0001F150\n\n%s" % self.to_text())
+        return(f"\U0001F162 \U0001F150\n{self.stroke}\n{self.to_text()}")
 
 class conflict_text(stroke_text):
     # need for resolving with imports from rtf
@@ -175,26 +205,18 @@ class exhibit_text(text_element):
     """
     text element that holds exhibit
     """
-    def __init__(self, exhibit_id = None, caption = None, exhibit_num = 1, **kargs):
+    def __init__(self, num = 1, **kargs):
         super().__init__(**kargs)
-        self.element = "exhibit"
-        self.exhibit_id = "Exhibit {{{id}}}".format(id = exhibit_id)
-        self.exhibit_num = exhibit_num
-        self.caption = caption
-    def __len__(self):
-        return(len(self.exhibit_id))
+        self.element = "sequence"
+        self.name = "Exhibit"
+        self.num = num
     def length(self):
         return(1)
-    def set_id(self, exhibit_id):
-        self.exhibit_id = "Exhibit {{{id}}}".format(id = exhibit_id)
-    def set_num(self, num):
-        self.exhibit_num = num
     def to_text(self):
-        return("Exhibit\u00a0{num}".format(num = self.exhibit_num))
-    def to_rtf(self):
-        # not functional for now
-        # need global variable to keep track of numbers
-        # then apply to all serializations, ie update exhibit num, then serialize
+        return(f"{self.name} {self.exhibit_num}")
+    def to_display(self):
+        return(f"\U0001F154\n\n{self.to_text()}")
+    def to_odt(self, paragraph, document):
         pass
 
 def translate_coords(len1, len2, pos):
@@ -241,9 +263,14 @@ def backtrack_coord(pos, backspace, text_len, func_len):
 # backspace = 5
 # backtrack_coord(pos, backspace, text_len, func_len)
 # backtrack_coord(24, backspace, text_len, func_len)
+# text_len = [4, 3, 3, 5]
+# func_len = [4, 3, 1, 5]
+# pos = 10
+# backspace = 1
+# backtrack_coord(pos, backspace, text_len, func_len)
 
 class element_factory:
-    def gen_element(self, element_dict):
+    def gen_element(self, element_dict, user_field_dict = user_field_dict):
         # default is always a text element
         element = text_element()
         if element_dict["element"] == "stroke":
@@ -252,6 +279,10 @@ class element_factory:
             element = dummy_element()
         elif element_dict["element"] == "image":
             element = image_text()
+        elif element_dict["element"] == "field":
+            element = text_field(user_dict = user_field_dict)
+        elif element_dict["element"] == "automatic":
+            element = automatic_text()
         element.from_dict(element_dict)
         return(element)
 
@@ -278,7 +309,7 @@ class element_collection(UserList):
         return(sum(self.lens()))
     def __getitem__(self, key):
         if isinstance(key, slice):
-            el_lengths = list(accumulate([i.length() for i in self.data]))
+            el_lengths = list(accumulate(self.lengths()))
             start = key.start
             if not start:
                 start = 0
@@ -327,9 +358,8 @@ class element_collection(UserList):
     def element_count(self):
         return(len(self.data))
     def to_json(self):
-        return([i.to_dict() for i in self.data])
+        return([i.to_json() for i in self.data])
     def to_text(self):
-        # to do: placeholder until figure out how to dislay each element for reveal steno
         text = [i.to_text() for i in self.data]
         return("".join(text))
     def to_rtf(self):
@@ -418,13 +448,25 @@ class element_collection(UserList):
         lengths = self.lengths()
         cum_lengths = list(accumulate(lengths))
         cum_lengths.insert(0, 0)
-        steno_pos = translate_coords(cum_len, cum_lengths, pos)        
+        steno_pos = translate_coords(cum_len, cum_lengths, pos)
         res = self.insert(steno_pos, item)
         return(res)
     def starts_with(self, char):
         return(self.data[0].data.startswith(char))
     def ends_with(self, char):
         return(self.data[-1].data.endswith(char))
+    def starts_with_element(self, element_type):
+        if not self.data:
+            return False
+        if self.data[0].element == element_type:
+            return True
+        else:
+            return False
+    def ends_with_element(self, element_type):
+        if self.data[-1].element == element_type:
+            return True
+        else:
+            return False
     def remove_end(self, char = "\n"):
         if self.data[-1].data == char:
             del self.data[-1]
@@ -475,7 +517,7 @@ class element_collection(UserList):
             if track_len < 0:
                 break
          
-# stroke_data = [text_element(text = "AB\tC"), stroke_text(stroke = "T-", text = "it "), automatic_text(text = "Q\tstart "), stroke_text(stroke = "EUFS ", text = "I was ")]
+# stroke_data = [text_element(text = "ABC"), stroke_text(stroke = "T-", text = "it "), automatic_text(text = "\n", prefix = "?"), stroke_text(stroke = "EUFS ", text = "I was ")]
 # ex_text = exhibit_text(exhibit_id = "first-exhibit", text = "abc\n")
 # stroke_data.append(ex_text)
 

@@ -16,6 +16,7 @@ class PloverCATEditor(QTextEdit):
     def __init__(self, widget):
         super().__init__(widget)
         self._completer = None
+        self.block = 0
     def setCompleter(self, c):
         if not c:
             self._completer = c

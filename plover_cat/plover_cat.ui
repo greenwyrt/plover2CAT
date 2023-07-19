@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>965</width>
-    <height>668</height>
+    <width>956</width>
+    <height>743</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -67,53 +67,118 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="dockNestingEnabled">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_14">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="PloverCATEditor" name="textEdit">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-          <horstretch>3</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>8</pointsize>
-         </font>
-        </property>
-        <property name="contextMenuPolicy">
-         <enum>Qt::CustomContextMenu</enum>
-        </property>
-        <property name="acceptDrops">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Richtext editor.</string>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
-        </property>
-        <property name="documentTitle">
-         <string/>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="cursorWidth">
-         <number>5</number>
-        </property>
-        <property name="textInteractionFlags">
-         <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QTabWidget" name="mainTabs">
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::South</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <property name="tabBarAutoHide">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="homeTab">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <attribute name="title">
+        <string>Recent Files</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_21">
+        <item>
+         <layout class="QVBoxLayout" name="flowparent">
+          <item>
+           <widget class="QLabel" name="label_39">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Welcome to Plover2CAT. Create a new transcript or select a recent transcript below.</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::PlainText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="recentfileflow">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="editorTab">
+       <attribute name="title">
+        <string>Editor</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="PloverCATEditor" name="textEdit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>3</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="acceptDrops">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Richtext editor.</string>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
+          <property name="documentTitle">
+           <string/>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="cursorWidth">
+           <number>5</number>
+          </property>
+          <property name="textInteractionFlags">
+           <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -122,7 +187,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>965</width>
+     <width>956</width>
      <height>19</height>
     </rect>
    </property>
@@ -151,8 +216,14 @@
      <addaction name="actionODT"/>
      <addaction name="actionRTF"/>
     </widget>
+    <widget class="QMenu" name="menuRecentFiles">
+     <property name="title">
+      <string>Recent Files</string>
+     </property>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="menuRecentFiles"/>
     <addaction name="actionImportRTF"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
@@ -172,7 +243,6 @@
      <bool>true</bool>
     </property>
     <addaction name="actionFindReplacePane"/>
-    <addaction name="actionInsertImage"/>
     <addaction name="separator"/>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
@@ -183,8 +253,10 @@
     <addaction name="actionNormalCopy"/>
     <addaction name="separator"/>
     <addaction name="actionJumpToParagraph"/>
-    <addaction name="actionInsertNormalText"/>
     <addaction name="actionClearParagraph"/>
+    <addaction name="separator"/>
+    <addaction name="actionEnableAutosave"/>
+    <addaction name="actionSetAutosaveTime"/>
    </widget>
    <widget class="QMenu" name="menuAudio">
     <property name="title">
@@ -266,6 +338,7 @@
     <addaction name="actionAddAutocompletionTerm"/>
     <addaction name="actionRetroactiveDefine"/>
     <addaction name="actionDefineLast"/>
+    <addaction name="actionDeleteLast"/>
     <addaction name="separator"/>
     <addaction name="actionCursorAtEnd"/>
     <addaction name="actionCaptureAllOutput"/>
@@ -279,10 +352,30 @@
     <addaction name="actionCreateNewStyle"/>
     <addaction name="actionGenerateStyleFromTemplate"/>
     <addaction name="actionRefreshEditor"/>
+    <addaction name="separator"/>
+    <addaction name="actionAutomaticAffixes"/>
+    <addaction name="actionEditAffixes"/>
+   </widget>
+   <widget class="QMenu" name="menuInsert">
+    <property name="title">
+     <string>Insert</string>
+    </property>
+    <widget class="QMenu" name="menuField">
+     <property name="title">
+      <string>Field...</string>
+     </property>
+    </widget>
+    <addaction name="actionInsertImage"/>
+    <addaction name="actionInsertNormalText"/>
+    <addaction name="actionExhibit"/>
+    <addaction name="menuField"/>
+    <addaction name="separator"/>
+    <addaction name="actionEditFields"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuSteno_Actions"/>
+   <addaction name="menuInsert"/>
    <addaction name="menuAudio"/>
    <addaction name="menuStyling"/>
    <addaction name="menuDictionary"/>
@@ -359,6 +452,12 @@ position.</string>
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
        </property>
+       <property name="undoRedoEnabled">
+        <bool>false</bool>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
        <property name="readOnly">
         <bool>true</bool>
        </property>
@@ -397,7 +496,7 @@ position.</string>
    <property name="minimumSize">
     <size>
      <width>97</width>
-     <height>134</height>
+     <height>195</height>
     </size>
    </property>
    <property name="toolTip">
@@ -407,7 +506,7 @@ position.</string>
     <string>Suggestions</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>2</number>
+    <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -649,7 +748,7 @@ position.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-403</y>
+          <y>0</y>
           <width>363</width>
           <height>472</height>
          </rect>
@@ -1143,7 +1242,7 @@ and margin positions. Less accurate with proportional fonts.</string>
               <item row="9" column="1">
                <widget class="QComboBox" name="blockHeadingLevel">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
@@ -1151,6 +1250,61 @@ and margin positions. Less accurate with proportional fonts.</string>
                 <property name="toolTip">
                  <string>Specify heading level of style</string>
                 </property>
+                <item>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>1</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>3</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>4</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>6</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>7</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>8</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>9</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>10</string>
+                 </property>
+                </item>
                </widget>
               </item>
               <item row="10" column="1">
@@ -1201,7 +1355,7 @@ and margin positions. Less accurate with proportional fonts.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>414</width>
+          <width>410</width>
           <height>415</height>
          </rect>
         </property>
@@ -2100,7 +2254,7 @@ time from next paragraph.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>344</width>
+          <width>361</width>
           <height>164</height>
          </rect>
         </property>
@@ -2322,7 +2476,7 @@ time from next paragraph.</string>
   <widget class="QDockWidget" name="dockStenoData">
    <property name="minimumSize">
     <size>
-     <width>91</width>
+     <width>174</width>
      <height>113</height>
     </size>
    </property>
@@ -2330,7 +2484,7 @@ time from next paragraph.</string>
     <string>Reveal Steno</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>8</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_7">
     <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -2342,6 +2496,9 @@ time from next paragraph.</string>
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
        </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
        <property name="editTriggers">
         <set>QAbstractItemView::NoEditTriggers</set>
        </property>
@@ -2351,7 +2508,51 @@ time from next paragraph.</string>
        <property name="flow">
         <enum>QListView::LeftToRight</enum>
        </property>
+       <property name="isWrapping" stdset="0">
+        <bool>true</bool>
+       </property>
+       <property name="itemAlignment">
+        <set>Qt::AlignLeading</set>
+       </property>
       </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_22">
+       <item>
+        <widget class="QPushButton" name="downgradeRevealStenoEl">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>Downgrades selected element</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/resources.qrc">
+           <normaloff>:/arrow-270-medium.png</normaloff>:/arrow-270-medium.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="reveal_steno_refresh">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="toolTip">
+          <string>Refresh reveal steno display</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources/resources.qrc">
+           <normaloff>:/arrow-circle-double-135.png</normaloff>:/arrow-circle-double-135.png</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -2372,6 +2573,12 @@ time from next paragraph.</string>
    <addaction name="actionInsertNormalText"/>
   </widget>
   <widget class="QDockWidget" name="dockNavigation">
+   <property name="minimumSize">
+    <size>
+     <width>91</width>
+     <height>113</height>
+    </size>
+   </property>
    <property name="windowTitle">
     <string>Navigation</string>
    </property>
@@ -2381,21 +2588,24 @@ time from next paragraph.</string>
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_12">
      <item>
-      <widget class="QListWidget" name="navigationList"/>
+      <widget class="QListWidget" name="navigationList">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOff</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="textElideMode">
+        <enum>Qt::ElideRight</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
   </widget>
-  <action name="actionOpen_Stroke_Log">
-   <property name="text">
-    <string>Open Stroke Log...</string>
-   </property>
-  </action>
-  <action name="actionOpen_Project">
-   <property name="text">
-    <string>Open Project...</string>
-   </property>
-  </action>
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="resources/resources.qrc">
@@ -2478,16 +2688,6 @@ time from next paragraph.</string>
    </property>
    <property name="toolTip">
     <string>Select a custom dictionary to use for the transcript</string>
-   </property>
-  </action>
-  <action name="actionOpen_Audio_File">
-   <property name="text">
-    <string>Open Audio File</string>
-   </property>
-  </action>
-  <action name="actionStop">
-   <property name="text">
-    <string>Stop</string>
    </property>
   </action>
   <action name="actionPlainText">
@@ -2614,14 +2814,6 @@ time from next paragraph.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Y</string>
-   </property>
-  </action>
-  <action name="actionSelect_All">
-   <property name="text">
-    <string>Select All</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
    </property>
   </action>
   <action name="actionOpenAudio">
@@ -2823,11 +3015,6 @@ paragraphs to merge</string>
     <string>Ctrl+Shift+P</string>
    </property>
   </action>
-  <action name="actionPause_Recording">
-   <property name="text">
-    <string>Pause Recording</string>
-   </property>
-  </action>
   <action name="actionStopRecording">
    <property name="enabled">
     <bool>false</bool>
@@ -2980,6 +3167,10 @@ paragraphs to merge</string>
    </property>
   </action>
   <action name="actionClearParagraph">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/cross.png</normaloff>:/cross.png</iconset>
+   </property>
    <property name="text">
     <string>Reset Paragraph</string>
    </property>
@@ -2999,18 +3190,13 @@ paragraphs to merge</string>
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="actionChanglog">
-   <property name="text">
-    <string>Changlog</string>
-   </property>
-  </action>
   <action name="actionDefineLast">
    <property name="icon">
     <iconset resource="resources/resources.qrc">
      <normaloff>:/arrow-stop-180.png</normaloff>:/arrow-stop-180.png</iconset>
    </property>
    <property name="text">
-    <string>Define Last</string>
+    <string>Define Last Untrans</string>
    </property>
    <property name="toolTip">
     <string>Scan to find last untranslate, and define it for past and future occurrences</string>
@@ -3051,11 +3237,6 @@ paragraphs to merge</string>
     <string>Paper Tape Font</string>
    </property>
   </action>
-  <action name="actionEditor_Font">
-   <property name="text">
-    <string>Editor Font</string>
-   </property>
-  </action>
   <action name="actionStyleFileSelect">
    <property name="text">
     <string>Select Style File...</string>
@@ -3089,18 +3270,13 @@ with supported formatting only.</string>
     <string>F5</string>
    </property>
   </action>
-  <action name="actionDeleteStyle">
-   <property name="text">
-    <string>Delete Style</string>
-   </property>
-  </action>
   <action name="actionInsertNormalText">
    <property name="icon">
     <iconset resource="resources/resources.qrc">
      <normaloff>:/control-cursor.png</normaloff>:/control-cursor.png</iconset>
    </property>
    <property name="text">
-    <string>Insert Normal Text</string>
+    <string>Normal Text</string>
    </property>
    <property name="toolTip">
     <string>Insert normal text through popup 
@@ -3174,7 +3350,7 @@ dialog box at cursor location</string>
      <normaloff>:/image--plus.png</normaloff>:/image--plus.png</iconset>
    </property>
    <property name="text">
-    <string>Insert Image</string>
+    <string>Image</string>
    </property>
   </action>
   <action name="actionBackgroundColor">
@@ -3200,6 +3376,68 @@ dialog box at cursor location</string>
     <string>Navigation</string>
    </property>
   </action>
+  <action name="actionDeleteLast">
+   <property name="text">
+    <string>Delete Last Untrans</string>
+   </property>
+  </action>
+  <action name="actionAutomaticAffixes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Automatic Paragraph Affixes</string>
+   </property>
+   <property name="toolTip">
+    <string>Automatically end paragraphs with appropriate punctuation for style.</string>
+   </property>
+  </action>
+  <action name="actionEditFields">
+   <property name="text">
+    <string>Edit Fields</string>
+   </property>
+  </action>
+  <action name="actionEnableAutosave">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Autosave</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable autosave to backup file every 5 minutes.</string>
+   </property>
+  </action>
+  <action name="actionEditAffixes">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Edit Paragraph Affixes</string>
+   </property>
+   <property name="toolTip">
+    <string>Open dialog to edit paragraph affixes</string>
+   </property>
+  </action>
+  <action name="actionSetAutosaveTime">
+   <property name="text">
+    <string>Set Autosave Time</string>
+   </property>
+  </action>
+  <action name="actionExhibit">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Exhibit</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3212,38 +3450,6 @@ dialog box at cursor location</string>
   <include location="resources/resources.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>actionZoomIn</sender>
-   <signal>triggered()</signal>
-   <receiver>textEdit</receiver>
-   <slot>zoomIn()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>389</x>
-     <y>219</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionZoomOut</sender>
-   <signal>triggered()</signal>
-   <receiver>textEdit</receiver>
-   <slot>zoomOut()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>389</x>
-     <y>219</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>actionSpeedUp</sender>
    <signal>triggered()</signal>
@@ -3273,22 +3479,6 @@ dialog box at cursor location</string>
     <hint type="destinationlabel">
      <x>34</x>
      <y>460</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionNormalCopy</sender>
-   <signal>triggered()</signal>
-   <receiver>textEdit</receiver>
-   <slot>copy()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>474</x>
-     <y>257</y>
     </hint>
    </hints>
   </connection>
@@ -3497,6 +3687,22 @@ dialog box at cursor location</string>
     <hint type="destinationlabel">
      <x>765</x>
      <y>500</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAutomaticAffixes</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>actionEditAffixes</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
     </hint>
    </hints>
   </connection>

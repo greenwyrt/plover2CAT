@@ -106,15 +106,9 @@ qt_key_nums = {
 }
 
 # copied from plover-speaker-id
-DEFAULT_SPEAKERS = {
-  1: "Mr. Stphao",
-  2: "Ms. Skwrao",
-  3: "Mr. Eufplt",
-  4: "Ms. Eurbgs",
-  300: "the Witness",
-  301: "the Court",
-  302: "the Videographer",
-  303: "the Court Reporter",
-  304: "the Clerk",
-  305: "the Bailiff",
+user_field_dict = {
+  "SPEAKER_STPHAO": "Mr. Stphao",
+  "SPEAKER_SKWRAO": "Ms. Skwrao",
+  "SPEAKER_EUFPLT": "Mr. Eufplt",
+  "SPEAKER_EURBGS": "Ms. Eurbgs",
 }
