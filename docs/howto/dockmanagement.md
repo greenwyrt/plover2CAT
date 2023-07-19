@@ -1,6 +1,6 @@
 # How to organize, show, and hide docks
 
-Plover2CAT has multiple dock windows, namely `Paper Tape`, `Suggestions`, `History`, `Reveal Steno`, `Audio Controls` and `Toolbox`. They all have a sub-window title, a maximize icon, and a close icon.
+Plover2CAT has multiple dock windows, such as `Paper Tape`, `Suggestions`, `History`, `Reveal Steno`. They all have a sub-window title, a maximize icon, and a close icon.
 
 ![Example of dock](images/dock.png)
 
@@ -10,7 +10,7 @@ See [this image](https://doc.qt.io/qt-6/images/mainwindow-docks-example.png) for
 
 To stack docks together, drag one dock on top of another. 
 
-![Gif of dock stacking](../../images/floating_stacking_docks.gif)
+![Gif of dock stacking](images/floating_stacking_docks.gif)
 
 To hide a dock, click the close icon beside the maximize icon and the dock will close. 
 
