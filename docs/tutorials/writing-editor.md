@@ -55,7 +55,8 @@ Now look to the right side. Click on the headings within the toolbar to open the
 To save the transcript, use `File`--> `Save` or `Ctrl + S`  to save. 
 Click to the History tab. You will see that under version history at the bottom, it shows the time of your last save.
 
-Now you can close the transcript by `File` --> `Close`. Close the transcript.S
+Now you can close the transcript by `File` --> `Close`.  **DO NOT** use the `Alt+ F4` or `ESC` as that causes an instant exit without saving.
+
 
 Repope the transcript again by using `Open`, and then selecting the `config.CONFIG` file in the file dialog. Your transcript will be loaded back in.
 
