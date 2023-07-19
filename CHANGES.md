@@ -1,5 +1,13 @@
 CHANGES
 
+ver 2.0.1
+
+- Bug: removed unused reference to icon in resources
+- Bug: chunking for `steno_wrap` was splitting elements, not words, leading to improper wrapping for multi-stroke words.
+- Bug: retro/last define bug, ([link](https://github.com/greenwyrt/plover2CAT/pull/6))
+- Change: now record audiotime even if media is on pause, previously only occurred when media was playing
+- Change: `export_srt` now using same `QTextBlock` iterator as other exports, no longer search for block by number
+
 ver 2.0.0 
 
 Major change:
