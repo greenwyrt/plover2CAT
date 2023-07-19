@@ -266,11 +266,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     # menu/gui management
     def set_shortcuts(self):
         shortcut_file = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "shortcuts.json"
-        for act in self.findChildren(QAction):
-            txt = act.text()    
-            name = act.objectName()
-            if txt and name:
-                print(f"{txt} {name} {act.shortcut().toString()}")
         if not shortcut_file.exists():
             log.debug("No shortcut file exists, using default menu shortcuts.")
             return
