@@ -8,6 +8,8 @@ The sections below list things that could be part of future versions.
 
 The log messages are not formatted consistently or easy to decipher.
 
+Then one could reconstruct transcript from logs.
+
 ## RTF/CRE
 
 RTF import/export has been implemented selectively. 
@@ -49,41 +51,14 @@ Search and replace is done "blindly" in the case of replace all, and also more t
 Paragraphs with certain styles could get a highlight color.
 
 
-## Custom classes for text objects
-
-*This idea is only partially implemented*
-
-The `userData` for each text block is just a list of three-element lists. This works well for just simple time-stroke-string. Professional CAT programs can do things such as display conflicts and index entries. However, those have either variable lengths or are one in length and have to be treated differently than normal steno. With custom classes, non-stroke entities can emit custom len values, and be handled differently in export. 
-
-This likely requires changing the `.transcript` file format in some way, likely a major revision. This should be done before adding images/tables.
-
-Class steno_object
-    text
-    stroke(s)
-    timestamp
-    audiotimestamp
-    str <- text
-    dict
-    len <- text length
-    length <- tag length
-
-Class reference_object
-    text is one char " "
-    stroke is empty
-    timestamp is empty
-    audiotimestamp is empty
-    str is one char
-    len is one char
-    ref_anchor is an id
-    len is 1
-    length is length of id and more
-
-Why? Image exhibit reference as "Exhibit 1. caption blah" within text. This should be treated as one character, and have unique id for referencing.
-
 ## Richtext Features for indexes and tables
 
 While richtext editing has been enabled, some common features of word processors and professional CAT software are missing. Primary ones are 1) embedding images (implemented), 2) table of contents/index and 3) tables.
 
 Indexes (in reality, a table of contents) for ODF depends on having "heading" styles. This can be integrated. RTF table of contents is possible (based on the spec). The difficulty will be keeping track of the text in the editor selected for table of contents if there is custom text. 
 
-Tables are likely more difficult to implement and may require an editor widget
+Tables are likely more difficult to implement and may require an editor widget.
+
+## Refactoring editor
+
+The editor should be refactor into a smaller class. At least, export functions should be extracted out.
