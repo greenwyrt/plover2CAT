@@ -1,27 +1,42 @@
-Plover2CAT is a plugin for Plover, the open-source stenography engine. If the only user requirement is to write steno on the computer, this plugin is not needed as Plover is more than sufficient. Plover2CAT provides some of the features a computer-aided-transcription (CAT) program has to produce a transcript for captioning or other purposes. 
+Plover2CAT is a plugin for Plover, the open-source stenography engine. If the only user requirement is to write steno on the computer, this plugin is not needed as Plover is more than sufficient. Plover2CAT supplements Plover by providing some features of a computer-aided-transcription (CAT) program.
 
 # Features Overview:
 
-- [x] a rich text editor with steno hidden underneath
-- [x] paragraph "block" type formatting
-- [x] conventional editing features such as cut/copy/paste while keeping steno data attached
-- [x] undo/redo history
-- [x] automatic creation and loading of transcript-specific dictionaries for each transcript
-- [x] find and replace for simple text, steno stroke, and untrans
-- [x] retroactive define, and define last translate with replacement of all previous occurrences and new outline sent to transcript dictionary
-- [x] an audiovisual player, with controls for timing offset, playback rate, skipping forward and back
-- [x] synchronization of steno with the audio/video file for transcription
-- [x] audio recording synchronized with steno (file format dependent on codecs in operating system)
-- [x] export transcript to plain text, HTML, ASCII, SubRip, RTF/CRE and Open Text Document formats (with style templates)
-- [x] saves paper tape with keys pressed, position of cursor in document, and timestamps at each stroke
-- [x] suggestions based on stroke history (powered by Tapey Tape or clippy_2), updated every paragraph
-- [x] spellcheck using the `spylls` library, ability to select spellcheck dictionaries 
-- [x] versioning using the `dulwich` library, switch between previously saved transcript states
-- [x] custom shortcuts for menu items
-- [x] translation of paper tape file into transcript
-- [x] basic import of RTF/CRE transcript
-- [x] import of images and export into supported formats
+- a rich text editor with steno hidden underneath:
+  - paragraph "block" type formatting
+  - undo/redo history
+  - conventional editing features such as cut/copy/paste
+  - find and replace for simple text, steno stroke, and untrans
+  - spellcheck using the `spylls` library with user-selectable dictionaries
+  - autosave transcripts
+  - image insertion
+  - navigation of heading paragraphs
 
+- steno related features such as:
+  - define/delete last untrans
+  - define retroactive
+  - insertion automatic paragraph affixes based on paragraph style
+  - insertion of user defined fields
+  - timestamped paper tape
+  - creation and loading of transcript-specific dictionaries for each transcript
+
+- audiovisual synchonization and recording
+
+- export transcript formats (with style templates):
+  - plain text
+  - HTML
+  - ASCII
+  - SubRip
+  - RTF/CRE 
+  - Open Text Document formats 
+
+- outline suggestions based on stroke history (powered by Tapey Tape or clippy_2)
+
+- transcript versioning using the `dulwich` library
+
+- custom shortcuts for menu items
+
+- translation of paper tape file into transcript
 
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
@@ -59,7 +74,7 @@ Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0
 
 # Development
 
-Plover2CAT at present, is one gigantic class, and with absolutely no tests. See the user manual for details of formats such as stroke data, and wished-for features.
+Plover2CAT at present, is one gigantic class, and with absolutely no tests. See the docs for details of the implementation, and wished-for features.
 
 # Contribute
 
@@ -67,7 +82,7 @@ Suggestions and bug reports are welcomed.
 
 Contributions to the tutorials and how-to documentation are especially welcomed.
 
-Contact me on discord or open an issue on the repo. 
+Contact me on the Plover discord as plants#4820  or open an issue on the repo. 
 
 
 
