@@ -21,4 +21,6 @@ A shortcut is composed of 0 or more modifiers (`Ctrl`, `Shift`, `Alt`, `Meta`) a
 
 Note that changes only take effect when Plover2CAT is restarted.
 
+Note that `Ctrl + {0-9}` and `Ctrl + Shift + {0-9}` are sets of key combinations reserved for switcing between paragraph styles and inserting field elements, respectively. It is best not to use these combinations for other shortcuts.
+
 
