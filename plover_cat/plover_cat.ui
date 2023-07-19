@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>965</width>
-    <height>668</height>
+    <height>710</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -123,7 +123,7 @@
      <x>0</x>
      <y>0</y>
      <width>965</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -396,8 +396,8 @@ position.</string>
   <widget class="QDockWidget" name="dockSuggest">
    <property name="minimumSize">
     <size>
-     <width>97</width>
-     <height>134</height>
+     <width>185</width>
+     <height>142</height>
     </size>
    </property>
    <property name="toolTip">
@@ -412,17 +412,53 @@ position.</string>
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QRadioButton" name="suggest_sort">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="toolTip">
-        <string>Enable to sort by most recent</string>
-       </property>
-       <property name="text">
-        <string>By Recency</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_18">
+       <item>
+        <widget class="QComboBox" name="suggest_source">
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="toolTip">
+          <string>Selects which plugin provides suggestions.</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>tapey-tape</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>clippy_2</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="suggest_sort">
+         <property name="focusPolicy">
+          <enum>Qt::NoFocus</enum>
+         </property>
+         <property name="toolTip">
+          <string>Enable to sort by most recent</string>
+         </property>
+         <property name="text">
+          <string>By Recency</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QTableWidget" name="suggestTable">
@@ -464,7 +500,7 @@ position.</string>
   <widget class="QDockWidget" name="dockAudio">
    <property name="minimumSize">
     <size>
-     <width>256</width>
+     <width>264</width>
      <height>89</height>
     </size>
    </property>
@@ -649,8 +685,8 @@ position.</string>
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-403</y>
-          <width>363</width>
+          <y>0</y>
+          <width>367</width>
           <height>472</height>
          </rect>
         </property>
@@ -1757,7 +1793,7 @@ Use %p for page number.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>251</width>
+          <width>255</width>
           <height>215</height>
          </rect>
         </property>
@@ -2281,7 +2317,7 @@ time from next paragraph.</string>
         </widget>
        </item>
        <item>
-        <widget class="QUndoView" name="undoView">
+        <widget class="QUndoView" name="undoView" native="true">
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -3206,6 +3242,11 @@ dialog box at cursor location</string>
    <class>PloverCATEditor</class>
    <extends>QPlainTextEdit</extends>
    <header>plover_cat.TextEditor</header>
+  </customwidget>
+  <customwidget>
+   <class>QUndoView</class>
+   <extends>QWidget</extends>
+   <header>qundoview.h</header>
   </customwidget>
  </customwidgets>
  <resources>

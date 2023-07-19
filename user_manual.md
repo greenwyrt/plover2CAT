@@ -17,7 +17,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] audio recording synchronized with steno (file format dependent on codecs in operating system)
 - [x] export transcript, with formatting when possible, to plain text, basic ASCII, formatted ASCII, HTML, SubRip, and Open Text Document formats (with style templates)
 - [x] saves paper tape with keys pressed, position of cursor in document, and timestamps at each stroke
-- [x] suggestions based on stroke history (powered by Tapey Tape), updated every paragraph
+- [x] suggestions based on stroke history (powered by Tapey Tape or clippy_2), updated every paragraph
 - [x] spellcheck using the `spylls` library, ability to select spellcheck dictionaries 
 - [x] versioning using the `dulwich` library, switch between previously saved transcript states.
 - [x] basic import of RTF/CRE transcript
@@ -301,9 +301,9 @@ Plover2CAT uses the [Plover Tapey Tape plugin](https://github.com/rabbitgrowth/p
 
 Suggestions can be sorted by most common (default), or most recent (toggle the `By Recency` option). 
 
-Entries will show up to the ten most common/recent entries, only if Tapey Tape has suggested an alternative outline thrice before. 
+Entries will show up to the ten most common/recent entries for which the suggestion source has suggested an alternative outline thrice before. 
 
-The truly nitty-gritty: for users who have a custom output format defined for Tapey Tape, if `%s` is part of the format, the suggestions should be extracted properly as the regex relies on the presence of the two spaces and `>` before a suggestion.
+The truly nitty-gritty: for users who have a custom output format defined for Tapey Tape, if `%s` is part of the format, the suggestions should be extracted properly as the regex relies on the presence of the two spaces and `>` before a suggestion. clippy_2 support relies on the default ANSI coloring of the suggestions.
 
 ### Reveal Steno
 

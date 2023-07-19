@@ -14,7 +14,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - [x] audio recording synchronized with steno (file format dependent on codecs in operating system)
 - [x] export transcript to plain text, HTML, ASCII, SubRip, RTF/CRE and Open Text Document formats (with style templates)
 - [x] saves paper tape with keys pressed, position of cursor in document, and timestamps at each stroke
-- [x] suggestions based on stroke history (powered by Tapey Tape), updated every paragraph
+- [x] suggestions based on stroke history (powered by Tapey Tape or clippy_2), updated every paragraph
 - [x] spellcheck using the `spylls` library, ability to select spellcheck dictionaries 
 - [x] versioning using the `dulwich` library, switch between previously saved transcript states
 - [x] custom shortcuts for menu items

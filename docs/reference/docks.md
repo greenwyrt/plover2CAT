@@ -14,7 +14,9 @@ Highlight a stroke in the paper tape, and click "Locate" to move to that positio
 
 The Suggestions dock has a table, showing the suggestions in one column, and the outline in another column.
 
-Plover2CAT uses the [Plover Tapey Tape plugin](https://github.com/rabbitgrowth/plover-tapey-tape) for suggestions, in the default format and in the default location (`tapey-tape.txt`). If the plugin is not installed, or the location and format of the file is not the default, suggestions within Plover2CAT will likely not work. Plover2CAT relies on the `%s` part of the Tapey Tape output. If `%s` is part of the format, the suggestions should be extracted properly as the regex relies on the presence of the two spaces and `>` before a suggestion.
+Plover2CAT uses the [Plover Tapey Tape plugin](https://github.com/rabbitgrowth/plover-tapey-tape) or the [Plover clippy_2 plugin](https://github.com/Josiah-tan/plover_clippy_2) for suggestions, in the default format and in the default location (`tapey-tape.txt` or `clippy_2.org`, respectively). If the plugin is not installed, or the location and format of the file is not the default, suggestions within Plover2CAT will likely not work. Plover2CAT relies on the `%s` part of the Tapey Tape output. If `%s` is part of the format, the suggestions should be extracted properly as the regex relies on the presence of the two spaces and `>` before a suggestion.
+
+The dropdown above the table can be used to select which plugin Plover2CAT gets suggestions from.
 
 Suggestions can be sorted by most common (default), or most recent (toggle the `By Recency` option). 
 
