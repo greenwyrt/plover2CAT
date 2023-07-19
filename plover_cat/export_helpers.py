@@ -181,13 +181,12 @@ def steno_wrap_odf(block_data, max_char = 80, tab_space = 4, first_line_indent =
     return(par_dict)
 
 def load_odf_styles(path):
-    # log.info("Loading ODF style file from %s", str(path))
+    log.debug(f"Loading ODF style file from {str(path)}")
     style_text = load(path)
     json_styles = {}
     for style in style_text.getElementsByType(Styles)[0].getElementsByType(Style):
         if style.getAttribute("family") != "paragraph":
              continue
-        # print(style.getAttribute("name"))
         json_styles[style.getAttribute("name")] = {"family": style.getAttribute("family"), "nextstylename": style.getAttribute("nextstylename"), "defaultoutlinelevel": style.getAttribute("defaultoutlinelevel"), "parentstylename": style.getAttribute("parentstylename")}
         if style.getElementsByType(ParagraphProperties):
             par_prop = style.getElementsByType(ParagraphProperties)[0]

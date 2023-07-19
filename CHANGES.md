@@ -1,5 +1,33 @@
 CHANGES
 
+ver 2.1.0 - not released
+
+- Feature: New steno action, delete last untrans.
+
+- Change: `Define Last` is renamed `Define Last Untrans` in menu
+
+- Feature: User Fields, can be set in editor, and then inserted from menu by shortcut (`Ctrl+Shift+{0-9}`) for first nine defined entries
+
+- Feature: Heading levels can be assigned to styles in the styling pane. 
+
+- Feature: Navigate to headings using the Navigation dock by doubleclicking, ODT export has heading styling
+
+- Change: rename `to_dict` of text elements to `to_json`
+
+- Change: Reveal steno dock now only shows the text of the elements. Hover to see details such as type. Wrap has been enabled to reduce horizontal scrolling for long paragraphs.
+
+- Change: reformatted log messages, actions that affect the content are INFO level and as JSON records while GUI events are DEBUG level. Will help with filtering for dev and debugging purposes.
+
+- Feature: Autosave. Will save the transcript to a hidden file in the transcript directory at user defined interval. Enabled by default.
+
+- Feature: Automatic paragraph prefixes and suffix strings, customizable for each style. 
+
+- Change: Main editor widget is now tabbed between the editor and a recent files pane.
+
+- Feature: Recent Files pane that appears at center at startup, displays recent files to open at a click. 
+
+- Changes: documentation. `user_manual.md` is out-of-date and removed as documentation has been moved and re-organized in `docs/`
+
 ver 2.0.1
 
 - Bug: removed unused reference to icon in resources
@@ -7,6 +35,7 @@ ver 2.0.1
 - Bug: retro/last define bug, ([link](https://github.com/greenwyrt/plover2CAT/pull/6))
 - Change: now record audiotime even if media is on pause, previously only occurred when media was playing
 - Change: `export_srt` now using same `QTextBlock` iterator as other exports, no longer search for block by number
+
 
 ver 2.0.0 
 

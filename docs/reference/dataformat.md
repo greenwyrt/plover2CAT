@@ -10,26 +10,29 @@ The key values in the JSON file are used to store transcript properties.
 
 Possible key values are:
 
-- base_directory: (Optional) this is a placeholder value for setting a root directory if transcripts are to be combined.
-- style: relative path from config file to the selected style file (all files should be under `style` directory)
-- dictionaries: list of relatively paths for transcript dictionaries (all files should be under `dictionary` directory)
-- page_width: width of transcript page for export (in inches)
-- page_height: height of transcript page for export (in inches)
-- page_left_margin: left margin of transcript page for export (in inches)
-- page_right_margin: right margin of transcript page for export (in inches)
-- page_top_margin: top margin of transcript page for export (in inches)
-- page_bottom_margin: bottom margin of transcript page for export (in inches)
-- page_max_char: numeric value indicating maximum number of characters per line for export (0 means automatic)
-- page_max_line: number value indicating maximum lines per character for export (0 means automatic)
-- page_line_numbering: Boolean value indicating whether line numbering should be enabled in exports
-- page_linenumering_increment: numeric value indicating every nth line is to be numbered (if supported in the export format)
-- page_timestamp: Boolean value indicating whether text lines should be timestamped
-- header_left: text for left header of each page
-- header_ceter: text for center header of each page
-- header_right: text for right header of each page
-- footer_left: text for left footer of each page
-- footer_center: text for center footer of each page
-- footer_right: text for right footer of each page
+- `base_directory`: (Optional) this is a placeholder value for setting a root directory if transcripts are to be combined.
+- `style`: relative path from config file to the selected style file (all files should be under `style` directory)
+- `dictionaries`: list of relatively paths for transcript dictionaries (all files should be under `dictionary` directory)
+- `page_width`: width of transcript page for export (in inches)
+- `page_height`: height of transcript page for export (in inches)
+- `page_left_margin`: left margin of transcript page for export (in inches)
+- `page_right_margin`: right margin of transcript page for export (in inches)
+- `page_top_margin`: top margin of transcript page for export (in inches)
+- `page_bottom_margin`: bottom margin of transcript page for export (in inches)
+- `page_max_char`: numeric value indicating maximum number of characters per line for export (0 means automatic)
+- `page_max_line`: number value indicating maximum lines per character for export (0 means automatic)
+- `page_line_numbering`: Boolean value indicating whether line numbering should be enabled in exports
+- `page_linenumering_increment`: numeric value indicating every nth line is to be numbered (if supported in the export format)
+- `page_timestamp`: Boolean value indicating whether text lines should be timestamped
+- `header_left`: text for left header of each page
+- `header_center`: text for center header of each page
+- `header_right`: text for right header of each page
+- `footer_left`: text for left footer of each page
+- `footer_center`: text for center footer of each page
+- `footer_right`: text for right footer of each page
+- `user_field_dict`: dictionary containing default fields
+- `enable_automatic_affix`: boolean, whether to enable automatic affixes
+- `auto_paragraph_affixes`: dict containing affixes for styles, `{"style": {"prefix": "", "suffix": ""}}`
 
 For the header_* and footer_* keys, their text string values can contain a `%p` which will be replaced with the page number. 
 
@@ -49,6 +52,8 @@ default_config = {
     "page_line_numbering": False
 }
 ```
+
+Users should not have to edit the config file by hand as almost all values can be set through the GUI.
 
 ## Tape file
 

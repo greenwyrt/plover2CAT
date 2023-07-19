@@ -46,9 +46,9 @@ def save_json(json_dict, file_path):
     file_path = pathlib.Path(file_path)
     if not file_path.parent.exists():
         file_path.parent.mkdir()
-    with open(file_path, "w") as f:
+    with open(file_path, "r+") as f:
         json.dump(json_dict, f, indent = 4)
-        log.info("Data saved in " + str(file_path))
+        log.debug(f"Data saved in {str(file_path)}.")
 
 def add_custom_dicts(custom_dict_paths, dictionaries):
     """Takes list of dictionary paths, returns Plover dict config"""
@@ -76,7 +76,7 @@ def load_dictionary_stack_from_backup(path):
 
 def backup_dictionary_stack(dictionaries, path):
     """Takes Plover dict config, creates backup file."""
-    log.info("Backing up Plover dictionaries to %s", path)
+    log.debug("Backing up Plover dictionaries to %s", path)
     if dictionaries:
         with open(path, 'w') as f:
             json.dump([DictionaryConfig.to_dict(d) for d in dictionaries], f)
@@ -94,3 +94,9 @@ def remove_empty_from_dict(d):
     else:
         return d
 
+def hide_file(filename):
+    import ctypes
+    FILE_ATTRIBUTE_HIDDEN = 0x02
+    ret = ctypes.windll.kernel32.SetFileAttributesW(filename, FILE_ATTRIBUTE_HIDDEN)    
+    if not ret: # There was an error.
+        raise ctypes.WinError()    

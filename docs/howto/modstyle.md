@@ -15,5 +15,6 @@ Properties of the style that can be modified are:
 - paragraph left, right, top and bottom margins (measured in inches)
 - paragraph style can be none, or set to another style so that the present style inherits from the parent style
 - next style can be set to none, the style itself, or another style so a new paragraph created after the present one will have style set to next style
+- heading level, from 1 - 10
 
 To apply and save the changes, press `Modify Style`. Changes to a style will apply document-wide to all paragraphs with the style.

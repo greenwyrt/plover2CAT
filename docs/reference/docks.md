@@ -24,7 +24,11 @@ Entries will show up to the ten most common/recent entries, only if Tapey Tape h
 
 ## Reveal Steno
 
-This is a dock with a table which shows the current paragraph's text, and the steno underlying the text. It will update when the cursor moves, and the paragraph is non-empty.
+This is a dock with a table which displays the current paragraph's text, and the underlying informating on mouse hovering. Use the `refresh` button to update the display if needed.
+
+## Navigation
+
+This dock shows the paragraphs that are styled as headings. Paragraphs with higher number levels are indented as needed. Double-click to move the cursor to the beginning of the heading paragraph.
 
 ## History
 

@@ -60,6 +60,18 @@ Attributes:
 
 Character formats have to be applied through the iterator of `QTextBlock` on individual `QTextFragment` elements to avoid applying a format on an image, over-riding its format, and causing it to revert to an object replacement charater.
 
+## update_field
+
+- `document`: reference to `QTextDocument`
+- `block`: integer, `blockNumber` in editor
+- `position`: integer, position of cursor within block
+- `old_dict`: reference to old dict for user fields
+- `new_dict`: reference to new dict for user fields
+
+When fields change values, the underlying `text_field` will be updated when called again, but the text in the `QTextEdit` will not. This command updates the `text_field` element, then removes the old field value and inserts the new one into text. 
+
+The original `dict` that has to be updated is outside the command and has to be passed in by reference. But a copy each of the old and the new dicts are needed to perform redo/undos properly.
+
 ## element_actions
 
 This is a factory for generating QUndoCommands based on the element type.

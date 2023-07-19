@@ -24,8 +24,11 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Write even when window is not in focus](howto/captureoutput.md)
 - [Merge paragraphs](howto/mergepar.md)
 - [Split a paragraph](howto/splitpar.md)
+- [Add automatic paragraph affixes](howto/auto_affixes.md)
 - [Retroactive Define for selection in editor](howto/retrodefine.md)
-- [Scan for last untranslated and add outline to dictionary](nowto/definelast.md)
+- [Scan for last untranslated and add outline to dictionary/delete](howto/definelast.md)
+- [Define and insert a user field](howto/userfield.md)
+- [Navigate to paper tape and back](howto/tapelinking.md)
 - [Import RTF/CRE transcript file](howto/importrtf.md)
 - [Enable autocompletion and add terms](howto/autocompletion.md)
 - [Translate tape files](howto/translatetape.md)
@@ -41,6 +44,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Show invisible characters](howto/showall.md)
 - [Move cursor](howto/cursormove.md)
 - [Set custom shortcuts for menu items](howto/setcustomshortcuts.md)
+- [Set autosave](howto/autosave.md)
 
 ### Do common editing tasks
 
@@ -54,6 +58,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Add extra language dictionaries](howto/addspelldict.md)
 - Reset paragraph
 - [Revert to previously saved version](howto/revert.md)
+- [Navigate with headings](howto/navigate.md)
 
 ### Play and Record Audiovisual files
 
@@ -97,10 +102,10 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Commands](reference/commands.md)
 
 
-In development
+In development:
 - [Editor class](reference/main.md)
 - [Custom text objects](reference/elements.md)
-
+- Dialogs
 
 ## Discussions of design, development, and descriptions
 
@@ -118,5 +123,5 @@ Helpful things to do:
 - Go to `Help` --> `About` to view the version number.
 - Compress and attach the entire transcript directory, or the `*.tape` and `*.transcript` files. 
 - If possible, add steps to reproduce the problem. 
-- Add the log output from running Plover (debug) and attempt to cause the exact error.
+- Add the log output from running Plover (debug) after an attempt to cause the exact same error.
 

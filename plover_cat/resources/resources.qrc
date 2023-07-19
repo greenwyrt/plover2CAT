@@ -1,5 +1,10 @@
 <RCC>
   <qresource>
+    <file>document-text.png</file>
+    <file>document-text-large.png</file>
+    <file>arrow-270-medium.png</file>
+    <file>cross.png</file>
+    <file>arrow-circle-double-135.png</file>
     <file>palette.png</file>
     <file>image--plus.png</file>
     <file>lightning.png</file>
