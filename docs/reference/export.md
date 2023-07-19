@@ -4,7 +4,7 @@ Plover2CATs can export transcripts in several plain and formatted documents for 
 
 ## Supported formatting in export
 
-The table below summarizes what features are available for each export format.
+The table below summarizes what features are available for each export format. For formats where features are not available, the closest text representation is used to replace it.
 
 Format        | Plain Text | Basic ASCII | ASCII     | HTML      | ODT     | RTF/CRE
 ---           | ---        | ---         | ---       | ---       | ---     | ---
@@ -16,8 +16,10 @@ Header/Footer | No         | No          | &check;   | &check;   | &check; | *No
 Char/Line     | No         | No          | &check;   | &check;   | &check; | No
 Lines/Page    | No         | No          | &check;   | &check;   | &check; | *No*
 Images        | No         | No          | No        | No        | &check; | &check;
+Fields        | No         | No          | No        | No        | &check; | &check;
+Headings      | No         | No          | No        | No        | &check; | No
 
-\* No font support, indents and other layout is converted to closest approximation using spaces for padding.
+\* No font support but indents and other layout are converted to closest approximation using spaces for padding.
 
 Italics for features not yet supported but planned.
 

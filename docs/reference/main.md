@@ -12,6 +12,8 @@ The main class in Plover2CAT is PloverCATWindow that subclasses `QMainWindow` an
 - `styles`: dict holding styles
 - `txt_formats`: dict holding "full" font formatting info (after recursion)
 - `par_formats`: dict holding "full" paragraph formatting info (after recursion)
+- `user_field_dict`: dict, holds user defined fields 
+- `auto_paragraph_affixes`: dict, holds affixes for styles
 - `speakers`: (not utilized yet) dict to hold speaker ids
 - `styles_path`: path referencing style file
 - `stroke_time`: text string timestamp of last stroke
@@ -21,6 +23,7 @@ The main class in Plover2CAT is PloverCATWindow that subclasses `QMainWindow` an
 - `last_raw_steno`: string, raw steno of last stroke
 - `last_string_sent`: string, text sent with last stroke
 - `last_backspaces_sent`: integer, number of backspaces sent with last stroke
+- `autosave_time`: `QTimer` object for activating autosave
 - `undo_stack`: holds `QUndoStack`
 - `cutcopy_storage`: `element_collection` holding steno to paste
 - `spell_ignore`: list of words to ignore in spellcheck, temporary for session
@@ -59,27 +62,37 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `open_help`: sends user to help docs
 - `context_menu`: opens right-click menu
 - `menu_enabling`: enable/disables menu choices when transcript is open
-- `model_from_file`: reads completion choices from `wordlist.json`
+- `update_field_menu`: takes created user fields and creates menu actions (+ shortcuts) for insertion
+- `clear_layout`: helper function needed for clearing layout
+- `recent_file_menu`: populates Recent Files submenu with recent paths, and adds "tiles" to the "Recent Files" tab
 - `setup_completion`: sets up autocomplete using `wordlist.json` into editor if menu option toggled
+- `model_from_file`: reads completion choices from `wordlist.json`
 - `change_window_font`: change font family/size for window
 - `change_backgrounds`: changes background color for window
 - `change_tape_font`: change font family/size for tape dock
--  `show_invisible_char`: show all characters in editor pane
+- `show_invisible_char`: show all characters in editor pane
 - `calculate_space_width`: calculates average chars per inch for selected font
 - `jump_par`: move cursor to selected paragraph
 - `show_find_replace`: brings Find/Replace pane to front, if selection exists, place in search field
+- `heading_navigation`: jump to selected heading in editor from Navigation pane
+- `navigate_to`: function accepts block number, moves and sets editor cursor to beginning of block
+- `update_gui`: collects other functions to be updated each time cursor changes
+- `update_navigation`: updates Navigation pane, displays list of heading paragraphs
 
 ### Transcript management
 
 - `create_new`: creates new transcript project
 - *`open_file`*: opens existing transcript project
-- `save_file`: saves transcript files
+- `save_file`: saves transcript project
+- `save_transcript`: extracts transcript data from editor
 - `dulwich_save`: commits transcript files to repo with commit message
 - *`load_transcript`*: loads transcript data into editor and `userData` in blocks
 - `revert_file`: reverts transcript back to selected commit from repo
 - *`save_as_file`*: saves transcript data and tape into new location
 - `close_file`: closes transcript project and cleans up editor
 - `action_close`: quits editor window
+- `recentfile_open`: opens a recent file through `action`
+- `recentfile_store`: stores file path into settings as a recent file as the first, deletes later occurrence if exists
 - `open_root`: opens transcript dir through system explorer
 
 ### Dictionary management
@@ -106,6 +119,7 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `style_from_template`: reads ODF or RTF file, extracting only style information to write to new style file
 - `display_block_data`: triggered manually after text changes or split/merge, updates style and block properties display, triggers autocomplete dropdown if toggled
 - `display_block_steno`: takes strokes, update Reveal Steno dock with strokes, called from `display_block_data`
+- `refresh_steno_display`: updates Reveal Steno pane manually
 - *`update_paragraph_style`*: updates style of present paragraph block
 - `update_style_display`: updates UI elements to display present style
 - `style_edit`: changes properties of current style to user selections
@@ -124,6 +138,8 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `get_tapey_tape`: summarizes suggestions from Tapey Tape plugin if available
 - `stroke_to_text_move`: move to corresponding position in editor based on cursor position in tape dock
 - `text_to_stroke_move`: move to corresponding stroke in tape based on steno data under editor cursor
+- `enable_affix`: set status of `enable_auto_affix` in config
+- `edit_auto_affixes`: calls `affixDialogWindow` to set and edit affixes for each paragraph style
 - *`tape_translate`*: extract stroke data from selected tape file, translates and overwrite current transcript
 - *`on_stroke`*: hooked to Plover `stroked`, main function, performs multiple functions relating to updating block data, managing steno data, inserting/removing text/new lines as needed 
 - *`split_paragraph`*: creates new paragraph
@@ -132,12 +148,21 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - *`cut_steno`*: cuts text and steno from selection
 - *`paste_steno`*: inserts previously stored steno and text into cursor location
 - `reset_paragraph`: removes text and all data from block
+- *`insert_image`*: inserts selected image at cursor position
+- *`insert_field`*: inserts selected field at cursor position
 - *`define_retroactive`*: takes steno and text from selection, asks for new translation, then replaces all occurrences in transcript
--  `define_scan`: searches for last untranslated and triggers `define_retroactive`
+- `define_scan`: searches for last untranslated and triggers `define_retroactive`
+- *`delete_scan`*: searches for last untranslated and removes it
 - *`add_autocomplete_item`*: adds selection to `wordlist.json` for autocompletion
 - *`insert_autocomplete`*: autocompletion after selection from dropdown, replaces partial word with full selection
 - *`insert_text`*: user dialog to insert pure text, adds blank in steno data
 - `mock_del`: triggered on `Del` keypress, replicates normal `Del` behaviour
+- *`edit_fields`*: calls `fieldDialogWindow` to create and edit user fields, and refreshes existing field elements in text
+- `add_begin_auto_affix`: checks and adds prefix set for `style`, copying `element` and returning `automatic_text` element
+- `add_end_auto_affix`: checks and adds suffix set for `style`, copying `element` and returning `automatic_text` element
+
+### Search
+
 - `search`: wrapper function for three types of searches
 - `text_search`: search editor text using `QTextEdit` search functions
 - `steno_wrapped_search`: wrapper for both directions of `steno_search`
@@ -148,13 +173,14 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `search_untrans_options`: if untrans search selected, enables/disables allowed search options
 - *`replace`*: replaces match result from search with field text, moves to next match
 - `replace_everything`: iteratively replaces all matches with field text
+
+### Spellchecking
+
 - `sp_check`: checks word in dictionary
 - `spellcheck`: spellchecks transcript word by word, stop and display suggestions
 - `sp_ignore_all`: add word to be ignored by spellcheck
 - *`sp_insert_suggest`*: change selection to suggestion
 - `set_sp_dict`: load selected spellcheck dictionary
-- `insert_image`: inserts selected image at cursor position
-
 
 ### Audio management
 
@@ -184,3 +210,16 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - *`export_srt`*: exports to SRT
 - *`export_rtf`*: exports RTF
 - `import_rtf`: imports RTF
+
+
+
+## Persistent settings
+
+This settings are stored locally and generally set the window properties/GUI.
+
+- `geometry`: window geometry
+- `windowstate`: window state
+- `windowfont`: window font
+- `tapefont`: paper tape font
+- `backgroundcolor`: background color of window
+- `recentfiles`: list of file paths of recently opened transcripts

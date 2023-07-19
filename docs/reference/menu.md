@@ -41,6 +41,7 @@ This menu is for steno-related menu items.
 - Add Autocompletion Term: Activates dialog window to add autocompletion candidate and steno.
 - Retroactive Define: Define an outline after writing it.
 - Define Last: Define last preceding untranslate before cursor.
+- Delete Last Untrans: Find last preceding untranslate, if exists, and delete.
 - Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
 - Capture All Steno Input: If checked, all writing through Plover will be tracked, and text emitted into editor, regardless of whether editor window is in focus. By default, no writing to editor when window is not in focus.
 - Translate Tape: Activates file dialog selector for tapes files to translate using the present dictionary stack in Plover.
@@ -141,7 +142,8 @@ This section documents each menu item under its menu section with the identifier
 | Autocompletion          | `actionAutocompletion`        |              |
 | Add Autocompletion Term | `actionAddAutocompletionTerm` | Ctrl+Alt+R   |
 | Retroactive Define      | `actionRetroactiveDefine`     | Ctrl+R       |
-| Define Last             | `actionDefineLast`            | Ctrl+Shift+R |
+| Define Last Untrans     | `actionDefineLast`            | Ctrl+Shift+R |
+| Delete Last Untrans     | `actionDeleteLast`            |              |
 | Lock Cursor At End      | `actionCursorAtEnd`           |              |
 | Capture All Output      | `actionCaptureAllOutput`      |              |
 | Translate Tape          | `actionTranslateTape`         |              |
