@@ -2317,7 +2317,7 @@ time from next paragraph.</string>
         </widget>
        </item>
        <item>
-        <widget class="QUndoView" name="undoView" native="true">
+        <widget class="QUndoView" name="undoView">
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -3242,11 +3242,6 @@ dialog box at cursor location</string>
    <class>PloverCATEditor</class>
    <extends>QPlainTextEdit</extends>
    <header>plover_cat.TextEditor</header>
-  </customwidget>
-  <customwidget>
-   <class>QUndoView</class>
-   <extends>QWidget</extends>
-   <header>qundoview.h</header>
   </customwidget>
  </customwidgets>
  <resources>
