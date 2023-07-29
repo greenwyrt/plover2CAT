@@ -1,32 +1,57 @@
 CHANGES
 
-ver 2.1.0 - not released
+ver 2.1.0
 
-- Feature: New steno action, delete last untrans.
+This version focuses mainly on "things" to be inserted.
 
-- Change: `Define Last` is renamed `Define Last Untrans` in menu
+Editor Changes:
+
+- Feature: Navigate to headings using the Navigation dock by doubleclicking, ODT export has heading styling. Heading levels can be assigned to styles in the styling pane. 
 
 - Feature: User Fields, can be set in editor, and then inserted from menu by shortcut (`Ctrl+Shift+{0-9}`) for first nine defined entries
 
-- Feature: Heading levels can be assigned to styles in the styling pane. 
-
-- Feature: Navigate to headings using the Navigation dock by doubleclicking, ODT export has heading styling
-
-- Change: rename `to_dict` of text elements to `to_json`
-
-- Change: Reveal steno dock now only shows the text of the elements. Hover to see details such as type. Wrap has been enabled to reduce horizontal scrolling for long paragraphs.
-
-- Change: reformatted log messages, actions that affect the content are INFO level and as JSON records while GUI events are DEBUG level. Will help with filtering for dev and debugging purposes.
-
 - Feature: Autosave. Will save the transcript to a hidden file in the transcript directory at user defined interval. Enabled by default.
+
+- Change: suggestions can now be sourced from plover_clippy_2 thanks to @AshenColors 
 
 - Feature: Automatic paragraph prefixes and suffix strings, customizable for each style. 
 
-- Change: Main editor widget is now tabbed between the editor and a recent files pane.
+- Feature: Set shortcuts for menu items right in editor. Does checking to ensure shortcuts are not one already in use or reserved.
+
+- Feature: Insert index text through the indices editor and also with quick menu insertions.
+
+- Feature: New steno action, delete last untrans.
+
+- Change: Zoom in/ zoom out have been removed (non-functional with styling). Font sizes should be changed through styling.
+
+UI Changes:
+
+- Change: `Define Last` is renamed `Define Last Untrans` in menu
+
+- Change: Reveal steno dock now only shows the text of the elements. Hover to see details such as type. Wrap has been enabled to reduce horizontal scrolling for long paragraphs.
 
 - Feature: Recent Files pane that appears at center at startup, displays recent files to open at a click. 
 
-- Changes: documentation. `user_manual.md` is out-of-date and removed as documentation has been moved and re-organized in `docs/`
+- Change: Main editor widget is now tabbed between the editor and a recent files pane. When loading a transcript, the editor text only appears after loading is completed (increases speed).
+
+Internal Changes:
+
+- Multiple dialog windows with own code and UI to implement new features.
+
+- Change: updated documentation. `user_manual.md` is out-of-date and removed as documentation has been moved and re-organized in `docs/`.
+
+- Change: rename `to_dict` of text elements to `to_json`
+
+- Change: reformatted log messages, actions that affect the content are INFO level and as JSON records while GUI events are DEBUG level. Will help with filtering for dev and debugging purposes.
+
+- Change: Element checking in transcript loading for block. If no image elements, skip the `QUndoCommand` interface and directly insert text. This increases loading speed by magnitudes. Also adds block and char formats during initial text insertion, avoid refresh syle for entire document.
+
+- Change: Will ask user to select whether to refresh styles if over 200 blocks as it can take time. Within `set_par_style`, will check elements in block, and if no image element, will set entire block charFormat for speed.
+
+- Change: Keep original json dict in memory, and when a paragraph is edited, use `userState` to mark. This way, `userData` of blocks are only extracted after encountering the first `userState`. If only a few paragraphs are changed (especially at end), drastically decreases saving time since only changed blocks need to get updated in json dict.
+
+- Bug: combine strokes if Plover issues a "correction" (backspaces + string) if # of backspaces greater than previous string emitted. Fixes "dropping" of strokes in transcript data due to the backspaces entire steno elements.
+
 
 ver 2.0.1
 

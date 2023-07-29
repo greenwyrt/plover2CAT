@@ -11,11 +11,11 @@ from plover_cat.constants import user_field_dict
 from PyQt5.QtCore import QByteArray, QBuffer, QIODevice
 from PyQt5.QtGui import QImage, QImageReader
 from odf.teletype import addTextToElement
-from odf.text import P, UserFieldDecls, UserFieldDecl, UserFieldGet
+from odf.text import P, UserFieldDecls, UserFieldDecl, UserFieldGet, UserIndexMarkStart, UserIndexMarkEnd
 from odf.draw import Frame, TextBox, Image
 
 # display letters: s for stroke, t for text, i for image, 
-# a for auto, c for conflict, f for field
+# sa for auto, c for conflict, f for field
 # x for "index"/references, e for exhibit
 
 class text_element(UserString):
@@ -188,7 +188,7 @@ class automatic_text(stroke_text):
         string = ""
         if self.prefix:
             string = string + write_command("cxa",  self.prefix, visible = False, group = True)
-        string = string + write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", self.stroke, visible = False, group = True) + self.data
+        string = string + write_command("cxt", self.time + ":00", visible = False, group = True) + write_command("cxs", self.stroke, visible = False, group = True) + self.data
         if self.suffix:
             string = string + write_command("cxa",  self.suffix, visible = False, group = True)
         return(string)
@@ -201,23 +201,48 @@ class conflict_text(stroke_text):
         super().__init__(**kargs)
         self.choices = choices
 
-class exhibit_text(text_element):
+class index_text(text_element):
     """
     text element that holds exhibit
     """
-    def __init__(self, num = 1, **kargs):
+    def __init__(self, prefix = "Exhibit", indexname = 0, description = "", hidden = True, **kargs):
         super().__init__(**kargs)
-        self.element = "sequence"
-        self.name = "Exhibit"
-        self.num = num
+        self.element = "index"
+        # indexname and data ("text") are identifiers, not allowed to change
+        self.indexname = indexname
+        self.prefix = prefix
+        self.description = description
+        self.hidden = hidden
+    def __len__(self):
+        return(len(self.to_text()))
     def length(self):
         return(1)
     def to_text(self):
-        return(f"{self.name} {self.exhibit_num}")
+        if self.hidden:
+            return(f"{self.prefix}\u0020{self.data}")
+        else:
+            return(f"{self.prefix}\u0020{self.data}{self.description}")
     def to_display(self):
         return(f"\U0001F154\n\n{self.to_text()}")
     def to_odt(self, paragraph, document):
-        pass
+        # while first instinct is to use self.time, problem with copied steno if index
+        id_time = str(datetime.now().timestamp())
+        index_start = UserIndexMarkStart(id = id_time, indexname = self.indexname)
+        index_end = UserIndexMarkEnd(id = id_time)
+        paragraph.addElement(index_start)
+        addTextToElement(paragraph, self.to_text())
+        paragraph.addElement(index_end)
+    def to_rtf(self):
+        # Exhibit 1{\xe\cxinum1\v Exhibit 1:  A knife}
+        # {\xe{\*\cxexnum 1}Exhibit 1:  A knife}
+        string = write_command("cxinum", value = self.indexname)
+        if self.hidden:
+            string = string + write_command("v")
+        string = write_command("cxexnum", self.data, visible = False, group = True) + string
+        string = write_command("xe", text = f"{self.prefix}\u0020{self.data}{self.description}", value = string, group = True)
+        if self.hidden:
+            string = self.to_text() + string
+        return(string)
 
 def translate_coords(len1, len2, pos):
     pos_index = bisect_left(len1, pos)
@@ -283,6 +308,8 @@ class element_factory:
             element = text_field(user_dict = user_field_dict)
         elif element_dict["element"] == "automatic":
             element = automatic_text()
+        elif element_dict["element"] == "index":
+            element = index_text()
         element.from_dict(element_dict)
         return(element)
 

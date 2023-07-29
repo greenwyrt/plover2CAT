@@ -6,7 +6,7 @@ This tutorial covers writing in Plover2CAT, changing style properties and saving
 
 ## Writing
 
-Create a new transcript. You will know you are in a transcript when `File` --> `New` and `File` --> `Open` menu items are faded out (and so are their corresponding icons on the toolbar).
+Create a new transcript. You will know you are in a transcript when **File > New** or **File > Open** menu items are faded out (and so are their corresponding icons on the toolbar).
 
 ![Within a new transcript](images/withintranscript.png)
 
@@ -40,7 +40,7 @@ Now look to the right side. Click on the headings within the toolbar to open the
  
  ## Changing a style property
 
- You are able to change properties of a style, which will be applied document-wide. For example, you can make the Question style bold. Go to a paragraph that uses the question style, click the bold icon, and then click the "Modify Style" button at the bottom of the Styling pane.
+Changes to properties of a style are applied document-wide. For example, you can make the Question style bold. Go to a paragraph that uses the question style, click the bold icon, and then click the "Modify Style" button at the bottom of the Styling pane.
 
  ![Example of style changed](images/changedstyle.png)
 
@@ -52,18 +52,17 @@ Now look to the right side. Click on the headings within the toolbar to open the
 
  ##  Save and Versioning
 
-To save the transcript, use `File`--> `Save` or `Ctrl + S`  to save. 
+To save the transcript, use **File > Save** or `Ctrl + S`  to save. 
 Click to the History tab. You will see that under version history at the bottom, it shows the time of your last save.
 
-Now you can close the transcript by `File` --> `Close`.  **DO NOT** use the `Alt+ F4` or `ESC` as that causes an instant exit without saving.
+Now you can close the transcript by **File > Close**.  **DO NOT** use the `Alt+ F4` or `ESC` as that causes an instant exit without saving.
 
-
-Repope the transcript again by using `Open`, and then selecting the `config.CONFIG` file in the file dialog. Your transcript will be loaded back in.
+Repope the transcript again by using **File > Open**, and then selecting the `config.CONFIG` file in the file dialog. Your transcript will be loaded back in.
 
 You can revert changes from your previous saves.
 
 First, add some more writing to the document. Save again.
 
-Then select a previous time from the Version History dropdown. The text in the editor will now have the text of the version at that time. Notice that this `revert` creates a save as well.
+Then select a previous time from the Version History dropdown in the History dock. The text in the editor will now have the text of the version at that time. Notice that this `revert` creates a save as well.
 
 

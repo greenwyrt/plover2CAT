@@ -46,9 +46,10 @@ def save_json(json_dict, file_path):
     file_path = pathlib.Path(file_path)
     if not file_path.parent.exists():
         file_path.parent.mkdir()
-    if not file_path.exists():
-        file_path.touch()        
-    with open(file_path, "r+") as f:
+    # if not file_path.exists():
+    #     file_path.touch()
+    # rw mode is needed to manage hide file
+    with open(file_path, "w") as f:
         json.dump(json_dict, f, indent = 4)
         log.debug(f"Data saved in {str(file_path)}.")
 

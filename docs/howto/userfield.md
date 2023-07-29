@@ -15,21 +15,21 @@ Plover2CAT comes with default user fields available for insertion in the form of
 }
 ```
 
-To add or change a user field, go to `Insert` and then `Edit fields`. A dialog box will appear. 
+To add or change a user field, go to **Insert > Edit fields**. A dialog box will appear. 
 
 ### Add new user field
 
-Fill in the "name" of the field in the `Field name` box. It is best to stick to ASCII characters. 
+1. Fill in the "name" of the field in the `Field name` box. Use ASCII characters. 
 
-Then fill in the `Field value` with the desired text to show for this field. 
+2. Fill in the `Field value` with the desired text to show for this field. 
 
-Then click `Add new field` in order to create a new user field. The new field name and value will appear in the table below.
+3. Click `Add new field` in order to create a new user field. The new field name and value will then appear in the table below.
 
-### Editing a user field
+### Editing and removing a user field
 
-Field names, shown in the first column of the column, cannot be edited. But field values can be edited by double-clicking in the cells in the second column.
+Field names, shown in the first column of the table, cannot be edited. Field values can be edited by double-clicking in the cells in the second column.
 
-To remove a field completely, use the `Remove field` button.
+To remove a field completely, select the row in the table and click the `Remove field` button.
 
 ## Insert a user field
 

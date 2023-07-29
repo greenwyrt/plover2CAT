@@ -298,8 +298,6 @@
      <addaction name="actionToolbox"/>
      <addaction name="actionNavigation"/>
     </widget>
-    <addaction name="actionZoomIn"/>
-    <addaction name="actionZoomOut"/>
     <addaction name="actionShowAllCharacters"/>
     <addaction name="actionWindowFont"/>
     <addaction name="actionBackgroundColor"/>
@@ -326,6 +324,7 @@
     <addaction name="actionAbout"/>
     <addaction name="actionUserManual"/>
     <addaction name="actionAcknowledgements"/>
+    <addaction name="actionEditMenuShortcuts"/>
    </widget>
    <widget class="QMenu" name="menuSteno_Actions">
     <property name="title">
@@ -365,12 +364,18 @@
       <string>Field...</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuIndexEntry">
+     <property name="title">
+      <string>Index Entry</string>
+     </property>
+    </widget>
     <addaction name="actionInsertImage"/>
     <addaction name="actionInsertNormalText"/>
-    <addaction name="actionExhibit"/>
     <addaction name="menuField"/>
+    <addaction name="menuIndexEntry"/>
     <addaction name="separator"/>
     <addaction name="actionEditFields"/>
+    <addaction name="actionEditIndices"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -495,7 +500,7 @@ position.</string>
   <widget class="QDockWidget" name="dockSuggest">
    <property name="minimumSize">
     <size>
-     <width>97</width>
+     <width>185</width>
      <height>195</height>
     </size>
    </property>
@@ -1391,7 +1396,7 @@ and margin positions. Less accurate with proportional fonts.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>410</width>
+          <width>206</width>
           <height>415</height>
          </rect>
         </property>
@@ -1761,7 +1766,7 @@ Use %p for page number.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>300</width>
+          <width>279</width>
           <height>217</height>
          </rect>
         </property>
@@ -1947,7 +1952,7 @@ Use %p for page number.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>255</width>
+          <width>251</width>
           <height>215</height>
          </rect>
         </property>
@@ -2135,7 +2140,7 @@ time from next paragraph.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>239</width>
+          <width>167</width>
           <height>279</height>
          </rect>
         </property>
@@ -2290,7 +2295,7 @@ time from next paragraph.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>361</width>
+          <width>219</width>
           <height>164</height>
          </rect>
         </property>
@@ -3422,7 +3427,7 @@ dialog box at cursor location</string>
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Automatic Paragraph Affixes</string>
@@ -3466,12 +3471,14 @@ dialog box at cursor location</string>
     <string>Set Autosave Time</string>
    </property>
   </action>
-  <action name="actionExhibit">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
+  <action name="actionEditMenuShortcuts">
    <property name="text">
-    <string>Exhibit</string>
+    <string>Edit Menu Shortcuts</string>
+   </property>
+  </action>
+  <action name="actionEditIndices">
+   <property name="text">
+    <string>Edit Indices</string>
    </property>
   </action>
  </widget>

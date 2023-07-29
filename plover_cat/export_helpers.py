@@ -8,14 +8,14 @@ from copy import deepcopy
 from odf.style import (Style, TextProperties, ParagraphProperties, FontFace, PageLayout, 
 PageLayoutProperties, MasterPage, TabStops, TabStop, GraphicProperties, Header, Footer)
 
-def format_odf_text(block, style, chars_in_inch, page_width, line_num = 0):
+def format_odf_text(block_data, style, chars_in_inch, page_width, line_num = 0):
     # block is QTextBlock
     # max_char fed into function is converted from page width or user setting (line num digits and timestamp digits are "outside of page")
-    text = block.text()
+    text = block_data.to_text()
     l_marg = 0
     r_marg = 0
     first_indent = 0
-    block_data = deepcopy(block.userData()["strokes"])
+    # block_data = deepcopy(block.userData()["strokes"])
     spaces_to_insert = 0
     if "paragraphproperties" in style:
         if "marginleft" in style["paragraphproperties"]:
@@ -68,10 +68,10 @@ def format_odf_text(block, style, chars_in_inch, page_width, line_num = 0):
         par_text[list(par_text.keys())[-1]]["text"][-1].data = par_text[list(par_text.keys())[-1]]["text"][-1].data.rstrip("\n")
     return(par_text)
 
-def format_text(block, style, max_char = 80, line_num = 0):
+def format_text(block_data, style, max_char = 80, line_num = 0):
     # block is QTextBlock
     # max_char fed into function is converted from page width or user setting (line num digits and timestamp digits are "outside of page")
-    text = block.text()
+    text = block_data.to_text()
     l_marg = 0
     r_marg = 0
     t_marg = 0
@@ -79,7 +79,6 @@ def format_text(block, style, max_char = 80, line_num = 0):
     align = "left"
     linespacing = "100%"
     first_indent = 0
-    block_data = deepcopy(block.userData()["strokes"])
     # print(block_data)
     # all measurements converted to spaces, for horizontal, 10 chars per inch, for vertical, 6 chars per inch
     if "paragraphproperties" in style:

@@ -101,6 +101,7 @@ class Ui_indexDialog(object):
         self.hideDescript.setText(_translate("indexDialog", "Hide entry descriptions"))
         self.label_3.setText(_translate("indexDialog", "Entries for index:"))
         self.displayEntries.setToolTip(_translate("indexDialog", "Double-click to edit index entry descriptions."))
+        self.displayEntries.setSortingEnabled(True)
         self.label_4.setText(_translate("indexDialog", "Index entry text:"))
         self.entryAdd.setText(_translate("indexDialog", "Add new entry"))
         self.saveAndInsert.setText(_translate("indexDialog", "Save && Insert"))

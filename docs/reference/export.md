@@ -18,6 +18,7 @@ Lines/Page    | No         | No          | &check;   | &check;   | &check; | *No
 Images        | No         | No          | No        | No        | &check; | &check;
 Fields        | No         | No          | No        | No        | &check; | &check;
 Headings      | No         | No          | No        | No        | &check; | No
+Index entries | No         | No          | No        | No        | &check; | &check;
 
 \* No font support but indents and other layout are converted to closest approximation using spaces for padding.
 

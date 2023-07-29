@@ -10,7 +10,7 @@ Import of RTF/CRE transcript files produced by other CAT software is not fully s
 
 ## RTF/CRE export
 
-Plover2CAT will export a basic RTF/CRE as a data exchange file with other CAT software. The subset of flags for export and import is not the same, and consequently importing and then exporting an RTF/CRE file will not re-create the exact same file.
+Plover2CAT will export a basic RTF/CRE as a data exchange file with other CAT software. The subset of flags for export and import is not the same, and consequently importing and then exporting an RTF/CRE file will not re-create the exact same file. See [exports](export.md) for supported RTF features.
 
 
 ## Supported flags
@@ -47,11 +47,13 @@ Recognized RTF/CRE flags
 
     Transcript (\cxtranscript)*    
     Revision number (\cxrev)*
+    Frame rate per second (\cxframes)
     System (\cxsystem)*
     Number of lines per page (\cxnoflines)*
+    Location of line number (\cxlinex)* - hardcoded
+    Location of time code on line (\cxtimex)* - hardcoded
     Timecode (\cxt)
     Steno (\cxs)
-    Frame rate per second (\cxframes)
     Automatic Text (\cxa)
     Delete space (\cxds)
 

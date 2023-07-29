@@ -17,6 +17,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
   - define retroactive
   - insertion automatic paragraph affixes based on paragraph style
   - insertion of user defined fields
+  - insertion of index entries
   - timestamped paper tape
   - creation and loading of transcript-specific dictionaries for each transcript
 
@@ -28,9 +29,9 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
   - ASCII
   - SubRip
   - RTF/CRE 
-  - Open Text Document formats 
+  - OpenDocument Text 
 
-- outline suggestions based on stroke history (powered by Tapey Tape or clippy_2)
+- outline suggestions based on stroke history (powered by [Tapey Tape](https://github.com/rabbitgrowth/plover-tapey-tape) or [clippy_2](https://github.com/Josiah-tan/plover_clippy_2))
 
 - transcript versioning using the `dulwich` library
 

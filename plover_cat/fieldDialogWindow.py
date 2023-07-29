@@ -14,6 +14,7 @@ class fieldDialogWindow(QDialog, Ui_fieldDialog):
         self.removeField.clicked.connect(self.remove_field)
         self.userDictTable.clearContents()
         self.userDictTable.setColumnCount(2)
+        self.userDictTable.setHorizontalHeaderLabels(["Name", "Value"])
         self.userDictTable.setRowCount(len(self.user_field_dict))
         for row, (k, v) in enumerate(self.user_field_dict.items()):
             key = QTableWidgetItem(k)

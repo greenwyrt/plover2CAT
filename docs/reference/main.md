@@ -14,7 +14,6 @@ The main class in Plover2CAT is PloverCATWindow that subclasses `QMainWindow` an
 - `par_formats`: dict holding "full" paragraph formatting info (after recursion)
 - `user_field_dict`: dict, holds user defined fields 
 - `auto_paragraph_affixes`: dict, holds affixes for styles
-- `speakers`: (not utilized yet) dict to hold speaker ids
 - `styles_path`: path referencing style file
 - `stroke_time`: text string timestamp of last stroke
 - `audio_file`: path referencing file being played/recorded
@@ -223,5 +222,6 @@ This settings are stored locally and generally set the window properties/GUI.
 - `windowstate`: window state
 - `windowfont`: window font
 - `tapefont`: paper tape font
+- `suggestionsource`: use clippy-2 or tapey tape
 - `backgroundcolor`: background color of window
 - `recentfiles`: list of file paths of recently opened transcripts

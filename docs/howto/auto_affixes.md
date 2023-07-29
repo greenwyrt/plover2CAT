@@ -3,21 +3,28 @@
 Plover2CAT provides the ability to add defined text strings to the beginning and end of every paragraph based on the style of the paragraph.
 
 This can be very useful in certain cases, such as a Question style where every paragraph may begin with `Q.` and end with a `?`
+
 ## Enable automatic paragraph affixes
 
-To enable automatic affixes, go to the `Styling` menu and then click `Automatic Paragraph Affixes`. Then set affixes if none are defined.
+To enable automatic affixes, click **Styling > Automatic Paragraph Affixes**. 
+
+Then set affixes if none are defined.
 
 ## Set affixes
 
-To open the affix editor, go to `Styling` and then `Edit Paragraph Affixes`. 
+To open the affix editor, go to **Styling > Edit Paragraph Affixes**.
 
-First select the desired style to set affixes to. Existing values for the style will be shown in the Prefix string and Suffix string fields, else the fields will be blank. Fill out the fields as needed.
+1. Select the desired style to set affixes to from the dropdown list. Existing values for the style are shown in the Prefix string and Suffix string fields, else the fields are blank. 
 
-Click `Save` to save the affixes for the style. Then click `OK` to return to the main editor. If `Cancel` is pressed, the changes are discarded.
+2. Fill out the Prefix string and Suffix string fields. Leave empty if not needed.
+
+3. Click `Save` to save the affixes for the style. 
+
+4. Then click `OK` to return to the main editor. If `Cancel` is pressed, the changes are discarded.
 
 ## Tab insertions
 
-Affixes can contain tab characters but not new lines. To insert a tab into a prefix/suffix field, first place the cursor at the desired position. Then click `Insert tab at cursor`.
+Affixes can contain tab characters but not new lines. To insert a tab into a prefix/suffix field, place the cursor at the desired position. Then click `Insert tab at cursor`.
 
 ## Usage
 

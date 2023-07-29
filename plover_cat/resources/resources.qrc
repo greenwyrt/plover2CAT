@@ -1,5 +1,6 @@
 <RCC>
   <qresource>
+    <file>card--pencil.png</file>
     <file>document-text.png</file>
     <file>document-text-large.png</file>
     <file>arrow-270-medium.png</file>

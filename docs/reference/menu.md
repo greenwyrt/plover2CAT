@@ -4,47 +4,58 @@ The menu bar in Plover2CAT resides at the top of the page, and each menu section
 
 ## Descriptions
 
+*italics* represent sub-menus
+
 ### The File menu
 
 This menu contains items related to transcript file management, import and export.
 
 - New: Creates a timestamped folder named `transcript-YYYY-MM-DDTHHMMSS` and sets up the editor for writing.
 - Open...: Load a previously created `transcript-YYYY-MM-DDTHHMMSS` by Plover2CAT by selecting the `*.config` file in the project folder.
+- *Recent Files*: sub-menu containing recently loaded transcripts.
 - Import RTF/CRE: Import a RTF/CRE transcript file from other CAT software. See [Supported RTF/CRE features](rtf_support.md) for details.
 - Save: Saves the transcript data.
 - Save Transcript Data at ...: Save the transcript JSON in another location.
-- Export As: This submenu lists the different export formats available for export. For details of each file type, see [export formats](export.md)
+- *Export As*: This submenu lists the different export formats available for export. For details of each file type, see [export formats](export.md)
 - Open Transcript Folder: Open the folder where the transcript is located using the file explorer.
-- Close: Closes the transcript.
-- Quit: Quits Plover2CAT.
+- Close: Close the transcript.
+- Quit: Quit Plover2CAT.
 
 ### The Edit Menu
 
-- Find/Replace Pane: Shows the "Find and Replace" pane if visible.
-- Undo: Undo one action ie merge, cut if available.
-- Redo: Redo the undone action if available.
+- Find/Replace Pane: Shows Find and Replace pane if hidden.
+- Undo: Undo previous action.
+- Redo: Redo undone action if available.
 - Copy: Copy text (and underlying steno) from paragraph.
 - Cut: Cut text (and underlying steno) from paragraph.
 - Paste: Paste text (and underlying steno) into paragraph.
-- Normal Copy: Copies text only.
+- Normal Copy: Copy the text only for use in other applications.
 - Jump to Paragraph...: Activates a dialog window to select a paragraph to nagivate to.
-- Insert Normal Text: Activates a dialog window to insert normal text
-- Reset Paragraph: Removes all paragraph text and steno data. Used as the last option when text and steno data go out of sync.
+- Reset Paragraph: Removes all paragraph text and steno data from paragraph. Used as the last option when text and steno data go out of sync.
 
 ### The Steno Actions Menu
 
 This menu is for steno-related menu items.
 
-- Merge Paragraphs: Merges two paragraphs together.
-- Split Paragraphs: Splits one paragraph into two.
-- Autocompletion: Start up autocompletion. Requires a `wordlist.json` in a `sources/` dictionary.
-- Add Autocompletion Term: Activates dialog window to add autocompletion candidate and steno.
-- Retroactive Define: Define an outline after writing it.
+- Merge Paragraphs: Merge two paragraphs by selecting across two paragraphs, or place cursor in second of paragraphs to merge.
+- Split Paragraphs: Split paragraph by placing cursor at position to split.
+- Autocompletion: Toggle to enable autocompletion in editor. Requires a `wordlist.json` in a `sources/` dictionary.
+- Add Autocompletion Term: Activates dialog to add candidate text and steno for autocompletion.
+- Retroactive Define: Set new translation for strokes under selected text, replaces all occurrences of text.
 - Define Last: Define last preceding untranslate before cursor.
 - Delete Last Untrans: Find last preceding untranslate, if exists, and delete.
 - Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
 - Capture All Steno Input: If checked, all writing through Plover will be tracked, and text emitted into editor, regardless of whether editor window is in focus. By default, no writing to editor when window is not in focus.
 - Translate Tape: Activates file dialog selector for tapes files to translate using the present dictionary stack in Plover.
+
+## The Insert Menu
+
+- Insert Image: Activates a file selector to select image to insert
+- Insert Normal Text: Activates a dialog window to insert normal text
+- *Insert Field*: sub-menu for defined fields to insert
+- *Index Entry*: sub-menu for quick insert of index entries
+- Edit Fields: Activates dialog to create and edit field variables
+- Edit Indices: Activates dialog to create and manage indexes and index entries
 
 ### The Audiovisual Menu
 
@@ -67,6 +78,8 @@ This menu contains items related to audiovisual files.
 - Create New Style: Create a new style based on the currently selected style. User will input new style name.
 - Generate Style File From Template: Generate a JSON style file from an ODF or RTF file.
 - Refresh Editor: Update the visual styling foreach paragraph if not already done.
+- Automatic Paragraph Affixes: Toggle to enable adding prefix and suffix strings to paragraphs based on style
+- Edit Paragraph Affixes: Activates dialog to set prefix/suffix strings for paragraph styles
 
 ### The Dictionary Menu
 
@@ -79,10 +92,9 @@ This menu is for transcript dictionary management.
 
 This menu contains items related to view.
 
-- Zoom In: Increase the zoom on the main editor. The size from this and `Zoom Out` are "temporary", meaning they will fall back to normal if a document is loaded, such as opening/closing projects.
-- Zoom Out: Decrease the zoom on the main editor.
 - Show All Characters: Toggle to view whitespace charactes (spaces with dots, tabs with left arrows, paragraph endings with pilcrow symbol)
 - Window Font: Set the font and size for the window. This is saved when exiting and will be maintained across sessions.
+- Background Color: Set background color.
 - Paper Tape Font: Set the font and size for the paper tape. This is savd when exiting and will be maintained across sessions.
 - Docks: Submenu with items to toggle the visibility of each dock. A user can also right click on the toolbar and toggle dock visibility that way.
 
@@ -93,6 +105,7 @@ This menu contains help:
 - About: Dialog displaying name and version number.
 - Online User Manual: Directs to the online user manual (this document).
 - Acknowledgements
+- Edit Menu Shortcuts: Activates dialog for setting key shortcuts for available menu items
 
 ## Identifiers
 
@@ -148,6 +161,13 @@ This section documents each menu item under its menu section with the identifier
 | Capture All Output      | `actionCaptureAllOutput`      |              |
 | Translate Tape          | `actionTranslateTape`         |              |
 
+### Insert
+
+| Item                 | Action Identifier        | Shortcut     |
+|----------------------|--------------------------|--------------|
+| Insert Image         | `actionInsertImage`      |              |
+| Insert Normal Text   | `actionInsertNormalText` | Insert       |
+
 ### Audiovisual
 
 | Item             | Action Identifier     | Shortcut     |
@@ -171,6 +191,8 @@ This section documents each menu item under its menu section with the identifier
 | Create New Style                  | `actionCreateNewStyle`            |          |
 | Generate Style File From Template | `actionGenerateStyleFromTemplate` |          |
 | Refresh Editor                    | `actionRefreshEditor`             |          |
+| Automatic Paragraph Affixes       | `actionAutomaticAffixes`          |          |
+| Edit Paragraph Affixes            | `actionEditAffixes`               |          |
 
 ### Dictionary
 
@@ -183,11 +205,10 @@ This section documents each menu item under its menu section with the identifier
 
 | Item                    | Action Identifier         | Shortcut |
 |-------------------------|---------------------------|----------|
-| Zoom In                 | `actionZoomIn`            | Ctrl+=   |
-| Zoom Out                | `actionZoomOut`           | Ctrl+-   |
 | Show All Characters     | `actionShowAllCharacters` |          |
 | Window Font             | `actionWindowFont`        |          |
 | Paper Tape Font         | `actionPaperTapeFont`     |          |
+| Background Color        | `actionBackgroundColor`   |          |
 | Docks \> Paper Tape     | `actionPaperTape`         |          |
 | Docks \> Suggestions    | `actionSuggestions`       |          |
 | Docks \> History        | `actionHistory`           |          |
@@ -202,3 +223,4 @@ This section documents each menu item under its menu section with the identifier
 | About                   | `actionAbout`             |          |
 | Online User Manual      | `actionUserManual`        | F1       |
 | Acknowledgements        | `actionAcknowledgements`  |          |
+| Edit Menu Shortcuts     | `actionEditMenuShortcuts` |          |

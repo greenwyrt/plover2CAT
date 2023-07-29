@@ -71,4 +71,5 @@ class Ui_fieldDialog(object):
         self.label.setText(_translate("fieldDialog", "Field name:"))
         self.label_2.setText(_translate("fieldDialog", "Field value:"))
         self.addNewField.setText(_translate("fieldDialog", "Add new field"))
+        self.userDictTable.setSortingEnabled(True)
         self.removeField.setText(_translate("fieldDialog", "Remove field"))

@@ -149,6 +149,9 @@ def collapse_dict(element):
             append_value(new_dict, i["control"], "")
     return(new_dict)
 
+
+# with rtf_steno parsing, each control word parses as a dict, and text as a dict
+# each group parses as a list (ParseResults), and so results in a list with control words as dicts, more groups as lists, and text as dicts
 class rtf_steno:
     def __init__(self, file_name, progress_bar):
         self.rtf_file = file_name
@@ -279,6 +282,8 @@ class rtf_steno:
                 command_name = i[0]["control"]
                 if command_name == "stylesheet":
                     self.parse_styles(i)
+                if command_name == "fonttbl":
+                    self.parse_font(i)
                 if command_name == "info":
                     self.parse_date(i)
                 if command_name == "cxframes":
@@ -287,8 +292,6 @@ class rtf_steno:
                     self.parse_timecode(i)
                 if command_name == "cxs":
                     self.parse_steno(i)
-                if command_name == "fonttbl":
-                    self.parse_font(i)
                 if command_name == "cxa":
                     self.parse_cxa(i)
             else:
@@ -312,7 +315,18 @@ class rtf_steno:
                 self.scanned_styles[str(par_style_index)] = new_style_dict
                 par_style_index += 1
                 
+test_string = """
+{\\rtf1\\ansi\\deff1
+{\\fonttbl
+{\\f0\\fcharset1 Times New Roman;}
+{\\f1\\froman\\fcharset1 Times New Roman{\\*\\falt Base Font};}}
+{\\colortbl;\\red0\\green0\\blue0;\\red0\\green0\\blue255;\\red0\\green255\\blue255;\\red0\\green255\\blue0;}
+{\\xe{\\*\cxexnum 1}Exhibit 1:  A knife }}
+"""
+test_string = r"{\par\pard\s0\f0\fs24{\*\cxt 20:46:25:00}{\*\cxs WELG}Welcome{\*\cxt 20:46:26:00}{\*\cxs TOT} to the{\*\cxt 20:46:27:00}{\*\cxs SROEUS} Voice{\*\cxt 20:46:27:00}{\*\cxs -F} of{\*\cxt 20:46:27:00}{\*\cxs PHERBG} America{\xe{\*\cxexnum 1}Exhibit 1:  A knife }{\*\cxt 20:46:28:00}{\*\cxs AES}'s{\*\cxt 20:46:29:00}{\*\cxs TPHUS} News{\*\cxt 20:46:30:00}{\*\cxs WORDZ} Words{\*\cxt 20:46:30:00}{\*\cxs TP-PL}.}"
 
+
+res = expr.parse_string(test_string)
 # test_rtf = rtf_steno("plover_cat/test.rtf")
 # test_rtf.parse_document()
 # test_rtf.scan_par_styles()
@@ -470,7 +484,7 @@ def generate_stroke_rtf(stroke):
 
 def write_command(control, text = None, value = None, visible = True, group = False):
     command = "\\" + control
-    if value:
+    if value is not None:
         command = command + str(value)
     if text:
         command = command + " " + text

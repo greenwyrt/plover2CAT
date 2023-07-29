@@ -1,7 +1,5 @@
 # Documentation
 
-Plover2CAT's documentation is moving from a one-file user manual to more structured help.
-
 To get started, go through the following tutorials that will go through installing, writing into the editor, adding formatting, and exporting the transcript.
 
 ## Get Started
@@ -28,6 +26,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Retroactive Define for selection in editor](howto/retrodefine.md)
 - [Scan for last untranslated and add outline to dictionary/delete](howto/definelast.md)
 - [Define and insert a user field](howto/userfield.md)
+- [Insert index entries](howto/indices.md)
 - [Navigate to paper tape and back](howto/tapelinking.md)
 - [Import RTF/CRE transcript file](howto/importrtf.md)
 - [Enable autocompletion and add terms](howto/autocompletion.md)
@@ -40,7 +39,6 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Set window font](howto/windowfont.md)
 - [Set background color](howto/backgroundcolor.md)
 - [Set paper tape font](howto/papertapefont.md)
-- [Zoom in/Zoom Out](howto/zoom.md)
 - [Show invisible characters](howto/showall.md)
 - [Move cursor](howto/cursormove.md)
 - [Set custom shortcuts for menu items](howto/setcustomshortcuts.md)
@@ -105,7 +103,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 In development:
 - [Editor class](reference/main.md)
 - [Custom text objects](reference/elements.md)
-- Dialogs
+- [Dialogs](reference/dialogs.md)
 
 ## Discussions of design, development, and descriptions
 

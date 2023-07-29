@@ -120,13 +120,18 @@ TODO
 really needed with RTF imports, not so much with Plover
 
 
-### exhibit_text
+### index_text
 
-TODO
+It has the additional attributes:
+    - `element`: "index"
+    - `prefix`: string to place before "number"
+    - `indexname`: index that element belongs to
+    - `description`: description of the index entry 
+    - `hidden`: whether description is hidden or not
 
-Used to hold exhibit references as unique ids, not numbered until very end.
+The actual "number" for the exhibit is stored in the `text` attribute. 
 
-Need non-breaking space in `to_text` so that "label" and "number" are always together even for text formats.
+Has non-breaking space in `to_text` so that "prefix" and "number" are always together even for text formats.
 
 ## element_collection
 
