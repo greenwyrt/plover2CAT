@@ -560,6 +560,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             block = block.next()            
 
     def update_index_menu(self, index_dict):
+        if not index_dict:
+            return
         log.debug("Updating index entry insertion sub-menu.")
         self.menuIndexEntry.clear()
         for ind, (k, v) in enumerate(index_dict.items()):
@@ -651,6 +653,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage("Created project.")
         log.debug("New project successfully created and set up.")
         self.update_paragraph_style()
+        document_cursor = self.textEdit.textCursor()
+        document_cursor.setBlockFormat(self.par_formats[self.style_selector.currentText()])
+        document_cursor.setCharFormat(self.txt_formats[self.style_selector.currentText()])  
+        self.textEdit.setTextCursor(document_cursor)        
 
     def open_file(self, file_path = ""):
         self.mainTabs.setCurrentIndex(1)
@@ -734,6 +740,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.autosave_setup(self.actionEnableAutosave.isChecked())
         if self.textEdit.document().characterCount() == 1:
             self.update_paragraph_style()
+            document_cursor = self.textEdit.textCursor()
+            document_cursor.setBlockFormat(self.par_formats[self.style_selector.currentText()])
+            document_cursor.setCharFormat(self.txt_formats[self.style_selector.currentText()])  
+            self.textEdit.setTextCursor(document_cursor)              
 
     def save_file(self):
         if not self.file_name:
@@ -2364,6 +2374,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         index_dict = {}
         current_cursor = self.textEdit.textCursor()
         block = self.textEdit.document().begin()
+        if len(self.textEdit.toPlainText()) == 0:
+            return
         while True:
             block_strokes = block.userData()["strokes"]
             for ind, el in enumerate(block_strokes.data):

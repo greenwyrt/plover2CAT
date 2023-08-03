@@ -36,6 +36,8 @@ UI Changes:
 
 - Change: Main editor widget is now tabbed between the editor and a recent files pane. When loading a transcript, the editor text only appears after loading is completed (increases speed).
 
+- Change: aligned paper tape, [thanks AshenColors](https://github.com/greenwyrt/plover2CAT/pull/11#issue-1832014437)
+
 Internal Changes:
 
 - Multiple dialog windows with own code and UI to implement new features.
