@@ -88,7 +88,7 @@ The keys for the nested JSON object are:
 - `audiostarttime`: timestamp of audio when paragraph was created (if available)
 - `audioendtime`: timestamp of audio if audio was stopped when cursor was in paragraph (if available)
 - `style`: string stating the style of the paragraph (should be one of the keys in the style file)
-- `strokes`: array of serialized `text elements`
+- `strokes`: array of serialized `text elements` (see [elements](elements.md))
 - `notes`: string for any notes the user has added to the paragraph
 
 ### Format < 2.0.0
@@ -163,7 +163,7 @@ Below is a commented template for one style for crafting styles by hand.
 
 
 ```
-The `default.json` file looks like
+The `default.json` file looks like:
 
 ```
 default_styles = {

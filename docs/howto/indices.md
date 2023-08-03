@@ -42,9 +42,13 @@ As the dialog is non-modal however, the user can keep the dialog open in the bac
 
 ## Quick insert of index entries
 
-An index entry can be quickly added through the **Insert > Index Entry** sub-menu. Each existing index will be a sub-menu item. Clicking it will bring up a dialog to enter the text. `OK` will insert the index entry.
+An index entry can be quickly added through the **Insert > Index Entry** sub-menu. Each existing index will be a sub-menu item. 
 
-The "quick" occurs through Plover2CAT being able to specify shortcuts for each menu item. See [How to set custom shortcuts](setcustomshortcuts.md) for how to set shortcuts on menu items. With shortcuts, inserting an entry would be a process of 1) Activating sub-menu item by shortcut, 2) Input text and 3) press `OK` or input `Enter`.
+If no text is selected, clicking the sub-menu item will bring up a dialog to enter the text. `OK` will insert the index entry.
+
+If there is text selected in the editor, the selected text becomes the index name and an entry made from that text. Note that the steno information will be lost.
+
+The "quick" occurs through Plover2CAT being able to specify shortcuts for each menu item. See [How to set custom shortcuts](setcustomshortcuts.md) for how to set shortcuts on menu items. With shortcuts, inserting an entry would be a process of 1) Activating sub-menu item by shortcut, 2) Input text, 3) press `OK` or input `Enter`.
 
 ## Generating the index
 

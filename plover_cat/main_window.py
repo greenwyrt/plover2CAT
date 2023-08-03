@@ -33,8 +33,8 @@ import plover
 from plover.engine import StenoEngine
 from plover.steno import Stroke, normalize_steno, normalize_stroke
 from plover.dictionary.base import load_dictionary
-# from plover.system.english_stenotype import DICTIONARIES_ROOT, ORTHOGRAPHY_WORDLIST
-# from plover.system import _load_wordlist
+from plover.system.english_stenotype import DICTIONARIES_ROOT, ORTHOGRAPHY_WORDLIST
+from plover.system import _load_wordlist
 from plover import log
 
 from . __version__ import __version__
@@ -43,6 +43,7 @@ from plover_cat.fieldDialogWindow import fieldDialogWindow
 from plover_cat.affixDialogWindow import affixDialogWindow
 from plover_cat.shortcutDialogWindow import shortcutDialogWindow
 from plover_cat.indexDialogWindow import indexDialogWindow
+from plover_cat.suggestDialogWindow import suggestDialogWindow
 from plover_cat.rtf_parsing import *
 from plover_cat.constants import *
 from plover_cat.qcommands import *
@@ -51,6 +52,8 @@ from plover_cat.steno_objects import *
 from plover_cat.export_helpers import * 
 from plover_cat.FlowLayout import FlowLayout
 from plover_cat.documentWorker import documentWorker
+
+scowl = _load_wordlist(ORTHOGRAPHY_WORDLIST, DICTIONARIES_ROOT)
 
 class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def __init__(self, engine):
@@ -118,6 +121,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.par_formats = {}
         self.user_field_dict = {}
         self.auto_paragraph_affixes = {}
+        self.index_dialog = indexDialogWindow({}) 
+        self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
         self.styles_path = ""
         self.stroke_time = ""
         self.audio_file = ""
@@ -204,19 +209,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionAutomaticAffixes.toggled.connect(self.enable_affix)
         self.actionEditAffixes.triggered.connect(self.edit_auto_affixes)
         self.menuIndexEntry.triggered.connect(lambda action, el = None: self.insert_index_entry(el = el, action = action))
-        self.index_dialog = None
-        self.actionEditIndices.triggered.connect(self.edit_indices)
+        self.actionEditIndices.triggered.connect(self.edit_indices)       
         ## steno related edits
         self.actionMergeParagraphs.triggered.connect(lambda: self.merge_paragraphs())
         self.actionSplitParagraph.triggered.connect(lambda: self.split_paragraph())
-        self.actionAddCustomDict.triggered.connect(lambda: self.add_dict())
-        self.actionRemoveTranscriptDict.triggered.connect(lambda: self.remove_dict())
         self.actionRetroactiveDefine.triggered.connect(lambda: self.define_retroactive())
         self.actionDefineLast.triggered.connect(lambda: self.define_scan())
         self.actionDeleteLast.triggered.connect(lambda: self.delete_scan())
         self.actionAutocompletion.triggered.connect(self.setup_completion)
         self.actionAddAutocompletionTerm.triggered.connect(self.add_autocomplete_item)
         self.actionTranslateTape.triggered.connect(self.tape_translate)
+        ## dict related
+        self.actionAddCustomDict.triggered.connect(lambda: self.add_dict())
+        self.actionRemoveTranscriptDict.triggered.connect(lambda: self.remove_dict())
+        self.actionTranscriptSuggestions.triggered.connect(lambda: self.transcript_suggest())
         ## style connections
         self.edit_page_layout.clicked.connect(self.update_config)
         self.editCurrentStyle.clicked.connect(self.style_edit)
@@ -268,9 +274,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cursor_status.setObjectName("cursor_status")
         self.statusBar.addPermanentWidget(self.cursor_status)
         log.debug("Main window open.")
-        # test = _load_wordlist(ORTHOGRAPHY_WORDLIST, DICTIONARIES_ROOT)
-        # print(test["is"])
-
     # menu/gui management
     def set_shortcuts(self):
         shortcut_file = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "shortcuts.json"
@@ -708,6 +711,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.setup_page()
         self.menu_enabling(False)
         self.update_field_menu()
+        present_index = self.extract_indexes()
+        self.update_index_menu(present_index)
         QApplication.restoreOverrideCursor()
         export_path = selected_folder / "export"
         pathlib.Path(export_path).mkdir(parents = True, exist_ok=True)
@@ -968,10 +973,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.index_dialog.close()
         self.config = {}
         self.user_field_dict = {}
+        self.index_dialog = indexDialogWindow({})
+        self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
         self.cursor_block = 0
         self.cursor_block_position = 0        
         self.menu_enabling()
         self.update_field_menu()
+        self.update_index_menu({})
         self.textEdit.clear()
         self.mainTabs.setCurrentIndex(0)
         # self.textEdit.setPlainText("Welcome to Plover2CAT\nSet up or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")        
@@ -1140,6 +1148,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             restored_dicts = load_dictionary_stack_from_backup(backup_dictionary_location)
             self.engine.config = {'dictionaries': restored_dicts}
             log.debug("Dictionaries restored from backup file.")
+
+    def transcript_suggest(self):
+        log.debug("User activate transcript suggestions.")
+        if not self.suggest_dialog:
+            self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
+        self.suggest_dialog.update_text(self.textEdit.toPlainText())
+        self.suggest_dialog.show()      
+        self.suggest_dialog.activateWindow()        
     # config related
     def load_config_file(self, dir_path):
         config_path = pathlib.Path(dir_path) / "config.CONFIG"
@@ -2311,26 +2327,38 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         return(auto_el)    
 
     def insert_index_entry(self, el = None, action = None):
-        if not el:
+        current_cursor = self.textEdit.textCursor()
+        if el is None:
             index_name = action.data()[0]
             index_prefix = action.data()[1]
             index_hidden = action.data()[2]
-            txt, ok = QInputDialog.getText(self, f"Quick insert index {index_name}", f"{index_prefix}")
+            if current_cursor.hasSelection():
+                txt = current_cursor.selectedText()
+                ok = True
+            else:
+                txt, ok = QInputDialog.getText(self, f"Quick insert index {index_name}", f"{index_prefix}")
             if not ok:
                 return
             el = index_text(prefix = index_prefix, indexname = index_name, hidden = index_hidden, text = txt)
-        current_cursor = self.textEdit.textCursor()
-        current_block = current_cursor.blockNumber()
         start_pos = current_cursor.positionInBlock()
+        current_block = current_cursor.blockNumber()
+        self.undo_stack.beginMacro("Insert index")
+        if current_cursor.hasSelection() and el == None:
+            self.cut_steno(store = False)
+            self.textEdit.setTextCursor(current_cursor)
+            start_pos = current_cursor.positionInBlock()
+        else:
+            current_cursor.setPosition(min(current_cursor.position(), current_cursor.anchor()))
+            start_pos = current_cursor.positionInBlock()
         insert_cmd = steno_insert(self.textEdit, current_block, start_pos, el)
         self.undo_stack.push(insert_cmd)
-        present_index = self.extract_indexes()
+        self.undo_stack.endMacro()
+        # present_index = self.extract_indexes()
         if not self.index_dialog:
             self.index_dialog = indexDialogWindow({})
         present_index = self.extract_indexes()
         if present_index:
             self.index_dialog.update_dict(present_index)
-        # self.update_indices()
 
     def extract_indexes(self):
         index_dict = {}

@@ -73,18 +73,15 @@ class indexDialogWindow(QDialog, Ui_indexDialog):
         if self.displayEntries.currentRow() > -1:
             self.saveAndInsert.setEnabled(True)
     def insert_entry(self):
-        self.save_index()
         index_name = self.indexChoice.currentText()
         selected_row = self.displayEntries.currentRow()
-        if selected_row > -1:
+        if selected_row == -1:
             return
         entry_text = self.displayEntries.item(selected_row, 0).text()
         index_dict = self.index_dict[index_name]
         el = index_text(prefix = index_dict["prefix"], indexname = index_name, description = index_dict["entries"][entry_text], hidden = index_dict["hidden"], text = entry_text)
-        print(el.to_json())
         self.index_insert.emit(el)
-        # need pyqt signal here to connect outside
-        # make index_element here from selected row and pass out
+        self.save_index()
     def update_dict(self, index_dict):
         self.index_dict = index_dict
         self.indexChoice.clear()

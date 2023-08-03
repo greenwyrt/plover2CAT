@@ -2,7 +2,9 @@
 
 To apply an existing style to paragraph, nagivate to the `Styling` pane in the `Toolbox` dock.
 
-Put the cursor into the paragraph to be styled. Select the name of the desired style to apply from the `Current Paragraph Style` dropdown. If the style is visually different from the paragraph's original style, the paragraph will have a visual change.
+1. Put the cursor into the paragraph to be styled.
+2. Select the name of the desired style to apply from the `Current Paragraph Style` dropdown. 
+3. If the style is visually different from the paragraph's original style, the paragraph will have a visual change.
 
-For the first 10 styles, use `Ctrl + NUM` (where NUM is keys 0 - 9) to apply the style. 
+For the first 10 styles, you can use the shortcut `Ctrl + NUM` (where NUM is keys 0 - 9) to apply the style.
 

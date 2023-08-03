@@ -28,6 +28,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Define and insert a user field](howto/userfield.md)
 - [Insert index entries](howto/indices.md)
 - [Navigate to paper tape and back](howto/tapelinking.md)
+- [Generate dictionary suggestions from transcript](howto/transcriptsuggest.md)
 - [Import RTF/CRE transcript file](howto/importrtf.md)
 - [Enable autocompletion and add terms](howto/autocompletion.md)
 - [Translate tape files](howto/translatetape.md)
@@ -118,7 +119,7 @@ In development:
 Two ways: 1) Send a message over Discord. I am plants#4820 or 2) Open an issue on Github.
 
 Helpful things to do: 
-- Go to `Help` --> `About` to view the version number.
+- Go to **Help > About** to view the version number.
 - Compress and attach the entire transcript directory, or the `*.tape` and `*.transcript` files. 
 - If possible, add steps to reproduce the problem. 
 - Add the log output from running Plover (debug) after an attempt to cause the exact same error.

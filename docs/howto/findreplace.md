@@ -6,13 +6,10 @@ Use `Ctrl+F` to move to the find and replace pane.
 
 ## Text Find
 
-Click on `Text` under `Search Types` to enable this. 
-
-This will enable searching within translated text on the editor screen. Options for case sensitivity and whole word are available which can be checked or unchecked.
-
-If any text in the editor is selected, it will automatically be put into the "Find" input box if `Ctrl+F` is used.
-
-Enter text into the find box and then press `Next` to get the next occurrence or `Previous` to get the previous.
+1. Click on `Text` under `Search Types` to enable this. This will enable searching within translated text on the editor screen. 
+2. Check/uncheck options for case sensitivity and whole word if available.
+3. If any text in the editor is selected, it will automatically be put into the "Find" input box if `Ctrl+F` is used.
+4. Enter text into the find box and then press `Next` to get the next occurrence or `Previous` to get the previous.
 
 ## Steno Find
 
@@ -28,7 +25,7 @@ Click on `Untrans` under `Search Types` to enable this.
 
 This will search for any text that appears to be an untranslated steno stroke within the translated text. Only whole "words" in steno order and 3 or more letters long qualify as an untrans.
 
-Nothing has to be entered into the find box. This search will find any untrans that match.
+This search will find any untrans that match.
 
 ## Replace
 

@@ -59,13 +59,13 @@ Tables are likely more difficult to implement and may require an editor widget.
 
 ## Refactoring editor
 
-The editor should be refactor into a smaller class. At least, export functions should be extracted out.
+The editor should be refactor into a smaller class.
 
 Methods that exclusively work on the `QTextEdit` could possibly be extracted and refactored from the `PloverCATWindow` into the `PloverCATEditor` custom class.
 
 ## Editor speed
 
-At present, when loading a transcript, the main bottleneck in speed comes from rendering paragraph styles for display. Populating the editor with text is incredibly fast by avoiding the use of `QUndoCommands`. With styles, there is the collapsing of the style dict, the setting of formats and the checking of each text element in case any are images slow down the processes.
+At present, when loading a transcript, the main bottleneck in speed comes from rendering paragraph styles for display and setting page format on the document. Populating the editor with text is incredibly fast by avoiding the use of `QUndoCommands`. With styles, there is the collapsing of the style dict, the setting of formats and the checking of each text element in case any are images slow down the processes.
 
 The other processes that scan the whole document again and again are fields (on every update), and index entries, and the edits that have to be made depending on how frequently the element occur.
 

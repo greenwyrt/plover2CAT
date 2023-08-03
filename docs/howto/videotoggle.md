@@ -4,4 +4,4 @@ When Plover2CAT detects that there is video available in the media file, it will
 
 ![Show/Hide video window](images/show_hide_video.gif)
 
-To hide this window, go to `Audiovisual` and then `Show/Hide Video`. This will toggle to show or hide the video window depending on the present state. 
+To hide this window, go to **Audiovisual > Show/Hide Video**. This will toggle to show or hide the video window depending on the present state. 

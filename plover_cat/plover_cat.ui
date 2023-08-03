@@ -313,6 +313,7 @@
     </property>
     <addaction name="actionAddCustomDict"/>
     <addaction name="actionRemoveTranscriptDict"/>
+    <addaction name="actionTranscriptSuggestions"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1396,7 +1397,7 @@ and margin positions. Less accurate with proportional fonts.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>206</width>
+          <width>410</width>
           <height>415</height>
          </rect>
         </property>
@@ -1766,7 +1767,7 @@ Use %p for page number.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>279</width>
+          <width>300</width>
           <height>217</height>
          </rect>
         </property>
@@ -2140,7 +2141,7 @@ time from next paragraph.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>167</width>
+          <width>239</width>
           <height>279</height>
          </rect>
         </property>
@@ -2295,7 +2296,7 @@ time from next paragraph.</string>
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>219</width>
+          <width>361</width>
           <height>164</height>
          </rect>
         </property>
@@ -3479,6 +3480,11 @@ dialog box at cursor location</string>
   <action name="actionEditIndices">
    <property name="text">
     <string>Edit Indices</string>
+   </property>
+  </action>
+  <action name="actionTranscriptSuggestions">
+   <property name="text">
+    <string>Transcript Suggestions</string>
    </property>
   </action>
  </widget>

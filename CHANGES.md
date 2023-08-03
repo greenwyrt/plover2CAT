@@ -24,6 +24,8 @@ Editor Changes:
 
 - Change: Zoom in/ zoom out have been removed (non-functional with styling). Font sizes should be changed through styling.
 
+- Feature: Transcript suggestions, search transcript for common n-grams and frequent rare words to add to dictionary.
+
 UI Changes:
 
 - Change: `Define Last` is renamed `Define Last Untrans` in menu
@@ -38,7 +40,7 @@ Internal Changes:
 
 - Multiple dialog windows with own code and UI to implement new features.
 
-- Change: updated documentation. `user_manual.md` is out-of-date and removed as documentation has been moved and re-organized in `docs/`.
+- Change: updated documentation. `user_manual.md` is out-of-date and removed as documentation has been moved and re-organized in `docs/`. Moved to **bold** for menu items. 
 
 - Change: rename `to_dict` of text elements to `to_json`
 

@@ -4,6 +4,8 @@ Editing is done through the `QUndoStack` mechanism for redo/undo-ing actions.
 
 The two main functions are `steno_insert` and `steno_remove`, which insert and remove elements from the `userData` slot of the block in the `QTextEdit`.
 
+`block_state` is an attribute that is set within the `Qcommands` to indicate a block has been changed. For safety, even if an action is undone, the block's state is not reverted.
+
 ## `steno_insert`:
 
 Used to insert steno. 
