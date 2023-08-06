@@ -28,14 +28,16 @@ from pyparsing import (
 
 from plover import log
 
+from plover_cat.steno_objects import *
 # control chars \ { }
 
 
 LBRACE, RBRACE, BKS = map(Suppress, "{}\\")
 
 
-text_whitespace = Word(printables, exclude_chars="\\{}") + Opt(White(" ", max=1))
+text_whitespace = Opt(White(" \t")) + Word(printables, exclude_chars="\\{}") + Opt(White(" \t"))
 text_whitespace.set_name("text")
+text_whitespace.leave_whitespace()
 
 # special chars that exist as control words, should be replaced by actual unicode equivalents, 
 tab_char = Literal("\\tab").set_parse_action(replace_with("\N{CHARACTER TABULATION}")) # "\t" or "\N{CHARACTER TABULATION}"
@@ -97,6 +99,7 @@ control = Group(
     Combine(
         Word(alphas)("control") + 
         Opt(Word(nums + '-').set_parse_action(common.convert_to_integer))("num") + 
+        Opt(White(" ", max=1)) + 
         Opt(Literal(";"))("ending")
         )
     )
@@ -226,34 +229,35 @@ class rtf_steno:
         cxa_dict = collapse_dict(element)
         self.steno = ""
         self.text = cxa_dict["text"]
-        self.append_stroke()
+        timestamp = "%sT%s:%s:%s.%s" % (self.date, self.timecode["hour"], self.timecode["min"], self.timecode["sec"], self.timecode["milli"])
+        ael = automatic_text(prefix = cxa_dict["text"], time = timestamp)
+        self.par.append(ael.to_json())
     def parse_steno(self, element):
         try:
             stroke = element[1]["value"]
         except:
             stroke = ""
         self.steno = stroke
-        # self.steno = stroke_element
     def parse_text(self, element):
         self.text = element["value"]
     def append_stroke(self):
         timestamp = "%sT%s:%s:%s.%s" % (self.date, self.timecode["hour"], self.timecode["min"], self.timecode["sec"], self.timecode["milli"])
-        stroke = [timestamp, self.steno, self.text]
-        self.par.append(stroke)
+        ael = stroke_text(time = timestamp, stroke = self.steno, text = self.text)
+        self.par.append(ael.to_json())
     def convert_framerate_milli(self, frames):
         milli = 1000 * frames / self.framerate
         return(milli)
     def set_new_paragraph(self):
-        strokes = self.par
         par_num = str(len(self.paragraphs))
-        par_text = "".join([stroke[2] for stroke in self.par])
+        # par_text = "".join([stroke[2] for stroke in self.par])
         # this last stroke should capture the stroke emitting \par
         timestamp = "%sT%s:%s:%s.%s" % (self.date, self.timecode["hour"], self.timecode["min"], self.timecode["sec"], self.timecode["milli"])
-        last_stroke = [timestamp, self.steno, "\n"]
-        self.par.append(last_stroke)
+        last_stroke = stroke_text(time = timestamp, stroke = self.steno, text = "\n")
+        self.par.append(last_stroke.to_json())
+        strokes = self.par
         par_dict = {}
-        par_dict["text"] = par_text
-        par_dict["data"] = {"strokes": strokes, "creationtime": strokes[0][0]}
+        par_dict["strokes"] = strokes
+        par_dict["creationtime"] = strokes[0]["time"]
         par_dict["style"] = self.par_style
         self.paragraphs[par_num] = par_dict
         self.par = []
@@ -306,7 +310,7 @@ class rtf_steno:
         style_list = []
         for i in style_string.scanString(data):
             style_list.append(i[0].asList())
-        print(len(style_list))
+        # print(len(style_list))
         par_style_index = 0
         for ind, el in enumerate(style_list):
             new_style_dict = collapse_dict(el)
@@ -359,9 +363,6 @@ def modify_styleindex_to_name(styles, style_names):
             i["nextstylename"] = style_names[int(i["nextstylename"])]
         styles[key] = i
     return(styles)
-
-def modify_fontindex_to_name(font,font_name):
-    pass 
 
 def extract_par_style(style_dict):
     one_style_dict = {}
@@ -477,19 +478,3 @@ def load_rtf_styles(parse_results):
         renamed_indiv_style.append(new_style_name)
     return(style_dict, renamed_indiv_style)    
 
-def generate_stroke_rtf(stroke):
-    time_string = datetime.strptime(stroke[0], "%Y-%m-%dT%H:%M:%S.%f").strftime('%H:%M:%S')
-    string = write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", stroke[1], visible = False, group = True) + stroke[2]
-    return(string)
-
-def write_command(control, text = None, value = None, visible = True, group = False):
-    command = "\\" + control
-    if value is not None:
-        command = command + str(value)
-    if text:
-        command = command + " " + text
-    if not visible:
-        command = "\\*" + command
-    if group:
-        command = "{" + command + "}"
-    return(command)

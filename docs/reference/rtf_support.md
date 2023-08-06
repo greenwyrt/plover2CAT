@@ -55,7 +55,6 @@ Recognized RTF/CRE flags
     Timecode (\cxt)
     Steno (\cxs)
     Automatic Text (\cxa)
-    Delete space (\cxds)
 
 
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>956</width>
+    <width>955</width>
     <height>743</height>
    </rect>
   </property>
@@ -71,7 +71,7 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_14">
+   <layout class="QVBoxLayout" name="verticalLayout_24">
     <item>
      <widget class="QTabWidget" name="mainTabs">
       <property name="focusPolicy">
@@ -147,7 +147,8 @@
           </property>
           <property name="font">
            <font>
-            <pointsize>8</pointsize>
+            <family>Courier New</family>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="contextMenuPolicy">
@@ -187,7 +188,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>956</width>
+     <width>955</width>
      <height>19</height>
     </rect>
    </property>
@@ -243,9 +244,6 @@
      <bool>true</bool>
     </property>
     <addaction name="actionFindReplacePane"/>
-    <addaction name="separator"/>
-    <addaction name="actionUndo"/>
-    <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="actionCopy"/>
     <addaction name="actionCut"/>
@@ -331,6 +329,9 @@
     <property name="title">
      <string>Steno Actions</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
     <addaction name="actionMergeParagraphs"/>
     <addaction name="actionSplitParagraph"/>
     <addaction name="separator"/>
@@ -348,6 +349,9 @@
     <property name="title">
      <string>Styling</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
     <addaction name="actionStyleFileSelect"/>
     <addaction name="actionCreateNewStyle"/>
     <addaction name="actionGenerateStyleFromTemplate"/>
@@ -359,6 +363,9 @@
    <widget class="QMenu" name="menuInsert">
     <property name="title">
      <string>Insert</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
     </property>
     <widget class="QMenu" name="menuField">
      <property name="title">
@@ -412,7 +419,7 @@
   <widget class="QDockWidget" name="dockPaper">
    <property name="minimumSize">
     <size>
-     <width>95</width>
+     <width>100</width>
      <height>142</height>
     </size>
    </property>
@@ -464,14 +471,14 @@ position.</string>
        <property name="lineWrapMode">
         <enum>QPlainTextEdit::NoWrap</enum>
        </property>
-       <property name="tabStopDistance">
-        <double>50.000000000000000</double>
-       </property>
        <property name="readOnly">
         <bool>true</bool>
        </property>
        <property name="plainText">
         <string/>
+       </property>
+       <property name="tabStopDistance">
+        <double>50.000000000000000</double>
        </property>
        <property name="textInteractionFlags">
         <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -505,7 +512,7 @@ position.</string>
    <property name="minimumSize">
     <size>
      <width>185</width>
-     <height>195</height>
+     <height>139</height>
     </size>
    </property>
    <property name="toolTip">
@@ -608,8 +615,8 @@ position.</string>
   <widget class="QDockWidget" name="dockAudio">
    <property name="minimumSize">
     <size>
-     <width>264</width>
-     <height>89</height>
+     <width>256</width>
+     <height>100</height>
     </size>
    </property>
    <property name="contextMenuPolicy">
@@ -748,8 +755,8 @@ position.</string>
   <widget class="QDockWidget" name="dockProp">
    <property name="minimumSize">
     <size>
-     <width>87</width>
-     <height>289</height>
+     <width>137</width>
+     <height>165</height>
     </size>
    </property>
    <property name="contextMenuPolicy">
@@ -773,1587 +780,1173 @@ position.</string>
    <widget class="QWidget" name="dockWidgetContents_5">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QToolBox" name="toolBox">
-       <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="toolTip">
-        <string/>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
+       <property name="tabPosition">
+        <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
+       </property>
+       <property name="elideMode">
+        <enum>Qt::ElideRight</enum>
+       </property>
+       <property name="usesScrollButtons">
+        <bool>true</bool>
+       </property>
+       <property name="tabsClosable">
+        <bool>false</bool>
+       </property>
+       <property name="movable">
+        <bool>false</bool>
+       </property>
+       <property name="tabBarAutoHide">
+        <bool>false</bool>
        </property>
        <widget class="QWidget" name="styling_pane">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>363</width>
-          <height>472</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>Set style for current paragraph or load styles for export</string>
-        </property>
         <attribute name="icon">
          <iconset resource="resources/resources.qrc">
           <normaloff>:/edit-style.png</normaloff>:/edit-style.png</iconset>
         </attribute>
-        <attribute name="label">
-         <string>Styling</string>
+        <attribute name="title">
+         <string>Style</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_11">
+        <attribute name="toolTip">
+         <string>Set style for current paragraph or load styles for export</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_25">
          <item>
-          <widget class="QLabel" name="style_file_path">
-           <property name="toolTip">
-            <string>Name of current style file</string>
+          <widget class="QScrollArea" name="scrollArea">
+           <property name="widgetResizable">
+            <bool>true</bool>
            </property>
-           <property name="text">
-            <string>Style file location</string>
-           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>388</width>
+              <height>466</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_26">
+             <item>
+              <widget class="QLabel" name="style_file_path">
+               <property name="toolTip">
+                <string>Name of current style file</string>
+               </property>
+               <property name="text">
+                <string>Style file location</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Current Paragraph Style:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="style_selector">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_4">
+               <property name="title">
+                <string>Style Settings</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_20">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_12">
+                  <item>
+                   <widget class="QFontComboBox" name="blockFont">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="currentFont">
+                     <font>
+                      <family>Courier New</family>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSpinBox" name="blockFontSize">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="suffix">
+                     <string>pt</string>
+                    </property>
+                    <property name="value">
+                     <number>12</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_15">
+                  <item>
+                   <widget class="QPushButton" name="blockFontBold">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Set text italic for style</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources/resources.qrc">
+                      <normaloff>:/edit-bold.png</normaloff>:/edit-bold.png</iconset>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="blockFontItalic">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Set text italicized for style</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources/resources.qrc">
+                      <normaloff>:/edit-italic.png</normaloff>:/edit-italic.png</iconset>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="blockFontUnderline">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Set text underlined for style</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources/resources.qrc">
+                      <normaloff>:/edit-underline.png</normaloff>:/edit-underline.png</iconset>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="blockLeftAlign">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Set alignment left for style</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources/resources.qrc">
+                      <normaloff>:/edit-alignment.png</normaloff>:/edit-alignment.png</iconset>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">blockAlignment</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="blockCenterAlign">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Set alignment center for style</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources/resources.qrc">
+                      <normaloff>:/edit-alignment-center.png</normaloff>:/edit-alignment-center.png</iconset>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">blockAlignment</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="blockRightAlign">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Set alignment right for style</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources/resources.qrc">
+                      <normaloff>:/edit-alignment-right.png</normaloff>:/edit-alignment-right.png</iconset>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">blockAlignment</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="blockJustify">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Set alignment justified for style</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources/resources.qrc">
+                      <normaloff>:/edit-alignment-justify-distribute.png</normaloff>:/edit-alignment-justify-distribute.png</iconset>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">blockAlignment</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSpinBox" name="blockLineSpace">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Set line spacing as proportion of font height (ie 200% for double space)</string>
+                    </property>
+                    <property name="suffix">
+                     <string>%</string>
+                    </property>
+                    <property name="maximum">
+                     <number>1000</number>
+                    </property>
+                    <property name="value">
+                     <number>100</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_2">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="formLayout_4">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_30">
+                    <property name="text">
+                     <string>Average Char Width </string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QDoubleSpinBox" name="fontspaceInInch">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Average character width of font, use this to estimate indent and margin positions. Less accurate with proportional fonts.</string>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
+                    </property>
+                    <property name="suffix">
+                     <string>in</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_28">
+                    <property name="text">
+                     <string>First Line Indent</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QDoubleSpinBox" name="blockTextIndent">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Specify text indent in inches relative to page margin</string>
+                    </property>
+                    <property name="suffix">
+                     <string>in</string>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.050000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="label_29">
+                    <property name="text">
+                     <string>Tab Stop Distance</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QDoubleSpinBox" name="blockTabStop">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Specify position of tab stop</string>
+                    </property>
+                    <property name="suffix">
+                     <string>in</string>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.050000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="label_24">
+                    <property name="text">
+                     <string>Left Margin (Indent)</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QDoubleSpinBox" name="blockLeftMargin">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Specify paragraph margin relative to left page margin</string>
+                    </property>
+                    <property name="suffix">
+                     <string>in</string>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.050000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="label_25">
+                    <property name="text">
+                     <string>Right Margin (Indent)</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="QDoubleSpinBox" name="blockRightMargin">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Specify right margin relative to right page margin</string>
+                    </property>
+                    <property name="suffix">
+                     <string>in</string>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.050000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="label_26">
+                    <property name="text">
+                     <string>Top Margin (Padding)</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="1">
+                   <widget class="QDoubleSpinBox" name="blockTopMargin">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Specify padding for top of paragraph</string>
+                    </property>
+                    <property name="suffix">
+                     <string>in</string>
+                    </property>
+                    <property name="minimum">
+                     <double>0.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.050000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="label_27">
+                    <property name="text">
+                     <string>Bottom Margin (Padding)</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="1">
+                   <widget class="QDoubleSpinBox" name="blockBottomMargin">
+                    <property name="focusPolicy">
+                     <enum>Qt::ClickFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Specify padding for bottom of paragraph</string>
+                    </property>
+                    <property name="readOnly">
+                     <bool>false</bool>
+                    </property>
+                    <property name="suffix">
+                     <string>in</string>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.050000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="0">
+                   <widget class="QLabel" name="label_31">
+                    <property name="text">
+                     <string>Parent Style</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="1">
+                   <widget class="QComboBox" name="blockParentStyle">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Select parent style for style</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="0">
+                   <widget class="QLabel" name="label_32">
+                    <property name="text">
+                     <string>Next Style</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="1">
+                   <widget class="QComboBox" name="blockNextStyle">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Select style of next paragraph</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="0">
+                   <widget class="QLabel" name="label_33">
+                    <property name="text">
+                     <string>Heading Level</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="1">
+                   <widget class="QComboBox" name="blockHeadingLevel">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="toolTip">
+                     <string>Specify heading level of style</string>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>1</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>2</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>3</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>4</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>5</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>6</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>7</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>8</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>9</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>10</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="10" column="1">
+                   <widget class="QPushButton" name="editCurrentStyle">
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="text">
+                     <string>Modify Current Style</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Current Paragraph Style:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="style_selector">
-           <property name="focusPolicy">
-            <enum>Qt::NoFocus</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="groupBox_4">
-           <property name="title">
-            <string>Style Settings</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_20">
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_12">
-              <item>
-               <widget class="QFontComboBox" name="blockFont">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="currentFont">
-                 <font>
-                  <family>Courier New</family>
-                  <pointsize>12</pointsize>
-                 </font>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="blockFontSize">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="suffix">
-                 <string>pt</string>
-                </property>
-                <property name="value">
-                 <number>12</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_15">
-              <item>
-               <widget class="QPushButton" name="blockFontBold">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Set text italic for style</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="resources/resources.qrc">
-                  <normaloff>:/edit-bold.png</normaloff>:/edit-bold.png</iconset>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="blockFontItalic">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Set text italicized for style</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="resources/resources.qrc">
-                  <normaloff>:/edit-italic.png</normaloff>:/edit-italic.png</iconset>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="blockFontUnderline">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Set text underlined for style</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="resources/resources.qrc">
-                  <normaloff>:/edit-underline.png</normaloff>:/edit-underline.png</iconset>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="blockLeftAlign">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Set alignment left for style</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="resources/resources.qrc">
-                  <normaloff>:/edit-alignment.png</normaloff>:/edit-alignment.png</iconset>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">blockAlignment</string>
-                </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="blockCenterAlign">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Set alignment center for style</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="resources/resources.qrc">
-                  <normaloff>:/edit-alignment-center.png</normaloff>:/edit-alignment-center.png</iconset>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">blockAlignment</string>
-                </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="blockRightAlign">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Set alignment right for style</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="resources/resources.qrc">
-                  <normaloff>:/edit-alignment-right.png</normaloff>:/edit-alignment-right.png</iconset>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">blockAlignment</string>
-                </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="blockJustify">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Set alignment justified for style</string>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset resource="resources/resources.qrc">
-                  <normaloff>:/edit-alignment-justify-distribute.png</normaloff>:/edit-alignment-justify-distribute.png</iconset>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <attribute name="buttonGroup">
-                 <string notr="true">blockAlignment</string>
-                </attribute>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSpinBox" name="blockLineSpace">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Set line spacing as proportion of font height 
-(ie 200% for double space)</string>
-                </property>
-                <property name="suffix">
-                 <string>%</string>
-                </property>
-                <property name="maximum">
-                 <number>1000</number>
-                </property>
-                <property name="value">
-                 <number>100</number>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QFormLayout" name="formLayout_4">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_30">
-                <property name="text">
-                 <string>Average Char Width </string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QDoubleSpinBox" name="fontspaceInInch">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Average character width of font, use this to estimate indent 
-and margin positions. Less accurate with proportional fonts.</string>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-                <property name="buttonSymbols">
-                 <enum>QAbstractSpinBox::NoButtons</enum>
-                </property>
-                <property name="suffix">
-                 <string>in</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_28">
-                <property name="text">
-                 <string>First Line Indent</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QDoubleSpinBox" name="blockTextIndent">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Specify text indent in inches relative to page margin</string>
-                </property>
-                <property name="suffix">
-                 <string>in</string>
-                </property>
-                <property name="minimum">
-                 <double>0.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.050000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_29">
-                <property name="text">
-                 <string>Tab Stop Distance</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QDoubleSpinBox" name="blockTabStop">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Specify position of tab stop</string>
-                </property>
-                <property name="suffix">
-                 <string>in</string>
-                </property>
-                <property name="singleStep">
-                 <double>0.050000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_24">
-                <property name="text">
-                 <string>Left Margin (Indent)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QDoubleSpinBox" name="blockLeftMargin">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Specify paragraph margin relative to left page margin</string>
-                </property>
-                <property name="suffix">
-                 <string>in</string>
-                </property>
-                <property name="minimum">
-                 <double>0.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.050000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="0">
-               <widget class="QLabel" name="label_25">
-                <property name="text">
-                 <string>Right Margin (Indent)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <widget class="QDoubleSpinBox" name="blockRightMargin">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Specify right margin relative to right page margin</string>
-                </property>
-                <property name="suffix">
-                 <string>in</string>
-                </property>
-                <property name="minimum">
-                 <double>0.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.050000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="0">
-               <widget class="QLabel" name="label_26">
-                <property name="text">
-                 <string>Top Margin (Padding)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QDoubleSpinBox" name="blockTopMargin">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Specify padding for top of paragraph</string>
-                </property>
-                <property name="suffix">
-                 <string>in</string>
-                </property>
-                <property name="minimum">
-                 <double>0.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.050000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="0">
-               <widget class="QLabel" name="label_27">
-                <property name="text">
-                 <string>Bottom Margin (Padding)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="1">
-               <widget class="QDoubleSpinBox" name="blockBottomMargin">
-                <property name="focusPolicy">
-                 <enum>Qt::ClickFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Specify padding for bottom of paragraph</string>
-                </property>
-                <property name="readOnly">
-                 <bool>false</bool>
-                </property>
-                <property name="suffix">
-                 <string>in</string>
-                </property>
-                <property name="singleStep">
-                 <double>0.050000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0">
-               <widget class="QLabel" name="label_31">
-                <property name="text">
-                 <string>Parent Style</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QComboBox" name="blockParentStyle">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Select parent style for style</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="0">
-               <widget class="QLabel" name="label_32">
-                <property name="text">
-                 <string>Next Style</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="1">
-               <widget class="QComboBox" name="blockNextStyle">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Select style of next paragraph</string>
-                </property>
-               </widget>
-              </item>
-              <item row="9" column="0">
-               <widget class="QLabel" name="label_33">
-                <property name="text">
-                 <string>Heading Level</string>
-                </property>
-               </widget>
-              </item>
-              <item row="9" column="1">
-               <widget class="QComboBox" name="blockHeadingLevel">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="toolTip">
-                 <string>Specify heading level of style</string>
-                </property>
-                <item>
-                 <property name="text">
-                  <string/>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>1</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>2</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>3</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>4</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>5</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>6</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>7</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>8</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>9</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>10</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="10" column="1">
-               <widget class="QPushButton" name="editCurrentStyle">
-                <property name="focusPolicy">
-                 <enum>Qt::NoFocus</enum>
-                </property>
-                <property name="text">
-                 <string>Modify Current Style</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <spacer name="verticalSpacer_5">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </widget>
        <widget class="QWidget" name="page_format_pane">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>410</width>
-          <height>415</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>Set page format for ODF export</string>
-        </property>
         <attribute name="icon">
          <iconset resource="resources/resources.qrc">
           <normaloff>:/document-resize-actual.png</normaloff>:/document-resize-actual.png</iconset>
         </attribute>
-        <attribute name="label">
+        <attribute name="title">
          <string>Page Format</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_10">
+        <attribute name="toolTip">
+         <string>Set page format</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_27">
          <item>
-          <layout class="QFormLayout" name="formLayout_3">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>Page Width</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="page_width">
-             <property name="toolTip">
-              <string>Paper width</string>
-             </property>
-             <property name="suffix">
-              <string>in.</string>
-             </property>
-             <property name="value">
-              <double>8.500000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>Page Height</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="page_height">
-             <property name="toolTip">
-              <string>Page height</string>
-             </property>
-             <property name="suffix">
-              <string>in.</string>
-             </property>
-             <property name="value">
-              <double>11.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_10">
-             <property name="text">
-              <string>Left Margin</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDoubleSpinBox" name="page_left_margin">
-             <property name="toolTip">
-              <string>Page left margin</string>
-             </property>
-             <property name="suffix">
-              <string>in.</string>
-             </property>
-             <property name="decimals">
-              <number>4</number>
-             </property>
-             <property name="value">
-              <double>1.750000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string>Top Margin</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QDoubleSpinBox" name="page_top_margin">
-             <property name="toolTip">
-              <string>Page top margin</string>
-             </property>
-             <property name="suffix">
-              <string>in.</string>
-             </property>
-             <property name="decimals">
-              <number>4</number>
-             </property>
-             <property name="value">
-              <double>0.787400000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_12">
-             <property name="text">
-              <string>Right Margin</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QDoubleSpinBox" name="page_right_margin">
-             <property name="toolTip">
-              <string>Page right margin</string>
-             </property>
-             <property name="suffix">
-              <string>in.</string>
-             </property>
-             <property name="decimals">
-              <number>4</number>
-             </property>
-             <property name="value">
-              <double>0.379900000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_13">
-             <property name="text">
-              <string>Bottom Margin</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QDoubleSpinBox" name="page_bottom_margin">
-             <property name="toolTip">
-              <string>Page bottom margin</string>
-             </property>
-             <property name="suffix">
-              <string>in.</string>
-             </property>
-             <property name="decimals">
-              <number>4</number>
-             </property>
-             <property name="value">
-              <double>0.787400000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_15">
-             <property name="text">
-              <string>Max Char per Line</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QSpinBox" name="page_max_char">
-             <property name="toolTip">
-              <string>Each line can contain at most n char,
-excluding line number and timestamps</string>
-             </property>
-             <property name="specialValueText">
-              <string>Automatic</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0">
-            <widget class="QLabel" name="label_14">
-             <property name="text">
-              <string>Max Lines per Page</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QSpinBox" name="page_max_lines">
-             <property name="specialValueText">
-              <string>Automatic</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0">
-            <widget class="QLabel" name="label_35">
-             <property name="text">
-              <string>Line Numbering</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="1">
-            <widget class="QCheckBox" name="enable_line_num">
-             <property name="toolTip">
-              <string>Enable line number in applicable formats</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0">
-            <widget class="QLabel" name="label_34">
-             <property name="text">
-              <string>Frequency</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="1">
-            <widget class="QSpinBox" name="line_num_freq">
-             <property name="toolTip">
-              <string>Show line number every nth line for ODF</string>
-             </property>
-             <property name="minimum">
-              <number>1</number>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0">
-            <widget class="QLabel" name="label_36">
-             <property name="text">
-              <string>Line Timestamp</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="1">
-            <widget class="QCheckBox" name="enable_timestamp">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_37">
-           <property name="text">
-            <string>Header:</string>
+          <widget class="QScrollArea" name="scrollArea_2">
+           <property name="widgetResizable">
+            <bool>true</bool>
            </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents_2">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>-169</y>
+              <width>388</width>
+              <height>409</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_28">
+             <item>
+              <layout class="QFormLayout" name="formLayout_3">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_8">
+                 <property name="text">
+                  <string>Page Width</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QDoubleSpinBox" name="page_width">
+                 <property name="toolTip">
+                  <string>Paper width</string>
+                 </property>
+                 <property name="suffix">
+                  <string>in.</string>
+                 </property>
+                 <property name="value">
+                  <double>8.500000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Page Height</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QDoubleSpinBox" name="page_height">
+                 <property name="toolTip">
+                  <string>Page height</string>
+                 </property>
+                 <property name="suffix">
+                  <string>in.</string>
+                 </property>
+                 <property name="value">
+                  <double>11.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Left Margin</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDoubleSpinBox" name="page_left_margin">
+                 <property name="toolTip">
+                  <string>Page left margin</string>
+                 </property>
+                 <property name="suffix">
+                  <string>in.</string>
+                 </property>
+                 <property name="decimals">
+                  <number>4</number>
+                 </property>
+                 <property name="value">
+                  <double>1.750000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_11">
+                 <property name="text">
+                  <string>Top Margin</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="page_top_margin">
+                 <property name="toolTip">
+                  <string>Page top margin</string>
+                 </property>
+                 <property name="suffix">
+                  <string>in.</string>
+                 </property>
+                 <property name="decimals">
+                  <number>4</number>
+                 </property>
+                 <property name="value">
+                  <double>0.787400000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_12">
+                 <property name="text">
+                  <string>Right Margin</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QDoubleSpinBox" name="page_right_margin">
+                 <property name="toolTip">
+                  <string>Page right margin</string>
+                 </property>
+                 <property name="suffix">
+                  <string>in.</string>
+                 </property>
+                 <property name="decimals">
+                  <number>4</number>
+                 </property>
+                 <property name="value">
+                  <double>0.379900000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Bottom Margin</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QDoubleSpinBox" name="page_bottom_margin">
+                 <property name="toolTip">
+                  <string>Page bottom margin</string>
+                 </property>
+                 <property name="suffix">
+                  <string>in.</string>
+                 </property>
+                 <property name="decimals">
+                  <number>4</number>
+                 </property>
+                 <property name="value">
+                  <double>0.787400000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="label_15">
+                 <property name="text">
+                  <string>Max Char per Line</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="1">
+                <widget class="QSpinBox" name="page_max_char">
+                 <property name="toolTip">
+                  <string>Each line can contain at most n char, excluding line number and timestamps</string>
+                 </property>
+                 <property name="specialValueText">
+                  <string>Automatic</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="0">
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Max Lines per Page</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="1">
+                <widget class="QSpinBox" name="page_max_lines">
+                 <property name="specialValueText">
+                  <string>Automatic</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="8" column="0">
+                <widget class="QLabel" name="label_35">
+                 <property name="text">
+                  <string>Line Numbering</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="8" column="1">
+                <widget class="QCheckBox" name="enable_line_num">
+                 <property name="toolTip">
+                  <string>Enable line number in applicable formats</string>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="9" column="0">
+                <widget class="QLabel" name="label_34">
+                 <property name="text">
+                  <string>Frequency</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="9" column="1">
+                <widget class="QSpinBox" name="line_num_freq">
+                 <property name="toolTip">
+                  <string>Show line number every nth line for ODF</string>
+                 </property>
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="10" column="0">
+                <widget class="QLabel" name="label_36">
+                 <property name="text">
+                  <string>Line Timestamp</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="10" column="1">
+                <widget class="QCheckBox" name="enable_timestamp">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_37">
+               <property name="text">
+                <string>Header:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QLineEdit" name="header_left">
+                 <property name="focusPolicy">
+                  <enum>Qt::ClickFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Header text to be aligned left. Use %p for page number.</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Left</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="header_center">
+                 <property name="focusPolicy">
+                  <enum>Qt::ClickFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Header text to be centered. Use %p for page number.</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Center</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="header_right">
+                 <property name="focusPolicy">
+                  <enum>Qt::ClickFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Header text to be aligned right. Use %p for page number.</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Right</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_38">
+               <property name="text">
+                <string>Footer:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_17">
+               <item>
+                <widget class="QLineEdit" name="footer_left">
+                 <property name="focusPolicy">
+                  <enum>Qt::ClickFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Footer text to be aligned left. Use %p for page number.</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Left</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="footer_center">
+                 <property name="focusPolicy">
+                  <enum>Qt::ClickFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Footer text to be aligned center. Use %p for page number.</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Center</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="footer_right">
+                 <property name="focusPolicy">
+                  <enum>Qt::ClickFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Footer text to be aligned right. Use %p for page number.</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Right</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPushButton" name="edit_page_layout">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Confirm and save changes to page and margin parameters</string>
+               </property>
+               <property name="text">
+                <string>Change Page Layout</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_5">
-           <item>
-            <widget class="QLineEdit" name="header_left">
-             <property name="focusPolicy">
-              <enum>Qt::ClickFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Header text to be aligned left. 
-Use %p for page number.</string>
-             </property>
-             <property name="placeholderText">
-              <string>Left</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="header_center">
-             <property name="focusPolicy">
-              <enum>Qt::ClickFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Header text to be centered. 
-Use %p for page number.</string>
-             </property>
-             <property name="placeholderText">
-              <string>Center</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="header_right">
-             <property name="focusPolicy">
-              <enum>Qt::ClickFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Header text to be aligned right. 
-Use %p for page number.</string>
-             </property>
-             <property name="placeholderText">
-              <string>Right</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_38">
-           <property name="text">
-            <string>Footer:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_17">
-           <item>
-            <widget class="QLineEdit" name="footer_left">
-             <property name="focusPolicy">
-              <enum>Qt::ClickFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Footer text to be aligned left. 
-Use %p for page number.</string>
-             </property>
-             <property name="placeholderText">
-              <string>Left</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="footer_center">
-             <property name="focusPolicy">
-              <enum>Qt::ClickFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Footer text to be aligned center. 
-Use %p for page number.</string>
-             </property>
-             <property name="placeholderText">
-              <string>Center</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="footer_right">
-             <property name="focusPolicy">
-              <enum>Qt::ClickFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Footer text to be aligned right. 
-Use %p for page number.</string>
-             </property>
-             <property name="placeholderText">
-              <string>Right</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QPushButton" name="edit_page_layout">
-           <property name="focusPolicy">
-            <enum>Qt::NoFocus</enum>
-           </property>
-           <property name="toolTip">
-            <string>Confirm and save changes to page and margin parameters</string>
-           </property>
-           <property name="text">
-            <string>Change Page Layout</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </widget>
        <widget class="QWidget" name="find_replace_pane">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>300</width>
-          <height>217</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>Find and replace</string>
-        </property>
         <attribute name="icon">
          <iconset resource="resources/resources.qrc">
           <normaloff>:/magnifier.png</normaloff>:/magnifier.png</iconset>
         </attribute>
-        <attribute name="label">
+        <attribute name="title">
          <string>Find and Replace</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_9">
-           <item>
-            <widget class="QGroupBox" name="groupBox_2">
-             <property name="title">
-              <string>Search Types</string>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_14">
-              <item>
-               <widget class="QRadioButton" name="search_text">
-                <property name="toolTip">
-                 <string>Search visible text for match</string>
-                </property>
-                <property name="text">
-                 <string>Text</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="search_steno">
-                <property name="toolTip">
-                 <string>Search strokes, find text has to match stroke completely</string>
-                </property>
-                <property name="text">
-                 <string>Underlying Steno</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="search_untrans">
-                <property name="toolTip">
-                 <string>Search what appears to be untranslated chords in visible text</string>
-                </property>
-                <property name="text">
-                 <string>Untrans</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <item>
-              <widget class="QLineEdit" name="search_term">
-               <property name="toolTip">
-                <string>Text to search for</string>
-               </property>
-               <property name="placeholderText">
-                <string>Find</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="search_forward">
-               <property name="toolTip">
-                <string>Perform selected search forwards</string>
-               </property>
-               <property name="text">
-                <string>Next</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="search_backward">
-               <property name="toolTip">
-                <string>Perform selected search backwards</string>
-               </property>
-               <property name="text">
-                <string>Previous</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QLineEdit" name="replace_term">
-               <property name="toolTip">
-                <string>The text to replace the match found in search</string>
-               </property>
-               <property name="placeholderText">
-                <string>Replace</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="replace_selected">
-               <property name="toolTip">
-                <string>Replace the found match with the text in the replace textbox</string>
-               </property>
-               <property name="text">
-                <string>Once</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="replace_all">
-               <property name="toolTip">
-                <string>Replace all matches with text in replace textbox</string>
-               </property>
-               <property name="text">
-                <string>All</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QCheckBox" name="search_case">
-               <property name="toolTip">
-                <string>Case sensitive search</string>
-               </property>
-               <property name="text">
-                <string>Match Case</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="search_whole">
-               <property name="toolTip">
-                <string>Text in find has to match text as a whole word/stroke</string>
-               </property>
-               <property name="text">
-                <string>Whole Word/Stroke</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="search_wrap">
-               <property name="toolTip">
-                <string>Search will continue from top/bottom if a match is not found in forward/back search</string>
-               </property>
-               <property name="text">
-                <string>Wrap</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_13"/>
-           </item>
-           <item>
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="paragraph_pane">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>251</width>
-          <height>215</height>
-         </rect>
-        </property>
-        <property name="toolTip">
-         <string>Edit paragraph properties</string>
-        </property>
-        <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+        <attribute name="toolTip">
+         <string>Find and replace</string>
         </attribute>
-        <attribute name="label">
-         <string>Paragraph Properties Editor</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <layout class="QVBoxLayout" name="verticalLayout_29">
          <item>
-          <widget class="QCheckBox" name="editorCheck">
-           <property name="focusPolicy">
-            <enum>Qt::NoFocus</enum>
-           </property>
-           <property name="toolTip">
-            <string>Unlock to edit paragraph properties</string>
-           </property>
-           <property name="text">
-            <string>Lock</string>
-           </property>
-           <property name="checked">
+          <widget class="QScrollArea" name="scrollArea_3">
+           <property name="widgetResizable">
             <bool>true</bool>
            </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QFormLayout" name="formLayout_2">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Paragraph</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLabel" name="editorParagraphLabel">
-             <property name="toolTip">
-              <string>Paragraph number</string>
-             </property>
-             <property name="text">
-              <string>0</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Creation Time</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QDateTimeEdit" name="editorCreationTime">
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Modifies creation time of paragraph</string>
-             </property>
-             <property name="displayFormat">
-              <string>yyyy-MM-dd hh:mm:ss.zzz</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Edit Time</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDateTimeEdit" name="editorEditTime">
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Read only. Displays edit time
-of paragraph. Will change upon
-any cursor movement.</string>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-             <property name="displayFormat">
-              <string>yyyy-MM-dd hh:mm:ss.zzz</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Audio Start Time</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QTimeEdit" name="editorAudioStart">
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Modifies audio start time of
-paragraph. By default, the
-audio end time of the previous
-paragraph is set by this
-unless previous paragraph has
-audio end time set.</string>
-             </property>
-             <property name="currentSection">
-              <enum>QDateTimeEdit::HourSection</enum>
-             </property>
-             <property name="displayFormat">
-              <string>hh:mm:ss.zzz</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Audio End Time</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QTimeEdit" name="editorAudioEnd">
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Sets audio end time for this
-paragraph. If not set, audio
-end time is the audio start
-time from next paragraph.</string>
-             </property>
-             <property name="displayFormat">
-              <string>hh:mm:ss.zzz</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Notes</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QLineEdit" name="editorNotes">
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="toolTip">
-              <string>Custom notes attached to paragraph</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QPushButton" name="submitEdited">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="focusPolicy">
-            <enum>Qt::NoFocus</enum>
-           </property>
-           <property name="toolTip">
-            <string>Enable with checkbox in order to submit edits</string>
-           </property>
-           <property name="text">
-            <string>Edit Paragraph Properties</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="audio_recording_pane">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>239</width>
-          <height>279</height>
-         </rect>
-        </property>
-        <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
-        </attribute>
-        <attribute name="label">
-         <string>Audio Recording</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_15">
-           <item>
-            <layout class="QFormLayout" name="formLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_16">
-               <property name="text">
-                <string>Input Device:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_17">
-               <property name="text">
-                <string>Audio Codec:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_18">
-               <property name="text">
-                <string>File Container:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_19">
-               <property name="text">
-                <string>Sample Rate</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="audio_device">
-               <property name="toolTip">
-                <string>Select where to receive audio input</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QComboBox" name="audio_codec">
-               <property name="toolTip">
-                <string>Select the audio codec to record with, depends on system codecs</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="audio_container">
-               <property name="toolTip">
-                <string>Select audio file type, depends on system</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QComboBox" name="audio_sample_rate">
-               <property name="toolTip">
-                <string>Select the sample rate for the recorded audio</string>
-               </property>
-               <property name="insertPolicy">
-                <enum>QComboBox::InsertAtTop</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QComboBox" name="audio_channels">
-               <property name="toolTip">
-                <string>Select number of channels to record from</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="label_20">
-               <property name="text">
-                <string>Channels</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="groupBox_3">
-             <property name="title">
-              <string>Encoding Mode</string>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_16">
-              <item>
-               <widget class="QRadioButton" name="constant_quality">
-                <property name="toolTip">
-                 <string>Constant quality means varying bitrate for audio file</string>
-                </property>
-                <property name="text">
-                 <string>Constant Quality</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSlider" name="quality_slider">
-                <property name="toolTip">
-                 <string>Quality of audio recording, from very bad to very good</string>
-                </property>
-                <property name="maximum">
-                 <number>4</number>
-                </property>
-                <property name="value">
-                 <number>2</number>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="constant_bitrate">
-                <property name="toolTip">
-                 <string>Constant bitrate means quality will vary</string>
-                </property>
-                <property name="text">
-                 <string>Constant Bitrate</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="audio_bitrate">
-                <property name="toolTip">
-                 <string>Select bitrate for recording</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="spellcheck_pane">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>361</width>
-          <height>164</height>
-         </rect>
-        </property>
-        <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/spell-check.png</normaloff>:/spell-check.png</iconset>
-        </attribute>
-        <attribute name="label">
-         <string>Spellcheck</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_10">
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_18">
+           <widget class="QWidget" name="scrollAreaWidgetContents_3">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>405</width>
+              <height>240</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_30">
              <item>
-              <widget class="QComboBox" name="dict_selection">
+              <widget class="QGroupBox" name="groupBox_2">
+               <property name="title">
+                <string>Search Types</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_14">
+                <item>
+                 <widget class="QRadioButton" name="search_text">
+                  <property name="toolTip">
+                   <string>Search visible text for match</string>
+                  </property>
+                  <property name="text">
+                   <string>Text</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="search_steno">
+                  <property name="toolTip">
+                   <string>Search strokes, find text has to match stroke completely</string>
+                  </property>
+                  <property name="text">
+                   <string>Underlying Steno</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="search_untrans">
+                  <property name="toolTip">
+                   <string>Search what appears to be untranslated chords in visible text</string>
+                  </property>
+                  <property name="text">
+                   <string>Untrans</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
-                <property name="text">
-                 <string>en-US</string>
-                </property>
+                <widget class="QLineEdit" name="search_term">
+                 <property name="toolTip">
+                  <string>Text to search for</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Find</string>
+                 </property>
+                </widget>
                </item>
-              </widget>
+               <item>
+                <widget class="QPushButton" name="search_forward">
+                 <property name="toolTip">
+                  <string>Perform selected search forwards</string>
+                 </property>
+                 <property name="text">
+                  <string>Next</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="search_backward">
+                 <property name="toolTip">
+                  <string>Perform selected search backwards</string>
+                 </property>
+                 <property name="text">
+                  <string>Previous</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QPushButton" name="spell_search">
-               <property name="text">
-                <string>Search</string>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QLineEdit" name="replace_term">
+                 <property name="toolTip">
+                  <string>The text to replace the match found in search</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Replace</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="replace_selected">
+                 <property name="toolTip">
+                  <string>Replace the found match with the text in the replace textbox</string>
+                 </property>
+                 <property name="text">
+                  <string>Once</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="replace_all">
+                 <property name="toolTip">
+                  <string>Replace all matches with text in replace textbox</string>
+                 </property>
+                 <property name="text">
+                  <string>All</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QPushButton" name="spell_skip">
-               <property name="text">
-                <string>Skip</string>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QCheckBox" name="search_case">
+                 <property name="toolTip">
+                  <string>Case sensitive search</string>
+                 </property>
+                 <property name="text">
+                  <string>Match Case</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="search_whole">
+                 <property name="toolTip">
+                  <string>Text in find has to match text as a whole word/stroke</string>
+                 </property>
+                 <property name="text">
+                  <string>Whole Word/Stroke</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="search_wrap">
+                 <property name="toolTip">
+                  <string>Search will continue from top/bottom if a match is not found in forward/back search</string>
+                 </property>
+                 <property name="text">
+                  <string>Wrap</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QPushButton" name="spell_ignore_all">
-               <property name="text">
-                <string>Ignore All</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="spell_change">
-               <property name="text">
-                <string>Change</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_4">
+              <spacer name="verticalSpacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
@@ -2366,45 +1959,516 @@ time from next paragraph.</string>
               </spacer>
              </item>
             </layout>
-           </item>
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_19">
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="paragraph_pane">
+        <attribute name="icon">
+         <iconset resource="resources/resources.qrc">
+          <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Paragraph</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>Edit paragraph properties</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_31">
+         <item>
+          <widget class="QScrollArea" name="scrollArea_4">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents_4">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>405</width>
+              <height>240</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_32">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_11">
-               <item>
-                <widget class="QLabel" name="label_21">
+              <widget class="QCheckBox" name="editorCheck">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Unlock to edit paragraph properties</string>
+               </property>
+               <property name="text">
+                <string>Lock</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QFormLayout" name="formLayout_2">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_2">
                  <property name="text">
-                  <string>Detected:</string>
+                  <string>Paragraph</string>
                  </property>
                 </widget>
                </item>
-               <item>
-                <widget class="QLineEdit" name="spellcheck_result"/>
+               <item row="0" column="1">
+                <widget class="QLabel" name="editorParagraphLabel">
+                 <property name="toolTip">
+                  <string>Paragraph number</string>
+                 </property>
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>Creation Time</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QDateTimeEdit" name="editorCreationTime">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Modifies creation time of paragraph</string>
+                 </property>
+                 <property name="displayFormat">
+                  <string>yyyy-MM-dd hh:mm:ss.zzz</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_6">
+                 <property name="text">
+                  <string>Edit Time</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QDateTimeEdit" name="editorEditTime">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Read only. Displays edit time of paragraph. Will change upon any cursor movement.</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                 <property name="displayFormat">
+                  <string>yyyy-MM-dd hh:mm:ss.zzz</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Audio Start Time</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QTimeEdit" name="editorAudioStart">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Modifies audio start time of paragraph.</string>
+                 </property>
+                 <property name="currentSection">
+                  <enum>QDateTimeEdit::HourSection</enum>
+                 </property>
+                 <property name="displayFormat">
+                  <string>hh:mm:ss.zzz</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_5">
+                 <property name="text">
+                  <string>Audio End Time</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QTimeEdit" name="editorAudioEnd">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Sets audio end time for this paragraph. </string>
+                 </property>
+                 <property name="displayFormat">
+                  <string>hh:mm:ss.zzz</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QLabel" name="label_7">
+                 <property name="text">
+                  <string>Notes</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QLineEdit" name="editorNotes">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Custom notes attached to paragraph</string>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
              <item>
-              <widget class="QListWidget" name="spellcheck_suggestions">
+              <widget class="QPushButton" name="submitEdited">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="focusPolicy">
                 <enum>Qt::NoFocus</enum>
                </property>
-               <property name="contextMenuPolicy">
-                <enum>Qt::NoContextMenu</enum>
-               </property>
                <property name="toolTip">
-                <string>Double click on choice to replace</string>
+                <string>Enable with checkbox in order to submit edits</string>
                </property>
-               <property name="editTriggers">
-                <set>QAbstractItemView::DoubleClicked</set>
-               </property>
-               <property name="selectionBehavior">
-                <enum>QAbstractItemView::SelectColumns</enum>
+               <property name="text">
+                <string>Edit Paragraph Properties</string>
                </property>
               </widget>
              </item>
+             <item>
+              <spacer name="verticalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
-           </item>
-          </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="audio_recording_pane">
+        <attribute name="icon">
+         <iconset resource="resources/resources.qrc">
+          <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Audio Recording</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>Set audio recording parameters</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_33">
+         <item>
+          <widget class="QScrollArea" name="scrollArea_5">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents_5">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>388</width>
+              <height>283</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_34">
+             <item>
+              <layout class="QFormLayout" name="formLayout">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_16">
+                 <property name="text">
+                  <string>Input Device:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_17">
+                 <property name="text">
+                  <string>Audio Codec:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_18">
+                 <property name="text">
+                  <string>File Container:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QLabel" name="label_19">
+                 <property name="text">
+                  <string>Sample Rate</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="audio_device">
+                 <property name="toolTip">
+                  <string>Select where to receive audio input</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QComboBox" name="audio_codec">
+                 <property name="toolTip">
+                  <string>Select the audio codec to record with, depends on system codecs</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QComboBox" name="audio_container">
+                 <property name="toolTip">
+                  <string>Select audio file type, depends on system</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QComboBox" name="audio_sample_rate">
+                 <property name="toolTip">
+                  <string>Select the sample rate for the recorded audio</string>
+                 </property>
+                 <property name="insertPolicy">
+                  <enum>QComboBox::InsertAtTop</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QComboBox" name="audio_channels">
+                 <property name="toolTip">
+                  <string>Select number of channels to record from</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_20">
+                 <property name="text">
+                  <string>Channels</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_3">
+               <property name="title">
+                <string>Encoding Mode</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_16">
+                <item>
+                 <widget class="QRadioButton" name="constant_quality">
+                  <property name="toolTip">
+                   <string>Constant quality means varying bitrate for audio file</string>
+                  </property>
+                  <property name="text">
+                   <string>Constant Quality</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSlider" name="quality_slider">
+                  <property name="toolTip">
+                   <string>Quality of audio recording, from very bad to very good</string>
+                  </property>
+                  <property name="maximum">
+                   <number>4</number>
+                  </property>
+                  <property name="value">
+                   <number>2</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="constant_bitrate">
+                  <property name="toolTip">
+                   <string>Constant bitrate means quality will vary</string>
+                  </property>
+                  <property name="text">
+                   <string>Constant Bitrate</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="audio_bitrate">
+                  <property name="toolTip">
+                   <string>Select bitrate for recording</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_8">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="spellcheck_pane">
+        <attribute name="icon">
+         <iconset resource="resources/resources.qrc">
+          <normaloff>:/spell-check.png</normaloff>:/spell-check.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Spellcheck</string>
+        </attribute>
+        <attribute name="toolTip">
+         <string>Spellcheck editor transcript</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_35">
+         <item>
+          <widget class="QScrollArea" name="scrollArea_6">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents_6">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>405</width>
+              <height>240</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_36">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_10">
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_18">
+                 <item>
+                  <widget class="QComboBox" name="dict_selection">
+                   <item>
+                    <property name="text">
+                     <string>en-US</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="spell_search">
+                   <property name="text">
+                    <string>Search</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="spell_skip">
+                   <property name="text">
+                    <string>Skip</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="spell_ignore_all">
+                   <property name="text">
+                    <string>Ignore All</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="spell_change">
+                   <property name="text">
+                    <string>Change</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer_4">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_19">
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_11">
+                   <item>
+                    <widget class="QLabel" name="label_21">
+                     <property name="text">
+                      <string>Detected:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="spellcheck_result"/>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="QListWidget" name="spellcheck_suggestions">
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
+                   <property name="contextMenuPolicy">
+                    <enum>Qt::NoContextMenu</enum>
+                   </property>
+                   <property name="toolTip">
+                    <string>Double click on choice to replace</string>
+                   </property>
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::DoubleClicked</set>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectColumns</enum>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -2453,7 +2517,7 @@ time from next paragraph.</string>
   <widget class="QDockWidget" name="dockHistoryStack">
    <property name="minimumSize">
     <size>
-     <width>97</width>
+     <width>100</width>
      <height>210</height>
     </size>
    </property>
@@ -2488,7 +2552,7 @@ time from next paragraph.</string>
           <enum>Qt::NoContextMenu</enum>
          </property>
          <property name="toolTip">
-          <string>Placeholder for new development</string>
+          <string>Session actions for undo/redo</string>
          </property>
         </widget>
        </item>
@@ -2500,12 +2564,19 @@ time from next paragraph.</string>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="versions"/>
+        <widget class="QComboBox" name="versions">
+         <property name="toolTip">
+          <string>Previous versions to revert to</string>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_13">
          <item>
           <widget class="QPushButton" name="revert_version">
+           <property name="toolTip">
+            <string>Confirm revert transcript to selected revision</string>
+           </property>
            <property name="text">
             <string>Revert</string>
            </property>
@@ -2521,7 +2592,7 @@ time from next paragraph.</string>
   <widget class="QDockWidget" name="dockStenoData">
    <property name="minimumSize">
     <size>
-     <width>174</width>
+     <width>127</width>
      <height>113</height>
     </size>
    </property>
@@ -2620,7 +2691,7 @@ time from next paragraph.</string>
   <widget class="QDockWidget" name="dockNavigation">
    <property name="minimumSize">
     <size>
-     <width>91</width>
+     <width>100</width>
      <height>113</height>
     </size>
    </property>
@@ -2804,63 +2875,6 @@ time from next paragraph.</string>
     <string>Ctrl+V</string>
    </property>
   </action>
-  <action name="actionZoomIn">
-   <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/magnifier-zoom-in.png</normaloff>:/magnifier-zoom-in.png</iconset>
-   </property>
-   <property name="text">
-    <string>Zoom In</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+=</string>
-   </property>
-  </action>
-  <action name="actionZoomOut">
-   <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/magnifier-zoom-out.png</normaloff>:/magnifier-zoom-out.png</iconset>
-   </property>
-   <property name="text">
-    <string>Zoom Out</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+-</string>
-   </property>
-  </action>
-  <action name="actionUndo">
-   <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/arrow-curve-180.png</normaloff>:/arrow-curve-180.png</iconset>
-   </property>
-   <property name="text">
-    <string>Undo</string>
-   </property>
-   <property name="toolTip">
-    <string>Undo writing or other action</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Z</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::WindowShortcut</enum>
-   </property>
-  </action>
-  <action name="actionRedo">
-   <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/arrow-curve.png</normaloff>:/arrow-curve.png</iconset>
-   </property>
-   <property name="text">
-    <string>Redo</string>
-   </property>
-   <property name="toolTip">
-    <string>Redo writing or other action</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Y</string>
-   </property>
-  </action>
   <action name="actionOpenAudio">
    <property name="icon">
     <iconset resource="resources/resources.qrc">
@@ -2967,9 +2981,7 @@ time from next paragraph.</string>
     <string>Merge Paragraphs</string>
    </property>
    <property name="toolTip">
-    <string>Merge two paragraphs by selecting across 
-two paragraphs, or place cursor in second of 
-paragraphs to merge</string>
+    <string>Merge two paragraphs by selecting across two paragraphs, or place cursor in second of paragraphs to merge</string>
    </property>
   </action>
   <action name="actionSplitParagraph">
@@ -2993,7 +3005,7 @@ paragraphs to merge</string>
     <string>Window Font</string>
    </property>
    <property name="toolTip">
-    <string>Set font and size</string>
+    <string>Set font and size for window</string>
    </property>
   </action>
   <action name="actionODT">
@@ -3111,7 +3123,7 @@ paragraphs to merge</string>
     <string>Lock Cursor At End</string>
    </property>
    <property name="toolTip">
-    <string>All writing will be appended to end of document</string>
+    <string>Keep cursor at end of document for writing</string>
    </property>
   </action>
   <action name="actionCaptureAllOutput">
@@ -3122,7 +3134,7 @@ paragraphs to merge</string>
     <string>Capture All Steno Output</string>
    </property>
    <property name="toolTip">
-    <string>Steno output will be recorded even if window is not in focus</string>
+    <string>Record steno output even if window is not in focus</string>
    </property>
   </action>
   <action name="actionUserManual">
@@ -3219,6 +3231,9 @@ paragraphs to merge</string>
    <property name="text">
     <string>Reset Paragraph</string>
    </property>
+   <property name="toolTip">
+    <string>Reset paragraph by clearing all data and text</string>
+   </property>
   </action>
   <action name="actionRetroactiveDefine">
    <property name="icon">
@@ -3258,6 +3273,9 @@ paragraphs to merge</string>
    <property name="text">
     <string>About</string>
    </property>
+   <property name="toolTip">
+    <string>Show version information</string>
+   </property>
    <property name="shortcut">
     <string>F1</string>
    </property>
@@ -3281,6 +3299,9 @@ paragraphs to merge</string>
    <property name="text">
     <string>Paper Tape Font</string>
    </property>
+   <property name="toolTip">
+    <string>Set font for Paper Tape dock</string>
+   </property>
   </action>
   <action name="actionStyleFileSelect">
    <property name="text">
@@ -3298,18 +3319,23 @@ paragraphs to merge</string>
     <string>Generate Style File From Template</string>
    </property>
    <property name="toolTip">
-    <string>Select template file (ODT) and generate style json
-with supported formatting only.</string>
+    <string>Select template file (ODT) and generate style json with supported formatting only.</string>
    </property>
   </action>
   <action name="actionCreateNewStyle">
    <property name="text">
     <string>Create New Style</string>
    </property>
+   <property name="toolTip">
+    <string>Create new style based on existing style</string>
+   </property>
   </action>
   <action name="actionRefreshEditor">
    <property name="text">
     <string>Refresh Editor</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh formatting for entire editor</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
@@ -3324,8 +3350,7 @@ with supported formatting only.</string>
     <string>Normal Text</string>
    </property>
    <property name="toolTip">
-    <string>Insert normal text through popup 
-dialog box at cursor location</string>
+    <string>Insert normal text through dialog</string>
    </property>
    <property name="shortcut">
     <string>Ins</string>
@@ -3341,6 +3366,9 @@ dialog box at cursor location</string>
    </property>
    <property name="text">
     <string>Show All Characters</string>
+   </property>
+   <property name="toolTip">
+    <string>Show all characters, including invisible ones</string>
    </property>
   </action>
   <action name="actionPlainASCII">
@@ -3378,10 +3406,16 @@ dialog box at cursor location</string>
    <property name="text">
     <string>Jump to Paragraph ...</string>
    </property>
+   <property name="toolTip">
+    <string>Jump to paragraph by paragraph number</string>
+   </property>
   </action>
   <action name="actionTranslateTape">
    <property name="text">
     <string>Translate Tape</string>
+   </property>
+   <property name="toolTip">
+    <string>Import tape file to translate to editor</string>
    </property>
   </action>
   <action name="actionRTF">
@@ -3397,6 +3431,9 @@ dialog box at cursor location</string>
    <property name="text">
     <string>Image</string>
    </property>
+   <property name="toolTip">
+    <string>Insert image object</string>
+   </property>
   </action>
   <action name="actionBackgroundColor">
    <property name="icon">
@@ -3407,7 +3444,7 @@ dialog box at cursor location</string>
     <string>Background Color</string>
    </property>
    <property name="toolTip">
-    <string>Set background color</string>
+    <string>Set background color of editor window</string>
    </property>
   </action>
   <action name="actionNavigation">
@@ -3424,6 +3461,9 @@ dialog box at cursor location</string>
   <action name="actionDeleteLast">
    <property name="text">
     <string>Delete Last Untrans</string>
+   </property>
+   <property name="toolTip">
+    <string>Scan to find last untranslate, and delete it</string>
    </property>
   </action>
   <action name="actionAutomaticAffixes">
@@ -3444,6 +3484,9 @@ dialog box at cursor location</string>
    <property name="text">
     <string>Edit Fields</string>
    </property>
+   <property name="toolTip">
+    <string>Edit fields values</string>
+   </property>
   </action>
   <action name="actionEnableAutosave">
    <property name="checkable">
@@ -3456,7 +3499,7 @@ dialog box at cursor location</string>
     <string>Autosave</string>
    </property>
    <property name="toolTip">
-    <string>Enable autosave to backup file every 5 minutes.</string>
+    <string>Enable autosave to backup file at defined time intervals</string>
    </property>
   </action>
   <action name="actionEditAffixes">
@@ -3467,27 +3510,39 @@ dialog box at cursor location</string>
     <string>Edit Paragraph Affixes</string>
    </property>
    <property name="toolTip">
-    <string>Open dialog to edit paragraph affixes</string>
+    <string>Add and edit paragraph affixes for styles</string>
    </property>
   </action>
   <action name="actionSetAutosaveTime">
    <property name="text">
     <string>Set Autosave Time</string>
    </property>
+   <property name="toolTip">
+    <string>Set time intervals for autosave</string>
+   </property>
   </action>
   <action name="actionEditMenuShortcuts">
    <property name="text">
     <string>Edit Menu Shortcuts</string>
+   </property>
+   <property name="toolTip">
+    <string>Customize shortcuts for menu items</string>
    </property>
   </action>
   <action name="actionEditIndices">
    <property name="text">
     <string>Edit Indices</string>
    </property>
+   <property name="toolTip">
+    <string>Add and edit index and index entries</string>
+   </property>
   </action>
   <action name="actionTranscriptSuggestions">
    <property name="text">
     <string>Transcript Suggestions</string>
+   </property>
+   <property name="toolTip">
+    <string>Analyze transcript for common words/n-grams to add to dictionary</string>
    </property>
   </action>
  </widget>

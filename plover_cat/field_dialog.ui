@@ -27,7 +27,11 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="fieldName"/>
+      <widget class="QLineEdit" name="fieldName">
+       <property name="toolTip">
+        <string>Identifier for field, best be ASCII characters</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
@@ -37,7 +41,11 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="fieldValue"/>
+      <widget class="QLineEdit" name="fieldValue">
+       <property name="toolTip">
+        <string>Text value for field, appears in transcript. If left blank, field name appears in text.</string>
+       </property>
+      </widget>
      </item>
      <item row="2" column="1">
       <widget class="QPushButton" name="addNewField">
@@ -52,6 +60,9 @@
     <widget class="QTableWidget" name="userDictTable">
      <property name="contextMenuPolicy">
       <enum>Qt::DefaultContextMenu</enum>
+     </property>
+     <property name="toolTip">
+      <string>Double-click cells to edit field values.</string>
      </property>
      <property name="editTriggers">
       <set>QAbstractItemView::DoubleClicked</set>
@@ -80,6 +91,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="removeField">
+       <property name="acceptDrops">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Removes selected field from table</string>
+       </property>
        <property name="text">
         <string>Remove field</string>
        </property>
@@ -87,6 +104,9 @@
      </item>
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="toolTip">
+        <string/>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

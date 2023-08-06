@@ -46,6 +46,9 @@
        </item>
        <item row="1" column="1">
         <widget class="QComboBox" name="scowlSize">
+         <property name="toolTip">
+          <string>Filter for words with size greater than selected in SCOWL. If blank, only filters common stopwords</string>
+         </property>
          <property name="currentIndex">
           <number>0</number>
          </property>
@@ -110,6 +113,9 @@
        </item>
        <item row="2" column="1">
         <widget class="QSpinBox" name="minOccur">
+         <property name="toolTip">
+          <string>Word/n-gram must occur at least this many times</string>
+         </property>
          <property name="minimum">
           <number>1</number>
          </property>
@@ -127,6 +133,9 @@
        </item>
        <item row="3" column="1">
         <widget class="QSpinBox" name="minNgram">
+         <property name="toolTip">
+          <string>N-gram must be this many words long</string>
+         </property>
          <property name="minimum">
           <number>2</number>
          </property>
@@ -141,6 +150,9 @@
        </item>
        <item row="4" column="1">
         <widget class="QSpinBox" name="maxNgram">
+         <property name="toolTip">
+          <string>N-gram cannot be longer than this value</string>
+         </property>
          <property name="minimum">
           <number>2</number>
          </property>
@@ -155,6 +167,9 @@
        </item>
        <item row="5" column="1">
         <widget class="QPushButton" name="detect">
+         <property name="toolTip">
+          <string>Perform selected search</string>
+         </property>
          <property name="text">
           <string>Detect</string>
          </property>
@@ -169,6 +184,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QPushButton" name="toDictionary">
+         <property name="toolTip">
+          <string>Send selected translation and outline to dictionary</string>
+         </property>
          <property name="text">
           <string>To Dictionary</string>
          </property>

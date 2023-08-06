@@ -8,7 +8,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtGui import QFontMetrics
 from time import sleep
 from plover import log
-from plover_cat.helpers import save_json, ms_to_hours, return_commits, inch_to_spaces
+from plover_cat.helpers import save_json, ms_to_hours, return_commits, inch_to_spaces, write_command
 from plover_cat.steno_objects import *
 from plover_cat.rtf_parsing import *
 from plover_cat.export_helpers import *
@@ -485,8 +485,8 @@ class documentWorker(QObject):
         info_string.append(write_command("cxnoflines", value = page_vspan))
         # cxlinex and cxtimex is hardcoded as it is also harcoded in odf
         # based on rtf spec, confusing whether left text margin, or left page margin
-        info_string.append(write_command("creatim", value = create_string))
-        info_string.append(write_command("buptim", value = backup_string))
+        info_string.append(write_command("creatim", value = create_string, group = True))
+        info_string.append(write_command("buptim", value = backup_string, group = True))
         info_string.append(write_command("cxlinex", value = int(in_to_twip(-0.15))))
         info_string.append(write_command("cxtimex", value = int(in_to_twip(-1.5))))
         info_string.append(write_command("cxnofstrokes", value = stroke_count))
@@ -510,27 +510,20 @@ class documentWorker(QObject):
         line_num = 1
         doc_lines = []
         log.debug(f"Exporting in SRT to {self.path}")
-        for block_num, block_data in self.document.items():  
-            doc_lines += [block_num]
-            audiostarttime = block_data["audiostarttime"]
-            # webvtt uses periods for ms separator
-            audiostarttime = audiostarttime.replace(".", ",")
-            if "audioendtime" in block_data:
-                audioendtime = block_data["audioendtime"]
-            elif int(block_num) == (len(self.document) - 1):
-                log.debug(f"Block {block_num} does not have audioendtime. Last block in document. Setting 0 as timestamp.")
-                audioendtime = ms_to_hours(0)
-            else:
-                log.debug(f"Block {block_num} does not have audioendtime. Attempting to use starttime from next block.")
-                try:
-                    audioendtime = self.document[str(int(block_num) + 1)]["audiostarttime"]
-                except (TypeError, KeyError) as err:
-                    audioendtime = ms_to_hours(0)
-            audioendtime = audioendtime.replace(".", ",")
-            doc_lines += [audiostarttime + " --> " + audioendtime]
-            el_list = [ef.gen_element(element_dict = i, user_field_dict = self.user_field_dict) for i in block_data["strokes"]]
-            doc_lines += ["".join([el.to_text() for el in el_list])]
-            doc_lines += [""]
+        for block_num, block_data in self.document.items():
+            if "audioendtime" not in block_data:
+                if str(int(block_num) + 1) in self.document and "audiostarttime" in self.document[str(int(block_num) + 1)]:
+                    block_data["audioendtime"] = self.document[str(int(block_num) + 1)]["audiostarttime"]
+                else:
+                    block_data["audioendtime"] = None
+            el_list = element_collection([ef.gen_element(element_dict = i, user_field_dict = self.user_field_dict) for i in block_data["strokes"]])
+            par_dict = format_srt_text(el_list, line_num = line_num, audiostarttime = block_data["audiostarttime"], audioendtime = block_data["audioendtime"])
+            line_num += len(par_dict)
+            for k, v in par_dict.items():
+                doc_lines += [k]
+                doc_lines += [ms_to_hours(v["starttime"]).replace(".", ",") + " --> " + ms_to_hours(v["endtime"]).replace(".", ",")]
+                doc_lines += ["".join([el.to_text() for el in v["text"]])]
+                doc_lines += [""]
             self.progress.emit(int(block_num))
         file_path = pathlib.Path(self.path)
         with open(file_path, "w", encoding="utf-8") as f:

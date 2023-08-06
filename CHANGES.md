@@ -1,5 +1,31 @@
 CHANGES
 
+ver 2.1.1
+
+This is a minor revision as most are under the hood changes
+
+- Change: hookup menu Undo/Redo items to stack, now items will display things like "Redo/Undo insert ..."
+
+- Change: remove unused actions from UI
+
+- Change: New qcommand `style_update` to update style changes, brings style changes into undo framework
+
+- Change: QUndoCommand text messages standardized
+
+- Change: Main editor and dialogs have new/condensed tooltips, docs updated.
+
+- Change: Toolbox Dock now uses tabs (holding scroll areas) rather than pages, less scrolling needed and more space for ui since page titles do not take up vertical space
+
+- Bug: word wrapped text did not return proper times for timestamps, added `split` method to elements
+
+- Bug: fixed RTF parser that did not respect spaces as delimiters vs text, now using new json format
+
+- Bug: fix #10 where editor falls back to default system font, should now fall back to first style font
+
+- Change: SRT export now word-wraps to 47 characters max automatically.
+
+- Change: gather UI updates into `update_gui` to update every cursor move
+
 ver 2.1.0
 
 This version focuses mainly on "things" to be inserted.

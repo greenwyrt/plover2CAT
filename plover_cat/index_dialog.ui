@@ -28,10 +28,17 @@
        <item row="0" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QComboBox" name="indexChoice"/>
+          <widget class="QComboBox" name="indexChoice">
+           <property name="toolTip">
+            <string>Indices are numbered starting at 0</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="addNewIndex">
+           <property name="toolTip">
+            <string>Add another index</string>
+           </property>
            <property name="text">
             <string>Add New Index</string>
            </property>
@@ -49,12 +56,19 @@
        <item row="1" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QLineEdit" name="indexPrefix"/>
+          <widget class="QLineEdit" name="indexPrefix">
+           <property name="toolTip">
+            <string>Prefix for index entry</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="hideDescript">
            <property name="enabled">
             <bool>true</bool>
+           </property>
+           <property name="toolTip">
+            <string>Do not show entry description in transcript</string>
            </property>
            <property name="text">
             <string>Hide entry descriptions</string>
@@ -101,7 +115,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="entryText"/>
+        <widget class="QLineEdit" name="entryText">
+         <property name="toolTip">
+          <string>Text for the index entry</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="entryAdd">
@@ -124,6 +142,9 @@
        <property name="enabled">
         <bool>false</bool>
        </property>
+       <property name="toolTip">
+        <string>Save changes to present index and insert selected entry</string>
+       </property>
        <property name="text">
         <string>Save &amp;&amp; Insert</string>
        </property>
@@ -131,6 +152,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="saveIndex">
+       <property name="toolTip">
+        <string>Save changes to selected index</string>
+       </property>
        <property name="text">
         <string>Save</string>
        </property>

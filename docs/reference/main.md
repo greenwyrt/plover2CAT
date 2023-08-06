@@ -9,11 +9,14 @@ The main class in Plover2CAT is PloverCATWindow that subclasses `QMainWindow` an
 - `recorder`: instance of `QAudioRecorder`
 - `config`: dict holding transcript configuration
 - `file_name`: path for transcript folder
+- `backup_document`: dict of transcript data, updated on save
 - `styles`: dict holding styles
 - `txt_formats`: dict holding "full" font formatting info (after recursion)
 - `par_formats`: dict holding "full" paragraph formatting info (after recursion)
 - `user_field_dict`: dict, holds user defined fields 
 - `auto_paragraph_affixes`: dict, holds affixes for styles
+- `index_dialog`: index dialog editor
+- `suggest_dialog`: suggestion dialog editor
 - `styles_path`: path referencing style file
 - `stroke_time`: text string timestamp of last stroke
 - `audio_file`: path referencing file being played/recorded
@@ -22,6 +25,7 @@ The main class in Plover2CAT is PloverCATWindow that subclasses `QMainWindow` an
 - `last_raw_steno`: string, raw steno of last stroke
 - `last_string_sent`: string, text sent with last stroke
 - `last_backspaces_sent`: integer, number of backspaces sent with last stroke
+- `track_lengths`: deque holding len of string_sent and backspaces_sent, used for tracking/comparing corrections if strokes need to be combined
 - `autosave_time`: `QTimer` object for activating autosave
 - `undo_stack`: holds `QUndoStack`
 - `cutcopy_storage`: `element_collection` holding steno to paste
@@ -56,6 +60,7 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 ### GUI
 
 - `set_shortcuts`: reads `shortcuts.json` and makes menu shortcuts as needed
+- `edit_shortcuts`: opens shortcut dialog editor
 - `about`: displays version
 - `acknowledge`: displays acknowledgments 
 - `open_help`: sends user to help docs
@@ -77,17 +82,20 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `navigate_to`: function accepts block number, moves and sets editor cursor to beginning of block
 - `update_gui`: collects other functions to be updated each time cursor changes
 - `update_navigation`: updates Navigation pane, displays list of heading paragraphs
+- `update_index_menu`: generates sub-menu items for quick index entry insertion
+- `set_autosave_time`: set autosave time interval
 
 ### Transcript management
 
 - `create_new`: creates new transcript project
 - *`open_file`*: opens existing transcript project
 - `save_file`: saves transcript project
-- `save_transcript`: extracts transcript data from editor
+- `save_transcript`: extracts transcript data from editor, only updates values if necessary, ie every par starting with first with `userState` == 1
 - `dulwich_save`: commits transcript files to repo with commit message
 - *`load_transcript`*: loads transcript data into editor and `userData` in blocks
 - `revert_file`: reverts transcript back to selected commit from repo
 - *`save_as_file`*: saves transcript data and tape into new location
+- `autosave`: saves present transcript to hidden file
 - `close_file`: closes transcript project and cleans up editor
 - `action_close`: quits editor window
 - `recentfile_open`: opens a recent file through `action`
@@ -101,7 +109,7 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `remove_dict`: file selection dialog to remove custom dict from `dict/` and plover dictionary stack
 - `set_dictionary_config`: takes list of dictionary paths, generate default dict if missing, backups present dictionary stack and loads transcript dictionaries
 - `restore_dictionary_from_backup`: restore plover dictionary stack from backup file
-
+- `transcript_suggest`: trigger suggestion dialog
 ### Config management
 
 - `load_config_file`: reads config file and sets editor UI variables
@@ -116,12 +124,13 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `gen_style_formats`: generates complete font and paragraph format dicts recursively for each style
 - `select_style_file`: load style fil from user file selction
 - `style_from_template`: reads ODF or RTF file, extracting only style information to write to new style file
-- `display_block_data`: triggered manually after text changes or split/merge, updates style and block properties display, triggers autocomplete dropdown if toggled
+- `display_block_data`: updates style and block properties display, triggers autocomplete dropdown if toggled
 - `display_block_steno`: takes strokes, update Reveal Steno dock with strokes, called from `display_block_data`
 - `refresh_steno_display`: updates Reveal Steno pane manually
 - *`update_paragraph_style`*: updates style of present paragraph block
 - `update_style_display`: updates UI elements to display present style
 - `style_edit`: changes properties of current style to user selections
+- `check_undo_stack`: will trigger editor style refresh if undo/redo action is related to style changes
 - `new_style`: create a new style based on current style
 - *`refresh_editor_styles`*: complete refresh of all paragraph blocks based on present styles
 - *`to_next_styles`*: sets current block style based on `nextstylename` attribute of previous block if exists
@@ -161,7 +170,10 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - *`edit_fields`*: calls `fieldDialogWindow` to create and edit user fields, and refreshes existing field elements in text
 - `add_begin_auto_affix`: checks and adds prefix set for `style`, copying `element` and returning `automatic_text` element
 - `add_end_auto_affix`: checks and adds suffix set for `style`, copying `element` and returning `automatic_text` element
-
+- `insert_index_entry`: create index element and insert into transcript
+- `extract_indexes`: find all index entries in transcript
+- `update_indices`: check and updates transcript index entries according to present indices from indices dialog
+- `edit_indices`: opens indices editor dialog
 ### Search
 
 - `search`: wrapper function for three types of searches

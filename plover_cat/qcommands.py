@@ -127,7 +127,7 @@ class steno_remove(QUndoCommand):
         self.document.setTextCursor(current_cursor)
         log_dict = {"action": "remove", "block": self.block, "position_in_block": self.position_in_block, "end": self.position_in_block + self.length}
         log.info(f"Remove: {log_dict}")
-        self.setText("Remove: %d chars" % len(self.steno))
+        self.setText("Remove: %d backspace(s)" % len(self.steno))
     def undo(self):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
@@ -177,7 +177,7 @@ class image_insert(QUndoCommand):
         log.info(f"Insert: {log_dict}")
         current_cursor.insertImage(imageFormat)
         current_block.setUserState(1)
-        self.setText("Insert image")
+        self.setText("Insert: image object")
         self.document.setTextCursor(current_cursor)
     def undo(self):
         current_cursor = self.document.textCursor()
@@ -253,7 +253,7 @@ class split_steno_par(QUndoCommand):
         current_block.setUserData(first_data)
         new_block.setUserData(second_data)
         new_block.setUserState(1)
-        self.setText("Split: %d,%d" % (self.block, self.position_in_block))
+        self.setText("Split: paragraph %d at %d" % (self.block, self.position_in_block))
         log_dict = {"action": "split", "block": self.block, "position_in_block": self.position_in_block}
         log.info(f"Split: {log_dict}")
         self.block_state = current_block.userState()
@@ -334,7 +334,7 @@ class merge_steno_par(QUndoCommand):
         log_dict = {"action": "merge", "block": self.block}
         log.info(f"Merge: {log_dict}")
         self.document.setTextCursor(current_cursor)
-        self.setText("Merge: %d & %d" % (first_block_num, second_block_num))
+        self.setText("Merge: paragraphs %d & %d" % (first_block_num, second_block_num))
     def undo(self):
         current_cursor = self.document.textCursor()
         first_block_num = self.block
@@ -389,7 +389,7 @@ class set_par_style(QUndoCommand):
             self.style = list(self.par_formats.keys())[0]
         block_data = update_user_data(block_data, "style", self.style)
         current_block.setUserData(block_data)
-        self.setText("Style: Par. %d set style %s" % (self.block, self.style))
+        self.setText(f"Format: set paragraph {self.block} style to {self.style}")
         current_cursor.movePosition(QTextCursor.StartOfBlock)
         current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
         current_cursor.setBlockFormat(self.par_formats[self.style])
@@ -435,6 +435,26 @@ class set_par_style(QUndoCommand):
             log_dict = {"action": "set_style", "block": self.block, "style": self.old_style}
             log.info(f"Style: {log_dict}")
 
+class style_update(QUndoCommand):
+    def __init__(self, styles, style_name, new_style_dict):
+        super().__init__()
+        self.styles = styles
+        self.style_name = style_name
+        self.new_style_dict = deepcopy(new_style_dict)
+        self.old_style_dict = {}
+    def redo(self):
+        if self.style_name in self.styles:
+            self.old_style_dict = deepcopy(self.styles[self.style_name])
+        self.styles[self.style_name] = self.new_style_dict
+        log_dict = {"action": "edit_style", "style_dict": self.new_style_dict}
+        log.info(f"Style: {log_dict}")
+        self.setText(f"Style: update style attributes for style {self.style_name}")
+    def undo(self):
+        if self.old_style_dict:
+            self.styles[self.style_name] = self.old_style_dict
+        log_dict = {"action": "edit_style", "style_dict": self.old_style_dict}
+        log.info(f"Style undo: {log_dict}")
+
 class update_field(QUndoCommand):
     def __init__(self, document, block, position, old_dict, new_dict):
         super().__init__()
@@ -470,7 +490,7 @@ class update_field(QUndoCommand):
                 break
             block = block.next()
         current_cursor.setPosition(current_block.position() + self.position_in_block)
-        self.setText("Update fields")
+        self.setText("Fields: update fields")
         log_dict = {"action": "field", "field": self.new_dict}
         log.info(f"Field: {log_dict}")
     def undo(self):
@@ -530,7 +550,7 @@ class update_entries(QUndoCommand):
                 break
             block = block.next()
         current_cursor.setPosition(current_block.position() + self.position_in_block)
-        self.setText("Update indexes.")
+        self.setText("Indices: update indices.")
         log_dict = {"action": "index", "index": self.new_dict}
         log.info(f"Index: {log_dict}")
     def undo(self):

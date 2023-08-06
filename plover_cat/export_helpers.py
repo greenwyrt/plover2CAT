@@ -143,9 +143,26 @@ def format_text(block_data, style, max_char = 80, line_num = 0):
         par_text[k]["text"] = par_text[k]["text"] + "\n" * line_spaces
     return(par_text)
 
+def format_srt_text(block_data, line_num = 0, audiostarttime = "", audioendtime = ""):
+    par_text = steno_wrap_srt(block_data, max_char = 47, starting_line_num = line_num)
+    # line_times = []
+    # if audiostarttime and audioendtime:
+    #     for line, data in par_txt.items():
+    #         line_times.append(data["starttime"])
+    #         line_times.append(data["endtime"])
+    #     if all([t >= audiostarttime and t <= audioendtime for t in line_times]):
+    #         return(par_text)
+    #     else:
+    #         audiostarttime = hours_to_ms(audiostarttime)
+    #         audioendtime = hours_to_ms(audioendtime)
+    #         # not complete
+    return(par_text)
+
 def steno_wrap_plain(text, block_data, max_char = 80, tab_space = 4, first_line_indent = "", 
-                        par_indent = "", timestamp = False, starting_line_num = 0):
+                        par_indent = "", starting_line_num = 0):
+    """returns dict of dicts, {line_number: {line_text, line_timestamp}}"""
     # the -1 in max char is because the rounding is not perfect, might have some lines that just tip over
+    # uses text string instead of block_data because text has pre-expanded tabs 
     wrapped = textwrap.wrap(text, width = max_char - 1, initial_indent= first_line_indent,
                 subsequent_indent= par_indent, expand_tabs = False, tabsize = tab_space, replace_whitespace=False)
     begin_pos = 0
@@ -167,7 +184,8 @@ def steno_wrap_plain(text, block_data, max_char = 80, tab_space = 4, first_line_
     return(par_dict)
 
 def steno_wrap_odf(block_data, max_char = 80, tab_space = 4, first_line_indent = "", 
-                        par_indent = "", timestamp = False, starting_line_num = 0):
+                        par_indent = "", starting_line_num = 0):
+    """ returns dict of dicts {line_number: {line_text, line_timestamp}}"""
     # the -1 in max char is because the rounding is not perfect, might have some lines that just tip over
     wrapper = steno_wrapper(width = max_char - 1, initial_indent= first_line_indent,
                 subsequent_indent= par_indent, expand_tabs = False, tabsize = tab_space, replace_whitespace=False)
@@ -179,7 +197,23 @@ def steno_wrap_odf(block_data, max_char = 80, tab_space = 4, first_line_indent =
         par_dict[starting_line_num + ind + 1] = {"text": wrapped[ind], "time": line_time}
     return(par_dict)
 
+def steno_wrap_srt(block_data, max_char = 47, tab_space = 0, first_line_indent = "", 
+                        par_indent = "", starting_line_num = 0):
+    # change from other wrapper here, tabs are expanded into 0 spaces
+    wrapper = steno_wrapper(width = max_char - 1, initial_indent= first_line_indent,
+                subsequent_indent= par_indent, expand_tabs = True, tabsize = tab_space, replace_whitespace=False)
+    wrapped = wrapper.wrap(text = block_data)
+    begin_pos = 0
+    par_dict = {}
+    for ind, i in enumerate(wrapped):
+        ec = element_collection(i)
+        start_time = ec.audio_time()
+        end_time = ec.audio_time(reverse = True)
+        par_dict[starting_line_num + ind + 1] = {"text": wrapped[ind], "starttime": start_time, "endtime": end_time}
+    return(par_dict)
+
 def load_odf_styles(path):
+    """extract styles from ODT file and convert supported to par + text style dicts"""
     log.debug(f"Loading ODF style file from {str(path)}")
     style_text = load(path)
     json_styles = {}
@@ -209,6 +243,7 @@ def load_odf_styles(path):
     return(json_styles)
 
 def recursive_style_format(style_dict, style, prop = "paragraphproperties"):
+    """used to get full style par/text format dict if style inherits from another"""
     if "parentstylename" in style_dict[style]:
         parentstyle = recursive_style_format(style_dict, style_dict[style]["parentstylename"], prop = prop)
         if prop in style_dict[style]:
@@ -221,6 +256,7 @@ def recursive_style_format(style_dict, style, prop = "paragraphproperties"):
             return({})
 
 def parprop_to_blockformat(par_dict):
+    """take dict of paragraph attributes, returns QTextBlockFormat obj"""
     par_format = QTextBlockFormat()
     if "textalign" in par_dict:
         if par_dict["textalign"] == "justify":
@@ -257,6 +293,7 @@ def parprop_to_blockformat(par_dict):
     return(par_format)
 
 def txtprop_to_textformat(txt_dict):
+    """takes dict of text attributes, returns QTextCharFormat obj"""
     txt_format = QTextCharFormat()
     if "fontfamily" in txt_dict:
         potential_font = QFont(txt_dict["fontfamily"])

@@ -24,7 +24,11 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QComboBox" name="text_name"/>
+      <widget class="QComboBox" name="text_name">
+       <property name="toolTip">
+        <string>Name of menu item</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
@@ -34,7 +38,11 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QKeySequenceEdit" name="shortcut"/>
+      <widget class="QKeySequenceEdit" name="shortcut">
+       <property name="toolTip">
+        <string>Click and then press keys for shortcut</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -44,6 +52,9 @@
       <widget class="QPushButton" name="validate">
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
+       </property>
+       <property name="toolTip">
+        <string>Check if shortcuts conflict and save</string>
        </property>
        <property name="text">
         <string>Validate and save</string>

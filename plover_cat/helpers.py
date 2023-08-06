@@ -6,7 +6,20 @@ from plover.config import Config, DictionaryConfig
 from plover import log
 from dulwich.porcelain import open_repo_closing
 
+def write_command(control, text = None, value = None, visible = True, group = False):
+    command = "\\" + control
+    if value is not None:
+        command = command + str(value)
+    if text:
+        command = command + " " + text
+    if not visible:
+        command = "\\*" + command
+    if group:
+        command = "{" + command + "}"
+    return(command)
+
 def return_commits(repo, max_entries = 100):
+    """ Adapted from dulwich, returns commit info"""
     with open_repo_closing(repo) as r:
         walker = r.get_walker(max_entries = max_entries, paths=None, reverse=False)
         commit_strs = []
@@ -23,6 +36,13 @@ def ms_to_hours(millis):
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     return ("%02d:%02d:%02d.%03d" % (hours, minutes, seconds, milliseconds))
+
+def hours_to_ms(hour_str):
+    """Converts formatted hour:min:sec.milli to milliseconds"""
+    hours, minutes, sec_ms = hour_str.split(":")
+    seconds, milliseconds = sec_md.split(".")
+    total_ms = milliseconds + seconds * 1000 + minutes * 60000 + hours * 3600000
+    return(total_ms)
 
 def in_to_pt(inch):
     inch = float(inch)
@@ -90,6 +110,7 @@ def backup_dictionary_stack(dictionaries, path):
             pass
 
 def remove_empty_from_dict(d):
+    """removes dict key:value if value is None-like"""
     if type(d) is dict:
         return dict((k, remove_empty_from_dict(v)) for k, v in d.items() if v and remove_empty_from_dict(v))
     elif type(d) is list:
@@ -98,8 +119,9 @@ def remove_empty_from_dict(d):
         return d
 
 def hide_file(filename):
+    """helper for windows os to hide autosave file"""
     import ctypes
     FILE_ATTRIBUTE_HIDDEN = 0x02
     ret = ctypes.windll.kernel32.SetFileAttributesW(filename, FILE_ATTRIBUTE_HIDDEN)    
-    if not ret: # There was an error.
+    if not ret:
         raise ctypes.WinError()    

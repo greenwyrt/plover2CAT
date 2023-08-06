@@ -28,6 +28,7 @@ It has the methods:
 - `__getitem__`: returns new instance after deepcopy
 - `__repr__`: representation as `dict`
 - `length`: returns length of string, here as placeholder in order to keep consistency with other subclassed elements, the functional length
+- `split`: splits text string on whitespace (re from textwrapper), returns list of elements containing each text piece separately, but same otherwise as original
 - `from_dict`: can populate class using a dict
 - `to_display`: formatted string for display in GUI, should be a string for three lines, 1) icon letter, 2) element data, if any, 3) text
 - `to_json`: returns dict of attributes

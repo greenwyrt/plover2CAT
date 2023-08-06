@@ -51,6 +51,12 @@ Attributes:
 - `space_placement`: value from Plover config
 - `add_space`: whether to add space upon merge, default is `True`
 
+## style_update
+
+- `styles`: reference to style dict in editor
+- `style_name`: name of style to be updated
+- `new_style_dict`: dict containing new style attributes
+- `old_style_dict`: dict with old style attributes
 
 ## set_par_style:
 

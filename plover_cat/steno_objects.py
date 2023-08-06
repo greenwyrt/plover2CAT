@@ -5,14 +5,17 @@ from collections import UserList, UserString
 from copy import deepcopy
 from itertools import accumulate
 from bisect import bisect_left, bisect
-from plover_cat.rtf_parsing import write_command
-from plover_cat.helpers import pixel_to_in
+from plover_cat.helpers import pixel_to_in, write_command
 from plover_cat.constants import user_field_dict
 from PyQt5.QtCore import QByteArray, QBuffer, QIODevice
 from PyQt5.QtGui import QImage, QImageReader
 from odf.teletype import addTextToElement
 from odf.text import P, UserFieldDecls, UserFieldDecl, UserFieldGet, UserIndexMarkStart, UserIndexMarkEnd
 from odf.draw import Frame, TextBox, Image
+
+_whitespace = '\t\n\x0b\x0c\r '
+whitespace = r'[%s]' % re.escape(_whitespace)
+wordsep_simple_re = re.compile(r'(%s+)' % whitespace)
 
 # display letters: s for stroke, t for text, i for image, 
 # sa for auto, c for conflict, f for field
@@ -28,6 +31,22 @@ class text_element(UserString):
         self.time = time or datetime.now().isoformat("T", "milliseconds")
     def __len__(self):
         return(len(self.data))
+    def split(self):
+        if self.length() > 1:
+            chunks = wordsep_simple_re.split(self.data)
+            list_chunks = []
+            for c in chunks:
+                class_dict = deepcopy(self.__dict__)
+                class_dict["data"] = c
+                new_element = self.__class__()
+                new_element.from_dict(class_dict)
+                list_chunks.append(new_element)
+            return(list_chunks)
+        else:
+            class_dict = deepcopy(self.__dict__)
+            new_element = self.__class__()
+            new_element.from_dict(class_dict)
+            return([new_element])            
     def __getitem__(self, key):
         class_dict = deepcopy(self.__dict__)
         class_dict["data"] = self.data[key]
@@ -170,9 +189,7 @@ class text_field(text_element):
         paragraph.addElement(user_field)
 
 class automatic_text(stroke_text):
-    """
-    use for text such as Q\t, ie set directly for question style
-    """
+    """use for text such as Q\t, ie set directly for question style"""
     def __init__(self, prefix = "", suffix = "", **kargs):
         super().__init__(**kargs)
         self.element = "automatic"
@@ -533,6 +550,12 @@ class element_collection(UserList):
     def collection_time(self, reverse = False):
         times = [el.time for el in self.data]
         return(sorted(times, reverse = reverse)[0])
+    def audio_time(self, reverse = False):
+        times = [el.audiotime for el in self.data if el.element == "stroke" and el.audiotime != ""]
+        if times:
+            return(sorted(times, reverse = reverse)[0])
+        else:
+            return None
     def replace_initial_tab(self, tab_replace = "    "):
         track_len = 3
         for el in self.data:
@@ -580,25 +603,10 @@ class steno_wrapper(textwrap.TextWrapper):
 
     def _split(self, text):
         # override
-        # split text/stroke elements, return as chunked text elements
-        # other elements just keep together
         text.remove_end()
         chunks = []
-        txt = ""
         for el in text.data:
-            if el.element in ["stroke", "text"]:
-                # keep adding to string as long as it is still "text"
-                txt = txt + el.to_text()
-            else:
-                # add txt string and then append element, so list is ["text", el, "text"]
-                txt_chunks = self.wordsep_simple_re.split(txt)
-                chunks.extend([text_element(i) for i in txt_chunks if i])
-                txt = ""
-                chunks.append(el)
-        if txt:
-            # if there is remaining text, append
-            txt_chunks = self.wordsep_simple_re.split(txt)
-            chunks.extend([text_element(i) for i in txt_chunks if i])
+            chunks.extend(el.split())
         return chunks
 
     def _wrap_chunks(self, chunks):
