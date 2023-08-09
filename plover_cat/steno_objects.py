@@ -13,7 +13,7 @@ from odf.teletype import addTextToElement
 from odf.text import P, UserFieldDecls, UserFieldDecl, UserFieldGet, UserIndexMarkStart, UserIndexMarkEnd
 from odf.draw import Frame, TextBox, Image
 
-_whitespace = '\t\n\x0b\x0c\r '
+_whitespace = '\u2029\t\n\x0b\x0c\r '
 whitespace = r'[%s]' % re.escape(_whitespace)
 wordsep_simple_re = re.compile(r'(%s+)' % whitespace)
 
@@ -69,7 +69,7 @@ class text_element(UserString):
         return(self.data)
     def to_rtf(self):
         time_string = datetime.strptime(self.time, "%Y-%m-%dT%H:%M:%S.%f").strftime('%H:%M:%S')      
-        string = write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", "", visible = False, group = True) + self.data
+        string = write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", "", visible = False, group = True) + self.to_text()
         return(string)
     def to_odt(self, paragraph, document):
         addTextToElement(paragraph, self.to_text())
@@ -260,6 +260,15 @@ class index_text(text_element):
         if self.hidden:
             string = self.to_text() + string
         return(string)
+
+class redact_text(text_element):
+    def __init__(self, **kargs):
+        super().__init__(**kargs)
+        self.element = "redacted"
+    def to_display(self):
+        return("\U0001F161\n\n%s" % self.data)
+    def to_text(self):
+        return("\u2588" * len(self.data))
 
 def translate_coords(len1, len2, pos):
     pos_index = bisect_left(len1, pos)

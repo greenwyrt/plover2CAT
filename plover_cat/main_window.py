@@ -21,7 +21,7 @@ QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, 
 QTextOption, QTextCharFormat, QKeySequence, QPalette)
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
 QStyle, QMessageBox, QDialog, QFontDialog, QColorDialog, QUndoStack, QLabel, QMenu,
-QCompleter, QApplication, QTextEdit, QProgressBar, QAction, QToolButton)
+QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar, QAction, QToolButton)
 from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaRecorder, 
 QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -38,12 +38,15 @@ from plover.system import _load_wordlist
 from plover import log
 
 from . __version__ import __version__
+
 from plover_cat.plover_cat_ui import Ui_PloverCAT
 from plover_cat.fieldDialogWindow import fieldDialogWindow
 from plover_cat.affixDialogWindow import affixDialogWindow
 from plover_cat.shortcutDialogWindow import shortcutDialogWindow
 from plover_cat.indexDialogWindow import indexDialogWindow
 from plover_cat.suggestDialogWindow import suggestDialogWindow
+from plover_cat.captionDialogWindow import captionDialogWindow
+
 from plover_cat.rtf_parsing import *
 from plover_cat.constants import *
 from plover_cat.qcommands import *
@@ -52,6 +55,7 @@ from plover_cat.steno_objects import *
 from plover_cat.export_helpers import * 
 from plover_cat.FlowLayout import FlowLayout
 from plover_cat.documentWorker import documentWorker
+from plover_cat.captionWorker import captionWorker
 
 scowl = _load_wordlist(ORTHOGRAPHY_WORDLIST, DICTIONARIES_ROOT)
 
@@ -121,7 +125,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.par_formats = {}
         self.user_field_dict = {}
         self.auto_paragraph_affixes = {}
-        self.index_dialog = indexDialogWindow({}) 
+        self.index_dialog = indexDialogWindow({})
+        self.caption_dialog = captionDialogWindow() 
         self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
         self.styles_path = ""
         self.stroke_time = ""
@@ -159,9 +164,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread = QThread()
         self.progressBar = QProgressBar()
         self.spell_ignore = []
+        self.caption_cursor_pos = 0
         # self.textEdit.setPlainText("Welcome to Plover2CAT\nOpen or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")
         self.menu_enabling()
         self.update_field_menu()
+        self.update_style_menu()
         self.set_shortcuts()
         # connections:
         ## engine connections
@@ -198,6 +205,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.recorder.error.connect(lambda: self.recorder_error())
         self.recorder.durationChanged.connect(self.update_record_time)
         self.actionShowVideo.triggered.connect(lambda: self.show_hide_video())
+        self.actionCaptioning.triggered.connect(self.setup_captions)
+        self.actionFlushCaption.triggered.connect(self.flush_caption)
         ## editor related connections
         self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
         self.textEdit.complete.connect(self.insert_autocomplete)
@@ -219,6 +228,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.textEdit.send_del.connect(self.mock_del)
+        self.textEdit.send_key.connect(self.mock_key)
+        self.textEdit.send_bks.connect(self.mock_bks)
         self.revert_version.clicked.connect(self.revert_file)
         ## insert related
         self.actionInsertImage.triggered.connect(lambda: self.insert_image())
@@ -229,7 +240,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionAutomaticAffixes.toggled.connect(self.enable_affix)
         self.actionEditAffixes.triggered.connect(self.edit_auto_affixes)
         self.menuIndexEntry.triggered.connect(lambda action, el = None: self.insert_index_entry(el = el, action = action))
-        self.actionEditIndices.triggered.connect(self.edit_indices)       
+        self.actionEditIndices.triggered.connect(self.edit_indices)
+        self.actionRedact.triggered.connect(self.insert_redacted)     
         ## steno related edits
         self.actionMergeParagraphs.triggered.connect(lambda: self.merge_paragraphs())
         self.actionSplitParagraph.triggered.connect(lambda: self.split_paragraph())
@@ -252,7 +264,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionGenerateStyleFromTemplate.triggered.connect(self.style_from_template)
         self.style_selector.activated.connect(self.update_paragraph_style)
         self.blockFont.currentFontChanged.connect(self.calculate_space_width)
-        self.textEdit.ins.connect(self.change_style)
+        self.menuParagraphStyle.triggered.connect(self.change_style)
+        # self.textEdit.ins.connect(self.change_style)
         ## search/replace connections
         self.search_text.toggled.connect(lambda: self.search_text_options())
         self.search_steno.toggled.connect(lambda: self.search_steno_options())
@@ -404,7 +417,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 action.setShortcut("Ctrl+Shift+%d" % ind)
             action.setData(k)
             self.menuField.addAction(action)
-    
+
+    def update_style_menu(self):
+        log.debug("Updating style sub-menu.")
+        self.menuParagraphStyle.clear()
+        for ind, name in enumerate(self.styles.keys()):
+            label = name
+            action = QAction(label, self.menuParagraphStyle)
+            if ind < 10:
+                action.setShortcut(f"Ctrl+{ind}")
+            action.setData(ind)
+            self.menuParagraphStyle.addAction(action)
+
     def clear_layout(self, layout):
         if layout is not None:
             while layout.count():
@@ -554,8 +578,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = self.textEdit.textCursor()
         if current_cursor.block().userData():
             self.display_block_steno(current_cursor.block().userData()["strokes"])
-            self.update_style_display(current_cursor.block().userData()["style"])
             self.display_block_data()
+            self.update_style_display(current_cursor.block().userData()["style"])
         # skip if still on same block
         if self.cursor_block == self.textEdit.textCursor().blockNumber():
             log.debug("Cursor in same paragraph as previous.")
@@ -671,6 +695,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.suggestTable.clearContents()
         self.menu_enabling(False)
         self.update_field_menu()
+        self.update_style_menu()
         self.autosave_setup(self.actionEnableAutosave.isChecked())
         self.recentfile_store(str(self.file_name))
         self.mainTabs.setCurrentIndex(1)
@@ -744,6 +769,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.setup_page()
         self.menu_enabling(False)
         self.update_field_menu()
+        self.update_style_menu()
         present_index = self.extract_indexes()
         self.update_index_menu(present_index)
         QApplication.restoreOverrideCursor()
@@ -799,7 +825,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if block.userState() == 1:
                 status = 1
             if status == 1:
-                block_dict = deepcopy(block.userData().return_all())
+                if block.userData():
+                    block_dict = deepcopy(block.userData().return_all())
+                else:
+                    return
                 block_num = block.blockNumber()
                 # print(f"Paragraph {block_num} changed.")
                 block_dict["strokes"] = block_dict["strokes"].to_json()
@@ -1017,6 +1046,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cursor_block_position = 0        
         self.menu_enabling()
         self.update_field_menu()
+        self.update_style_menu()
         self.update_index_menu({})
         self.textEdit.clear()
         self.mainTabs.setCurrentIndex(0)
@@ -1595,6 +1625,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.style_selector.clear()
         self.style_selector.addItems([*self.styles])
         self.style_selector.setCurrentText(old_style)
+        self.update_style_menu()
 
     def refresh_editor_styles(self):
         if self.textEdit.document().blockCount() > 200:
@@ -1656,9 +1687,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.undo_stack.push(style_cmd)
         self.statusBar.showMessage("Paragraph style set to {style}".format(style = new_style))
 
-    def change_style(self, index):
+    def change_style(self, action):
+        ind = action.data()
         log.debug("User shortcut to change style.")
-        self.style_selector.setCurrentIndex(qt_key_nums[index])
+        self.style_selector.setCurrentIndex(ind)
         current_cursor = self.textEdit.textCursor()
         style_cmd = set_par_style(current_cursor.blockNumber(), self.style_selector.currentText(), self.textEdit, self.par_formats, self.txt_formats)
         self.undo_stack.push(style_cmd)
@@ -1914,8 +1946,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     def on_stroke(self, stroke_pressed):
         self.editorCheck.setChecked(True)
-        if not self.engine.output:
-            return
+        # if not self.engine.output:
+        #     return
         if not self.file_name:
             return
         # do nothing if window not in focus
@@ -1929,6 +1961,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.actionCursorAtEnd.isChecked():
             current_cursor.movePosition(QTextCursor.End)
             self.textEdit.setTextCursor(current_cursor)
+        self.display_captions()
         self.cursor_block = current_cursor.blockNumber()
         self.cursor_block_position = current_cursor.positionInBlock()
         self.stroke_time = datetime.now().isoformat("T", "milliseconds")
@@ -2324,11 +2357,32 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.undo_stack.push(insert_cmd)
         self.undo_stack.endMacro()
 
-    def insert_text(self):
-        log.debug("User insert normal text.")
-        text, ok = QInputDialog().getText(self, "Insert Normal Text", "Text to insert")
-        if not ok:
+    def mock_key(self, text):
+        if self.engine.output:
             return
+        if not self.file_name:
+            return            
+        if len(text) > 0:
+            self.insert_text(text)
+    
+    def mock_bks(self):
+        if self.engine.output:
+            return
+        if not self.file_name:
+            return            
+        current_cursor = self.textEdit.textCursor()
+        if current_cursor.atBlockStart():
+            return
+        current_cursor.movePosition(QTextCursor.PreviousCharacter)
+        self.textEdit.setTextCursor(current_cursor)
+        self.mock_del()
+
+    def insert_text(self, text = None):
+        log.debug("User insert normal text.")
+        if not text:
+            text, ok = QInputDialog().getText(self, "Insert Normal Text", "Text to insert")
+            if not ok:
+                return
         log.debug(f"Inserting normal text {text}.")
         current_cursor = self.textEdit.textCursor()
         current_block_num = current_cursor.blockNumber()
@@ -2341,7 +2395,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.undo_stack.endMacro()      
 
     def mock_del(self):
-        log.debug("User input delete key.")
+        if not self.file_name:
+            return        
         current_cursor = self.textEdit.textCursor()
         if current_cursor.hasSelection():
             self.cut_steno(store = False)
@@ -2369,6 +2424,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             current_cursor = self.textEdit.textCursor()
             update_cmd = update_field(self.textEdit, current_cursor.blockNumber(), current_cursor.positionInBlock(), self.user_field_dict, new_field_dict)
             self.undo_stack.push(update_cmd)
+            self.update_field_menu()
+
+    def insert_redacted(self, text = None):
+        log.debug("User insert redact text.")
+        if not text:
+            text, ok = QInputDialog().getText(self, "Insert Redacted Text", "Text to insert")
+            if not ok:
+                return
+        log.debug(f"Inserting redacted text {text}.")
+        current_cursor = self.textEdit.textCursor()
+        current_block_num = current_cursor.blockNumber()
+        current_block = self.textEdit.document().findBlockByNumber(current_block_num)
+        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        # todo
+        # redact_steno = redact_text()
 
     def add_begin_auto_affix(self, element, style):
         if style not in self.auto_paragraph_affixes:
@@ -2928,6 +2998,80 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def update_record_time(self):
         msg = "Recorded %s" % ms_to_hours(self.recorder.duration())
         self.statusBar.showMessage(msg)
+
+    def setup_caption_window(self, display_font, max_blocks):
+        self.caption_window = QMainWindow()
+        self.caption_window.setMinimumSize(50, 50)
+        self.caption_window.setWindowFlags(self.caption_window.windowFlags() | Qt.WindowStaysOnTopHint)
+        self.caption_window.setWindowTitle("Plover2CAT Captions")
+        self.caption_edit = QPlainTextEdit()
+        self.caption_edit.setReadOnly(True)
+        self.caption_edit.setCursorWidth(5)
+        self.caption_edit.moveCursor(QTextCursor.End)
+        self.caption_edit.ensureCursorVisible()
+        # use same font for tape and caption
+        self.caption_edit.document().setDefaultFont(display_font)
+        if max_blocks != 0:
+            self.caption_edit.document().setMaximumBlockCount(max_blocks)
+        self.caption_window.setCentralWidget(self.caption_edit)
+        self.caption_window.show()
+
+    def add_cap(self, cap):
+        self.caption_edit.insertPlainText("\n" + cap)
+        self.caption_edit.ensureCursorVisible()
+
+    def setup_captions(self, checked):
+        if checked:
+            res = self.caption_dialog.exec_()
+            # need to always keep cursor at end, so can undo from end, but never from middle
+            self.actionCursorAtEnd.setChecked(True)
+            if res:
+                self.setup_caption_window(self.caption_dialog.font, self.caption_dialog.maxDisplayLines.value())
+                # if captions are enabled in middle of document, don't start from beginning
+                self.caption_cursor_pos = self.textEdit.textCursor().position()
+                self.thread = QThread()
+                self.cap_worker = captionWorker(max_length = self.caption_dialog.capLength.value(), time_delay = self.caption_dialog.delayTime.value(), remote = self.caption_dialog.remoteCapHost.currentText(), endpoint = self.caption_dialog.hostURL.text())
+                self.cap_worker.moveToThread(self.thread)
+                self.thread.started.connect(self.cap_worker.make_caps)
+                self.cap_worker.finished.connect(self.thread.quit)
+                self.cap_worker.finished.connect(self.cap_worker.deleteLater)
+                self.thread.finished.connect(self.thread.deleteLater)
+                self.cap_worker.capSend.connect(self.add_cap)
+                self.cap_worker.postMessage.connect(self.statusBar.showMessage)
+                self.thread.start()
+            else:
+                self.actionCaptioning.setChecked(False)
+        else:
+            # do cleanup
+            self.cap_worker.clean_and_stop()
+            self.caption_window.hide()
+
+    def display_captions(self):
+        if not self.actionCaptioning.isChecked():
+            return
+        doc_length = self.textEdit.document().characterCount()
+        if self.caption_cursor_pos + self.caption_dialog.charOffset.value() > doc_length:
+            return
+        old_pos = self.caption_cursor_pos
+        current_cursor = self.textEdit.textCursor()
+        current_cursor.setPosition(doc_length - self.caption_dialog.charOffset.value(), QTextCursor.KeepAnchor)
+        # get only up to word before limit
+        current_cursor.movePosition(QTextCursor.PreviousWord)
+        current_cursor.setPosition(old_pos, QTextCursor.KeepAnchor)
+        self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
+        new_text = current_cursor.selectedText()
+        self.cap_worker.intake(new_text)
+        # send text off to caption thread worker queue
+
+    def flush_caption(self):
+        old_pos = self.caption_cursor_pos
+        current_cursor = self.textEdit.textCursor()
+        current_cursor.setPosition(old_pos) 
+        current_cursor.movePosition(QTextCursor.End, QTextCursor.KeepAnchor)
+        new_text = current_cursor.selectedText()
+        self.cap_worker.intake(new_text + "\u2029")
+        self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
+
     # export functions
     def export_text(self):
         selected_folder = pathlib.Path(self.file_name)  / "export"

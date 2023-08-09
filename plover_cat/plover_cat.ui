@@ -276,6 +276,9 @@
     <addaction name="separator"/>
     <addaction name="actionRecordPause"/>
     <addaction name="actionStopRecording"/>
+    <addaction name="separator"/>
+    <addaction name="actionCaptioning"/>
+    <addaction name="actionFlushCaption"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -352,9 +355,15 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
+    <widget class="QMenu" name="menuParagraphStyle">
+     <property name="title">
+      <string>Set Paragraph Style</string>
+     </property>
+    </widget>
     <addaction name="actionStyleFileSelect"/>
     <addaction name="actionCreateNewStyle"/>
     <addaction name="actionGenerateStyleFromTemplate"/>
+    <addaction name="menuParagraphStyle"/>
     <addaction name="actionRefreshEditor"/>
     <addaction name="separator"/>
     <addaction name="actionAutomaticAffixes"/>
@@ -377,10 +386,11 @@
       <string>Index Entry</string>
      </property>
     </widget>
-    <addaction name="actionInsertImage"/>
-    <addaction name="actionInsertNormalText"/>
     <addaction name="menuField"/>
     <addaction name="menuIndexEntry"/>
+    <addaction name="actionInsertImage"/>
+    <addaction name="actionInsertNormalText"/>
+    <addaction name="actionRedact"/>
     <addaction name="separator"/>
     <addaction name="actionEditFields"/>
     <addaction name="actionEditIndices"/>
@@ -797,7 +807,7 @@ position.</string>
         <number>1</number>
        </property>
        <property name="elideMode">
-        <enum>Qt::ElideRight</enum>
+        <enum>Qt::ElideNone</enum>
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
@@ -833,7 +843,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
+              <width>340</width>
               <height>466</height>
              </rect>
             </property>
@@ -1434,7 +1444,7 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-169</y>
+              <y>0</y>
               <width>388</width>
               <height>409</height>
              </rect>
@@ -1796,8 +1806,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>405</width>
-              <height>240</height>
+              <width>277</width>
+              <height>207</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -1986,8 +1996,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>405</width>
-              <height>240</height>
+              <width>251</width>
+              <height>221</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -2188,7 +2198,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
+              <width>165</width>
               <height>283</height>
              </rect>
             </property>
@@ -2366,8 +2376,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>405</width>
-              <height>240</height>
+              <width>219</width>
+              <height>164</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_36">
@@ -3543,6 +3553,27 @@ position.</string>
    </property>
    <property name="toolTip">
     <string>Analyze transcript for common words/n-grams to add to dictionary</string>
+   </property>
+  </action>
+  <action name="actionRedact">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Redact Text</string>
+   </property>
+  </action>
+  <action name="actionCaptioning">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Captioning</string>
+   </property>
+  </action>
+  <action name="actionFlushCaption">
+   <property name="text">
+    <string>Flush Caption</string>
    </property>
   </action>
  </widget>

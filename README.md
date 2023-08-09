@@ -11,6 +11,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
   - autosave transcripts
   - image insertion
   - navigation of heading paragraphs
+  - typing input when Plover is disabled
 
 - steno related features such as:
   - define/delete last untrans

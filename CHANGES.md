@@ -1,6 +1,14 @@
 CHANGES
 
-ver 2.1.1
+Unreleased (ver 2.2.0):
+
+- Change: Style submenu added, now style change shortcuts are visible to user (`Ctrl + {0-9}`) for first ten styles.
+
+- Feature: Keyboard input enabled.
+
+- Feature: Captioning window, with character delay, max line length, and interval.
+
+## Ver 2.1.1 (2023-08-06)
 
 This is a minor revision as most are under the hood changes
 
@@ -26,7 +34,7 @@ This is a minor revision as most are under the hood changes
 
 - Change: gather UI updates into `update_gui` to update every cursor move
 
-ver 2.1.0
+## Ver 2.1.0 (2023-08-02)
 
 This version focuses mainly on "things" to be inserted.
 
@@ -92,7 +100,7 @@ ver 2.0.1
 - Change: `export_srt` now using same `QTextBlock` iterator as other exports, no longer search for block by number
 
 
-ver 2.0.0 
+## Ver 2.0.0 (2023-07-11)
 
 Major change:
 - Custom classes to store stroke data and other text elements within `userData` in the `QTextDocument`
@@ -110,7 +118,7 @@ Major change:
 
 
 
-ver 1.4.2 (2023-02-06)
+## Ver 1.4.2 (2023-02-06)
 
 - Bug: Anodyne reported that setting `after output` or some retroactive commands was throwing errors. This should now be fixed.
 
@@ -129,7 +137,7 @@ ver 1.4.2 (2023-02-06)
 - Change: Online help now has F1 as the default shortcut.
 
 
-ver 1.4.1 (2022-12-30)
+## Ver 1.4.1 (2022-12-30)
 
 - Change: Added status bar messages for importing rtf. When actually parsing rtf file, cursor is set to loading so users know that program is not stuck.
 
@@ -151,7 +159,7 @@ ver 1.4.1 (2022-12-30)
 
 - Bug fix: Thanks @dnaq, [fixed problem](https://github.com/greenwyrt/plover2CAT/pull/1) with type error when interfacing with Qt due to python 3.10 changing extension interface.
 
-ver 1.4.0 (2022-12-19)
+## Ver 1.4.0 (2022-12-19)
 
 - Feature: Rich text editor display
     - Under the hood changes: 
@@ -210,20 +218,20 @@ Only works within paragraphs, not across.
 
 - Change in progress: Moving documentation from user manual to docs file. Organized into tutorials and how to __ articles for now. 
 
-Ver 1.3.0 (2022-11-24)
+## Ver 1.3.0 (2022-11-24)
 
 - Feature: Versioning. Powered by [`dulwich`](https://github.com/jelmer/dulwich/). Versions are made when the transcript is opened, and each time on user save. It is possible to jump back and forth between versions. Only the transcript is modified, the paper tape does not change.
 - Change: Transcripts are now in pretty JSON format. Makes it easy to do `diff` between versions for git users.
 - Bug fix: pull version from one source for "about" dialog and setup.cfg
 - Possible fix for lag, uncertain.
 
-Ver 1.2.2 (2022-11-22):
+## Ver 1.2.2 (2022-11-22):
 - Feature: Context menu (right click) for editing.
 - Change: Made the light gray of selection in paper tape and alternating elements in reveal steno "darkGray" instead.
 - Feature: Spellcheck with the `spylls` library, ability to select from dictionaries in `spellcheck`
 - Bug fix: style setting complains about lack of block data when setting style on new paragraph
 
-Ver 1.2.1 (2022-11-20):
+## Ver 1.2.1 (2022-11-20):
 - Bug fix: Menu bar is now non-native. Otherwise, some menu items might get eaten up on macOS (thanks yann).
 - Bug fix: Reset paragraph now has a critical warning dialog before executing. It will also erase action history for the session.
 - Bug fix: Disable steno actions when no transcript is open. 

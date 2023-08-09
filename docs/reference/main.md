@@ -5,6 +5,7 @@ The main class in Plover2CAT is PloverCATWindow that subclasses `QMainWindow` an
 ## Attributes
 
 - `engine`: holds Plover's `engine` instance
+- `textEdit`: custom instance of `QTextEdit` with custom signals
 - `player`: instance of `QMediaPlayer`
 - `recorder`: instance of `QAudioRecorder`
 - `config`: dict holding transcript configuration
@@ -165,6 +166,8 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - *`delete_scan`*: searches for last untranslated and removes it
 - *`add_autocomplete_item`*: adds selection to `wordlist.json` for autocompletion
 - *`insert_autocomplete`*: autocompletion after selection from dropdown, replaces partial word with full selection
+- `mock_key`: triggered on keypress, inserts keypress unicode only if Plover disabled
+- `mock_bks`: triggered on backspace keypress, mock a deletion only if Plover disabled
 - *`insert_text`*: user dialog to insert pure text, adds blank in steno data
 - `mock_del`: triggered on `Del` keypress, replicates normal `Del` behaviour
 - *`edit_fields`*: calls `fieldDialogWindow` to create and edit user fields, and refreshes existing field elements in text
@@ -224,7 +227,15 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - *`export_rtf`*: exports RTF
 - `import_rtf`: imports RTF
 
+## `textEdit`
 
+`PloverCATEditor` subclasses `QTextEdit` to add a completer, and sends signals when editors receives keystrokes.
+
+Signals:
+- `complete`: sent when user selects autocomplete choice
+- `send_key`: sent when user presses keyboard, but only kep + optional `Shift`, no other modifiers
+- `send_del`: sent when user presses `Delete`
+- `send_bks`: sent when user presses `Backspace`
 
 ## Persistent settings
 

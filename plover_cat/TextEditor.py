@@ -11,8 +11,9 @@ num_keys = [Qt.Key_0, Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5, Qt.Key_6
 
 class PloverCATEditor(QTextEdit):
     complete = pyqtSignal(QModelIndex)
-    ins = pyqtSignal(int)
+    send_key = pyqtSignal(str)
     send_del = pyqtSignal()
+    send_bks = pyqtSignal()
     def __init__(self, widget):
         super().__init__(widget)
         self._completer = None
@@ -54,9 +55,12 @@ class PloverCATEditor(QTextEdit):
             self._completer.setWidget(self)
         super(PloverCATEditor, self).focusInEvent(e)
     def keyPressEvent(self, event):
-        if event.key() in num_keys and event.modifiers() == Qt.ControlModifier:
-            self.ins.emit(event.key())
-        elif event.key() == Qt.Key_Delete:
+        if event.key() == Qt.Key_Delete:
             self.send_del.emit()
+        elif event.key() == Qt.Key_Backspace:
+            self.send_bks.emit()
         else:
+            if event.key() != Qt.Key_Return:
+                if event.modifiers() in [Qt.NoModifier, Qt.ShiftModifier]:
+                    self.send_key.emit(event.text())
             QTextEdit.keyPressEvent(self, event)

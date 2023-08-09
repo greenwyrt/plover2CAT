@@ -32,6 +32,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Import RTF/CRE transcript file](howto/importrtf.md)
 - [Enable autocompletion and add terms](howto/autocompletion.md)
 - [Translate tape files](howto/translatetape.md)
+- [Set up and display captions](howto/captions.md)
 
 ### Configure the editor
 
