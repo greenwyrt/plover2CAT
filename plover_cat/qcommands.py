@@ -195,12 +195,13 @@ class image_insert(QUndoCommand):
 
 class split_steno_par(QUndoCommand):
     """ Splits paragraphs at position in block, and puts steno properly with new textblock """
-    def __init__(self, document, block, position_in_block, space_placement, new_line_stroke):
+    def __init__(self, document, block, position_in_block, space_placement, new_line_stroke, remove_space = True):
         super().__init__()
         self.block = block
         self.position_in_block = position_in_block
         self.document = document
         self.strokes = []
+        self.remove_space = remove_space
         self.space_placement = space_placement
         self.new_line_stroke = automatic_text()
         self.new_line_stroke.from_dict(new_line_stroke.to_json())
@@ -220,7 +221,7 @@ class split_steno_par(QUndoCommand):
         second_data = BlockUserData()
         first_data = update_user_data(first_data, key = "edittime")
         second_data = update_user_data(second_data, key = "edittime")
-        if second_part and self.space_placement == "Before Output":
+        if second_part and self.remove_space and self.space_placement == "Before Output":
             if second_part.starts_with(" "):
                 log.debug("Split: Stripping space from beginning of second piece")
                 second_part.remove_begin(" ")
@@ -270,7 +271,7 @@ class split_steno_par(QUndoCommand):
         for char in self.new_line_stroke.to_text().rstrip("\n"):
             current_cursor.deletePreviousChar()
         # remove the starting space that was removed
-        if self.space_placement == "Before Output":
+        if self.remove_space and self.space_placement == "Before Output":
             current_cursor.insertText(" ")
         restore_data = BlockUserData()
         for key, item in self.block_data.items():

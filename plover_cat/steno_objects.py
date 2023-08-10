@@ -33,7 +33,7 @@ class text_element(UserString):
         return(len(self.data))
     def split(self):
         if self.length() > 1:
-            chunks = wordsep_simple_re.split(self.data)
+            chunks = [c for c in wordsep_simple_re.split(self.data) if c]
             list_chunks = []
             for c in chunks:
                 class_dict = deepcopy(self.__dict__)
@@ -47,6 +47,13 @@ class text_element(UserString):
             new_element = self.__class__()
             new_element.from_dict(class_dict)
             return([new_element])            
+    def __add__(self, other):
+        if type(self) == type(other):
+            data = self.data + other.data
+            time = other.time
+            return(self.__class__(text = data, time = time))
+        else:
+            raise TypeError("Element classes have to match.")
     def __getitem__(self, key):
         class_dict = deepcopy(self.__dict__)
         class_dict["data"] = self.data[key]
@@ -99,6 +106,16 @@ class stroke_text(text_element):
         self.element = "stroke"
         self.stroke = stroke
         self.audiotime = audiotime
+    def __add__(self, other):
+        if self.data.endswith(" ") or other.data.startswith(" "):
+            raise ValueError("Stroke elements should not be combined across word boundaries")
+        if type(self) == type(other):
+            data = self.data + other.data
+            time = other.time
+            stroke = self.stroke + "/" + other.stroke
+            return(self.__class__(stroke = stroke, time = time, text = data))
+        else:
+            raise TypeError("Element classes have to match.")
     def to_rtf(self):
         time_string = datetime.strptime(self.time, "%Y-%m-%dT%H:%M:%S.%f").strftime('%H:%M:%S')      
         string = write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", self.stroke, visible = False, group = True) + self.data
@@ -117,6 +134,8 @@ class image_text(text_element):
         self.path = path
         self.width = width
         self.height = height
+    def __add__(self, other):
+        raise NotImplementedError("Cannot add on image element.")
     def length(self):
         return(1)
     def to_display(self):
@@ -147,6 +166,8 @@ class text_field(text_element):
         self.element = "field"
         self.name = name
         self.user_dict = user_dict
+    def __add__(self, other):
+        raise NotImplementedError("Cannot add on text field element.")
     def length(self):
         return(1)
     def to_json(self):
@@ -195,6 +216,8 @@ class automatic_text(stroke_text):
         self.element = "automatic"
         self.prefix = prefix
         self.suffix = suffix
+    def __add__(self, other):
+        raise NotImplementedError("Cannot add on automatic text element.")
     def __len__(self):
         return(len(self.to_text()))
     def to_text(self):
@@ -230,6 +253,8 @@ class index_text(text_element):
         self.prefix = prefix
         self.description = description
         self.hidden = hidden
+    def __add__(self, other):
+        raise NotImplementedError("Cannot add on index text element.")
     def __len__(self):
         return(len(self.to_text()))
     def length(self):
@@ -575,12 +600,26 @@ class element_collection(UserList):
             track_len -= len(el)
             if track_len < 0:
                 break
-         
-# stroke_data = [text_element(text = "ABC"), stroke_text(stroke = "T-", text = "it "), automatic_text(text = "\n", prefix = "?"), stroke_text(stroke = "EUFS ", text = "I was ")]
-# ex_text = exhibit_text(exhibit_id = "first-exhibit", text = "abc\n")
+    def merge_elements(self):
+        new_ec = []
+        last_el_type = ""
+        for ind, el in enumerate(self.data):
+            if ind == 0:
+                new_ec.append(el)
+                continue
+            try:
+                sum_el = new_ec[-1] + el
+                new_ec[-1] = sum_el
+            except (TypeError, ValueError, NotImplementedError):
+                new_ec.append(el)
+        return(self.__class__(new_ec))
+
+# stroke_data = [text_element(text = "ABC"), stroke_text(stroke = "T-", text = "it "), text_element(text = "2 ", time = "2023-08-09T23:02:26.526"), text_element(text = "3 "), stroke_text(stroke = "EUFS ", text = "I was "), stroke_text(stroke = "TAO", text = "too ")]
+# ex_text = automatic_text(prefix = "Pre", text = "...")
 # stroke_data.append(ex_text)
 
 # stroke_collection = element_collection(stroke_data)
+# stroke_collection.merge_elements()
 # stroke_collection.replace_initial_tab("  ")
 # element_list = stroke_collection.to_json() 
 # el_factory = element_factory()
@@ -613,8 +652,9 @@ class steno_wrapper(textwrap.TextWrapper):
     def _split(self, text):
         # override
         text.remove_end()
+        merged = text.merge_elements()
         chunks = []
-        for el in text.data:
+        for el in merged.data:
             chunks.extend(el.split())
         return chunks
 

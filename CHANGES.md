@@ -10,6 +10,10 @@ Unreleased (ver 2.2.0):
 
 - Bug: `Capture All Steno Output` had not been logging strokes at the same time. Will now log properly based on setting.
 
+- Bug: Multiple empty line strings were not generating the paragraphs needed, ie `\n\n`
+
+- Change: text elements and stroke elements now have `__add__`, other classes raise errors. This is used to collapse like-class elements for steno wrapping.
+
 ## Ver 2.1.1 (2023-08-06)
 
 This is a minor revision as most are under the hood changes

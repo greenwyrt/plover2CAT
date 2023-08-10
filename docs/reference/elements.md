@@ -27,6 +27,7 @@ It has the methods:
 - `__len__`: returns length of string
 - `__getitem__`: returns new instance after deepcopy
 - `__repr__`: representation as `dict`
+- `__add__`: adds together text, and updates time from other
 - `length`: returns length of string, here as placeholder in order to keep consistency with other subclassed elements, the functional length
 - `split`: splits text string on whitespace (re from textwrapper), returns list of elements containing each text piece separately, but same otherwise as original
 - `from_dict`: can populate class using a dict
@@ -49,6 +50,7 @@ It has the additional attributes:
 
 Overriding methods:
 
+- `__add__`: will only combine elements but not across word boundaries (spaces)
 - `to_rtf`
 - `to_display`
 
@@ -65,6 +67,7 @@ It has the additional attributes:
 
 Overriding methods:
 
+- `__add__`: throws error
 - `length`: 1
 - `to_display`
 - `to_odt`    
@@ -82,6 +85,7 @@ It has the additional elements:
 
 Overriding methods:
 
+- `__add__`: throws error
 - `length`: 1
 - `to_json`: do not output `user_field_dict`, no need for a copy of all fields with each element
 - `to_display`:
@@ -107,6 +111,7 @@ It has the additional attributes:
 
 It has the methods:
 
+- `__add__`: throws error
 - *`length`*: the length of the text only, the element's "functional" length
 - `__len__`: returns length of prefix + text + suffix
 - `to_text`: string of prefix + text + suffix
@@ -129,6 +134,10 @@ It has the additional attributes:
     - `indexname`: index that element belongs to
     - `description`: description of the index entry 
     - `hidden`: whether description is hidden or not
+
+Overriding methods:
+
+- `__add__`: throws error
 
 The actual "number" for the exhibit is stored in the `text` attribute. 
 
@@ -167,6 +176,7 @@ This is the container holding a list of elements. It subclasses `UserList` and o
 - `search_text`: text search through `re.finditer`
 - `collection_time`: returns earliest timestamp in collection, or latest if `reverse = True`
 - `replace_initial_tab`: replaces initial tab in place within collection, hardcoded to be only within first 4 chars
+- `merge_elements`: collapses collection elements using `_add__` method of elements in try-except
 
 ### Usage
 

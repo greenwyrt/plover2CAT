@@ -2058,10 +2058,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     stroke.audiotime = real_time
                 if self.recorder.state() == QMediaRecorder.RecordingState: 
                     stroke.audiotime = real_time
-                insert_cmd = steno_insert(current_document, self.cursor_block, self.cursor_block_position, stroke)
-                self.undo_stack.push(insert_cmd)
-                if (segment != list_segments[-1]) or (len(list_segments) == 1):
-                    self.split_paragraph()
+                if len(stroke) != 0:
+                    insert_cmd = steno_insert(current_document, self.cursor_block, self.cursor_block_position, stroke)
+                    self.undo_stack.push(insert_cmd)
+                if (i != (len(list_segments) - 1)) or (len(list_segments) == 1) or segment == "\n":
+                    self.split_paragraph(remove_space = False)
                 current_cursor = self.textEdit.textCursor()
                 # update cursor position for next loop
                 self.cursor_block = current_cursor.blockNumber()
@@ -2092,7 +2093,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.document().setModified(True)
         self.statusBar.clearMessage()
 
-    def split_paragraph(self):
+    def split_paragraph(self, remove_space = True):
         current_document = self.textEdit
         current_cursor = current_document.textCursor()
         self.cursor_block = current_cursor.blockNumber()
@@ -2100,7 +2101,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         new_line_stroke = stroke_text(stroke = "R-R", text = "\n")
         if self.config["enable_automatic_affix"]:
             new_line_stroke = self.add_end_auto_affix(new_line_stroke, current_cursor.block().userData()["style"])
-        split_cmd = split_steno_par(self.textEdit, self.cursor_block, self.cursor_block_position, self.config["space_placement"], new_line_stroke)
+        split_cmd = split_steno_par(self.textEdit, self.cursor_block, self.cursor_block_position, self.config["space_placement"], new_line_stroke, remove_space)
         self.undo_stack.push(split_cmd)
 
     def merge_paragraphs(self, add_space = True):
@@ -2114,6 +2115,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def copy_steno(self):
         log.debug("Performing copying.")
         current_cursor = self.textEdit.textCursor()
+        print(current_cursor.block().userData()["strokes"].merge_elements())
         if not current_cursor.hasSelection():
             log.debug("No text selected for copying, skipping")
             self.statusBar.showMessage("Select text for copying")
