@@ -8,6 +8,8 @@ Unreleased (ver 2.2.0):
 
 - Feature: Captioning window, with character delay, max line length, and interval.
 
+- Bug: `Capture All Steno Output` had not been logging strokes at the same time. Will now log properly based on setting.
+
 ## Ver 2.1.1 (2023-08-06)
 
 This is a minor revision as most are under the hood changes

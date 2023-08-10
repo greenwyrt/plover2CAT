@@ -1730,9 +1730,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.last_backspaces_sent = backspace
 
     def log_to_tape(self, stroke):
-        # logging stroke code
-        # do not log if not "typing" into window
-        if not self.textEdit.isActiveWindow():
+        # need file to output to
+        if not self.file_name:
+            return
+        if not self.engine.output and self.engine._machine_params.type == "Keyboard":
+            return
+        # if window inactive, and not capturing everything, and not enabled, don't do anything
+        # print(self.textEdit.isActiveWindow())
+        if not self.textEdit.isActiveWindow() and not self.actionCaptureAllOutput.isChecked():
             return
         ## copy from parts of plover paper tape and tapeytape
         keys = set()
@@ -1946,9 +1951,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     def on_stroke(self, stroke_pressed):
         self.editorCheck.setChecked(True)
-        # if not self.engine.output:
-        #     return
         if not self.file_name:
+            return
+        if not self.engine.output:
             return
         # do nothing if window not in focus
         if not self.textEdit.isActiveWindow() and not self.actionCaptureAllOutput.isChecked():
