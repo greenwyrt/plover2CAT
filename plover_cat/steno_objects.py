@@ -48,12 +48,14 @@ class text_element(UserString):
             new_element.from_dict(class_dict)
             return([new_element])            
     def __add__(self, other):
-        if type(self) == type(other):
+        if type(other) == type(self):
             data = self.data + other.data
             time = other.time
             return(self.__class__(text = data, time = time))
         else:
-            raise TypeError("Element classes have to match.")
+            return NotImplemented
+    def __radd__(self, other):
+        return NotImplemented
     def __getitem__(self, key):
         class_dict = deepcopy(self.__dict__)
         class_dict["data"] = self.data[key]
@@ -108,14 +110,33 @@ class stroke_text(text_element):
         self.audiotime = audiotime
     def __add__(self, other):
         if self.data.endswith(" ") or other.data.startswith(" "):
-            raise ValueError("Stroke elements should not be combined across word boundaries")
-        if type(self) == type(other):
+            raise ValueError("Elements should not be combined across word boundaries")
+        if type(other) == type(self):
             data = self.data + other.data
             time = other.time
             stroke = self.stroke + "/" + other.stroke
-            return(self.__class__(stroke = stroke, time = time, text = data))
+            audiotime = other.audiotime
+            return(self.__class__(stroke = stroke, time = time, text = data, audiotime = audiotime))
+        elif type(other) == text_element:
+            data = self.data + other.data
+            time = other.time
+            stroke = self.stroke
+            audiotime = self.audiotime
+            return(self.__class__(stroke = stroke, time = time, text = data, audiotime = audiotime))            
         else:
-            raise TypeError("Element classes have to match.")
+            raise TypeError("Stroke elements can only combine with other stroke or text elements.")
+    def __radd__(self, other):
+        if self.data.startswith(" ") or other.data.endswith(" "):
+            raise ValueError("Elements should not be combined across word boundaries")        
+        if isinstance(other, text_element):
+            data = other.data + self.data
+            time = self.time
+            stroke = self.stroke
+            audiotime = self.audiotime
+            return(self.__class__(stroke = stroke, time = time, text = data, audiotime = audiotime))
+        else:
+            return NotImplemented
+            # raise TypeError("Stroke elements can only combine with other stroke or text elements.")
     def to_rtf(self):
         time_string = datetime.strptime(self.time, "%Y-%m-%dT%H:%M:%S.%f").strftime('%H:%M:%S')      
         string = write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", self.stroke, visible = False, group = True) + self.data
@@ -135,7 +156,8 @@ class image_text(text_element):
         self.width = width
         self.height = height
     def __add__(self, other):
-        raise NotImplementedError("Cannot add on image element.")
+        return NotImplemented
+        # raise NotImplementedError("Cannot add on image element.")
     def length(self):
         return(1)
     def to_display(self):
@@ -167,7 +189,8 @@ class text_field(text_element):
         self.name = name
         self.user_dict = user_dict
     def __add__(self, other):
-        raise NotImplementedError("Cannot add on text field element.")
+        return NotImplemented
+        # raise NotImplementedError("Cannot add on text field element.")
     def length(self):
         return(1)
     def to_json(self):
@@ -217,7 +240,10 @@ class automatic_text(stroke_text):
         self.prefix = prefix
         self.suffix = suffix
     def __add__(self, other):
-        raise NotImplementedError("Cannot add on automatic text element.")
+        return NotImplemented
+        # raise NotImplementedError("Cannot add on automatic text element.")
+    def __radd__(self, other):
+        return NotImplemented
     def __len__(self):
         return(len(self.to_text()))
     def to_text(self):
@@ -254,7 +280,8 @@ class index_text(text_element):
         self.description = description
         self.hidden = hidden
     def __add__(self, other):
-        raise NotImplementedError("Cannot add on index text element.")
+        return NotImplemented
+        # raise NotImplementedError("Cannot add on index text element.")
     def __len__(self):
         return(len(self.to_text()))
     def length(self):
@@ -615,7 +642,7 @@ class element_collection(UserList):
         return(self.__class__(new_ec))
 
 # stroke_data = [text_element(text = "ABC"), stroke_text(stroke = "T-", text = "it "), text_element(text = "2 ", time = "2023-08-09T23:02:26.526"), text_element(text = "3 "), stroke_text(stroke = "EUFS ", text = "I was "), stroke_text(stroke = "TAO", text = "too ")]
-# ex_text = automatic_text(prefix = "Pre", text = "...")
+# ex_text = index_text(description = "index descript", text = "index name")
 # stroke_data.append(ex_text)
 
 # stroke_collection = element_collection(stroke_data)

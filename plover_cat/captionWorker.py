@@ -44,7 +44,7 @@ class captionWorker(QObject):
             else:
                 self.cap_line += self.next_word
     def send_cap(self):
-        print(f"queue size {self.cap_queue.qsize()}.")
+        # print(f"queue size {self.cap_queue.qsize()}.")
         try:
             cap, time = self.cap_queue.get_nowait()
             self.capSend.emit(cap)

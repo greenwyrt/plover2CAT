@@ -69,6 +69,9 @@
        <property name="toolTip">
         <string>Optional, only display this number of lines in caption window</string>
        </property>
+       <property name="value">
+        <number>2</number>
+       </property>
       </widget>
      </item>
      <item row="5" column="0">

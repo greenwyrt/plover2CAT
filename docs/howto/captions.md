@@ -2,6 +2,8 @@
 
 Plover2CAT can display input text in a separate window as captions.
 
+![Gif showing captioning.](images/caption_example.gif)
+
 ## Caption set up
 
 Click `Audiovisual > Captioning` to activate the captioning settings dialog, use or set the settings below, and then click `OK`.

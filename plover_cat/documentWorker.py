@@ -529,5 +529,4 @@ class documentWorker(QObject):
         with open(file_path, "w", encoding="utf-8") as f:
             for line in doc_lines:
                 f.write(f"{line}\n")
-            # self.statusBar.showMessage("Exported in srt format")
         self.finished.emit()

@@ -28,6 +28,7 @@ It has the methods:
 - `__getitem__`: returns new instance after deepcopy
 - `__repr__`: representation as `dict`
 - `__add__`: adds together text, and updates time from other
+- `__radd__`: returns `NotImplemented`
 - `length`: returns length of string, here as placeholder in order to keep consistency with other subclassed elements, the functional length
 - `split`: splits text string on whitespace (re from textwrapper), returns list of elements containing each text piece separately, but same otherwise as original
 - `from_dict`: can populate class using a dict
@@ -50,7 +51,8 @@ It has the additional attributes:
 
 Overriding methods:
 
-- `__add__`: will only combine elements but not across word boundaries (spaces)
+- `__add__`: will only combine elements but not across word boundaries (spaces), can accept `stroke_text` and `text_element`
+- `__radd__`: works with `text_element` addition properly, `NotImplemented` otherwise
 - `to_rtf`
 - `to_display`
 
@@ -67,7 +69,7 @@ It has the additional attributes:
 
 Overriding methods:
 
-- `__add__`: throws error
+- `__add__`: `NotImplemented`
 - `length`: 1
 - `to_display`
 - `to_odt`    
@@ -85,7 +87,7 @@ It has the additional elements:
 
 Overriding methods:
 
-- `__add__`: throws error
+- `__add__`: `NotImplemented`
 - `length`: 1
 - `to_json`: do not output `user_field_dict`, no need for a copy of all fields with each element
 - `to_display`:
@@ -111,7 +113,8 @@ It has the additional attributes:
 
 It has the methods:
 
-- `__add__`: throws error
+- `__add__`: `NotImplemented`
+- `__radd__`: `NotImplemented`, overrides `__radd__` from `stroke_text`
 - *`length`*: the length of the text only, the element's "functional" length
 - `__len__`: returns length of prefix + text + suffix
 - `to_text`: string of prefix + text + suffix
@@ -137,11 +140,15 @@ It has the additional attributes:
 
 Overriding methods:
 
-- `__add__`: throws error
+- `__add__`: `NotImplemented`
 
 The actual "number" for the exhibit is stored in the `text` attribute. 
 
 Has non-breaking space in `to_text` so that "prefix" and "number" are always together even for text formats.
+
+## Combining elements
+
+Only strictly text and stroke elements can be combined through `__add__` and `__radd__`, ie while `automatic_text` subclasses `stroke_text`, the two should not be combined. This is primarily for the use of collapsing elements into word chunks, as `pre` and `pare ` may be two stroke elements, but should be treated as one for wrapping, otherwise, steno wrapping may wrap in unwanted places.
 
 ## element_collection
 

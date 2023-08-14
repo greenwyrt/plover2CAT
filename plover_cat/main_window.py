@@ -207,6 +207,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionShowVideo.triggered.connect(lambda: self.show_hide_video())
         self.actionCaptioning.triggered.connect(self.setup_captions)
         self.actionFlushCaption.triggered.connect(self.flush_caption)
+        self.actionAddChangeAudioTimestamps.triggered.connect(self.modify_audiotime)
         ## editor related connections
         self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
         self.textEdit.complete.connect(self.insert_autocomplete)
@@ -648,7 +649,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     # open/close/save
     def create_new(self):
         self.mainTabs.setCurrentIndex(1)
-        ## make new dir, sets gui input
         project_dir = QFileDialog.getExistingDirectory(self, "Select Directory", plover.oslayer.config.CONFIG_DIR)
         if not project_dir:
             log.debug("No directory selected, not creating transcript folder.")
@@ -708,7 +708,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.setCurrentCharFormat(self.txt_formats[self.style_selector.currentText()]) 
         self.textEdit.setTextCursor(document_cursor) 
         self.textEdit.document().setDefaultFont(self.txt_formats[self.style_selector.currentText()].font())
-        self.undo_stack.clear()       
+        self.undo_stack.clear()  
+        self.parent().setWindowTitle(f"Plover2CAT - {str(self.file_name.stem)}") 
 
     def open_file(self, file_path = ""):
         self.mainTabs.setCurrentIndex(1)
@@ -797,7 +798,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             document_cursor.setBlockFormat(self.par_formats[self.style_selector.currentText()])
             document_cursor.setCharFormat(self.txt_formats[self.style_selector.currentText()])  
             self.textEdit.document().setDefaultFont(self.txt_formats[self.style_selector.currentText()].font())
-        self.undo_stack.clear()            
+        self.undo_stack.clear() 
+        self.parent().setWindowTitle(f"Plover2CAT - {str(self.file_name.stem)}") 
 
     def save_file(self):
         if not self.file_name:
@@ -828,7 +830,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 if block.userData():
                     block_dict = deepcopy(block.userData().return_all())
                 else:
-                    return
+                    return False
                 block_num = block.blockNumber()
                 # print(f"Paragraph {block_num} changed.")
                 block_dict["strokes"] = block_dict["strokes"].to_json()
@@ -844,6 +846,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 json_document.pop(str(num), None)
         save_json(json_document, path)
         QApplication.restoreOverrideCursor()
+        return True
 
     def dulwich_save(self, message = "autosave"):
         self.statusBar.showMessage("Saving versioned copy.")
@@ -1015,11 +1018,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         transcript = pathlib.Path(transcript)
         if transcript.exists():
             transcript.unlink()
-        self.save_transcript(transcript)       
-        if os.name == "nt":
+        save_res = self.save_transcript(transcript)       
+        if save_res and os.name == "nt":
             # hide file on windows systems
             hide_file(str(transcript))
-        self.statusBar.showMessage("Autosave complete.")  
+            self.statusBar.showMessage("Autosave complete.")  
 
     def close_file(self):
         if not self.undo_stack.isClean():
@@ -1057,6 +1060,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.parSteno.clear()
         self.autosave_time.stop()
         self.statusBar.showMessage("Project closed")
+        self.parent()._update_title()
         return True
 
     def action_close(self):
@@ -2506,19 +2510,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if len(self.textEdit.toPlainText()) == 0:
             return
         while True:
-            block_strokes = block.userData()["strokes"]
-            for ind, el in enumerate(block_strokes.data):
-                # print(ind)
-                if el.element == "index":
-                    if el.indexname not in index_dict:
-                        index_dict[el.indexname] = {}
-                    if "prefix" not in index_dict[el.indexname]:
-                        index_dict[el.indexname]["prefix"] = el.prefix
-                    if "hidden" not in index_dict[el.indexname]:
-                        index_dict[el.indexname]["hidden"] = el.hidden
-                    if "entries" not in index_dict[el.indexname]:
-                        index_dict[el.indexname]["entries"] = {}
-                    index_dict[el.indexname]["entries"][el.data] = el.description
+            # print(block.blockNumber())
+            if block.userData():
+                block_strokes = block.userData()["strokes"]
+                for ind, el in enumerate(block_strokes.data):
+                    # print(ind)
+                    if el.element == "index":
+                        if el.indexname not in index_dict:
+                            index_dict[el.indexname] = {}
+                        if "prefix" not in index_dict[el.indexname]:
+                            index_dict[el.indexname]["prefix"] = el.prefix
+                        if "hidden" not in index_dict[el.indexname]:
+                            index_dict[el.indexname]["hidden"] = el.hidden
+                        if "entries" not in index_dict[el.indexname]:
+                            index_dict[el.indexname]["entries"] = {}
+                        index_dict[el.indexname]["entries"][el.data] = el.description
             if block == self.textEdit.document().lastBlock():
                 break
             block = block.next()
@@ -3042,7 +3048,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 self.thread.started.connect(self.cap_worker.make_caps)
                 self.cap_worker.finished.connect(self.thread.quit)
                 self.cap_worker.finished.connect(self.cap_worker.deleteLater)
-                self.thread.finished.connect(self.thread.deleteLater)
+                # self.thread.finished.connect(self.thread.deleteLater)
                 self.cap_worker.capSend.connect(self.add_cap)
                 self.cap_worker.postMessage.connect(self.statusBar.showMessage)
                 self.thread.start()
@@ -3079,6 +3085,19 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cap_worker.intake(new_text + "\u2029")
         self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
 
+    def modify_audiotime(self):
+        block = self.textEdit.document().begin()
+        times = []
+        for i in range(self.textEdit.document().blockCount()):
+            if block.userData():
+                times.append(block.userData["creationtime"])
+                block_time = block.userData()["strokes"].collection_time()
+                times.append(block_time)
+            if block == self.textEdit.document().lastBlock():
+                break                
+            block = block.next()
+        earliest =  min([t for t in times if t])
+        print(earliest)
     # export functions
     def export_text(self):
         selected_folder = pathlib.Path(self.file_name)  / "export"
@@ -3127,8 +3146,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.progress.connect(self.progressBar.setValue)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.thread.finished.connect(lambda: self.statusBar.showMessage("Exported in ASCII format."))
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in ASCII format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start() 
 
     def export_html(self):
@@ -3159,8 +3178,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.progress.connect(self.progressBar.setValue)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.thread.finished.connect(lambda: self.statusBar.showMessage("Exported in HTML format."))
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in HTML format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()          
 
     def export_plain_ascii(self):
@@ -3190,8 +3209,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.progress.connect(self.progressBar.setValue)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.thread.finished.connect(lambda: self.statusBar.showMessage("Exported in plain ASCII format."))
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in plain ASCII format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()        
 
     def export_srt(self):
@@ -3227,8 +3246,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.progress.connect(self.progressBar.setValue)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.thread.finished.connect(lambda: self.statusBar.showMessage("Exported in srt format."))
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in srt format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
         
     def export_odt(self):   
@@ -3259,8 +3278,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.progress.connect(self.progressBar.setValue)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.thread.finished.connect(lambda: self.statusBar.showMessage("Exported in Open Document Format."))
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in Open Document Format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
     # import rtf
     def import_rtf(self):
@@ -3353,7 +3372,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.progress.connect(self.progressBar.setValue)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.thread.finished.connect(lambda: self.statusBar.showMessage("Exported in RTF/CRE format."))
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in RTF/CRE format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 

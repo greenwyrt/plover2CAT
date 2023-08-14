@@ -1,6 +1,6 @@
 CHANGES
 
-Unreleased (ver 2.2.0):
+# Ver 2.2.0 (2023-08-13)
 
 - Change: Style submenu added, now style change shortcuts are visible to user (`Ctrl + {0-9}`) for first ten styles.
 
@@ -12,7 +12,11 @@ Unreleased (ver 2.2.0):
 
 - Bug: Multiple empty line strings were not generating the paragraphs needed, ie `\n\n`
 
-- Change: text elements and stroke elements now have `__add__`, other classes raise errors. This is used to collapse like-class elements for steno wrapping.
+- Change: text elements and stroke elements now have `__add__` and `__radd__`, other classes raise errors. This is used to collapse like-class elements for steno wrapping.
+
+- Change: Window titlebar now updates with transcript name when transcript is opened.
+
+- Bug: removed thread deletion from `export_*` as before, a second export would crash.
 
 ## Ver 2.1.1 (2023-08-06)
 

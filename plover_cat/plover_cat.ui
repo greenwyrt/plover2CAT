@@ -279,6 +279,8 @@
     <addaction name="separator"/>
     <addaction name="actionCaptioning"/>
     <addaction name="actionFlushCaption"/>
+    <addaction name="separator"/>
+    <addaction name="actionAddChangeAudioTimestamps"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -347,6 +349,8 @@
     <addaction name="actionCursorAtEnd"/>
     <addaction name="actionCaptureAllOutput"/>
     <addaction name="actionTranslateTape"/>
+    <addaction name="separator"/>
+    <addaction name="actionMassTimestampChange"/>
    </widget>
    <widget class="QMenu" name="menuStyling">
     <property name="title">
@@ -843,7 +847,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>340</width>
+              <width>388</width>
               <height>466</height>
              </rect>
             </property>
@@ -1806,8 +1810,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>277</width>
-              <height>207</height>
+              <width>405</width>
+              <height>240</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -1996,8 +2000,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>251</width>
-              <height>221</height>
+              <width>405</width>
+              <height>240</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -2198,7 +2202,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>165</width>
+              <width>388</width>
               <height>283</height>
              </rect>
             </property>
@@ -2376,8 +2380,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>219</width>
-              <height>164</height>
+              <width>405</width>
+              <height>240</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_36">
@@ -3574,6 +3578,22 @@ position.</string>
   <action name="actionFlushCaption">
    <property name="text">
     <string>Flush Caption</string>
+   </property>
+  </action>
+  <action name="actionMassTimestampChange">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Mass Timestamp Change</string>
+   </property>
+  </action>
+  <action name="actionAddChangeAudioTimestamps">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Add/Change All Audio Timestamps</string>
    </property>
   </action>
  </widget>
