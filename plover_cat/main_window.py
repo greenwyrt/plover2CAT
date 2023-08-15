@@ -447,9 +447,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         settings = QSettings("Plover2CAT", "OpenCAT")
         recent_file_paths = settings.value("recentfiles", [])
         for dir_path in recent_file_paths:
-            label = pathlib.Path(dir_path).stem
+            transcript_path = pathlib.Path(dir_path)
+            if not transcript_path.exists():
+                continue
+            label = transcript_path.stem
             action = QAction(label, self.menuRecentFiles)
             action.setData(dir_path)
+            action.setToolTip(dir_path)
             self.menuRecentFiles.addAction(action)
             tb = QToolButton()
             icon = QtGui.QIcon()
@@ -459,6 +463,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             tb.setIconSize(QSize(32, 32))
             tb.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
             tb.setAutoRaise(True)
+            tb.setToolTip(dir_path)
             self.recentfileflow.addWidget(tb)
 
     def setup_completion(self, checked):
@@ -823,7 +828,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage("Saving transcript data.")
         block = self.textEdit.document().begin()
         status = 0
-        while True:
+        for i in range(self.textEdit.document().blockCount()):
             if block.userState() == 1:
                 status = 1
             if status == 1:
@@ -832,7 +837,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 else:
                     return False
                 block_num = block.blockNumber()
-                # print(f"Paragraph {block_num} changed.")
                 block_dict["strokes"] = block_dict["strokes"].to_json()
                 json_document[str(block_num)] = block_dict
                 block.setUserState(-1)
@@ -1095,8 +1099,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         except ValueError:
             pass  
         recent_file_paths.insert(0, path)
-        # print(recent_file_paths)
-        # only remember last ten
+        deleted = []
+        for dir_path in recent_file_paths:
+            if not pathlib.Path(dir_path).exists():
+                deleted.append(dir_path)
+        for remove_path in deleted:
+            recent_file_paths.remove(remove_path)
         del recent_file_paths[10:]
         settings.setValue("recentfiles", recent_file_paths)
         self.recent_file_menu()

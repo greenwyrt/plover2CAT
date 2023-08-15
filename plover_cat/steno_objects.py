@@ -17,10 +17,6 @@ _whitespace = '\u2029\t\n\x0b\x0c\r '
 whitespace = r'[%s]' % re.escape(_whitespace)
 wordsep_simple_re = re.compile(r'(%s+)' % whitespace)
 
-# display letters: s for stroke, t for text, i for image, 
-# sa for auto, c for conflict, f for field
-# x for "index"/references, e for exhibit
-
 class text_element(UserString):
     """
     base class, only text

@@ -1,6 +1,10 @@
-CHANGES
+# CHANGES
 
-# Ver 2.2.0 (2023-08-13)
+## Ver 2.2.1 Unreleased
+
+- Bug: deleted transcripts still in recent, remove from recent files menu if transcript no longer exists.
+
+## Ver 2.2.0 (2023-08-13)
 
 - Change: Style submenu added, now style change shortcuts are visible to user (`Ctrl + {0-9}`) for first ten styles.
 
