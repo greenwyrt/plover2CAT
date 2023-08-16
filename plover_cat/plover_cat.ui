@@ -216,6 +216,7 @@
      <addaction name="actionSubRip"/>
      <addaction name="actionODT"/>
      <addaction name="actionRTF"/>
+     <addaction name="actionTape"/>
     </widget>
     <widget class="QMenu" name="menuRecentFiles">
      <property name="title">
@@ -3594,6 +3595,14 @@ position.</string>
    </property>
    <property name="text">
     <string>Add/Change All Audio Timestamps</string>
+   </property>
+  </action>
+  <action name="actionTape">
+   <property name="text">
+    <string>Paper Tape (*.tape)</string>
+   </property>
+   <property name="toolTip">
+    <string>Exports only the strokes from paper tape</string>
    </property>
   </action>
  </widget>

@@ -297,6 +297,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionSubRip.triggered.connect(lambda: self.export_srt())
         self.actionODT.triggered.connect(lambda: self.export_odt())
         self.actionRTF.triggered.connect(lambda: self.export_rtf())
+        self.actionTape.triggered.connect(lambda: self.export_tape())
         # help
         self.actionUserManual.triggered.connect(lambda: self.open_help())
         self.actionAbout.triggered.connect(lambda: self.about())
@@ -3126,6 +3127,25 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         with open(file_path, "w") as f:
             f.write(contents)
             self.statusBar.showMessage("Exported in plain text format")
+
+    def export_tape(self):
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".tape"))
+            , _("Tape (*.tape)")
+        )
+        if not selected_file[0]:
+            return
+        tape_contents = self.strokeList.document().toPlainText()
+        tape_lines = tape_contents.splitlines()
+        doc_lines = []
+        for line in tape_lines:
+            doc_lines.append(line.split("|")[3])
+        with open(selected_file[0], "w", encoding = "utf-8") as f:
+            for line in doc_lines:
+                f.write(f"{line}\n")
 
     def export_ascii(self):
         selected_folder = pathlib.Path(self.file_name) / "export"
