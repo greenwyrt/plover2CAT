@@ -15,11 +15,9 @@ class captionDialogWindow(QDialog, Ui_captionDialog):
         if index != 2:
             self.serverPort.setEnabled(False)
             self.serverPassword.setEnabled(False)
-            self.hostURL.setEnabled(True)
         else:
             self.serverPort.setEnabled(True)
-            self.serverPassword.setEnabled(True)
-            self.hostURL.setEnabled(False)            
+            self.serverPassword.setEnabled(True)           
     def set_font(self):
         font, ok = QFontDialog.getFont(self.font, self)
         if ok:

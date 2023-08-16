@@ -19,7 +19,7 @@ class captionWorker(QObject):
         self.port = port
         self.password = password
         if self.port:
-            self.obs = obs.ReqClient(host='localhost', port=self.port, password=self.password, timeout=3) 
+            self.obs = obs.ReqClient(host=self.endpoint, port=self.port, password=self.password, timeout=3) 
         self.word_queue = Queue()
         self.cap_queue = Queue()
         self.cap_timer = QTimer()
@@ -89,5 +89,7 @@ class captionWorker(QObject):
             # print(err.code)
             self.postMessage.emit(f"Captioning: send to Zoom failed with error code {err.code}.")  
     def send_obs(self, cap):
-        print("obs")
-        res = self.obs.send_stream_caption(cap)
+        try:
+            res = self.obs.send_stream_caption(cap)
+        except OBSSDKRequestError as err:
+            self.postMessage.emit(f"Captioning: send to OBS failed with error code {err.code}")

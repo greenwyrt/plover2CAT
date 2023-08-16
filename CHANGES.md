@@ -1,6 +1,10 @@
 # CHANGES
 
-## Ver 2.2.1 Unreleased
+## Ver 2.2.2
+
+- Feature: Add OBS captioning through `obsws-python`
+
+## Ver 2.2.1 
 
 - Bug: deleted transcripts still in recent, remove from recent files menu if transcript no longer exists.
 
