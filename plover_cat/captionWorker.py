@@ -4,16 +4,22 @@ from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 from queue import Queue, Empty
 from plover_cat.steno_objects import wordsep_simple_re
 from datetime import datetime
+import obsws_python as obs
+
 class captionWorker(QObject):
     capSend = pyqtSignal(str)
     finished = pyqtSignal()
     postMessage = pyqtSignal(str)
-    def __init__(self, max_length = None, word_delay = None, time_delay = 1000, remote = None, endpoint = None):
+    def __init__(self, max_length = None, word_delay = None, time_delay = 1000, remote = None, endpoint = None, port = None, password = None):
         QObject.__init__(self)
         self.word_delay = word_delay
         self.max_length = max_length
         self.remote = remote
         self.endpoint = endpoint
+        self.port = port
+        self.password = password
+        if self.port:
+            self.obs = obs.ReqClient(host=self.endpoint, port=self.port, password=self.password, timeout=3) 
         self.word_queue = Queue()
         self.cap_queue = Queue()
         self.cap_timer = QTimer()
@@ -21,7 +27,7 @@ class captionWorker(QObject):
         self.cap_timer.timeout.connect(self.send_cap)
         self.cap_line = ""
         self.next_word = "" 
-        self.zoom_seq = 1   
+        self.zoom_seq = 1
     def intake(self, text):
         text_time = datetime.now()
         chunks = [i for i in wordsep_simple_re.split(text) if i]
@@ -53,11 +59,10 @@ class captionWorker(QObject):
                     self.send_msteams(cap)
                 elif self.remote == "Zoom":
                     self.send_zoom(cap)
+            if self.remote == "OBS":
+                self.send_obs(cap)
         except Empty:
             pass
-        # if not self.cap_queue.empty():
-        #     cap, time = self.cap_queue.get()
-        #     self.capSend.emit(cap)
     def clean_and_stop(self):
         self.cap_timer.stop()
         self.finished.emit()
@@ -82,4 +87,9 @@ class captionWorker(QObject):
             r = request.urlopen(req)
         except HTTPError as err:
             # print(err.code)
-            self.postMessage.emit(f"Captioning: send to Zoom failed with error code {err.code}.")        
+            self.postMessage.emit(f"Captioning: send to Zoom failed with error code {err.code}.")  
+    def send_obs(self, cap):
+        try:
+            res = self.obs.send_stream_caption(cap)
+        except OBSSDKRequestError as err:
+            self.postMessage.emit(f"Captioning: send to OBS failed with error code {err.code}")

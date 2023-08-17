@@ -44,6 +44,18 @@ At certain times, such as when captions are ending, or there is a long pause, so
 
 ## Remote captions
 
-Plover2CAT can send captions to Microsoft Teams and Zoom APIs. Follow the service's instructions to obtain the URL/API token to paste into the Captioning Settings dialog.
+Plover2CAT can send captions to Microsoft Teams and Zoom APIs and to OBS if WebSocket is enabled. 
+
+
+### Teams/Zoom Setup
+
+For Teams/Zoom, follow the respctive service's instructions to obtain the remote URL/API token to paste into the Captioning Settings dialog.
+
+### OBS Setup
+
+Captioning to OBS is provided by the `obsws-python` project.
+
+There has to be an existing OBS instance with WebSocket enabled. Three pieces of information are needed for the setup, the host URL, the port, and the password. If this is a local instance, the remote URL/API can be set as `localhost`.
 
 If Plover2CAT receives a failed response code, the code will appear in the status bar at the bottom.
+

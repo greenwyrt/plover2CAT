@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>413</width>
-    <height>205</height>
+    <width>555</width>
+    <height>213</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,6 +54,25 @@
       <widget class="QLabel" name="label_8">
        <property name="text">
         <string>Time delay between lines:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="delayTime">
+       <property name="toolTip">
+        <string>Leave at this many milliseconds between captions</string>
+       </property>
+       <property name="suffix">
+        <string>ms</string>
+       </property>
+       <property name="maximum">
+        <number>10000</number>
+       </property>
+       <property name="singleStep">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>1000</number>
        </property>
       </widget>
      </item>
@@ -113,12 +132,17 @@
          <string>Zoom</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>OBS</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item row="7" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>POST to:</string>
+        <string>Remote URL/Token:</string>
        </property>
       </widget>
      </item>
@@ -129,22 +153,34 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QSpinBox" name="delayTime">
-       <property name="toolTip">
-        <string>Leave at this many milliseconds between captions</string>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Port:</string>
        </property>
-       <property name="suffix">
-        <string>ms</string>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLineEdit" name="serverPort">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
-       <property name="maximum">
-        <number>10000</number>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Password:</string>
        </property>
-       <property name="singleStep">
-        <number>100</number>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QLineEdit" name="serverPassword">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
-       <property name="value">
-        <number>1000</number>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
        </property>
       </widget>
      </item>
