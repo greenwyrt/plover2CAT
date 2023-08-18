@@ -52,6 +52,7 @@ from plover_cat.constants import *
 from plover_cat.qcommands import *
 from plover_cat.helpers import * 
 from plover_cat.steno_objects import *
+from plover_cat.spellcheck import *
 from plover_cat.export_helpers import * 
 from plover_cat.FlowLayout import FlowLayout
 from plover_cat.documentWorker import documentWorker
@@ -1754,6 +1755,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         ## copy from parts of plover paper tape and tapeytape
         keys = set()
+        # possibilities = edit(stroke.steno_keys) 
+        # print(len(possibilities))
+        # suggest = [self.engine.lookup((c,)) for c in possibilities]
+        # print([s for s in suggest if s])
         for key in stroke.steno_keys:
             if key in self.numbers:
                 keys.add(self.numbers[key])
