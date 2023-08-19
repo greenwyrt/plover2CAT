@@ -245,6 +245,8 @@
      <bool>true</bool>
     </property>
     <addaction name="actionFindReplacePane"/>
+    <addaction name="actionSpellcheck"/>
+    <addaction name="actionStenoSearch"/>
     <addaction name="separator"/>
     <addaction name="actionCopy"/>
     <addaction name="actionCut"/>
@@ -809,7 +811,7 @@ position.</string>
         <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>6</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -2487,6 +2489,71 @@ position.</string>
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="stenospell_pane">
+        <attribute name="icon">
+         <iconset resource="resources/resources.qrc">
+          <normaloff>:/spell-check-error.png</normaloff>:/spell-check-error.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Steno Search</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_14">
+         <item>
+          <widget class="QScrollArea" name="scrollArea_7">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents_7">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>405</width>
+              <height>240</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_16">
+               <item>
+                <widget class="QLabel" name="label_40">
+                 <property name="text">
+                  <string>Outline:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="steno_outline">
+                 <property name="focusPolicy">
+                  <enum>Qt::ClickFocus</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="steno_search">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="text">
+                  <string>Search</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QListWidget" name="stenospell_res">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -3052,7 +3119,7 @@ position.</string>
      <normaloff>:/magnifier.png</normaloff>:/magnifier.png</iconset>
    </property>
    <property name="text">
-    <string>Find/Replace Pane</string>
+    <string>Find/Replace</string>
    </property>
    <property name="toolTip">
     <string>Open Find/Replace Pane if hidden</string>
@@ -3603,6 +3670,24 @@ position.</string>
    </property>
    <property name="toolTip">
     <string>Exports only the strokes from paper tape</string>
+   </property>
+  </action>
+  <action name="actionSpellcheck">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/spell-check.png</normaloff>:/spell-check.png</iconset>
+   </property>
+   <property name="text">
+    <string>Spellcheck</string>
+   </property>
+  </action>
+  <action name="actionStenoSearch">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/spell-check-error.png</normaloff>:/spell-check-error.png</iconset>
+   </property>
+   <property name="text">
+    <string>Steno Search</string>
    </property>
   </action>
  </widget>

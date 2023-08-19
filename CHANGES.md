@@ -1,5 +1,15 @@
 # CHANGES
 
+## Unreleased
+
+- Changed: use `deque` for sending captions to OBS to achieve "rolling" effect
+
+- Bug: remove left whitespace from captions
+
+- Changed: When using flush captions, add extra "\n" to force new line in display + remote
+
+- Feature: "Steno Search", use to find most likely translations based on steno outline
+
 ## Ver 2.2.2
 
 - Feature: Add OBS captioning through `obsws-python`

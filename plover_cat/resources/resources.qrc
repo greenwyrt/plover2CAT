@@ -1,5 +1,6 @@
 <RCC>
   <qresource>
+    <file>spell-check-error.png</file>
     <file>card--pencil.png</file>
     <file>document-text.png</file>
     <file>document-text-large.png</file>

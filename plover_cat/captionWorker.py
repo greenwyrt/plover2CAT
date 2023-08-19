@@ -2,6 +2,7 @@ from urllib import request, parse
 from urllib.error import HTTPError
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 from queue import Queue, Empty
+from collections import deque
 from plover_cat.steno_objects import wordsep_simple_re
 from datetime import datetime
 import obsws_python as obs
@@ -10,16 +11,18 @@ class captionWorker(QObject):
     capSend = pyqtSignal(str)
     finished = pyqtSignal()
     postMessage = pyqtSignal(str)
-    def __init__(self, max_length = None, word_delay = None, time_delay = 1000, remote = None, endpoint = None, port = None, password = None):
+    def __init__(self, max_length = None, max_lines = None, word_delay = None, time_delay = 1000, remote = None, endpoint = None, port = None, password = None):
         QObject.__init__(self)
         self.word_delay = word_delay
         self.max_length = max_length
+        self.max_lines = max_lines
         self.remote = remote
         self.endpoint = endpoint
         self.port = port
         self.password = password
         if self.port:
             self.obs = obs.ReqClient(host=self.endpoint, port=self.port, password=self.password, timeout=3) 
+            self.obs_queue = deque(maxlen = self.max_lines)
         self.word_queue = Queue()
         self.cap_queue = Queue()
         self.cap_timer = QTimer()
@@ -39,12 +42,12 @@ class captionWorker(QObject):
         while not self.word_queue.empty():
             self.next_word, text_time = self.word_queue.get()
             if self.max_length != 0 and (len(self.cap_line) + len(self.next_word)) > self.max_length:
-                self.cap_queue.put((self.cap_line, text_time))
+                self.cap_queue.put((self.cap_line.lstrip(" "), text_time))
                 self.cap_line = self.next_word
                 # self.send_cap()
             elif "\u2029" in self.next_word:
                 self.cap_line += self.next_word.replace("\u2029", "")
-                self.cap_queue.put((self.cap_line, text_time))
+                self.cap_queue.put((self.cap_line.lstrip(" "), text_time))
                 self.cap_line = ""
                 # self.send_cap()
             else:
@@ -90,6 +93,7 @@ class captionWorker(QObject):
             self.postMessage.emit(f"Captioning: send to Zoom failed with error code {err.code}.")  
     def send_obs(self, cap):
         try:
-            res = self.obs.send_stream_caption(cap)
+            self.obs_queue.append(cap)
+            res = self.obs.send_stream_caption("\n".join(list(self.obs_queue)))
         except OBSSDKRequestError as err:
             self.postMessage.emit(f"Captioning: send to OBS failed with error code {err.code}")

@@ -222,6 +222,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # self.actionRedo.triggered.connect(self.undo_stack.redo)
         # self.actionUndo.triggered.connect(self.undo_stack.undo)
         self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
+        self.actionSpellcheck.triggered.connect(lambda: self.show_spellcheck())
+        self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.navigationList.itemDoubleClicked.connect(self.heading_navigation)
         self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
@@ -283,6 +285,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.spell_ignore_all.clicked.connect(lambda: self.sp_ignore_all())
         self.spellcheck_suggestions.itemDoubleClicked.connect(self.sp_insert_suggest)
         self.dict_selection.activated.connect(self.set_sp_dict)
+        ## steno search
+        self.steno_search.clicked.connect(lambda: self.spell_steno())
         ## suggestions
         self.suggest_sort.toggled.connect(lambda: self.get_suggestions())
         self.suggest_source.currentIndexChanged.connect(lambda: self.get_suggestions())
@@ -566,6 +570,28 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.dockProp.setVisible(True)
         self.tabWidget.setCurrentWidget(self.find_replace_pane)
         log.debug("User set find pane visible.")
+
+    def show_spellcheck(self):
+        if not self.dockProp.isVisible():
+            self.dockProp.setVisible(True) 
+        self.tabWidget.setCurrentWidget(self.spellcheck_pane)  
+        log.debug("User set spellcheck pane visible.")
+
+    def show_stenospell(self):
+        current_cursor = self.textEdit.textCursor()
+        if current_cursor.hasSelection():
+            current_block = current_cursor.block()
+            start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+            end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+            start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
+            end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
+            underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
+            underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])        
+            self.steno_outline.setText(underlying_steno)
+        if not self.dockProp.isVisible():
+            self.dockProp.setVisible(True) 
+        self.tabWidget.setCurrentWidget(self.stenospell_pane)  
+        log.debug("User set steno spell pane visible.")
 
     def heading_navigation(self, item):
         block_number = item.data(Qt.UserRole)
@@ -1755,10 +1781,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         ## copy from parts of plover paper tape and tapeytape
         keys = set()
-        # possibilities = edit(stroke.steno_keys) 
-        # print(len(possibilities))
-        # suggest = [self.engine.lookup((c,)) for c in possibilities]
-        # print([s for s in suggest if s])
         for key in stroke.steno_keys:
             if key in self.numbers:
                 keys.add(self.numbers[key])
@@ -2851,6 +2873,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug("Selecting %s dictionary for spellcheck" % lang)
         dict_path = self.file_name / "spellcheck" / lang
         self.dictionary = Dictionary.from_files(str(dict_path))
+
+    def spell_steno(self):
+        outline = self.steno_outline.text()
+        pos = multi_gen_alternative(outline)
+        res = get_sorted_suggestions(pos, self.engine)
+        self.stenospell_res.clear()
+        for candidate in res:
+            self.stenospell_res.addItem(candidate[0])
     # audio functions
     def open_audio(self):
         if not self.file_name:
@@ -3057,7 +3087,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 # if captions are enabled in middle of document, don't start from beginning
                 self.caption_cursor_pos = self.textEdit.textCursor().position()
                 self.thread = QThread()
-                self.cap_worker = captionWorker(max_length = self.caption_dialog.capLength.value(), time_delay = self.caption_dialog.delayTime.value(), 
+                self.cap_worker = captionWorker(max_length = self.caption_dialog.capLength.value(), max_lines = self.caption_dialog.maxDisplayLines.value(), time_delay = self.caption_dialog.delayTime.value(), 
                                     remote = self.caption_dialog.remoteCapHost.currentText(), endpoint = self.caption_dialog.hostURL.text(), 
                                     port = self.caption_dialog.serverPort.text(), password = self.caption_dialog.serverPassword.text())
                 self.cap_worker.moveToThread(self.thread)
@@ -3098,7 +3128,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor.setPosition(old_pos) 
         current_cursor.movePosition(QTextCursor.End, QTextCursor.KeepAnchor)
         new_text = current_cursor.selectedText()
-        self.cap_worker.intake(new_text + "\u2029")
+        self.cap_worker.intake(new_text + "\n" + "\u2029")
         self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
 
     def modify_audiotime(self):

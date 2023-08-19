@@ -100,6 +100,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Export formats](reference/export.md)
 - [Supported RTF/CRE features](reference/rtf_support.md)
 - [Commands](reference/commands.md)
+- [Captioning](reference/captions.md)
 
 
 In development:
