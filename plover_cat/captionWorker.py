@@ -62,8 +62,8 @@ class captionWorker(QObject):
                     self.send_msteams(cap)
                 elif self.remote == "Zoom":
                     self.send_zoom(cap)
-            if self.remote == "OBS":
-                self.send_obs(cap)
+                elif self.remote == "OBS":
+                    self.send_obs(cap)
         except Empty:
             pass
     def clean_and_stop(self):

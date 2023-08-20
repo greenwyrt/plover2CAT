@@ -60,6 +60,10 @@ The Open Document Format (`ODF`) is an open source standard for documents based 
 
 Plover2CAT offers exports to RTF/CRE, the commonly used data exchange format for transcripts. As a result, it is possible to import transcripts from Plover2CAT to commercial software such as CaseCatalyst. Plover2CAT exports a [subset](rtf_support.md) of the [RTF spec](https://web.archive.org/web/20201017075356/http://www.legalxml.org/workgroups/substantive/transcripts/cre-spec.htm).
 
+### Paper Tape
+
+This exports the transcript paper tape in Plover's paper tape format.
+
 ## Export from editor
 
 The editor offloads exporting to another thread through `documentWorker`.

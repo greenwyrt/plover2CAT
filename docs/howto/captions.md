@@ -8,11 +8,11 @@ Plover2CAT can display input text in a separate window as captions.
 
 Click `Audiovisual > Captioning` to activate the captioning settings dialog, use or set the settings below, and then click `OK`.
 
-### `Stay this many chars behind`
+### `Stay this many words behind`
 
-The most important setting is `Stay this many chars behind`. This sets the minimum characters behind Plover2CAT will send to be formatted into captions, a "buffer" for making changes.
+The most important setting is `Stay this many words behind`. This sets the minimum words behind Plover2CAT will send to be formatted into captions, a "buffer" for making changes.
 
-For example, if the value is 10, and the text is `This is a first example`, after writing `example`, the text `This is a ` would have been sent to captions already. It is possible to undo or change the text `first example` but not the preceding text.
+For example, if the value is 2, and the text is `This is a first example`, after writing `example`, the text `This is a ` would have been sent to captions already. It is possible to undo or change the text `first example` but not the preceding text.
 
 ### `Maximum caption length`
 

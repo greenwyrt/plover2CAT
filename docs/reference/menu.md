@@ -23,7 +23,6 @@ This menu contains items related to transcript file management, import and expor
 
 ### The Edit Menu
 
-- Find/Replace Pane: Shows Find and Replace pane if hidden.
 - Undo: Undo previous action.
 - Redo: Redo undone action if available.
 - Copy: Copy text (and underlying steno) from paragraph.
@@ -71,6 +70,8 @@ This menu contains items related to audiovisual files.
 - Show/Hide Video: If a video file is selected to be played, then a video window will pop-up. This will show/hide the video window.
 - Record/Pause: Start recording using the settings in the audio recording box. If already recording, pressing this will pause recording, which is not the same as to press Stop Recording.
 - Stop Recording: Stop any recording in progress.  If Record/Pause is pressed again, the present audio file is overwritten.
+- Captioning: Setup caption display and remote sending
+- Flush Caption: Flush text in buffer to captions
 
 ### The Styling Menu
 
@@ -87,6 +88,13 @@ This menu is for transcript dictionary management.
 
 - Add Custom Dict: Add a custom dictionary to the transcript. See  [transcript dictionaries](#transcript-dictionaries) for details.
 - Remove Transcript Dictionary: Removes a loaded transcript dictionary. This will remove both from the Plover instance and the configuration file, but not delete the actual file.
+- Transcript Suggestions: analyze a transcript for common words and phrases to add to dictionary
+
+### The Tools Menu
+
+- Find/Replace Pane: Shows Find and Replace pane if hidden.
+- Spellcheck: Shows Spellcheck pane if hidden
+- Steno Search: Shows Steno Search pane if hidden
 
 ### The View Menu
 
@@ -127,6 +135,7 @@ This section documents each menu item under its menu section with the identifier
 | Export as... \> SubRip (.srt)          | `actionSubRip`               |          |
 | Export as... \> OpenDocumentText(.odt) | `actionODT`                  |          |
 | Export as... \> RTF/CRE (*.rtf)        | `actionRTF`                  |          |
+| Export as... \> Paper Tape (*.tape)    | `actionTape`                 |          |
 | Open Transcript Folder                 | `actionOpenTranscriptFolder` |          |
 | Close                                  | `actionClose`                |          |
 | Quit                                   | `actionQuit`                 | Ctrl+Q   |
@@ -135,7 +144,6 @@ This section documents each menu item under its menu section with the identifier
 
 | Item                 | Action Identifier        | Shortcut     |
 |----------------------|--------------------------|--------------|
-| Find/Replace Pane    | `actionFindReplacePane`  | Ctrl+F       |
 | Undo                 | `actionUndo`             | Ctrl+Z       |
 | Redo                 | `actionRedo`             | Ctrl+Y       |
 | Copy                 | `actionCopy`             | Ctrl+C       |
@@ -167,6 +175,8 @@ This section documents each menu item under its menu section with the identifier
 |----------------------|--------------------------|--------------|
 | Insert Image         | `actionInsertImage`      |              |
 | Insert Normal Text   | `actionInsertNormalText` | Insert       |
+| Edit Fields          | `actionEditFields`       |              |
+| Edit Indices         | `actionEditIndices`      |              |
 
 ### Audiovisual
 
@@ -182,6 +192,8 @@ This section documents each menu item under its menu section with the identifier
 | Show/Hide Video  | `actionShowVideo`     |              |
 | Record/Pause     | `actionRecordPause`   | Ctrl+Shift+P |
 | Stop Recording   | `actionStopRecording` |              |
+| Captioning       | `actionCaptioning`    |              |
+| Flush Caption    | `actionFlushCaption`  |              |
 
 ### Styling
 
@@ -196,10 +208,19 @@ This section documents each menu item under its menu section with the identifier
 
 ### Dictionary
 
-| Item                   | Action Identifier            | Shortcut |
-|------------------------|------------------------------|----------|
-| Add Custom Dict        | `actionAddCustomDict`        |          |
-| Remove Transcript Dict | `actionRemoveTranscriptDict` |          |
+| Item                   | Action Identifier             | Shortcut |
+|------------------------|-------------------------------|----------|
+| Add Custom Dict        | `actionAddCustomDict`         |          |
+| Remove Transcript Dict | `actionRemoveTranscriptDict`  |          |
+| Transcript Suggestions | `actionTranscriptSuggestions` |          |
+
+### Tools
+
+| Item                 | Action Identifier        | Shortcut     |
+|----------------------|--------------------------|--------------|
+| Find/Replace Pane    | `actionFindReplacePane`  | Ctrl+F       |
+| Spellcheck           | `actionSpellcheck`       |              |
+| Steno Search         | `actionStenoSearch`      |              |
 
 ### View
 

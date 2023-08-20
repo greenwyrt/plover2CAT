@@ -97,10 +97,6 @@ def edit(word):
             possibilities.extend([stroke_edit(c, "insert") for c in candidates])
             possibilities.extend([stroke_edit(c, "replaced", R[0]) for c in candidates])
     possibilities.extend(deletes)
-    # outlines = []
-    # for c in possibilities:
-    #     outline = Stroke.from_keys(c)
-    #     outlines.append(outline.rtfcre)
     return(set(possibilities))
 
 def add_prob(possibilities, stroke):

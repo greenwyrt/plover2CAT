@@ -215,7 +215,11 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `record_or_pause`: manages start/pause of recording
 - `stop_record`: stop recording
 - `update_record_time`: updates states bar with recording duration
-
+- `setup_caption_window`: creates separate window to display captions
+- `add_cap`: adds caption to caption window
+- `setup_captions`: uses caption dialog to set up `captionWorker` on separate thread
+- `display_captions`: sends new text to `captionWorker`
+- `flush_caption`: sends remaining text to `captionWorker`, sends `\n` when text empty
 
 ### Import/Export
 

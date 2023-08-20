@@ -129,6 +129,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.index_dialog = indexDialogWindow({})
         self.caption_dialog = captionDialogWindow() 
         self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
+        self.cap_worker = None
         self.styles_path = ""
         self.stroke_time = ""
         self.audio_file = ""
@@ -219,23 +220,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionCut.triggered.connect(lambda: self.cut_steno())
         self.actionPaste.triggered.connect(lambda: self.paste_steno())
         self.undo_stack.indexChanged.connect(self.check_undo_stack)
-        # self.actionRedo.triggered.connect(self.undo_stack.redo)
-        # self.actionUndo.triggered.connect(self.undo_stack.undo)
-        self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
-        self.actionSpellcheck.triggered.connect(lambda: self.show_spellcheck())
-        self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.navigationList.itemDoubleClicked.connect(self.heading_navigation)
-        self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
-        self.actionBackgroundColor.triggered.connect(lambda: self.change_backgrounds())
-        self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
-        self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
+        self.revert_version.clicked.connect(self.revert_file)
+        ## insert related
         self.textEdit.send_del.connect(self.mock_del)
         self.textEdit.send_key.connect(self.mock_key)
         self.textEdit.send_bks.connect(self.mock_bks)
-        self.revert_version.clicked.connect(self.revert_file)
-        ## insert related
         self.actionInsertImage.triggered.connect(lambda: self.insert_image())
         self.actionInsertNormalText.triggered.connect(self.insert_text)
         self.actionEditFields.triggered.connect(self.edit_fields)
@@ -270,6 +262,19 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.blockFont.currentFontChanged.connect(self.calculate_space_width)
         self.menuParagraphStyle.triggered.connect(self.change_style)
         # self.textEdit.ins.connect(self.change_style)
+        ## view
+        self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
+        self.actionBackgroundColor.triggered.connect(lambda: self.change_backgrounds())
+        self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
+        self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
+        ## tools
+        self.actionStyling.triggered.connect(lambda: self.show_styling())
+        self.actionPageFormat.triggered.connect(lambda: self.show_page_format())
+        self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
+        self.actionParagraph.triggered.connect(lambda: self.show_paragraph())
+        self.actionAudioRecording.triggered.connect(lambda: self.show_audio_recording())
+        self.actionSpellcheck.triggered.connect(lambda: self.show_spellcheck())
+        self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
         ## search/replace connections
         self.search_text.toggled.connect(lambda: self.search_text_options())
         self.search_steno.toggled.connect(lambda: self.search_steno_options())
@@ -346,6 +351,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         res = self.shortcut_dialog.exec_()
         if res:
             shortcut_file = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "shortcuts.json"
+            if not shortcut_file.exists():
+                save_json({}, shortcut_file)
             with open(shortcut_file, "r") as f:
                 shortcuts = json.loads(f.read())
                 shortcuts.update(self.shortcut_dialog.shortcut_dict)
@@ -563,6 +570,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug(f"User set jump to block {block_num}")
             self.navigate_to(block_num)
 
+    def show_styling(self):
+        if not self.dockProp.isVisible():
+            self.dockProp.setVisible(True)        
+        self.tabWidget.setCurrentWidget(self.styling_pane)
+        log.debug("User set styling pane.")
+
+    def show_page_format(self):
+        if not self.dockProp.isVisible():
+            self.dockProp.setVisible(True)
+        self.tabWidget.setCurrentWidget(self.page_format_pane)          
+
     def show_find_replace(self):
         if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
             self.search_term.setText(self.textEdit.textCursor().selectedText())
@@ -570,6 +588,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.dockProp.setVisible(True)
         self.tabWidget.setCurrentWidget(self.find_replace_pane)
         log.debug("User set find pane visible.")
+
+    def show_paragraph(self):
+        if not self.dockProp.isVisible():
+            self.dockProp.setVisible(True)
+        self.tabWidget.setCurrentWidget(self.paragraph_pane)
+
+    def show_audio_recording(self):
+        if not self.dockProp.isVisible():
+            self.dockProp.setVisible(True)
+        self.tabWidget.setCurrentWidget(self.audio_recording_pane)
 
     def show_spellcheck(self):
         if not self.dockProp.isVisible():
@@ -778,9 +806,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.set_dictionary_config(config_contents["dictionaries"])
         default_spellcheck_path = selected_folder / "spellcheck"
         if default_spellcheck_path.exists():
-            available_dicts = [file.stem for file in default_spellcheck_path.iterdir() if str(file).endswith("dic")]
-            if available_dicts:
-                self.dict_selection.addItems(available_dicts)
+            available_dicts = [file for file in default_spellcheck_path.iterdir() if str(file).endswith("dic")]
+            for dic in available_dicts:
+                self.dict_selection.addItem(text = dic.stem, userData = dic)
+            # if available_dicts:
+            #     self.dict_selection.addItems(available_dicts)
+        spellcheck_path = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "spellcheck"
+        if spellcheck_path.exists():
+            available_dicts = [file for file in spellcheck_path.iterdir() if str(file).endswith("dic")]
+            for dic in available_dicts:
+                self.dict_selection.addItem(text = dic.stem, userData = dic)
         # self.setup_speaker_ids()
         self.strokeList.clear()
         self.suggestTable.clearContents()        
@@ -1077,6 +1112,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.user_field_dict = {}
         self.index_dialog = indexDialogWindow({})
         self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
+        if self.actionCaptioning.isChecked():
+            self.setup_captions(False)
+            self.actionCaptioning.setChecked(False)
         self.cursor_block = 0
         self.cursor_block_position = 0        
         self.menu_enabling()
@@ -2871,7 +2909,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def set_sp_dict(self, index):
         lang = self.dict_selection.itemText(index)
         log.debug("Selecting %s dictionary for spellcheck" % lang)
-        dict_path = self.file_name / "spellcheck" / lang
+        dict_path = self.dict_selection.itemData(index)
         self.dictionary = Dictionary.from_files(str(dict_path))
 
     def spell_steno(self):
@@ -3060,6 +3098,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.caption_window = QMainWindow()
         self.caption_window.setMinimumSize(50, 50)
         self.caption_window.setWindowFlags(self.caption_window.windowFlags() | Qt.WindowStaysOnTopHint)
+        self.caption_window.setWindowFlags(self.caption_window.windowFlags() | QtCore.Qt.CustomizeWindowHint)
+        self.caption_window.setWindowFlags(self.caption_window.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
         self.caption_window.setWindowTitle("Plover2CAT Captions")
         self.caption_edit = QPlainTextEdit()
         self.caption_edit.setReadOnly(True)
@@ -3103,24 +3143,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             # do cleanup
             self.cap_worker.clean_and_stop()
+            self.caption_edit.clear()
             self.caption_window.hide()
 
     def display_captions(self):
         if not self.actionCaptioning.isChecked():
             return
-        doc_length = self.textEdit.document().characterCount()
-        if self.caption_cursor_pos + self.caption_dialog.charOffset.value() > doc_length:
-            return
-        old_pos = self.caption_cursor_pos
         current_cursor = self.textEdit.textCursor()
-        current_cursor.setPosition(doc_length - self.caption_dialog.charOffset.value(), QTextCursor.KeepAnchor)
-        # get only up to word before limit
-        current_cursor.movePosition(QTextCursor.PreviousWord)
-        current_cursor.setPosition(old_pos, QTextCursor.KeepAnchor)
-        self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
+        current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, self.caption_dialog.charOffset.value())
+        new_pos = current_cursor.position()
+        if self.caption_cursor_pos >= new_pos:
+            return
+        current_cursor.setPosition(self.caption_cursor_pos, QTextCursor.KeepAnchor)
         new_text = current_cursor.selectedText()
+        self.caption_cursor_pos = new_pos
         self.cap_worker.intake(new_text)
-        # send text off to caption thread worker queue
 
     def flush_caption(self):
         old_pos = self.caption_cursor_pos
@@ -3128,7 +3165,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor.setPosition(old_pos) 
         current_cursor.movePosition(QTextCursor.End, QTextCursor.KeepAnchor)
         new_text = current_cursor.selectedText()
-        self.cap_worker.intake(new_text + "\n" + "\u2029")
+        if new_text == "":
+            self.cap_worker.intake("\n" + "\u2029")
+        else:
+            self.cap_worker.intake(new_text + "\u2029")
         self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
 
     def modify_audiotime(self):

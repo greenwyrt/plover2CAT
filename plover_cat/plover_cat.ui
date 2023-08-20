@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>955</width>
-    <height>743</height>
+    <width>881</width>
+    <height>687</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -188,7 +188,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>955</width>
+     <width>881</width>
      <height>19</height>
     </rect>
    </property>
@@ -244,10 +244,6 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
-    <addaction name="actionFindReplacePane"/>
-    <addaction name="actionSpellcheck"/>
-    <addaction name="actionStenoSearch"/>
-    <addaction name="separator"/>
     <addaction name="actionCopy"/>
     <addaction name="actionCut"/>
     <addaction name="actionPaste"/>
@@ -402,6 +398,18 @@
     <addaction name="actionEditFields"/>
     <addaction name="actionEditIndices"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionStyling"/>
+    <addaction name="actionPageFormat"/>
+    <addaction name="actionFindReplacePane"/>
+    <addaction name="actionParagraph"/>
+    <addaction name="actionAudioRecording"/>
+    <addaction name="actionSpellcheck"/>
+    <addaction name="actionStenoSearch"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuSteno_Actions"/>
@@ -409,6 +417,7 @@
    <addaction name="menuAudio"/>
    <addaction name="menuStyling"/>
    <addaction name="menuDictionary"/>
+   <addaction name="menuTools"/>
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -811,7 +820,7 @@ position.</string>
         <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>6</number>
+        <number>0</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -849,8 +858,8 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>388</width>
+              <y>-150</y>
+              <width>340</width>
               <height>466</height>
              </rect>
             </property>
@@ -1451,9 +1460,9 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
-              <width>388</width>
-              <height>409</height>
+              <y>-99</y>
+              <width>206</width>
+              <height>415</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1785,6 +1794,19 @@ position.</string>
                </property>
               </widget>
              </item>
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </widget>
           </widget>
@@ -1813,8 +1835,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>405</width>
-              <height>240</height>
+              <width>277</width>
+              <height>316</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -2003,8 +2025,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>405</width>
-              <height>240</height>
+              <width>251</width>
+              <height>316</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -2205,8 +2227,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>388</width>
-              <height>283</height>
+              <width>218</width>
+              <height>316</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_34">
@@ -2383,8 +2405,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>405</width>
-              <height>240</height>
+              <width>219</width>
+              <height>316</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_36">
@@ -2508,8 +2530,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>405</width>
-              <height>240</height>
+              <width>218</width>
+              <height>316</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -3680,6 +3702,9 @@ position.</string>
    <property name="text">
     <string>Spellcheck</string>
    </property>
+   <property name="toolTip">
+    <string>Open Spellcheck Pane if hidden</string>
+   </property>
   </action>
   <action name="actionStenoSearch">
    <property name="icon">
@@ -3688,6 +3713,57 @@ position.</string>
    </property>
    <property name="text">
     <string>Steno Search</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Steno Search pane if hidden</string>
+   </property>
+  </action>
+  <action name="actionStyling">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/edit-style.png</normaloff>:/edit-style.png</iconset>
+   </property>
+   <property name="text">
+    <string>Styling</string>
+   </property>
+   <property name="toolTip">
+    <string>Open style pane if hidden</string>
+   </property>
+  </action>
+  <action name="actionPageFormat">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/document-resize-actual.png</normaloff>:/document-resize-actual.png</iconset>
+   </property>
+   <property name="text">
+    <string>Page Format</string>
+   </property>
+   <property name="toolTip">
+    <string>Open page format pane if hidden</string>
+   </property>
+  </action>
+  <action name="actionParagraph">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paragraph</string>
+   </property>
+   <property name="toolTip">
+    <string>Show paragraph attributes if hidden</string>
+   </property>
+  </action>
+  <action name="actionAudioRecording">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
+   </property>
+   <property name="text">
+    <string>Audio Recording</string>
+   </property>
+   <property name="toolTip">
+    <string>Show audio recording settings if hidden</string>
    </property>
   </action>
  </widget>

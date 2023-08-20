@@ -8,6 +8,16 @@
 
 - Changed: When using flush captions, add extra "\n" to force new line in display + remote
 
+- Changed: Changed buffer for captions from character to word
+
+- Bug: clean up `captionWorker` when closing transcript
+
+- Bug: fix problem in saving menu shortcuts when no shortcut.json exists
+
+- Change: will also make available spellchecking dictionaries located in `plover_config/plover2cat/spellcheck` for selection
+
+- Changed: `Tools` menu to visibility of every tab in Toolbox if hidden
+
 - Feature: "Steno Search", use to find most likely translations based on steno outline
 
 ## Ver 2.2.2

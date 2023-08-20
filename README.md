@@ -26,7 +26,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 
 - captioning features such as:
   - separate window to display captions
-  - customizable line lengths and buffer between current text and text displayed
+  - customizable line lengths and word buffer between current text and text displayed
   - customizable minimum time interval between lines appearing
   - send captions to Microsoft Teams, Zoom, or OBS
 

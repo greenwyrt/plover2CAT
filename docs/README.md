@@ -29,6 +29,7 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Insert index entries](howto/indices.md)
 - [Navigate to paper tape and back](howto/tapelinking.md)
 - [Generate dictionary suggestions from transcript](howto/transcriptsuggest.md)
+- [Use Steno Search](howto/stenosearch.md)
 - [Import RTF/CRE transcript file](howto/importrtf.md)
 - [Enable autocompletion and add terms](howto/autocompletion.md)
 - [Translate tape files](howto/translatetape.md)
@@ -101,9 +102,6 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Supported RTF/CRE features](reference/rtf_support.md)
 - [Commands](reference/commands.md)
 - [Captioning](reference/captions.md)
-
-
-In development:
 - [Editor class](reference/main.md)
 - [Custom text objects](reference/elements.md)
 - [Dialogs](reference/dialogs.md)
