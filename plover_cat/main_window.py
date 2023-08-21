@@ -18,7 +18,7 @@ from dulwich import porcelain
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
 QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, QTextBlockFormat, 
-QTextOption, QTextCharFormat, QKeySequence, QPalette)
+QTextOption, QTextCharFormat, QKeySequence, QPalette, QDesktopServices)
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
 QStyle, QMessageBox, QDialog, QFontDialog, QColorDialog, QUndoStack, QLabel, QMenu,
 QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar, QAction, QToolButton)
@@ -268,13 +268,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
         self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
         ## tools
-        self.actionStyling.triggered.connect(lambda: self.show_styling())
-        self.actionPageFormat.triggered.connect(lambda: self.show_page_format())
+        self.actionStyling.triggered.connect(lambda: self.show_toolbox_pane(self.styling_pane))
+        self.actionPageFormat.triggered.connect(lambda: self.show_toolbox_pane(self.page_format_pane))
         self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
-        self.actionParagraph.triggered.connect(lambda: self.show_paragraph())
-        self.actionAudioRecording.triggered.connect(lambda: self.show_audio_recording())
-        self.actionSpellcheck.triggered.connect(lambda: self.show_spellcheck())
+        self.actionParagraph.triggered.connect(lambda: self.show_toolbox_pane(self.paragraph_pane))
+        self.actionAudioRecording.triggered.connect(lambda: self.show_toolbox_pane(self.audio_recording_pane))
+        self.actionSpellcheck.triggered.connect(lambda: self.show_toolbox_pane(self.spellcheck_pane))
         self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
+        self.actionSearchWikipedia.triggered.connect(lambda: self.search_online("https://en.wikipedia.org/wiki/Special:Search/{0}"))
+        self.actionSearchMerriamWebster.triggered.connect(lambda: self.search_online("http://www.merriam-webster.com/dictionary/{0}"))
+        self.actionSearchOED.triggered.connect(lambda: self.search_online("https://www.oed.com/search/dictionary/?scope=Entries&q={0}"))
+        self.actionSearchGoogle.triggered.connect(lambda: self.search_online("https://www.google.com/search?q={0}"))
+        self.actionSearchDuckDuckGo.triggered.connect(lambda: self.search_online("https://duckduckgo.com/?q={0}"))
         ## search/replace connections
         self.search_text.toggled.connect(lambda: self.search_text_options())
         self.search_steno.toggled.connect(lambda: self.search_steno_options())
@@ -570,16 +575,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug(f"User set jump to block {block_num}")
             self.navigate_to(block_num)
 
-    def show_styling(self):
+    def show_toolbox_pane(self, pane):
         if not self.dockProp.isVisible():
-            self.dockProp.setVisible(True)        
-        self.tabWidget.setCurrentWidget(self.styling_pane)
-        log.debug("User set styling pane.")
-
-    def show_page_format(self):
-        if not self.dockProp.isVisible():
-            self.dockProp.setVisible(True)
-        self.tabWidget.setCurrentWidget(self.page_format_pane)          
+            self.dockProp.setVisible(True)    
+        self.tabWidget.setCurrentWidget(pane)
+        log.debug(f"User set {pane.objectName()} pane.")            
 
     def show_find_replace(self):
         if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
@@ -588,22 +588,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.dockProp.setVisible(True)
         self.tabWidget.setCurrentWidget(self.find_replace_pane)
         log.debug("User set find pane visible.")
-
-    def show_paragraph(self):
-        if not self.dockProp.isVisible():
-            self.dockProp.setVisible(True)
-        self.tabWidget.setCurrentWidget(self.paragraph_pane)
-
-    def show_audio_recording(self):
-        if not self.dockProp.isVisible():
-            self.dockProp.setVisible(True)
-        self.tabWidget.setCurrentWidget(self.audio_recording_pane)
-
-    def show_spellcheck(self):
-        if not self.dockProp.isVisible():
-            self.dockProp.setVisible(True) 
-        self.tabWidget.setCurrentWidget(self.spellcheck_pane)  
-        log.debug("User set spellcheck pane visible.")
 
     def show_stenospell(self):
         current_cursor = self.textEdit.textCursor()
@@ -620,6 +604,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.dockProp.setVisible(True) 
         self.tabWidget.setCurrentWidget(self.stenospell_pane)  
         log.debug("User set steno spell pane visible.")
+
+    def search_online(self, link):
+        current_cursor = self.textEdit.textCursor()
+        if not current_cursor.hasSelection():
+            self.statusBar.showMessage("No text selected for online search.")
+            return
+        QDesktopServices.openUrl(QUrl(link.format(current_cursor.selectedText())))
 
     def heading_navigation(self, item):
         block_number = item.data(Qt.UserRole)
@@ -655,9 +646,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         block = self.textEdit.document().begin()
         self.navigationList.clear()
         log.debug("Nagivation pane updated.")
-        while True:
+        for i in range(self.textEdit.document().blockCount()):
             block_data = block.userData()
-            if not block_data: return
+            if not block_data: continue
             if block_data["style"] in self.styles and "defaultoutlinelevel" in self.styles[block_data["style"]]:
                 item = QListWidgetItem()
                 level = int(self.styles[block_data["style"]]["defaultoutlinelevel"])
@@ -1718,7 +1709,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.progressBar.setFormat("Re-style paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
-        while True:
+        for i in range(self.textEdit.document().blockCount()):
             try:
                 block_style = block.userData()["style"]
             except TypeError:
@@ -2583,7 +2574,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         block = self.textEdit.document().begin()
         if len(self.textEdit.toPlainText()) == 0:
             return
-        while True:
+        for i in range(self.textEdit.document().blockCount()):
             # print(block.blockNumber())
             if block.userData():
                 block_strokes = block.userData()["strokes"]
@@ -3114,7 +3105,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.caption_window.show()
 
     def add_cap(self, cap):
-        self.caption_edit.insertPlainText("\n" + cap)
+        self.caption_edit.setPlainText(cap)
         self.caption_edit.ensureCursorVisible()
 
     def setup_captions(self, checked):
@@ -3127,7 +3118,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 # if captions are enabled in middle of document, don't start from beginning
                 self.caption_cursor_pos = self.textEdit.textCursor().position()
                 self.thread = QThread()
-                self.cap_worker = captionWorker(max_length = self.caption_dialog.capLength.value(), max_lines = self.caption_dialog.maxDisplayLines.value(), time_delay = self.caption_dialog.delayTime.value(), 
+                self.cap_worker = captionWorker(max_length = self.caption_dialog.capLength.value(), max_lines = self.caption_dialog.maxDisplayLines.value(),
                                     remote = self.caption_dialog.remoteCapHost.currentText(), endpoint = self.caption_dialog.hostURL.text(), 
                                     port = self.caption_dialog.serverPort.text(), password = self.caption_dialog.serverPassword.text())
                 self.cap_worker.moveToThread(self.thread)

@@ -11,7 +11,7 @@ class captionWorker(QObject):
     capSend = pyqtSignal(str)
     finished = pyqtSignal()
     postMessage = pyqtSignal(str)
-    def __init__(self, max_length = None, max_lines = None, word_delay = None, time_delay = 1000, remote = None, endpoint = None, port = None, password = None):
+    def __init__(self, max_length = None, max_lines = None, word_delay = None, remote = None, endpoint = None, port = None, password = None):
         QObject.__init__(self)
         self.word_delay = word_delay
         self.max_length = max_length
@@ -24,10 +24,7 @@ class captionWorker(QObject):
             self.obs = obs.ReqClient(host=self.endpoint, port=self.port, password=self.password, timeout=3) 
             self.obs_queue = deque(maxlen = self.max_lines)
         self.word_queue = Queue()
-        self.cap_queue = Queue()
-        self.cap_timer = QTimer()
-        self.cap_timer.start(time_delay)
-        self.cap_timer.timeout.connect(self.send_cap)
+        self.cap_queue = deque(maxlen = max_lines)
         self.cap_line = ""
         self.next_word = "" 
         self.zoom_seq = 1
@@ -41,21 +38,23 @@ class captionWorker(QObject):
     def make_caps(self):
         while not self.word_queue.empty():
             self.next_word, text_time = self.word_queue.get()
-            if self.max_length != 0 and (len(self.cap_line) + len(self.next_word)) > self.max_length:
-                self.cap_queue.put((self.cap_line.lstrip(" "), text_time))
-                self.cap_line = self.next_word
-                # self.send_cap()
+            try:
+                last_cap, cap_time = self.cap_queue.pop()
+            except IndexError:
+                last_cap = ""
+            if len(last_cap) + len(self.next_word) > self.max_length:
+                self.cap_queue.append((last_cap, cap_time))
+                self.cap_queue.append((self.next_word, text_time))
             elif "\u2029" in self.next_word:
-                self.cap_line += self.next_word.replace("\u2029", "")
-                self.cap_queue.put((self.cap_line.lstrip(" "), text_time))
-                self.cap_line = ""
-                # self.send_cap()
+                self.cap_queue.append((last_cap, cap_time))
+                self.cap_queue.append((self.next_word.replace("\u2029", ""), text_time))
             else:
-                self.cap_line += self.next_word
+                self.cap_queue.append((last_cap + self.next_word, text_time))
+            self.send_cap()
     def send_cap(self):
-        # print(f"queue size {self.cap_queue.qsize()}.")
         try:
-            cap, time = self.cap_queue.get_nowait()
+            last_caps = list(self.cap_queue)
+            cap = "\n".join(c[0].lstrip(" ") for c in last_caps if c[0].lstrip(" "))
             self.capSend.emit(cap)
             if self.endpoint:
                 if self.remote == "Microsoft Teams":
@@ -67,7 +66,6 @@ class captionWorker(QObject):
         except Empty:
             pass
     def clean_and_stop(self):
-        self.cap_timer.stop()
         self.finished.emit()
     def send_msteams(self, cap):
         req = request.Request(self.endpoint, method = "POST")
@@ -77,10 +75,8 @@ class captionWorker(QObject):
         try:
             r = request.urlopen(req)
         except HTTPError as err:
-            # print(err.code)
             self.postMessage.emit(f"Captioning: send to Microsoft Teams failed with error code {err.code}.")
     def send_zoom(self, cap):
-        # req = request.Request(self.endpoint, method = "POST")
         req = request.Request(self.endpoint + f"&seq={self.zoom_seq}&lang=en-US", method = "POST")      
         self.zoom_seq += 1
         req.data = cap.encode()  
@@ -89,11 +85,9 @@ class captionWorker(QObject):
         try:
             r = request.urlopen(req)
         except HTTPError as err:
-            # print(err.code)
             self.postMessage.emit(f"Captioning: send to Zoom failed with error code {err.code}.")  
     def send_obs(self, cap):
         try:
-            self.obs_queue.append(cap)
-            res = self.obs.send_stream_caption("\n".join(list(self.obs_queue)))
+            res = self.obs.send_stream_caption(cap)
         except OBSSDKRequestError as err:
             self.postMessage.emit(f"Captioning: send to OBS failed with error code {err.code}")

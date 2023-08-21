@@ -402,6 +402,9 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
     <addaction name="actionStyling"/>
     <addaction name="actionPageFormat"/>
     <addaction name="actionFindReplacePane"/>
@@ -409,6 +412,12 @@
     <addaction name="actionAudioRecording"/>
     <addaction name="actionSpellcheck"/>
     <addaction name="actionStenoSearch"/>
+    <addaction name="separator"/>
+    <addaction name="actionSearchWikipedia"/>
+    <addaction name="actionSearchMerriamWebster"/>
+    <addaction name="actionSearchOED"/>
+    <addaction name="actionSearchGoogle"/>
+    <addaction name="actionSearchDuckDuckGo"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -858,8 +867,8 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-150</y>
-              <width>340</width>
+              <y>0</y>
+              <width>351</width>
               <height>466</height>
              </rect>
             </property>
@@ -1460,8 +1469,8 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-99</y>
-              <width>206</width>
+              <y>0</y>
+              <width>351</width>
               <height>415</height>
              </rect>
             </property>
@@ -1835,8 +1844,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>277</width>
-              <height>316</height>
+              <width>368</width>
+              <height>240</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -2025,8 +2034,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>251</width>
-              <height>316</height>
+              <width>368</width>
+              <height>240</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -2227,8 +2236,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>218</width>
-              <height>316</height>
+              <width>351</width>
+              <height>283</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_34">
@@ -2405,8 +2414,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>219</width>
-              <height>316</height>
+              <width>368</width>
+              <height>240</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_36">
@@ -2530,8 +2539,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>218</width>
-              <height>316</height>
+              <width>368</width>
+              <height>240</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -3764,6 +3773,46 @@ position.</string>
    </property>
    <property name="toolTip">
     <string>Show audio recording settings if hidden</string>
+   </property>
+  </action>
+  <action name="actionSearchWikipedia">
+   <property name="text">
+    <string>Wikipedia</string>
+   </property>
+   <property name="toolTip">
+    <string>Search selected text on Wikipedia in default browser</string>
+   </property>
+  </action>
+  <action name="actionSearchGoogle">
+   <property name="text">
+    <string>Google</string>
+   </property>
+   <property name="toolTip">
+    <string>Search selected text on Google in default browser</string>
+   </property>
+  </action>
+  <action name="actionSearchDuckDuckGo">
+   <property name="text">
+    <string>DuckDuckGo</string>
+   </property>
+   <property name="toolTip">
+    <string>Search selected text on DuckDuckGo in default browser</string>
+   </property>
+  </action>
+  <action name="actionSearchMerriamWebster">
+   <property name="text">
+    <string>Merriam-Webster</string>
+   </property>
+   <property name="toolTip">
+    <string>Search selected text on Merriam-Webster in default browser</string>
+   </property>
+  </action>
+  <action name="actionSearchOED">
+   <property name="text">
+    <string>OED</string>
+   </property>
+   <property name="toolTip">
+    <string>Search selected text on Oxford English Dictionary in default browser</string>
    </property>
   </action>
  </widget>

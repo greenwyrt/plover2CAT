@@ -12,12 +12,15 @@ class captionDialogWindow(QDialog, Ui_captionDialog):
         self.fontSelector.setText(f"{self.font.family()} {self.font.pointSize()}")
         self.remoteCapHost.activated.connect(self.enable_host_ui)
     def enable_host_ui(self, index):
-        if index != 2:
-            self.serverPort.setEnabled(False)
-            self.serverPassword.setEnabled(False)
+        if index != 0:
+            self.hostURL.setEnabled(True)
+            if index == 3:
+                self.serverPort.setEnabled(True)
+                self.serverPassword.setEnabled(True)
         else:
-            self.serverPort.setEnabled(True)
-            self.serverPassword.setEnabled(True)           
+            self.hostURL.setEnabled(False)
+            self.serverPort.setEnabled(False)
+            self.serverPassword.setEnabled(False)                       
     def set_font(self):
         font, ok = QFontDialog.getFont(self.font, self)
         if ok:

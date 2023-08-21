@@ -1,8 +1,10 @@
 # CHANGES
 
-## Unreleased
+## Unreleased (Ver 2.3.0)
 
-- Changed: use `deque` for sending captions to OBS to achieve "rolling" effect
+Captioning interface and internals has been changed from 2.2.x versions with the help of @AshenColors.
+
+- Changed: use `deque` for sending captions to achieve "rolling" effect
 
 - Bug: remove left whitespace from captions
 
@@ -14,11 +16,15 @@
 
 - Bug: fix problem in saving menu shortcuts when no shortcut.json exists
 
-- Change: will also make available spellchecking dictionaries located in `plover_config/plover2cat/spellcheck` for selection
+- Change: also make available spellchecking dictionaries located in `plover_config/plover2cat/spellcheck` for selection
 
-- Changed: `Tools` menu to visibility of every tab in Toolbox if hidden
+- Change: `Tools` menu to visibility of every tab in Toolbox if hidden
+
+- Change: internal, convert while loops for going through document into for loops using block count
 
 - Feature: "Steno Search", use to find most likely translations based on steno outline
+
+- Feature: add online search for Wikipedia, DuckDuckGo, Google, Merriam-Webster, and Oxford English Dictionary
 
 ## Ver 2.2.2
 

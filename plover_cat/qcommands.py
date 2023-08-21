@@ -473,7 +473,7 @@ class update_field(QUndoCommand):
         block = self.document.document().begin()
         self.document.parent().parent().user_field_dict.clear()
         self.document.parent().parent().user_field_dict.update(self.new_dict)
-        while True:     
+        for i in range(self.document.document().blockCount()):     
             block_strokes = block.userData()["strokes"]
             if any([el.element == "field" for el in block_strokes.data]):
                 block.setUserState(1)
@@ -500,7 +500,7 @@ class update_field(QUndoCommand):
         block = self.document.document().begin()
         self.document.parent().parent().user_field_dict.clear()
         self.document.parent().parent().user_field_dict.update(self.store_dict)
-        while True:     
+        for i in range(self.document.document().blockCount()):   
             block_strokes = block.userData()["strokes"]
             for ind, el in enumerate(block_strokes.data):
                 # print(ind)
@@ -532,7 +532,7 @@ class update_entries(QUndoCommand):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
         block = self.document.document().begin()
-        while True:     
+        for i in range(self.document.document().blockCount()):    
             block_strokes = block.userData()["strokes"]
             if any([el.element == "index" for el in block_strokes.data]):
                 block.setUserState(1)
@@ -558,7 +558,7 @@ class update_entries(QUndoCommand):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
         block = self.document.document().begin()
-        while True:     
+        for i in range(self.document.document().blockCount()):    
             block_strokes = block.userData()["strokes"]
             for ind, el in enumerate(block_strokes.data):
                 # print(ind)

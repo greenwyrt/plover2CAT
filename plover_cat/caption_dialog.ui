@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>555</width>
-    <height>257</height>
+    <height>237</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Stay this many words behind:</string>
+        <string>Word buffer:</string>
        </property>
       </widget>
      </item>
@@ -33,74 +33,47 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Maximum caption length:</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QSpinBox" name="capLength">
        <property name="toolTip">
-        <string>Optional, maximum number of characters in one line</string>
+        <string>Maximum number of characters in one line</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
        </property>
        <property name="value">
         <number>42</number>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>Time delay between lines:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QSpinBox" name="delayTime">
-       <property name="toolTip">
-        <string>Leave at this many milliseconds between captions</string>
-       </property>
-       <property name="suffix">
-        <string>ms</string>
-       </property>
-       <property name="maximum">
-        <number>10000</number>
-       </property>
-       <property name="singleStep">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>1000</number>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_6">
-       <property name="text">
-        <string>Display max lines in window:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
+     <item row="3" column="1">
       <widget class="QSpinBox" name="maxDisplayLines">
        <property name="toolTip">
-        <string>Optional, only display this number of lines in caption window</string>
+        <string>Only display this number of lines in caption window</string>
+       </property>
+       <property name="minimum">
+        <number>1</number>
        </property>
        <property name="value">
         <number>2</number>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_7">
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>Display font:</string>
+        <string>Display max lines:</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="4" column="1">
       <widget class="QPushButton" name="fontSelector">
        <property name="toolTip">
         <string>Font for display</string>
@@ -110,18 +83,23 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_5">
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>Remote Endpoint:</string>
+        <string>Display font:</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
+     <item row="5" column="1">
       <widget class="QComboBox" name="remoteCapHost">
        <property name="toolTip">
         <string>Destination to send captions to</string>
        </property>
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
        <item>
         <property name="text">
          <string>Microsoft Teams</string>
@@ -139,7 +117,24 @@
        </item>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Remote Endpoint:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="hostURL">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>URL to send captions to</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
         <string>Remote URL/Token:</string>
@@ -147,13 +142,13 @@
       </widget>
      </item>
      <item row="7" column="1">
-      <widget class="QLineEdit" name="hostURL">
-       <property name="toolTip">
-        <string>URL to send captions to</string>
+      <widget class="QLineEdit" name="serverPort">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="7" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Port:</string>
@@ -161,26 +156,19 @@
       </widget>
      </item>
      <item row="8" column="1">
-      <widget class="QLineEdit" name="serverPort">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="label_9">
-       <property name="text">
-        <string>Password:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
       <widget class="QLineEdit" name="serverPassword">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>Password:</string>
        </property>
       </widget>
      </item>
