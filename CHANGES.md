@@ -1,10 +1,14 @@
 # CHANGES
 
-## Unreleased (Ver 2.3.0)
+## Ver 2.3.0
 
 Captioning interface and internals has been changed from 2.2.x versions with the help of @AshenColors.
 
-- Changed: use `deque` for sending captions to achieve "rolling" effect
+- Changed: use `deque` for sending captions to achieve "rolling" effect, and fixed repeating words 
+
+- Changed: default max line length 32 and max lines 3 for captioning
+
+- Bug: Fixed flush captions sending extra empty line
 
 - Bug: remove left whitespace from captions
 

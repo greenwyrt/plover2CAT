@@ -3159,7 +3159,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if new_text == "":
             self.cap_worker.intake("\n" + "\u2029")
         else:
-            self.cap_worker.intake(new_text + "\u2029")
+            self.cap_worker.intake(new_text)
         self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
 
     def modify_audiotime(self):
