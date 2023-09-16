@@ -1,5 +1,15 @@
 # CHANGES
 
+## Ver 2.3.1:
+
+- Changed: renamed View menu to Preferences
+
+- Changed: Move Edit Menu Shortcut to Preferences Menu
+
+- Feature: Clipboard history
+
+- Changed: will check and load `JSON` dictionary files from `plover_config/plover2cat/dict` for all transcripts
+
 ## Ver 2.3.0
 
 Captioning interface and internals has been changed from 2.2.x versions with the help of @AshenColors.

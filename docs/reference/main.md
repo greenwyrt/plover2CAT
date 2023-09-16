@@ -84,6 +84,7 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `update_gui`: collects other functions to be updated each time cursor changes
 - `update_navigation`: updates Navigation pane, displays list of heading paragraphs
 - `update_index_menu`: generates sub-menu items for quick index entry insertion
+- `clipboard_menu`: generates sub-menu items for snippets in clipboard `cutcopy_storage`
 - `set_autosave_time`: set autosave time interval
 
 ### Transcript management

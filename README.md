@@ -5,7 +5,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 - a rich text editor with steno hidden underneath:
   - paragraph "block" type formatting
   - undo/redo history
-  - conventional editing features such as cut/copy/paste
+  - conventional editing features such as cut/copy/paste and clipboard
   - find and replace for simple text, steno stroke, and untrans
   - spellcheck using the `spylls` library with user-selectable dictionaries
   - autosave transcripts

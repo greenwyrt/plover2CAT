@@ -29,6 +29,7 @@ This menu contains items related to transcript file management, import and expor
 - Cut: Cut text (and underlying steno) from paragraph.
 - Paste: Paste text (and underlying steno) into paragraph.
 - Normal Copy: Copy the text only for use in other applications.
+- *Clipboard*: Last 5 snippets from cut/copy
 - Jump to Paragraph...: Activates a dialog window to select a paragraph to nagivate to.
 - Reset Paragraph: Removes all paragraph text and steno data from paragraph. Used as the last option when text and steno data go out of sync.
 
@@ -96,15 +97,16 @@ This menu is for transcript dictionary management.
 - Spellcheck: Shows Spellcheck pane if hidden
 - Steno Search: Shows Steno Search pane if hidden
 
-### The View Menu
+### The Preferences Menu
 
-This menu contains items related to view.
+This menu contains items related to window layout, views, and shortcuts
 
 - Show All Characters: Toggle to view whitespace charactes (spaces with dots, tabs with left arrows, paragraph endings with pilcrow symbol)
 - Window Font: Set the font and size for the window. This is saved when exiting and will be maintained across sessions.
 - Background Color: Set background color.
 - Paper Tape Font: Set the font and size for the paper tape. This is savd when exiting and will be maintained across sessions.
 - Docks: Submenu with items to toggle the visibility of each dock. A user can also right click on the toolbar and toggle dock visibility that way.
+- Edit Menu Shortcuts: Activates dialog for setting key shortcuts for available menu items
 
 ### The Help Menu
 
@@ -113,7 +115,6 @@ This menu contains help:
 - About: Dialog displaying name and version number.
 - Online User Manual: Directs to the online user manual (this document).
 - Acknowledgements
-- Edit Menu Shortcuts: Activates dialog for setting key shortcuts for available menu items
 
 ## Identifiers
 
@@ -222,7 +223,7 @@ This section documents each menu item under its menu section with the identifier
 | Spellcheck           | `actionSpellcheck`       |              |
 | Steno Search         | `actionStenoSearch`      |              |
 
-### View
+### Preferences
 
 | Item                    | Action Identifier         | Shortcut |
 |-------------------------|---------------------------|----------|
@@ -236,6 +237,7 @@ This section documents each menu item under its menu section with the identifier
 | Docks \> Reveal Steno   | `actionRevealSteno`       |          |
 | Docks \> Audio Controls | `actionAudioControls`     |          |
 | Docks \> Toolbox        | `actionToolbox`           |          |
+| Edit Menu Shortcuts     | `actionEditMenuShortcuts` |          |
 
 ### Help
 
@@ -244,4 +246,3 @@ This section documents each menu item under its menu section with the identifier
 | About                   | `actionAbout`             |          |
 | Online User Manual      | `actionUserManual`        | F1       |
 | Acknowledgements        | `actionAcknowledgements`  |          |
-| Edit Menu Shortcuts     | `actionEditMenuShortcuts` |          |

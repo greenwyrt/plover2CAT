@@ -244,10 +244,16 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
+    <widget class="QMenu" name="menuClipboard">
+     <property name="title">
+      <string>Clipboard</string>
+     </property>
+    </widget>
     <addaction name="actionCopy"/>
     <addaction name="actionCut"/>
     <addaction name="actionPaste"/>
     <addaction name="actionNormalCopy"/>
+    <addaction name="menuClipboard"/>
     <addaction name="separator"/>
     <addaction name="actionJumpToParagraph"/>
     <addaction name="actionClearParagraph"/>
@@ -283,7 +289,7 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>Preferences</string>
     </property>
     <property name="toolTipsVisible">
      <bool>true</bool>
@@ -305,6 +311,7 @@
     <addaction name="actionBackgroundColor"/>
     <addaction name="actionPaperTapeFont"/>
     <addaction name="menuDocks"/>
+    <addaction name="actionEditMenuShortcuts"/>
    </widget>
    <widget class="QMenu" name="menuDictionary">
     <property name="title">
@@ -327,7 +334,6 @@
     <addaction name="actionAbout"/>
     <addaction name="actionUserManual"/>
     <addaction name="actionAcknowledgements"/>
-    <addaction name="actionEditMenuShortcuts"/>
    </widget>
    <widget class="QMenu" name="menuSteno_Actions">
     <property name="title">

@@ -161,13 +161,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
         self.undoView.setStack(self.undo_stack)
-        self.cutcopy_storage = {}
+        self.cutcopy_storage = deque(maxlen = 5)
         self.repo = None
         self.thread = QThread()
         self.progressBar = QProgressBar()
         self.spell_ignore = []
         self.caption_cursor_pos = 0
-        # self.textEdit.setPlainText("Welcome to Plover2CAT\nOpen or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")
         self.menu_enabling()
         self.update_field_menu()
         self.update_style_menu()
@@ -219,6 +218,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionCopy.triggered.connect(lambda: self.copy_steno())
         self.actionCut.triggered.connect(lambda: self.cut_steno())
         self.actionPaste.triggered.connect(lambda: self.paste_steno())
+        self.menuClipboard.triggered.connect(self.paste_steno)
         self.undo_stack.indexChanged.connect(self.check_undo_stack)
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.navigationList.itemDoubleClicked.connect(self.heading_navigation)
@@ -672,6 +672,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             action.setData((k, v["prefix"], v["hidden"]))
             self.menuIndexEntry.addAction(action)        
 
+    def clipboard_menu(self):
+        self.menuClipboard.clear()
+        for ind, snippet in enumerate(self.cutcopy_storage):
+            label = snippet.to_text()
+            action = QAction(label, self.menuClipboard)
+            action.setObjectName(f"clipboard{ind}")
+            action.setData(ind)
+            self.menuClipboard.addAction(action)
+
     def set_autosave_time(self):
         log.debug("User set autosave time.")
         settings = QSettings("Plover2CAT", "OpenCAT")
@@ -1112,6 +1121,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.update_field_menu()
         self.update_style_menu()
         self.update_index_menu({})
+        self.menuClipboard.clear()
+        self.cutcopy_storage.clear()
         self.textEdit.clear()
         self.mainTabs.setCurrentIndex(0)
         # self.textEdit.setPlainText("Welcome to Plover2CAT\nSet up or create a transcription folder first with File->New...\nA timestamped transcript folder will be created.")        
@@ -1270,6 +1281,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             set_list_dicts = set(list_dicts)
             full_paths = list(set_full_paths.difference(set_list_dicts))
             dictionaries = [pathlib.Path(i).relative_to(self.file_name) for i in full_paths]
+        editor_dict_path = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "dict"
+        if editor_dict_path.exists():
+            available_dicts = [file for file in editor_dict_path.iterdir() if str(file).endswith("json")]
+            for dic in available_dicts:
+                full_paths.append(str(dic))
         new_dict_config = add_custom_dicts(full_paths, list_dicts)
         self.engine.config = {'dictionaries': new_dict_config}
         config_dict = self.config
@@ -2199,7 +2215,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.statusBar.showMessage("Copying across paragraphs is not supported")
             return
         block_data = current_block.userData()
-        self.cutcopy_storage = block_data["strokes"].extract_steno(start_pos, stop_pos)
+        self.cutcopy_storage.appendleft(block_data["strokes"].extract_steno(start_pos, stop_pos))
+        self.clipboard_menu()
         self.textEdit.moveCursor(QTextCursor.End)
         log.debug("Copy data stored for pasting")
         # self.statusBar.showMessage(f"Copied from paragraph {current_block_num}, from {start_pos} to {stop_pos}.")
@@ -2228,7 +2245,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         block_data = current_block.userData()
         if store:
-            self.cutcopy_storage = block_data["strokes"].extract_steno(start_pos, stop_pos)
+            self.cutcopy_storage.appendleft(block_data["strokes"].extract_steno(start_pos, stop_pos))
+            self.clipboard_menu()
             log.debug("Data stored for pasting")
             self.statusBar.showMessage("Cut from paragraph {par_num}, from {start} to {end}".format(par_num = current_block_num, start = start_pos, end = stop_pos))
         self.undo_stack.beginMacro(f"Cut: {selected_text}")
@@ -2238,9 +2256,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.undo_stack.endMacro()
         log.debug(f"Cut: Cut in paragraph {current_block_num} from {start_pos} to {stop_pos}.")
 
-    def paste_steno(self):
+    def paste_steno(self, action = None):
         log.debug("Performing pasting.")
-        store_data = deepcopy(self.cutcopy_storage)
+        index = 0
+        if action:
+            index = action.data()
+        store_data = deepcopy(self.cutcopy_storage[index])
         if store_data == "":
             log.debug("Nothing in storage to paste, skipping")
             self.statusBar.showMessage("Cut or copy text to paste")
