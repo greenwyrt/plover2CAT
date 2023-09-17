@@ -1,5 +1,9 @@
 Plover2CAT is a plugin for Plover, the open-source stenography engine. If the only user requirement is to write steno on the computer, this plugin is not needed as Plover is more than sufficient. Plover2CAT supplements Plover by providing some features of a computer-aided-transcription (CAT) program.
 
+# Status
+
+Version 2.3.1 is the current release. Version 3.0.0 is under planning and development.
+
 # Features Overview:
 
 - a rich text editor with steno hidden underneath:

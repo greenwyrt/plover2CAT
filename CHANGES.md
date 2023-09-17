@@ -2,6 +2,8 @@
 
 ## Ver 2.3.1:
 
+This is the last planned update for version2.x.x unless there are major bugs.
+
 - Changed: renamed View menu to Preferences
 
 - Changed: Move Edit Menu Shortcut to Preferences Menu
