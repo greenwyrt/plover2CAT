@@ -115,7 +115,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             window_pal.setColor(QPalette.Base, back_color)
             self.setPalette(window_pal)
         if settings.contains("suggestionsource"):
-            self.suggest_source.setCurrentIndex(settings.value("suggestionsource"))
+            self.suggest_source.setCurrentIndex(int(settings.value("suggestionsource")))
         if settings.contains("recentfiles"):
             self.recent_file_menu()
         self.config = {}
@@ -3041,7 +3041,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.audio_bitrate.setEnabled(value)
 
     def recorder_error(self):
-        self.statusBar.setMessage(self.recorder.errorString())
+        self.statusBar.showMessage(self.recorder.errorString())
 
     def record_or_pause(self):
         if self.player.state() != QMediaPlayer.StoppedState:
