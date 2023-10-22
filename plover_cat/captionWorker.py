@@ -6,6 +6,7 @@ from collections import deque
 from plover_cat.steno_objects import wordsep_simple_re
 from datetime import datetime
 import obsws_python as obs
+from obsws_python.error import OBSSDKRequestError
 
 class captionWorker(QObject):
     capSend = pyqtSignal(str)
