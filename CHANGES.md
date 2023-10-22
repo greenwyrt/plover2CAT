@@ -1,5 +1,9 @@
 # CHANGES
 
+## Ver 2.3.2:
+
+- Fix bug with import OBSSDKRequestError
+
 ## Ver 2.3.1:
 
 This is the last planned update for version2.x.x unless there are major bugs.
