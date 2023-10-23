@@ -1,37 +1,18 @@
-# Main Editor Class
+# Main Window Class
 
 The main class in Plover2CAT is PloverCATWindow that subclasses `QMainWindow` and the `Ui_PloverCAT`. 
 
 ## Attributes
 
 - `engine`: holds Plover's `engine` instance
-- `textEdit`: custom instance of `QTextEdit` with custom signals
+- `textEdit`: custom instance of `PloverCATEditor`
 - `player`: instance of `QMediaPlayer`
 - `recorder`: instance of `QAudioRecorder`
-- `config`: dict holding transcript configuration
-- `file_name`: path for transcript folder
-- `backup_document`: dict of transcript data, updated on save
-- `styles`: dict holding styles
-- `txt_formats`: dict holding "full" font formatting info (after recursion)
-- `par_formats`: dict holding "full" paragraph formatting info (after recursion)
-- `user_field_dict`: dict, holds user defined fields 
-- `auto_paragraph_affixes`: dict, holds affixes for styles
 - `index_dialog`: index dialog editor
 - `suggest_dialog`: suggestion dialog editor
-- `styles_path`: path referencing style file
-- `stroke_time`: text string timestamp of last stroke
-- `audio_file`: path referencing file being played/recorded
-- `cursor_block`: integer, blockNumber of QTextCursor
-- `cursor_block_position`: integer, position of QTextCursor within block
-- `last_raw_steno`: string, raw steno of last stroke
-- `last_string_sent`: string, text sent with last stroke
-- `last_backspaces_sent`: integer, number of backspaces sent with last stroke
 - `track_lengths`: deque holding len of string_sent and backspaces_sent, used for tracking/comparing corrections if strokes need to be combined
 - `autosave_time`: `QTimer` object for activating autosave
-- `undo_stack`: holds `QUndoStack`
 - `cutcopy_storage`: `element_collection` holding steno to paste
-- `spell_ignore`: list of words to ignore in spellcheck, temporary for session
-- `repo`: Dulwich repo
 - `numbers`: dict holding corresponding Plover numbers
 
 ## Initialized
@@ -65,22 +46,27 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `about`: displays version
 - `acknowledge`: displays acknowledgments 
 - `open_help`: sends user to help docs
+- `display_message`: displays message to both log and status bar
 - `context_menu`: opens right-click menu
 - `menu_enabling`: enable/disables menu choices when transcript is open
-- `update_field_menu`: takes created user fields and creates menu actions (+ shortcuts) for insertion
-- `clear_layout`: helper function needed for clearing layout
 - `recent_file_menu`: populates Recent Files submenu with recent paths, and adds "tiles" to the "Recent Files" tab
-- `setup_completion`: sets up autocomplete using `wordlist.json` into editor if menu option toggled
-- `model_from_file`: reads completion choices from `wordlist.json`
+- `clear_layout`: helper function needed for clearing layout of recent files
 - `change_window_font`: change font family/size for window
 - `change_backgrounds`: changes background color for window
 - `change_tape_font`: change font family/size for tape dock
+- `show_toolbox_pane`: general func to show toolbox tab widget
+- `show_find_replace`: brings Find/Replace pane to front, if selection exists, place in search field
+- `search_online`: search selected text to different search engines
+- `heading_navigation`: jump to selected heading in editor from Navigation pane
+- `jump_par`: move cursor to selected paragraph
+
+
+- `update_field_menu`: takes created user fields and creates menu actions (+ shortcuts) for insertion
+- `setup_completion`: sets up autocomplete using `wordlist.json` into editor if menu option toggled
+- `model_from_file`: reads completion choices from `wordlist.json`
 - `show_invisible_char`: show all characters in editor pane
 - `calculate_space_width`: calculates average chars per inch for selected font
-- `jump_par`: move cursor to selected paragraph
-- `show_find_replace`: brings Find/Replace pane to front, if selection exists, place in search field
-- `heading_navigation`: jump to selected heading in editor from Navigation pane
-- `navigate_to`: function accepts block number, moves and sets editor cursor to beginning of block
+
 - `update_gui`: collects other functions to be updated each time cursor changes
 - `update_navigation`: updates Navigation pane, displays list of heading paragraphs
 - `update_index_menu`: generates sub-menu items for quick index entry insertion
@@ -93,7 +79,6 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - *`open_file`*: opens existing transcript project
 - `save_file`: saves transcript project
 - `save_transcript`: extracts transcript data from editor, only updates values if necessary, ie every par starting with first with `userState` == 1
-- `dulwich_save`: commits transcript files to repo with commit message
 - *`load_transcript`*: loads transcript data into editor and `userData` in blocks
 - `revert_file`: reverts transcript back to selected commit from repo
 - *`save_as_file`*: saves transcript data and tape into new location
@@ -112,6 +97,7 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `set_dictionary_config`: takes list of dictionary paths, generate default dict if missing, backups present dictionary stack and loads transcript dictionaries
 - `restore_dictionary_from_backup`: restore plover dictionary stack from backup file
 - `transcript_suggest`: trigger suggestion dialog
+
 ### Config management
 
 - `load_config_file`: reads config file and sets editor UI variables
@@ -124,7 +110,7 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `create_default_styles`: creates default `style.json` in `styles/`
 - `load_check_styles`: loads style file based on path, copies to `style/`
 - `gen_style_formats`: generates complete font and paragraph format dicts recursively for each style
-- `select_style_file`: load style fil from user file selction
+- `select_style_file`: load style file from user file selction
 - `style_from_template`: reads ODF or RTF file, extracting only style information to write to new style file
 - `display_block_data`: updates style and block properties display, triggers autocomplete dropdown if toggled
 - `display_block_steno`: takes strokes, update Reveal Steno dock with strokes, called from `display_block_data`

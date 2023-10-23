@@ -1,5 +1,17 @@
 # CHANGES
 
+## Ver 3.0.0:
+
+This version is refactored to separate editor internals and the GUI to implement new features in future versions.
+
+Internal changes:
+
+[ ] separating transcript object from overall editor
+[x] combine copy and cut steno (reduce code repetition)
+[ ] integrating audio properly to transcript
+[ ] convert `steno_insert`, `steno_remove`, `merge_paragraphs`, `split_paragraph` to take and use cursor passed in
+[ ] manage log `debug` and `info` levels with `send_message`
+
 ## Ver 2.3.1:
 
 This is the last planned update for version2.x.x unless there are major bugs.

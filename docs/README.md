@@ -102,7 +102,8 @@ Much of the following content is more useful if the Plover2CAT editor is open an
 - [Supported RTF/CRE features](reference/rtf_support.md)
 - [Commands](reference/commands.md)
 - [Captioning](reference/captions.md)
-- [Editor class](reference/main.md)
+- [Window](reference/main.md)
+- [Transcript editor object](reference/transcripteditor.md)
 - [Custom text objects](reference/elements.md)
 - [Dialogs](reference/dialogs.md)
 

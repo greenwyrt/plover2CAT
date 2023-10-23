@@ -115,7 +115,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             window_pal.setColor(QPalette.Base, back_color)
             self.setPalette(window_pal)
         if settings.contains("suggestionsource"):
-            self.suggest_source.setCurrentIndex(settings.value("suggestionsource"))
+            self.suggest_source.setCurrentIndex(int(settings.value("suggestionsource")))
         if settings.contains("recentfiles"):
             self.recent_file_menu()
         self.config = {}
@@ -2200,7 +2200,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def copy_steno(self):
         log.debug("Performing copying.")
         current_cursor = self.textEdit.textCursor()
-        print(current_cursor.block().userData()["strokes"].merge_elements())
+        # print(current_cursor.block().userData()["strokes"].merge_elements())
         if not current_cursor.hasSelection():
             log.debug("No text selected for copying, skipping")
             self.statusBar.showMessage("Select text for copying")

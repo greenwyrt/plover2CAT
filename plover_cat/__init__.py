@@ -5,7 +5,7 @@ from plover.gui_qt.tool import Tool
 
 from plover_cat.plover_cat_ui import Ui_PloverCAT
 
-from plover_cat.main_window import PloverCATWindow
+from plover_cat.PloverCATWindow import PloverCATWindow
 
 from . __version__ import __version__
 

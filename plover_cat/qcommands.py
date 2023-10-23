@@ -56,15 +56,16 @@ class element_actions:
 
 class steno_insert(QUndoCommand):
     """Inserts text and steno data into textblock in textdocument"""
-    def __init__(self,  document, block, position_in_block, steno):
+    def __init__(self, cursor, document, block, position_in_block, steno):
         super().__init__()
         self.document = document        
         self.block = block
         self.position_in_block = position_in_block
         self.steno = steno
         self.block_state = 1
+        self.cursor = cursor
     def redo(self):
-        current_cursor = self.document.textCursor()
+        current_cursor = self.cursor
         current_block = self.document.document().findBlockByNumber(self.block)
         current_cursor.setPosition(current_block.position() + self.position_in_block)
         self.block_state = current_block.userState()
@@ -102,7 +103,7 @@ class steno_insert(QUndoCommand):
               
 class steno_remove(QUndoCommand):
     """Removes text and steno data from textblock in textdocument"""
-    def __init__(self,  document, block, position_in_block, length, steno = ""):
+    def __init__(self, cursor, document, block, position_in_block, length, steno = ""):
         super().__init__()
         self.document = document
         self.block = block
@@ -110,8 +111,9 @@ class steno_remove(QUndoCommand):
         self.length = length
         self.steno = steno
         self.block_state = 1
+        self.cursor = cursor
     def redo(self):
-        current_cursor = self.document.textCursor()
+        current_cursor = self.cursor
         current_block = self.document.document().findBlockByNumber(self.block)
         start_pos = current_block.position() + self.position_in_block
         current_cursor.setPosition(start_pos)
@@ -195,7 +197,7 @@ class image_insert(QUndoCommand):
 
 class split_steno_par(QUndoCommand):
     """ Splits paragraphs at position in block, and puts steno properly with new textblock """
-    def __init__(self, document, block, position_in_block, space_placement, new_line_stroke, remove_space = True):
+    def __init__(self, cursor, document, block, position_in_block, space_placement, new_line_stroke, remove_space = True):
         super().__init__()
         self.block = block
         self.position_in_block = position_in_block
@@ -208,8 +210,9 @@ class split_steno_par(QUndoCommand):
         self.block_text = ""
         self.block_data = ""
         self.block_state = 1
+        self.cursor = cursor
     def redo(self):
-        current_cursor = self.document.textCursor()
+        current_cursor = self.cursor
         current_block = self.document.document().findBlockByNumber(self.block)
         current_cursor.setPosition(current_block.position() + self.position_in_block)
         self.block_data = deepcopy(current_block.userData().return_all())
@@ -283,7 +286,7 @@ class split_steno_par(QUndoCommand):
 
 class merge_steno_par(QUndoCommand):
     """Merge text and steno from two neighboring textblocks"""
-    def __init__(self, document, block, position_in_block, space_placement, add_space = True):
+    def __init__(self, cursor, document, block, position_in_block, space_placement, add_space = True):
         super().__init__()
         self.block = block
         self.document = document
@@ -292,9 +295,10 @@ class merge_steno_par(QUndoCommand):
         self.add_space = add_space
         self.first_data_dict = {}
         self.second_data_dict = {} 
-        self.block_state = 1       
+        self.block_state = 1   
+        self.cursor = cursor    
     def redo(self):
-        current_cursor = self.document.textCursor()
+        current_cursor = self.cursor
         first_block_num = self.block
         second_block_num = self.block + 1
         first_block = self.document.document().findBlockByNumber(first_block_num)

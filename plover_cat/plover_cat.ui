@@ -129,56 +129,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="editorTab">
-       <attribute name="title">
-        <string>Editor</string>
-       </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="PloverCATEditor" name="textEdit">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>3</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <family>Courier New</family>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="contextMenuPolicy">
-           <enum>Qt::CustomContextMenu</enum>
-          </property>
-          <property name="acceptDrops">
-           <bool>false</bool>
-          </property>
-          <property name="toolTip">
-           <string>Richtext editor.</string>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
-          </property>
-          <property name="documentTitle">
-           <string/>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="cursorWidth">
-           <number>5</number>
-          </property>
-          <property name="textInteractionFlags">
-           <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -437,7 +387,7 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QToolBar" name="toolbar_file">
+  <widget class="QToolBar" name="toolbarFile">
    <property name="windowTitle">
     <string>File Toolbar</string>
    </property>
@@ -873,7 +823,7 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
+              <y>-32</y>
               <width>351</width>
               <height>466</height>
              </rect>
@@ -2596,7 +2546,7 @@ position.</string>
     </layout>
    </widget>
   </widget>
-  <widget class="QToolBar" name="toolbar_steno">
+  <widget class="QToolBar" name="toolbarSteno">
    <property name="windowTitle">
     <string>Steno Actions Toolbar</string>
    </property>
@@ -2616,7 +2566,7 @@ position.</string>
    <addaction name="actionRetroactiveDefine"/>
    <addaction name="actionDefineLast"/>
   </widget>
-  <widget class="QToolBar" name="toolbar_audio">
+  <widget class="QToolBar" name="toolbarAudio">
    <property name="windowTitle">
     <string>Audio Toolbar</string>
    </property>
@@ -2792,7 +2742,7 @@ position.</string>
     </layout>
    </widget>
   </widget>
-  <widget class="QToolBar" name="toolbar_edit">
+  <widget class="QToolBar" name="toolbarEdit">
    <property name="windowTitle">
     <string>Edit Toolbar</string>
    </property>
@@ -3822,13 +3772,6 @@ position.</string>
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>PloverCATEditor</class>
-   <extends>QPlainTextEdit</extends>
-   <header>plover_cat.TextEditor</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="resources/resources.qrc"/>
  </resources>
