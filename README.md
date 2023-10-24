@@ -32,7 +32,7 @@ Version 2.3.1 is the current release. Version 3.0.0 is under planning and develo
   - separate window to display captions
   - customizable line lengths and word buffer between current text and text displayed
   - customizable minimum time interval between lines appearing
-  - send captions to Microsoft Teams, Zoom, or OBS
+  - send captions to Microsoft Teams, Zoom, or OBS (both local and remote)
 
 - export transcript formats (with style templates):
   - plain text

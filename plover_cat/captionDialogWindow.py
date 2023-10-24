@@ -14,12 +14,15 @@ class captionDialogWindow(QDialog, Ui_captionDialog):
     def enable_host_ui(self, index):
         if index != 0:
             self.hostURL.setEnabled(True)
+            self.hostURL.setPlaceholderText("")
             self.serverPassword.setEnabled(False) 
             self.serverPort.setEnabled(False)
             self.serverPort.setPlaceholderText("")
             if index == 3:
                 if not self.serverPort.text():
                     self.serverPort.setPlaceholderText("4455")
+                if not self.hostURL.text():
+                    self.hostURL.setPlaceholderText("localhost")
                 self.serverPort.setEnabled(True)
                 self.serverPassword.setEnabled(True)
         else:

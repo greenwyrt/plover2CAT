@@ -22,6 +22,10 @@ class captionWorker(QObject):
         self.port = port
         self.password = password
         if self.remote == "OBS":
+            if not self.port:
+                self.port = "4455"
+            if not self.endpoint:
+                self.endpoint = "localhost"
             self.obs = obs.ReqClient(host=self.endpoint, port=self.port, password=self.password, timeout=3) 
             self.obs_queue = deque(maxlen = self.max_lines)
         self.word_queue = Queue()

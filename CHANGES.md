@@ -5,6 +5,7 @@
 - Change: add default port 4455 for OBS
 - Bug: caption worker with obs no longer throws error if port is empty (create client if set to OBS)
 - Remote captions on twitch successfully tested with https://localhost.run/
+- Change: updated [caption how-to](docs/howto/captions.md) with new instructions for remote captions
 
 ## Ver 2.3.2:
 
