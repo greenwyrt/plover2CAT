@@ -3041,7 +3041,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.audio_bitrate.setEnabled(value)
 
     def recorder_error(self):
-        self.statusBar.setMessage(self.recorder.errorString())
+        self.statusBar.showMessage(self.recorder.errorString())
 
     def record_or_pause(self):
         if self.player.state() != QMediaPlayer.StoppedState:
