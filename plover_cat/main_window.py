@@ -3139,9 +3139,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 # if captions are enabled in middle of document, don't start from beginning
                 self.caption_cursor_pos = self.textEdit.textCursor().position()
                 self.thread = QThread()
+                host_port = self.caption_dialog.serverPort.text()
+                if not host_port:
+                    host_port = "4455"
                 self.cap_worker = captionWorker(max_length = self.caption_dialog.capLength.value(), max_lines = self.caption_dialog.maxDisplayLines.value(),
                                     remote = self.caption_dialog.remoteCapHost.currentText(), endpoint = self.caption_dialog.hostURL.text(), 
-                                    port = self.caption_dialog.serverPort.text(), password = self.caption_dialog.serverPassword.text())
+                                    port = host_port, password = self.caption_dialog.serverPassword.text())
                 self.cap_worker.moveToThread(self.thread)
                 self.thread.started.connect(self.cap_worker.make_caps)
                 self.cap_worker.finished.connect(self.thread.quit)

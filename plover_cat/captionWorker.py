@@ -21,7 +21,7 @@ class captionWorker(QObject):
         self.endpoint = endpoint
         self.port = port
         self.password = password
-        if self.port:
+        if self.remote == "OBS":
             self.obs = obs.ReqClient(host=self.endpoint, port=self.port, password=self.password, timeout=3) 
             self.obs_queue = deque(maxlen = self.max_lines)
         self.word_queue = Queue()
@@ -92,3 +92,5 @@ class captionWorker(QObject):
             res = self.obs.send_stream_caption(cap)
         except OBSSDKRequestError as err:
             self.postMessage.emit(f"Captioning: send to OBS failed with error code {err.code}")
+        except Exception as e:
+            self.postMessage.emit(f"Captioning: send to OBS failed. Error message is {e}")

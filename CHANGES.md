@@ -1,5 +1,11 @@
 # CHANGES
 
+## Ver 2.3.3:
+
+- Change: add default port 4455 for OBS
+- Bug: caption worker with obs no longer throws error if port is empty (create client if set to OBS)
+- Remote captions on twitch successfully tested with https://localhost.run/
+
 ## Ver 2.3.2:
 
 - Fix bug with import OBSSDKRequestError
