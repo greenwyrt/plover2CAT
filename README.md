@@ -2,7 +2,7 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 
 # Status
 
-Version 2.3.1 is the current release. Version 3.0.0 is under planning and development.
+Version 2.3.3 is the current release. Version 3.0.0 is under planning and development.
 
 # Features Overview:
 
