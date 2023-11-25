@@ -461,22 +461,22 @@ class style_update(QUndoCommand):
         log.info(f"Style undo: {log_dict}")
 
 class update_field(QUndoCommand):
-    def __init__(self, document, block, position, old_dict, new_dict):
+    def __init__(self, cursor, document, block, position, old_dict, new_dict):
         super().__init__()
         self.document = document
         self.block = block
         self.position_in_block = position
         # first is the reference to dict to be updated
-        self.user_field_dict = old_dict
+        self.user_field_dict = deepcopy(old_dict)
         self.new_dict = deepcopy(new_dict)
         # second one is the copy to be kept for undos
         self.store_dict = deepcopy(old_dict)
+        self.cursor = cursor
     def redo(self):
-        current_cursor = self.document.textCursor()
+        current_cursor = self.cursor
         current_block = self.document.document().findBlockByNumber(self.block)
         block = self.document.document().begin()
-        self.document.parent().parent().user_field_dict.clear()
-        self.document.parent().parent().user_field_dict.update(self.new_dict)
+        self.document.set_config_value("user_field_dict", self.new_dict)
         for i in range(self.document.document().blockCount()):     
             block_strokes = block.userData()["strokes"]
             if any([el.element == "field" for el in block_strokes.data]):
@@ -489,7 +489,7 @@ class update_field(QUndoCommand):
                         current_cursor.setPosition(block.position() + start_pos)
                         current_cursor.setPosition(block.position() + end_pos, QTextCursor.KeepAnchor)
                         current_cursor.removeSelectedText()
-                        el.user_dict = self.document.parent().parent().user_field_dict
+                        el.user_dict = self.new_dict
                         current_cursor.insertText(el.to_text())
             if block == self.document.document().lastBlock():
                 break
@@ -502,8 +502,7 @@ class update_field(QUndoCommand):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
         block = self.document.document().begin()
-        self.document.parent().parent().user_field_dict.clear()
-        self.document.parent().parent().user_field_dict.update(self.store_dict)
+        self.document.set_config_value("user_field_dict", self.store_dict)
         for i in range(self.document.document().blockCount()):   
             block_strokes = block.userData()["strokes"]
             for ind, el in enumerate(block_strokes.data):
@@ -514,7 +513,7 @@ class update_field(QUndoCommand):
                     current_cursor.setPosition(block.position() + start_pos)
                     current_cursor.setPosition(block.position() + end_pos, QTextCursor.KeepAnchor)
                     current_cursor.removeSelectedText()
-                    el.user_dict = self.document.parent().parent().user_field_dict
+                    el.user_dict = self.user_field_dict
                     current_cursor.insertText(el.to_text())
             if block == self.document.document().lastBlock():
                 break
@@ -524,7 +523,7 @@ class update_field(QUndoCommand):
         log.info(f"Field: {log_dict}")        
 
 class update_entries(QUndoCommand):
-    def __init__(self, document, block, position, old_dict, new_dict):
+    def __init__(self, cursor, document, block, position, old_dict, new_dict):
         super().__init__()
         self.document = document
         self.block = block
@@ -532,8 +531,9 @@ class update_entries(QUndoCommand):
         self.new_dict = deepcopy(new_dict)
         # second one is the copy to be kept for undos
         self.store_dict = deepcopy(old_dict)
+        self.cursor = cursor
     def redo(self):
-        current_cursor = self.document.textCursor()
+        current_cursor = self.cursor
         current_block = self.document.document().findBlockByNumber(self.block)
         block = self.document.document().begin()
         for i in range(self.document.document().blockCount()):    

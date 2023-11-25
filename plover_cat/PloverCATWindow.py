@@ -6,6 +6,7 @@ import pathlib
 import json
 import textwrap
 from datetime import datetime, timezone
+import time
 from collections import Counter, deque
 from shutil import copyfile
 from copy import deepcopy, copy
@@ -72,6 +73,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.recentfileflow.setObjectName("recentfileflow")
         self.flowparent.addLayout(self.recentfileflow)
         self.flowparent.addStretch()
+        self.video = None
         # self.player = QMediaPlayer()
         # self.recorder = QAudioRecorder()
         # # self.player.videoAvailableChanged.connect(self.set_up_video)
@@ -124,26 +126,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
         self.cap_worker = None
         self.autosave_time = QTimer()
-        # self.actionUndo = self.undo_stack.createUndoAction(self)
-        # undo_icon = QtGui.QIcon()
-        # undo_icon.addFile(":/arrow-curve-180.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # self.actionUndo.setIcon(undo_icon)
-        # self.actionUndo.setShortcutContext(QtCore.Qt.WindowShortcut)
-        # self.actionUndo.setToolTip("Undo writing or other action")
-        # self.actionUndo.setShortcut("Ctrl+Z")
-        # self.actionUndo.setObjectName("actionUndo")
-        # self.actionRedo = self.undo_stack.createRedoAction(self)
-        # redo_icon = QtGui.QIcon()
-        # redo_icon.addFile(":/arrow-curve.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # self.actionRedo.setIcon(redo_icon)
-        # self.actionRedo.setShortcutContext(QtCore.Qt.WindowShortcut)
-        # self.actionRedo.setToolTip("Redo writing or other action")
-        # self.actionRedo.setShortcut("Ctrl+Y")
-        # self.actionRedo.setObjectName("actionRedo")
-        # self.menuEdit.addSeparator()
-        # self.menuEdit.addAction(self.actionUndo)
-        # self.menuEdit.addAction(self.actionRedo)
-        # self.undoView.setStack(self.undo_stack)
         self.cutcopy_storage = deque(maxlen = 5)
         self.thread = QThread()
         self.progressBar = QProgressBar()
@@ -151,9 +133,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionUndo = None
         self.actionRedo = None
         self.menu_enabling()
+        self.audio_menu_enabling(False)
         self.set_shortcuts()
-        # self.update_field_menu()
-        # self.update_style_menu()
         # connections:
         ## engine connections
         engine.signal_connect("stroked", self.on_stroke) 
@@ -164,35 +145,27 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionQuit.triggered.connect(lambda: self.action_close())
         self.actionOpen.triggered.connect(lambda: self.open_file())
         self.actionNew.triggered.connect(lambda: self.create_new())
-        # self.actionClose.triggered.connect(lambda: self.close_file())
-        # self.actionSave.triggered.connect(lambda: self.save_file())
+        self.actionClose.triggered.connect(lambda: self.close_file())
+        self.actionSave.triggered.connect(lambda: self.save_file())
         # self.actionSaveAs.triggered.connect(lambda: self.save_as_file())
         # self.menuRecentFiles.triggered.connect(self.recentfile_open)
-        # self.actionEnableAutosave.triggered.connect(self.autosave_setup)
-        # self.actionSetAutosaveTime.triggered.connect(self.set_autosave_time)
-        # self.autosave_time.timeout.connect(self.autosave)
-        # self.actionOpenTranscriptFolder.triggered.connect(lambda: self.open_root())
+        self.actionEnableAutosave.triggered.connect(self.autosave_setup)
+        self.actionSetAutosaveTime.triggered.connect(self.set_autosave_time)
+        self.autosave_time.timeout.connect(self.autosave)
+        self.actionOpenTranscriptFolder.triggered.connect(lambda: self.open_root())
         # self.actionImportRTF.triggered.connect(lambda: self.import_rtf())
-        # ## audio connections
-        # self.actionOpenAudio.triggered.connect(lambda: self.open_audio())
-        # self.actionPlayPause.triggered.connect(self.play_pause)
-        # self.actionStopAudio.triggered.connect(self.stop_play)
-        # self.playRate.valueChanged.connect(self.update_playback_rate)
-        # self.player.durationChanged.connect(self.update_duration)
-        # self.player.positionChanged.connect(self.update_seeker_track)
-        # self.audio_seeker.sliderMoved.connect(self.set_position)
-        # self.actionSkipForward.triggered.connect(lambda: self.seek_position())
-        # self.actionSkipBack.triggered.connect(lambda: self.seek_position(-1))
+        ## audio connections
+        self.actionOpenAudio.triggered.connect(lambda: self.open_audio())
         # self.actionRecordPause.triggered.connect(lambda: self.record_or_pause())
         # self.actionStopRecording.triggered.connect(lambda: self.stop_record())
         # self.recorder.error.connect(lambda: self.recorder_error())
         # self.recorder.durationChanged.connect(self.update_record_time)
-        # self.actionShowVideo.triggered.connect(lambda: self.show_hide_video())
+        self.actionShowVideo.triggered.connect(lambda: self.show_hide_video())
         # self.actionCaptioning.triggered.connect(self.setup_captions)
         # self.actionFlushCaption.triggered.connect(self.flush_caption)
         # self.actionAddChangeAudioTimestamps.triggered.connect(self.modify_audiotime)
-        # ## editor related connections
-        # self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
+        ## editor related connections
+        self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
         # self.textEdit.complete.connect(self.insert_autocomplete)
         # self.textEdit.cursorPositionChanged.connect(self.update_gui)
         # self.editorCheck.stateChanged.connect(self.editor_lock)
@@ -204,34 +177,31 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # self.undo_stack.indexChanged.connect(self.check_undo_stack)
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.navigationList.itemDoubleClicked.connect(self.heading_navigation)
-        # self.revert_version.clicked.connect(self.revert_file)
-        # ## insert related
-        # self.textEdit.send_del.connect(self.mock_del)
-        # self.textEdit.send_key.connect(self.mock_key)
-        # self.textEdit.send_bks.connect(self.mock_bks)
-        # self.actionInsertImage.triggered.connect(lambda: self.insert_image())
-        # self.actionInsertNormalText.triggered.connect(self.insert_text)
-        # self.actionEditFields.triggered.connect(self.edit_fields)
-        # self.menuField.triggered.connect(self.insert_field)
-        # self.reveal_steno_refresh.clicked.connect(self.refresh_steno_display)
-        # self.actionAutomaticAffixes.toggled.connect(self.enable_affix)
-        # self.actionEditAffixes.triggered.connect(self.edit_auto_affixes)
-        # self.menuIndexEntry.triggered.connect(lambda action, el = None: self.insert_index_entry(el = el, action = action))
-        # self.actionEditIndices.triggered.connect(self.edit_indices)
+        self.actionRevertTranscript.triggered.connect(self.revert_file)
+        ## insert related
+        self.actionInsertImage.triggered.connect(lambda: self.insert_image())
+        self.actionInsertNormalText.triggered.connect(self.insert_text)
+        self.actionEditFields.triggered.connect(self.edit_fields)
+        self.menuField.triggered.connect(self.insert_field)
+        self.reveal_steno_refresh.clicked.connect(self.refresh_steno_display)
+        self.actionAutomaticAffixes.toggled.connect(self.enable_affix)
+        self.actionEditAffixes.triggered.connect(self.edit_auto_affixes)
+        self.menuIndexEntry.triggered.connect(lambda action, el = None: self.insert_index_entry(el = el, action = action))
+        self.actionEditIndices.triggered.connect(self.edit_indices)
         # self.actionRedact.triggered.connect(self.insert_redacted)     
-        # ## steno related edits
-        # self.actionMergeParagraphs.triggered.connect(lambda: self.merge_paragraphs())
-        # self.actionSplitParagraph.triggered.connect(lambda: self.split_paragraph())
+        ## steno related edits
+        self.actionMergeParagraphs.triggered.connect(lambda: self.merge_paragraphs())
+        self.actionSplitParagraph.triggered.connect(lambda: self.split_paragraph())
         # self.actionRetroactiveDefine.triggered.connect(lambda: self.define_retroactive())
         # self.actionDefineLast.triggered.connect(lambda: self.define_scan())
         # self.actionDeleteLast.triggered.connect(lambda: self.delete_scan())
         # self.actionAutocompletion.triggered.connect(self.setup_completion)
         # self.actionAddAutocompletionTerm.triggered.connect(self.add_autocomplete_item)
         # self.actionTranslateTape.triggered.connect(self.tape_translate)
-        # ## dict related
-        # self.actionAddCustomDict.triggered.connect(lambda: self.add_dict())
-        # self.actionRemoveTranscriptDict.triggered.connect(lambda: self.remove_dict())
-        # self.actionTranscriptSuggestions.triggered.connect(lambda: self.transcript_suggest())
+        ## dict related
+        self.actionAddCustomDict.triggered.connect(lambda: self.add_dict())
+        self.actionRemoveTranscriptDict.triggered.connect(lambda: self.remove_dict())
+        self.actionTranscriptSuggestions.triggered.connect(lambda: self.transcript_suggest())
         # ## style connections
         # self.edit_page_layout.clicked.connect(self.update_config)
         # self.editCurrentStyle.clicked.connect(self.style_edit)
@@ -246,14 +216,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # ## view
         self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
         self.actionBackgroundColor.triggered.connect(lambda: self.change_backgrounds())
-        # self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
+        self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
         self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
         ## tools
         self.actionStyling.triggered.connect(lambda: self.show_toolbox_pane(self.styling_pane))
         self.actionPageFormat.triggered.connect(lambda: self.show_toolbox_pane(self.page_format_pane))
-        # self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
+        self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
         self.actionParagraph.triggered.connect(lambda: self.show_toolbox_pane(self.paragraph_pane))
-        self.actionAudioRecording.triggered.connect(lambda: self.show_toolbox_pane(self.audio_recording_pane))
         self.actionSpellcheck.triggered.connect(lambda: self.show_toolbox_pane(self.spellcheck_pane))
         # self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
         self.actionSearchWikipedia.triggered.connect(lambda: self.search_online("https://en.wikipedia.org/wiki/Special:Search/{0}"))
@@ -283,7 +252,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # self.suggest_source.currentIndexChanged.connect(lambda: self.get_suggestions())
         # ## tape
         # self.textEdit.document().blockCountChanged.connect(lambda: self.get_suggestions())
-        # self.numbers = {number: letter for letter, number in plover.system.NUMBERS.items()}
         # self.strokeLocate.clicked.connect(lambda: self.stroke_to_text_move())
         # # export
         # self.actionPlainText.triggered.connect(lambda: self.export_text())
@@ -365,6 +333,27 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage(txt)
         log.debug(txt)
 
+    def update_tape(self, txt):
+        # todo: if ever tape format changes, alter here
+        lines = txt.splitlines()
+        for line in lines:
+            self.strokeList.appendPlainText(line)
+
+    def display_block_steno(self, strokes):
+        # clear of last block data
+        self.parSteno.clear()
+        for ind, el in enumerate(strokes.data):
+            item = QListWidgetItem()
+            item.setText(el.to_text())
+            item.setData(Qt.ToolTipRole, el.to_display())
+            item.setData(Qt.UserRole, ind)
+            self.parSteno.addItem(item)     
+
+    def refresh_steno_display(self):
+        current_cursor = self.textEdit.textCursor()
+        block_strokes = current_cursor.block().userData()["strokes"]
+        self.display_block_steno(block_strokes)
+
     def context_menu(self, pos):
         log.debug("User activated context menu.")
         menu = QMenu()
@@ -396,6 +385,68 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionSaveAs.setEnabled(not value)
         self.actionOpenTranscriptFolder.setEnabled(not value)
         self.actionClose.setEnabled(not value)
+
+    def audio_menu_enabling(self, value = True):
+        self.actionOpenAudio.setEnabled(not value)
+        self.actionPlayPause.setEnabled(value)
+        self.actionStopAudio.setEnabled(value)
+        self.actionSkipForward.setEnabled(value)
+        self.actionSkipBack.setEnabled(value)
+        self.actionSpeedUp.setEnabled(value)
+        self.actionSlowDown.setEnabled(value)
+        self.playRate.setEnabled(value)
+        self.audioDelay.setEnabled(value)
+        self.audio_seeker.setEnabled(value)
+        if not self.textEdit:
+            return
+        if value:
+            label_text = "Audio:" + str(self.textEdit.audio_file.name)
+            self.audio_label.setText(label_text)
+            self.actionPlayPause.triggered.connect(self.textEdit.play_pause_audio)
+            self.actionStopAudio.triggered.connect(self.textEdit.player.stop)
+            self.update_seeker_track(self.textEdit.audio_position)
+            self.update_duration(self.textEdit.player.duration())
+            self.audio_seeker.sliderMoved.connect(self.textEdit.player.setPosition)
+            self.textEdit.audio_position_changed.connect(self.update_seeker_track)
+            self.textEdit.audio_length_changed.connect(self.update_duration)
+            self.actionSkipForward.triggered.connect(lambda: self.textEdit.player.setPosition(self.textEdit.player.position() + 5000))
+            self.actionSkipBack.triggered.connect(lambda: self.textEdit.player.setPosition(self.textEdit.player.position() - 5000))
+            self.playRate.valueChanged.connect(self.textEdit.player.setPlaybackRate)
+            self.audioDelay.setValue(self.textEdit.audio_delay)
+            self.audioDelay.valueChanged.connect(self.set_audio_delay)
+        else:
+            self.audio_label.setText("Select file to play audio")
+            self.actionPlayPause.triggered.disconnect()
+            self.actionStopAudio.triggered.disconnect()
+            self.audio_seeker.sliderMoved.disconnect()
+            self.actionSkipForward.triggered.disconnect()
+            self.actionSkipBack.triggered.disconnect()
+            self.playRate.valueChanged.disconnect()
+            self.playRate.setValue(1)
+            self.update_duration(0)
+            self.update_seeker_track(0)
+            self.audioDelay.valueChanged.disconnect()
+            self.audioDelay.setValue(0)
+
+    def update_duration(self, duration):
+        self.audio_seeker.setMaximum(duration)
+        self.audio_duration.setText(ms_to_hours(duration))
+
+    def update_seeker_track(self, position):
+        self.audio_seeker.setValue(position)
+        self.audio_curr_pos.setText(ms_to_hours(position))
+
+    def open_root(self):
+        selected_folder = pathlib.Path(self.textEdit.file_name)
+        self.display_message(f"User open file directory {str(selected_folder)}")
+        if platform.startswith("win"):
+            os.startfile(selected_folder)
+        elif platform.startswith("linux"):
+            subprocess.call(['xdg-open', selected_folder])
+        elif platform.startswith("darwin"):
+            subprocess.call(['open', selected_folder])
+        else:
+            self.display_message("Unknown operating system. Not opening file directory.")
 
     def recent_file_menu(self):
         log.debug("Updating recent files menu.")
@@ -455,6 +506,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.strokeList.setFont(font)
             log.debug("User set paper tape font.")
 
+    def show_invisible_char(self):
+        doc_options = self.textEdit.document().defaultTextOption()
+        if self.actionShowAllCharacters.isChecked():
+            self.display_message("User enabled show invisible characters.")      
+            doc_options.setFlags(doc_options.flags() | QTextOption.ShowTabsAndSpaces | QTextOption.ShowLineAndParagraphSeparators)
+        else:
+            self.display_message("User disabled show invisible characters.")      
+            doc_options.setFlags(doc_options.flags() & ~QTextOption.ShowTabsAndSpaces & ~QTextOption.ShowLineAndParagraphSeparators)
+        self.textEdit.document().setDefaultTextOption(doc_options)
+
     def show_toolbox_pane(self, pane):
         if not self.dockProp.isVisible():
             self.dockProp.setVisible(True)    
@@ -490,6 +551,33 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug(f"User set jump to block {block_num}")
             self.textEdit.navigate_to(block_num)
 
+    def update_config_gui(self):
+        self.update_field_menu()
+        # todo: update page dimensions here
+
+    def update_field_menu(self):
+        self.display_message("Updating field sub-menu.")
+        self.menuField.clear()
+        for ind, (k, v) in enumerate(self.textEdit.user_field_dict.items()):
+            label = "{%s}: %s" % (k, v)
+            action = QAction(label, self.menuField)
+            if ind < 10:           
+                action.setShortcut("Ctrl+Shift+%d" % ind)
+            action.setData(k)
+            self.menuField.addAction(action)
+
+    def update_index_menu(self, index_dict = None):
+        if not index_dict:
+            index_dict = self.textEdit.extract_indexes()
+        self.display_message("Updating index entry insertion sub-menu.")
+        self.menuIndexEntry.clear()
+        for ind, (k, v) in enumerate(index_dict.items()):
+            label = "%s %s" % (k, v["prefix"])
+            action = QAction(label, self.menuIndexEntry)
+            action.setObjectName(f"index{ind}")
+            action.setData((k, v["prefix"], v["hidden"]))
+            self.menuIndexEntry.addAction(action)  
+
     def clipboard_menu(self):
         self.menuClipboard.clear()
         for ind, snippet in enumerate(self.cutcopy_storage):
@@ -498,6 +586,33 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             action.setObjectName(f"clipboard{ind}")
             action.setData(ind)
             self.menuClipboard.addAction(action)
+
+    def set_autosave_time(self):
+        log.debug("User set autosave time.")
+        settings = QSettings("Plover2CAT", "OpenCAT")
+        if settings.contains("autosaveinterval"):
+            min_save = settings.value("autosaveinterval")
+        else:
+            min_save = 5      
+        num, ok = QInputDialog().getInt(self, "Set autosave interval.", "Minutes:", min_save, 1, 100)
+        if ok:
+            log.debug(f"User set autosave interval to {num}.")
+            settings.setValue("autosaveinterval", num)
+            if self.actionEnableAutosave.isChecked():
+                self.autosave_setup(True)
+
+    def autosave_setup(self, checked):
+        settings = QSettings("Plover2CAT", "OpenCAT")
+        if settings.contains("autosaveinterval"):
+            min_save = settings.value("autosaveinterval")
+        else:
+            min_save = 5
+        milli = min_save * 60 * 1000           
+        if checked:
+            self.autosave_time.stop()
+            self.autosave_time.start(milli)
+        else:
+            self.autosave_time.stop()
 
     def create_new(self):
         transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
@@ -521,11 +636,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             selected_folder = pathlib.Path(selected_folder).parent
         else:
             selected_folder = pathlib.Path(file_path)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         self.display_message(f"Loading project files from {str(selected_folder)}")   
         editorTab = QtWidgets.QWidget()
-        editorTab.setObjectName(f"editorTab{self.mainTabs.count()}")
+        editorTab.setObjectName(f"editorTab_{time.time()}")
         editorLayout = QtWidgets.QHBoxLayout(editorTab)
-        editorLayout.setObjectName(f"editorLayout{self.mainTabs.count()}")
+        editorLayout.setObjectName(f"editorLayout_{time.time()}")
         self.textEdit = PloverCATEditor(editorTab)
         self.textEdit.load(selected_folder, self.engine)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -534,15 +650,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         sizePolicy.setHeightForWidth(self.textEdit.sizePolicy().hasHeightForWidth())
         self.textEdit.setSizePolicy(sizePolicy) 
         editorLayout.addWidget(self.textEdit)
-        tab_index = self.mainTabs.addTab(editorTab, self.textEdit.file_name.name)  
+        tab_index = self.mainTabs.addTab(editorTab, self.textEdit.file_name.name)
+        self.update_tape(self.textEdit.tape)
         self.mainTabs.setCurrentIndex(tab_index)
+        QApplication.restoreOverrideCursor()
         self.setup_connections()
 
     def setup_connections(self):
-        if self.actionUndo:
-            self.menuEdit.removeAction(self.actionUndo)
-        if self.actionRedo:
-            self.menuEdit.removeAction(self.actionRedo)
         self.actionUndo = self.textEdit.undo_stack.createUndoAction(self.menuEdit)
         undo_icon = QtGui.QIcon()
         undo_icon.addFile(":/arrow-curve-180.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -559,17 +673,51 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionRedo.setToolTip("Redo writing or other action")
         self.actionRedo.setShortcut("Ctrl+Y")
         self.actionRedo.setObjectName("actionRedo")
+        if self.textEdit.document().defaultTextOption().flags() and QTextOption.ShowTabsAndSpaces:
+            self.actionShowAllCharacters.setChecked(True)
         self.menuEdit.addSeparator()
         self.menuEdit.addAction(self.actionUndo)
         self.menuEdit.addAction(self.actionRedo)
         self.menu_enabling(False)
         # needed to override default undo/redo shortcuts
         self.set_shortcuts()
+        self.undoView.setStack(self.textEdit.undo_stack)
+        self.update_field_menu()
+        self.update_index_menu()
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
-        self.textEdit.send_message.connect(self.display_message)  
+        self.textEdit.send_message.connect(self.display_message)
+        self.textEdit.send_tape.connect(self.update_tape) 
+        self.textEdit.config_updated.connect(self.update_config_gui)
+        self.textEdit.player.videoAvailableChanged.connect(self.set_up_video)
+        if self.textEdit.player.isAudioAvailable():
+            self.audio_menu_enabling()
+            # todo read audio position and set up gui
+        if self.textEdit.player.isVideoAvailable():
+            self.set_up_video()
 
+    def breakdown_connections(self):
+        if self.actionUndo:
+            self.menuEdit.removeAction(self.actionUndo)
+            self.actionUndo.deleteLater()
+        if self.actionRedo:
+            self.menuEdit.removeAction(self.actionRedo)
+            self.actionRedo.deleteLater()
+        self.actionShowAllCharacters.setChecked(False)
+        self.menu_enabling()
+        self.strokeList.clear()
+        self.undoView.setStack(None)
+        self.menuField.clear() # clear field submenu
+        self.menuIndexEntry.clear() # clear index submenu
+        if self.textEdit.player.isAudioAvailable(): # clear audio connections if transcript has them
+            self.textEdit.player.stop()
+            self.audio_menu_enabling(False)
+        if self.video:
+            self.videoLayout.removeWidget(self.video)
+            self.video.deleteLater()
+        # todo: break all connections to textEdit
+        
     def action_close(self):
-        log.debug("User selected quit.")
+        self.display_message("User selected quit.")
         settings = QSettings("Plover2CAT", "OpenCAT")
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowstate", self.saveState())
@@ -577,26 +725,137 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         settings.setValue("tapefont", self.strokeList.font().toString())
         settings.setValue("backgroundcolor", self.palette().color(QPalette.Base))
         settings.setValue("suggestionsource", int(self.suggest_source.currentIndex()))
-        log.info("Saved window settings")
-        choice = self.textEdit.close_transcript()
+        self.display_message("Saved window settings")
+        choice = self.close_file()
         if choice:
-            log.debug("Closing window.")
+            self.display_message("Closing window.")
             self.parent().close()
 
+    def close_file(self, tab_index = None):
+        if not tab_index:
+            tab_index = self.mainTabs.currentIndex()
+        if tab_index == -1:
+            # if no tabs in widget, no closing
+            return True
+        tab_page = self.mainTabs.widget(tab_index)
+        if tab_page.objectName().startswith("editorTab"):
+            choice = self.textEdit.close_transcript()
+            if choice:
+                self.textEdit.disconnect()
+                self.breakdown_connections()
+        self.mainTabs.removeTab(tab_index)
+        tab_page.deleteLater()
+        return True
+
     def save_file(self):
-        pass
+        self.textEdit.save()
+        self.update_commit_list()
+
     def save_as_file(self):
-        pass
+        self.textEdit.save_as()
+        
     def autosave(self):
-        pass
+        if not self.textEdit:
+            return
+        self.textEdit.autosave()
+
+    def revert_file(self):
+        if not self.textEdit.repo:
+            return
+        if not self.textEdit.undo_stack.isClean():
+            user_choice = QMessageBox.critical(self, "Revert transcript", "All unsaved changes will be destroyed upon reversion. Session history will be erased. Do you wish to continue?")
+            if user_choice == QMessageBox.No:
+                return
+        commit_choices = self.textEdit.get_dulwich_commits()
+        commit_times = [commit_time for commit_id, commit_time in commit_choices]
+        commit_time, ok = QInputDialog.getItem(self, "Revert transcript", "Commit", commit_times, 0, False)
+        if ok:
+            ind = commit_times.index(commit_time)
+            commit_id = commit_choices[ind][0]
+            self.textEdit.revert_transcript(commit_id)
+
+    def add_dict(self):
+        ## select a dict from not file location to add to plover stack
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Select Dictionary"),
+            str(self.textEdit.file_name), _("Dict (*.json)"))[0]
+        if not selected_file:
+            return
+        selected_file = pathlib.Path(selected_file)
+        self.display_message(f"Selected dictionary at {str(selected_file)} to add.")
+        dict_dir_path = self.textEdit.file_name / "dict"
+        try:
+            os.mkdir(dict_dir_path)
+        except FileExistsError:
+            pass
+        dict_dir_name = dict_dir_path / selected_file.name
+        if selected_file != dict_dir_name:
+            self.display_message(f"Copying dictionary at {str(selected_file)} to {str(dict_dir_name)}")
+            copyfile(selected_file, dict_dir_name)
+        transcript_dicts = self.textEdit.get_config_value("dictionaries")
+        engine_dicts = self.engine.config["dictionaries"]
+        # do not add if already in dict
+        if str(selected_file) in engine_dicts:
+            self.display_message("Selected dictionary is already in loaded dictionaries, passing.")
+            return
+        new_dict_config = add_custom_dicts([str(selected_file)], engine_dicts)
+        self.engine.config = {'dictionaries': new_dict_config}
+        # update config
+        transcript_dicts.append(str(dict_dir_name.relative_to(self.textEdit.file_name)))
+        self.display_message(f"Add {str(dict_dir_name.relative_to(self.textEdit.file_name))} to config")
+
+    def remove_dict(self):
+        dict_dir_path = self.textEdit.file_name / "dict"
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Select Dictionary to remove"),
+            str(dict_dir_path), _("Dict (*.json)"))[0]
+        if not selected_file:
+            return
+        selected_file = pathlib.Path(selected_file)
+        self.display_message(f"Selected dictionary at {str(selected_file)} to remove.")
+        dictionary_list = self.textEdit.get_config_value("dictionaries")
+        list_dicts = self.engine.config["dictionaries"]
+        list_dicts = [i.path for i in list_dicts if pathlib.Path(i.path) != selected_file]
+        new_dict_config = add_custom_dicts(list_dicts, [])
+        self.engine.config = {'dictionaries': new_dict_config}
+        if str(selected_file.relative_to(self.textEdit.file_name)) in dictionary_list:
+            dictionary_list = [i for i in dictionary_list if i != str(selected_file.relative_to(self.textEdit.file_name))]
+            self.display_message(f"Remove {str(selected_file.relative_to(self.textEdit.file_name))} from config")
+            self.textEdit.set_config_value("dictionaries", dictionary_list)
+        else:
+            self.display_message("Selected dictionary not a transcript dictionary, passing.")
+
+    def transcript_suggest(self):
+        self.display_message("Generate transcript suggestions.")
+        if not self.suggest_dialog:
+            self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
+        self.suggest_dialog.update_text(self.textEdit.toPlainText())
+        self.suggest_dialog.show()      
+        self.suggest_dialog.activateWindow() 
+
     def log_to_tape(self, stroke):
-        pass   
+        # need file to output to
+        if not self.textEdit:
+            return
+        if not self.engine.output and self.engine._machine_params.type == "Keyboard":
+            return
+        # if window inactive, and not capturing everything, and not enabled, don't do anything
+        # print(self.textEdit.isActiveWindow())
+        if not self.textEdit.isActiveWindow() and not self.actionCaptureAllOutput.isChecked():
+            return
+        ## copy from parts of plover paper tape and tapeytape
+        self.textEdit.log_to_tape(stroke)             
+
     def on_send_string(self, string):
         log.debug(f"Plover engine sent string: {string}")
         self.textEdit.last_string_sent = string
+
     def count_backspaces(self, backspace):
         log.debug(f"Plover engine sent {backspace} backspace(s)")
         self.textEdit.last_backspaces_sent = backspace
+
     def on_stroke(self, stroke_pressed):
         self.editorCheck.setChecked(True)
         if not self.textEdit:
@@ -611,6 +870,19 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         # self.display_captions()
         self.textEdit.on_stroke(stroke_pressed, self.actionCursorAtEnd.isChecked())
+
+    def reset_paragraph(self):
+        user_choice = QMessageBox.critical(self, "Reset Paragraph", "This will clear all data from this paragraph. This cannot be undone. You will lose all history. Are you sure?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if user_choice != QMessageBox.Yes:
+            return
+        log.debug("User trigger paragraph reset.")
+        self.textEdit.undo_stack.clear()
+        log.debug("History cleared.")
+        current_cursor = self.textEdit.textCursor()
+        current_block = current_cursor.block()
+        current_block.setUserData(BlockUserData())
+        current_cursor.select(QTextCursor.BlockUnderCursor)
+        current_cursor.removeSelectedText()
 
     def cut_steno(self, cut = True):
         res = self.textEdit.cut_steno(cut = cut)
@@ -639,5 +911,385 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             cmd = ea.make_action(self.textEdit, current_block, current_pos, el)
             self.textEdit.undo_stack.push(cmd)
         self.textEdit.blockSignals(False)
-        self.undo_stack.endMacro()
+        self.textEdit.undo_stack.endMacro()
         self.display_message(f"Pasting to paragraph {current_block_num} at position {start_pos}.")  
+
+    def enable_affix(self, check):
+        self.display_message("Toggle automatic paragraph affixes.")
+        self.textEdit.set_config_value("enable_automatic_affix", check)
+
+    def edit_auto_affixes(self):
+        if not self.auto_paragraph_affixes:
+            self.display_message("No pre-existing affix dict.")
+        self.affix_dialog = affixDialogWindow(self.auto_paragraph_affixes, [*self.styles])
+        res = self.affix_dialog.exec_()
+        if res == QDialog.Accepted:
+            self.display_message("Updating paragraph affixes.")
+            self.auto_paragraph_affixes = self.affix_dialog.affix_dict
+
+    def insert_text(self, text = None):
+        if not text:
+            text, ok = QInputDialog().getText(self, "Insert Normal Text", "Text to insert")
+            if not ok:
+                return
+        self.display_message(f"Inserting normal text {text}.")
+        self.textEdit.insert_text(text)
+
+    def insert_image(self):
+        selected_file = QFileDialog.getOpenFileName(self, _("Select Image"), str(self.textEdit.file_name), 
+                            _("Image Files(*.png *.jpg *jpeg)"))[0]
+        if not selected_file:
+            self.display_message("No image selected, aborting")
+            return
+        self.display_message(f"User selected image file: {selected_file}")
+        selected_file = pathlib.Path(selected_file)
+        asset_dir_path = self.textEdit.file_name / "assets"
+        try:
+            os.mkdir(asset_dir_path)
+            self.display_message("Created asset directory.")
+        except FileExistsError:
+            pass
+        asset_dir_name = asset_dir_path / selected_file.name
+        if selected_file != asset_dir_name:
+            self.display_message(f"Copying image at {str(selected_file)} to {str(asset_dir_name)}")
+            copyfile(selected_file, asset_dir_name)
+        im_element = image_text(path = asset_dir_name.as_posix())
+        insert_cmd = image_insert(self.textEdit, self.textEdit.textCursor().blockNumber(), 
+                        self.textEdit.textCursor().positionInBlock(), im_element)
+        self.textEdit.undo_stack.push(insert_cmd)
+
+    def insert_field(self, action):
+        name = action.data()
+        self.display_message(f"Insert field {name}.")
+        self.textEdit.insert_field(name)
+
+    def edit_fields(self):
+        self.field_dialog = fieldDialogWindow(self.textEdit.user_field_dict)
+        res = self.field_dialog.exec_()
+        if res == QDialog.Accepted:
+            self.textEdit.update_fields(self.field_dialog.user_field_dict)  
+
+    def edit_indices(self, show_dialog = True):
+        if not self.index_dialog:
+            self.index_dialog = indexDialogWindow({})
+        present_index = self.textEdit.extract_indexes()
+        if present_index:
+            self.index_dialog.update_dict(present_index)
+        self.index_dialog.show()
+        self.index_dialog.index_insert.connect(self.insert_index_entry)
+        self.index_dialog.updated_dict.connect(self.update_indices)
+        self.index_dialog.activateWindow()   
+
+    def insert_index_entry(self, el = None, action = None):
+        current_cursor = self.textEdit.textCursor()
+        if el is None:
+            index_name = action.data()[0]
+            index_prefix = action.data()[1]
+            index_hidden = action.data()[2]
+            if current_cursor.hasSelection():
+                txt = current_cursor.selectedText()
+                ok = True
+            else:
+                txt, ok = QInputDialog.getText(self, f"Quick insert index {index_name}", f"{index_prefix}")
+            if not ok:
+                return
+            el = index_text(prefix = index_prefix, indexname = index_name, hidden = index_hidden, text = txt)
+        self.textEdit.insert_index_entry(el)
+        if not self.index_dialog:
+            self.index_dialog = indexDialogWindow({})
+        present_index = self.textEdit.extract_indexes()
+        if present_index:
+            self.index_dialog.update_dict(present_index)
+
+    def update_indices(self):
+        present_index = self.textEdit.extract_indexes()
+        new_index = self.index_dialog.index_dict
+        if not present_index:
+            return
+        self.textEdit.update_indices(present_index, new_index)
+        self.update_index_menu(self.index_dialog.index_dict)
+
+    def open_audio(self):
+        if self.textEdit.recorder.state() == QMediaRecorder.StoppedState:
+            pass
+        else:
+            QMessageBox.information(self, "Opening Media", "Recording in progress. Stop recording before loading media file.")
+            return
+        audio_file = QFileDialog.getOpenFileName(self, _("Select Media File"), str(self.textEdit.file_name), "Media Files (*.mp3 *.ogg *.wav *.mp4 *.mov *.wmv *.avi)")
+        if audio_file[0]:
+            self.textEdit.load_audio(audio_file[0])
+            self.audio_menu_enabling()
+
+    def set_audio_delay(self, value):
+        self.textEdit.audio_delay = value
+
+    def set_up_video(self, avail):
+        if avail:
+            self.display_message("Video available for file, displaying.")
+            self.video = QVideoWidget()
+            self.textEdit.player.setVideoOutput(self.video)
+            self.videoLayout.addWidget(self.video)
+            self.dockAudio.setVisible(True) 
+            self.actionShowVideo.setEnabled(True)
+
+    def show_hide_video(self):
+        if self.video.isVisible():
+            log.debug("Hide video.")
+            self.video.hide()
+        else:
+            log.debug("Show video.")
+            self.video.show()
+
+    def record_or_pause(self):
+        if self.textEdit.player.state() != QMediaPlayer.StoppedState:
+            self.display_message("Playing in progress. Stop media first.")
+            return
+        else:
+            pass
+        if self.textEdit.recorder.state() != QMediaPlayer.RecordingState:
+            self.textEdit.recorder.pause()
+            self.display_message("Recording paused.")
+        else:
+            # todo: dialog controls, file location
+            self.actionStopRecording.setEnabled(True)
+            self.textEdit.recorder.play()
+            self.display_message("Recording started.")
+
+    def stop_record(self):
+        self.textEdit.recorder.stop()
+        self.actionStopRecording.setEnabled(False)
+        self.display_message("Recording stopped.")
+
+    def export_text(self):
+        selected_folder = pathlib.Path(self.file_name)  / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".txt"))
+            , _("Transcript (*.txt)")
+        )
+        if not selected_file[0]:
+            return
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Export", "Another export is in process.")
+            return
+        contents = self.textEdit.document().toPlainText()
+        file_path = pathlib.Path(selected_file[0])
+        log.debug("Exporting plain text to %s.", str(file_path))
+        with open(file_path, "w") as f:
+            f.write(contents)
+            self.statusBar.showMessage("Exported in plain text format")
+
+    def export_tape(self):
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".tape"))
+            , _("Tape (*.tape)")
+        )
+        if not selected_file[0]:
+            return
+        tape_contents = self.strokeList.document().toPlainText()
+        tape_lines = tape_contents.splitlines()
+        doc_lines = []
+        for line in tape_lines:
+            doc_lines.append(line.split("|")[3])
+        with open(selected_file[0], "w", encoding = "utf-8") as f:
+            for line in doc_lines:
+                f.write(f"{line}\n")
+
+    def export_ascii(self):
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".txt"))
+            , _("Transcript (*.txt)")
+        )
+        if not selected_file[0]:
+            return
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Export", "Another export is in process.")
+            return        
+        self.save_file()
+        log.debug(f"Exporting in ASCII to {selected_file[0]}")
+        self.thread = QThread()
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setFormat("Export transcript paragraph %v")
+        self.statusBar.addWidget(self.progressBar)
+        self.progressBar.show()
+        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.save_ascii)
+        self.worker.progress.connect(self.progressBar.setValue)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in ASCII format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.start() 
+
+    def export_html(self):
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".html"))
+            , _("Transcript (*.html)")
+        )
+        if not selected_file[0]:
+            return
+        block = self.textEdit.document().begin()
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Export", "Another export is in process.")
+            return        
+        self.save_file()
+        log.debug(f"Exporting in HTML to {selected_file[0]}")
+        self.thread = QThread()
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setFormat("Export transcript paragraph %v")
+        self.statusBar.addWidget(self.progressBar)
+        self.progressBar.show()
+        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.save_html)
+        self.worker.progress.connect(self.progressBar.setValue)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in HTML format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.start()          
+
+    def export_plain_ascii(self):
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".txt"))
+            , _("Transcript (*.txt)")
+        )
+        if not selected_file[0]:
+            return
+        log.debug(f"Exporting in plain ASCII to {selected_file[0]}")
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Export", "Another export is in process.")
+            return        
+        self.save_file()        
+        self.thread = QThread()
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setFormat("Export transcript paragraph %v")
+        self.statusBar.addWidget(self.progressBar)
+        self.progressBar.show()
+        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.save_plain_ascii)
+        self.worker.progress.connect(self.progressBar.setValue)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in plain ASCII format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.start()        
+
+    def export_srt(self):
+        """
+        srt format: line 1: block number
+                    line 2: timestamp from --> to (millisecond separator comma, not period)
+                    line 3: text
+                    line 4: empty
+                    line 7: textstart
+        """
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".srt"))
+            , _("Captions (*.srt)")
+        )
+        if not selected_file[0]:
+            return
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Export", "Another export is in process.")
+            return        
+        self.save_file()
+        self.thread = QThread()
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setFormat("Export transcript paragraph %v")
+        self.statusBar.addWidget(self.progressBar)
+        self.progressBar.show()
+        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.save_srt)
+        self.worker.progress.connect(self.progressBar.setValue)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in srt format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.start()
+        
+    def export_odt(self):   
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".odt"))
+            , _("OpenDocumentText (*.odt)")
+        )
+        if not selected_file[0]:
+            return
+        log.debug(f"Exporting in ODF to {selected_file[0]}")
+        # automatically update config and save in case changes were not saved before
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Export", "Another export is in process.")
+            return        
+        self.save_file()
+        self.thread = QThread()
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setFormat("Export transcript paragraph %v")
+        self.statusBar.addWidget(self.progressBar)
+        self.progressBar.show()
+        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.save_odf)
+        self.worker.progress.connect(self.progressBar.setValue)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in Open Document Format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.start()
+
+    def export_rtf(self):
+        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_file = QFileDialog.getSaveFileName(
+            self,
+            _("Export Transcript"),
+            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".rtf"))
+            , _("RTF/CRE (*.rtf)")
+        )
+        if not selected_file[0]:
+            return
+        log.debug(f"Exporting in RTF to {selected_file[0]}")            
+        # automatically update config and save in case changes were not saved before
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Export", "Another export is in process.")
+            return        
+        self.save_file()
+        self.thread = QThread()
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setFormat("Export transcript paragraph %v")
+        self.statusBar.addWidget(self.progressBar)
+        self.progressBar.show()
+        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.save_rtf)
+        self.worker.progress.connect(self.progressBar.setValue)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in RTF/CRE format."))
+        # self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.start()

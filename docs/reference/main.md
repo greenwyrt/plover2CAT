@@ -47,6 +47,7 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 - `acknowledge`: displays acknowledgments 
 - `open_help`: sends user to help docs
 - `display_message`: displays message to both log and status bar
+- `update_tape`: updates paper tape with lines from transcript `send_tape`
 - `context_menu`: opens right-click menu
 - `menu_enabling`: enable/disables menu choices when transcript is open
 - `recent_file_menu`: populates Recent Files submenu with recent paths, and adds "tiles" to the "Recent Files" tab
@@ -77,13 +78,15 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 
 - `create_new`: creates new transcript project
 - *`open_file`*: opens existing transcript project
-- `save_file`: saves transcript project
-- `save_transcript`: extracts transcript data from editor, only updates values if necessary, ie every par starting with first with `userState` == 1
-- *`load_transcript`*: loads transcript data into editor and `userData` in blocks
+- `setup_connections`: make needed connections between editor and transcript object
+- `breakdown_connections`: disconnect connections with transcript and clean up GUI
 - `revert_file`: reverts transcript back to selected commit from repo
+
+
+- `save_file`: saves transcript project
 - *`save_as_file`*: saves transcript data and tape into new location
 - `autosave`: saves present transcript to hidden file
-- `close_file`: closes transcript project and cleans up editor
+- `close_file`: closes transcript project
 - `action_close`: quits editor window
 - `recentfile_open`: opens a recent file through `action`
 - `recentfile_store`: stores file path into settings as a recent file as the first, deletes later occurrence if exists
@@ -130,7 +133,7 @@ Methods that use manipulate the stroke data or use `QUndoCommands` are in *itali
 
 - `on_send_string`: hooked to Plover `send_string`, stores sent string
 - `count_backspaces`: hooked to Plover `send_backspaces`, stores number of backspaces sent
-- `log_to_tape`: hooked to Plover `stroked`, updates paper tape with most recent stroke along with timestamps and cursor position
+- `log_to_tape`: hooked to Plover `stroked`, records tape line
 - `get_suggestions`: dispatches to one of the functions below based on the value of suggest_source
 - `get_tapey_tape`: summarizes suggestions from Tapey Tape plugin if available
 - `get_clippy`: summarizes suggestions from Tapey Tape plugin if available

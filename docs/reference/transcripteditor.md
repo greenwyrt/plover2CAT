@@ -12,6 +12,7 @@ potential remove:
 - `file_name`: path for transcript folder
 - `repo`: Dulwich repo
 - `backup_document`: dict key:value, paragraph number: block data
+- `tape`: paper tape text as a long string with `\n` line separators
 - `dictionaries`: list of transcript-specific dictionaries 
 - `styles`: dict holding styles
 - `txt_formats`: dict holding "full" font formatting info (after recursion)
@@ -37,8 +38,15 @@ potential remove:
 
 ### Transcript management
 - `load`: takes a path, loads the transcript, and all related data
+- `load_transcript`:  loads transcript data into editor and `userData` in blocks
+- `load_tape`: load tape data
+- `save`: saves transcript
+- `save_transcript`: extracts transcript data from editor, only updates values if necessary, ie every par starting with first with `userState` == 1
 - `close_transcript`: clean up transcript for closing
 - `dulwich_save`: commits transcript files to repo with commit message
+- `get_dulwich_commits`: return list of commit times and id
+- `revert_transcript`: revert transcript based on commit id
+- `autosave`: saves transcript to hidden file
 
 ### Config management
 - `load_config_file`: loads config from file path, creates default if path does not exist
@@ -60,10 +68,12 @@ potential remove:
 ### Steno management
 
 - `on_stroke`: big function that manages insertion/deletion of data and text based on plover hook
+- `log_to_tape`: create tape string, append to file, and send string to update tape GUI
 - `update_block_times`: updates block with edit time and audio time, create `BlockUserData` if needed and set `creationtime`
 - `split_paragraph`: creates new paragraph
 - `merge_paragraphs`: combines two adjacent paragraphs
 - `cut_steno`: cut/copies steno and stores (depending on arguments), returns steno for cut/copy storage if specified
+
 ### Audio management
 
 - `get_audio_time`: returns audio time of media with delay correction
@@ -71,4 +81,7 @@ potential remove:
 - `navigate_to`: function accepts block number, moves and sets editor cursor to beginning of block
 
 ## Signals
+
+`send_message`: string to show in main window status bar
+`send_tape`: string to append to tape dock
 

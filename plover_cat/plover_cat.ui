@@ -210,6 +210,7 @@
     <addaction name="separator"/>
     <addaction name="actionEnableAutosave"/>
     <addaction name="actionSetAutosaveTime"/>
+    <addaction name="actionRevertTranscript"/>
    </widget>
    <widget class="QMenu" name="menuAudio">
     <property name="title">
@@ -365,7 +366,6 @@
     <addaction name="actionPageFormat"/>
     <addaction name="actionFindReplacePane"/>
     <addaction name="actionParagraph"/>
-    <addaction name="actionAudioRecording"/>
     <addaction name="actionSpellcheck"/>
     <addaction name="actionStenoSearch"/>
     <addaction name="separator"/>
@@ -606,7 +606,7 @@ position.</string>
   <widget class="QDockWidget" name="dockAudio">
    <property name="minimumSize">
     <size>
-     <width>256</width>
+     <width>260</width>
      <height>100</height>
     </size>
    </property>
@@ -638,6 +638,9 @@ position.</string>
       <layout class="QHBoxLayout" name="horizontalLayout_7">
        <item>
         <widget class="QDoubleSpinBox" name="playRate">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -675,6 +678,9 @@ position.</string>
        </item>
        <item>
         <widget class="QSpinBox" name="audioDelay">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -683,6 +689,9 @@ position.</string>
          </property>
          <property name="suffix">
           <string>ms</string>
+         </property>
+         <property name="minimum">
+          <number>-10000</number>
          </property>
          <property name="maximum">
           <number>10000</number>
@@ -704,6 +713,9 @@ position.</string>
        </item>
        <item>
         <widget class="QSlider" name="audio_seeker">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
          </property>
@@ -739,6 +751,9 @@ position.</string>
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="videoLayout"/>
      </item>
     </layout>
    </widget>
@@ -785,7 +800,7 @@ position.</string>
         <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -823,7 +838,7 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-32</y>
+              <y>0</y>
               <width>351</width>
               <height>466</height>
              </rect>
@@ -2170,184 +2185,6 @@ position.</string>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="audio_recording_pane">
-        <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
-        </attribute>
-        <attribute name="title">
-         <string>Audio Recording</string>
-        </attribute>
-        <attribute name="toolTip">
-         <string>Set audio recording parameters</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_33">
-         <item>
-          <widget class="QScrollArea" name="scrollArea_5">
-           <property name="widgetResizable">
-            <bool>true</bool>
-           </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents_5">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>351</width>
-              <height>283</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_34">
-             <item>
-              <layout class="QFormLayout" name="formLayout">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_16">
-                 <property name="text">
-                  <string>Input Device:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_17">
-                 <property name="text">
-                  <string>Audio Codec:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_18">
-                 <property name="text">
-                  <string>File Container:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_19">
-                 <property name="text">
-                  <string>Sample Rate</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QComboBox" name="audio_device">
-                 <property name="toolTip">
-                  <string>Select where to receive audio input</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QComboBox" name="audio_codec">
-                 <property name="toolTip">
-                  <string>Select the audio codec to record with, depends on system codecs</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QComboBox" name="audio_container">
-                 <property name="toolTip">
-                  <string>Select audio file type, depends on system</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QComboBox" name="audio_sample_rate">
-                 <property name="toolTip">
-                  <string>Select the sample rate for the recorded audio</string>
-                 </property>
-                 <property name="insertPolicy">
-                  <enum>QComboBox::InsertAtTop</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QComboBox" name="audio_channels">
-                 <property name="toolTip">
-                  <string>Select number of channels to record from</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_20">
-                 <property name="text">
-                  <string>Channels</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_3">
-               <property name="title">
-                <string>Encoding Mode</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_16">
-                <item>
-                 <widget class="QRadioButton" name="constant_quality">
-                  <property name="toolTip">
-                   <string>Constant quality means varying bitrate for audio file</string>
-                  </property>
-                  <property name="text">
-                   <string>Constant Quality</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSlider" name="quality_slider">
-                  <property name="toolTip">
-                   <string>Quality of audio recording, from very bad to very good</string>
-                  </property>
-                  <property name="maximum">
-                   <number>4</number>
-                  </property>
-                  <property name="value">
-                   <number>2</number>
-                  </property>
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QRadioButton" name="constant_bitrate">
-                  <property name="toolTip">
-                   <string>Constant bitrate means quality will vary</string>
-                  </property>
-                  <property name="text">
-                   <string>Constant Bitrate</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="audio_bitrate">
-                  <property name="toolTip">
-                   <string>Select bitrate for recording</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="verticalSpacer_8">
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>40</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="spellcheck_pane">
         <attribute name="icon">
          <iconset resource="resources/resources.qrc">
@@ -2606,13 +2443,6 @@ position.</string>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_17">
        <item>
-        <widget class="QLabel" name="label_22">
-         <property name="text">
-          <string>Session History:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QUndoView" name="undoView">
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>
@@ -2624,34 +2454,6 @@ position.</string>
           <string>Session actions for undo/redo</string>
          </property>
         </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_23">
-         <property name="text">
-          <string>Version History:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="versions">
-         <property name="toolTip">
-          <string>Previous versions to revert to</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_13">
-         <item>
-          <widget class="QPushButton" name="revert_version">
-           <property name="toolTip">
-            <string>Confirm revert transcript to selected revision</string>
-           </property>
-           <property name="text">
-            <string>Revert</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </item>
@@ -2960,6 +2762,9 @@ position.</string>
    </property>
   </action>
   <action name="actionSkipBack">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources/resources.qrc">
      <normaloff>:/control-skip-180.png</normaloff>:/control-skip-180.png</iconset>
@@ -2975,6 +2780,9 @@ position.</string>
    </property>
   </action>
   <action name="actionSkipForward">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources/resources.qrc">
      <normaloff>:/control-skip.png</normaloff>:/control-skip.png</iconset>
@@ -2990,6 +2798,9 @@ position.</string>
    </property>
   </action>
   <action name="actionStopAudio">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources/resources.qrc">
      <normaloff>:/control-stop-square.png</normaloff>:/control-stop-square.png</iconset>
@@ -3005,6 +2816,9 @@ position.</string>
    </property>
   </action>
   <action name="actionSlowDown">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Slow Down</string>
    </property>
@@ -3016,6 +2830,9 @@ position.</string>
    </property>
   </action>
   <action name="actionSpeedUp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Speed Up</string>
    </property>
@@ -3027,6 +2844,9 @@ position.</string>
    </property>
   </action>
   <action name="actionPlayPause">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources/resources.qrc">
      <normaloff>:/control-stop.png</normaloff>:/control-stop.png</iconset>
@@ -3129,7 +2949,7 @@ position.</string>
   <action name="actionRecordPause">
    <property name="icon">
     <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-record.png</normaloff>:/control-record.png</iconset>
+     <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
    </property>
    <property name="text">
     <string>Record/Pause</string>
@@ -3153,6 +2973,9 @@ position.</string>
    </property>
   </action>
   <action name="actionShowVideo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Show/Hide Video</string>
    </property>
@@ -3719,18 +3542,6 @@ position.</string>
     <string>Show paragraph attributes if hidden</string>
    </property>
   </action>
-  <action name="actionAudioRecording">
-   <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
-   </property>
-   <property name="text">
-    <string>Audio Recording</string>
-   </property>
-   <property name="toolTip">
-    <string>Show audio recording settings if hidden</string>
-   </property>
-  </action>
   <action name="actionSearchWikipedia">
    <property name="text">
     <string>Wikipedia</string>
@@ -3769,6 +3580,14 @@ position.</string>
    </property>
    <property name="toolTip">
     <string>Search selected text on Oxford English Dictionary in default browser</string>
+   </property>
+  </action>
+  <action name="actionRevertTranscript">
+   <property name="text">
+    <string>Revert Transcript</string>
+   </property>
+   <property name="toolTip">
+    <string>Revert transcript to previously saved version</string>
    </property>
   </action>
  </widget>

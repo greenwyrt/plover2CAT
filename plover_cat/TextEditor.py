@@ -1,7 +1,7 @@
 import string
 import pathlib
 import json
-
+import os
 from shutil import copyfile
 from collections import deque
 from dulwich.repo import Repo
@@ -9,13 +9,15 @@ from dulwich.errors import NotGitRepository
 from dulwich import porcelain
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor
-from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal
-from PyQt5.QtWidgets import QPlainTextEdit, QCompleter, QTextEdit, QUndoStack, QMessageBox
+from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument
+from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal, QUrl
+from PyQt5.QtWidgets import QPlainTextEdit, QCompleter, QTextEdit, QUndoStack, QMessageBox, QApplication
 from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaRecorder, 
 QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
 
 _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
+
+import plover
 
 from plover.oslayer.config import CONFIG_DIR
 from plover import log
@@ -23,7 +25,7 @@ from plover import log
 from plover_cat.qcommands import *
 from plover_cat.steno_objects import *
 from plover_cat.export_helpers import load_odf_styles, recursive_style_format, parprop_to_blockformat, txtprop_to_textformat
-from plover_cat.helpers import ms_to_hours, save_json, backup_dictionary_stack, add_custom_dicts, load_dictionary_stack_from_backup
+from plover_cat.helpers import ms_to_hours, save_json, backup_dictionary_stack, add_custom_dicts, load_dictionary_stack_from_backup, return_commits, hide_file
 from plover_cat.constants import default_styles, default_config, default_dict
 
 from . __version__ import __version__
@@ -31,11 +33,11 @@ from . __version__ import __version__
 class PloverCATEditor(QTextEdit):
 
     complete = pyqtSignal(QModelIndex)
-    send_key = pyqtSignal(str)
-    send_del = pyqtSignal()
-    send_bks = pyqtSignal()
     send_message = pyqtSignal(str)
-
+    send_tape = pyqtSignal(str)
+    config_updated = pyqtSignal()
+    audio_position_changed = pyqtSignal(int)
+    audio_length_changed = pyqtSignal(int)
     def __init__(self, widget):
         super().__init__(widget)
         # QTextEdit setup
@@ -54,13 +56,14 @@ class PloverCATEditor(QTextEdit):
         self.file_name = ""
         self.repo = None
         self.backup_document = {}
+        self.tape = ""
         # self.styles_path = ""        
         self.styles = {}
         self.txt_formats = {}
         self.par_formats = {}
         self.user_field_dict = {}
         self.auto_paragraph_affixes = {}    
-        self.audio_file = ""
+        self.numbers = {number: letter for letter, number in plover.system.NUMBERS.items()}
         self.cursor_block = 0
         self.cursor_block_position = 0
         self.stroke_time = ""
@@ -73,7 +76,11 @@ class PloverCATEditor(QTextEdit):
         self.spellcheck_dicts = []
         self._completer = None
         # media
+        self.audio_file = ""
+        self.audio_position = 0
         self.player = QMediaPlayer()
+        self.player.durationChanged.connect(self.update_audio_duration)
+        self.player.positionChanged.connect(self.update_audio_position)
         self.recorder = QAudioRecorder()
         self.audio_delay = 0
     def setCompleter(self, c):
@@ -114,14 +121,15 @@ class PloverCATEditor(QTextEdit):
         super(PloverCATEditor, self).focusInEvent(e)
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Delete:
-            self.send_del.emit()
+            self.mock_del()
         elif event.key() == Qt.Key_Backspace:
-            self.send_bks.emit()
+            self.mock_bks()
         else:
             if event.key() != Qt.Key_Return:
                 if event.modifiers() in [Qt.NoModifier, Qt.ShiftModifier]:
-                    self.send_key.emit(event.text())
+                    self.mock_type(event.text())
             QTextEdit.keyPressEvent(self, event)
+
     def load(self, path, engine):
         self.send_message.emit("Loading data")
         self.file_name = pathlib.Path(path)
@@ -137,8 +145,171 @@ class PloverCATEditor(QTextEdit):
             self.dulwich_save()
         except NotGitRepository:
             self.repo = Repo.init(self.file_name)
+        self.load_transcript(self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript"))
+        self.load_tape()
         self.engine = engine      
 
+    def load_transcript(self, transcript):
+        self.send_message.emit("Transcript file found, loading")
+        with open(transcript, "r") as f:
+            self.send_message.emit("Reading transcript data.")
+            json_document = json.loads(f.read())
+        self.backup_document = deepcopy(json_document)
+        self.moveCursor(QTextCursor.Start)
+        self.clear()
+        document_cursor = self.textCursor()
+        self.send_message.emit("Loading transcript data.")
+        ef = element_factory()
+        ea = element_actions()
+        self.clear()
+        # check if json document is older format
+        if "data" in json_document[next(iter(json_document))]:
+            # old format json
+            for key, value in json_document.items():
+                if not key.isdigit():
+                    continue
+                block_data = BlockUserData()
+                el_list = []
+                for el in value["data"]["strokes"]:
+                    el_dict = {"time": el[0], "stroke": el[1], "data": el[2]}
+                    if len(el) == 4:
+                        el_dict["audiotime"] = el[4]
+                    new_stroke = stroke_text()
+                    new_stroke.from_dict(el_dict)
+                    el_list.append(new_stroke)
+                for k, v in value["data"].items():
+                    block_data[k] = v
+                block_data["strokes"] = element_collection(el_list)
+                document_cursor.setBlockFormat(self.par_formats[block_data["style"]])
+                document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                   
+                # print(block_data.return_all())
+                document_cursor.insertText(value["text"])
+                document_cursor.block().setUserData(block_data)
+                document_cursor.block().setUserState(1)
+                if len(block_data["strokes"]) > 0 and block_data["strokes"].ends_with("\n"):
+                    document_cursor.insertText("\n")
+                self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
+                QApplication.processEvents()
+        else:        
+            # new format json  
+            for key, value in json_document.items():
+                # skip if key is not a digit
+                if not key.isdigit():
+                    continue
+                # document_cursor.insertText(value["text"])
+                block_data = BlockUserData()
+                el_list = [ef.gen_element(element_dict = i, user_field_dict = self.user_field_dict) for i in value["strokes"]]
+                # document_cursor.movePosition(QTextCursor.Start)
+                self.setTextCursor(document_cursor)
+                for k, v in value.items():
+                    block_data[k] = v
+                block_data["strokes"] = element_collection()
+                document_cursor.block().setUserData(block_data)
+                block_data["strokes"] = element_collection(el_list)
+                if block_data["style"] not in self.par_formats:
+                    block_data["style"] = next(iter(self.par_formats))
+                document_cursor.setBlockFormat(self.par_formats[block_data["style"]])
+                document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
+                if any([el.element == "image" for el in el_list]):
+                    for el in el_list:
+                        if el.element == "image":
+                            imageUri = QUrl("file://{0}".format(el.path))
+                            image = QImage(QImageReader(el.path).read())
+                            self.document().addResource(
+                                QTextDocument.ImageResource,
+                                imageUri,
+                                QVariant(image)
+                            )
+                            imageFormat = QTextImageFormat()
+                            imageFormat.setWidth(image.width())
+                            imageFormat.setHeight(image.height())
+                            imageFormat.setName(imageUri.toString())
+                            document_cursor.insertImage(imageFormat)
+                            document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
+                        else:
+                            document_cursor.insertText(el.to_text())
+                else:
+                    document_cursor.insertText(block_data["strokes"].to_text())
+                self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
+                QApplication.processEvents()
+        if document_cursor.block().userData() == None:
+            document_cursor.block().setUserData(BlockUserData())
+        self.undo_stack.clear()
+        self.send_message.emit("Loaded transcript.")   
+
+    def load_tape(self):
+        transcript_tape = self.file_name.joinpath(self.file_name.stem).with_suffix(".tape")
+        if pathlib.Path(transcript_tape).is_file():
+            self.send_message.emit("Tape file found, loading.")
+            self.tape = transcript_tape.read_text()
+            self.send_message.emit("Loaded tape.")
+
+    def save(self, path = None):
+        # todo: use path in future to save everywhere
+        selected_folder = pathlib.Path(self.file_name)
+        self.save_config_file()
+        transcript = selected_folder.joinpath(selected_folder.stem).with_suffix(".transcript")        
+        self.save_transcript(transcript)
+        if str(self.config["style"]).endswith(".json"):
+            save_json(self.styles, self.styles_path)
+        self.document().setModified(False)
+        self.undo_stack.setClean()
+        self.dulwich_save(message = "user save")
+        self.send_message.emit("Saved project data")  
+
+    def save_as(self, path):
+        # todo
+        # use pathlib to explore everything, replace stem, 
+        # disable for now, deal with paths for image assets in json
+        self.send_message.emit("Temporarily disabled.")
+
+    def save_transcript(self, path):      
+        json_document = self.backup_document
+        self.send_message.emit("Extracting block data for transcript save")
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.send_message.emit("Saving transcript data.")
+        block = self.document().begin()
+        status = 0
+        for i in range(self.document().blockCount()):
+            if block.userState() == 1:
+                status = 1
+            if status == 1:
+                if block.userData():
+                    block_dict = deepcopy(block.userData().return_all())
+                else:
+                    return False
+                block_num = block.blockNumber()
+                block_dict["strokes"] = block_dict["strokes"].to_json()
+                json_document[str(block_num)] = block_dict
+                block.setUserState(-1)
+            if block == self.document().lastBlock():
+                break
+            block = block.next()      
+        self.send_message.emit(f"Saving transcript data to {str(path)}")
+        if len(json_document) > self.document().blockCount():
+            for num in range(self.document().blockCount(), len(json_document)):
+                self.send_message.emit(f"Extra paragraphs in backup document. Removing {num}.")
+                json_document.pop(str(num), None)
+        save_json(json_document, path)
+        QApplication.restoreOverrideCursor()
+        return True
+
+    def autosave(self):
+        if self.undo_stack.isClean():
+            return
+        transcript_dir = pathlib.Path(self.file_name)
+        transcript_name = "." + str(transcript_dir.stem) + ".transcript"
+        transcript = transcript_dir / transcript_name
+        self.send_message.emit(f"Autosaving to {transcript}.")
+        transcript = pathlib.Path(transcript)
+        if transcript.exists():
+            transcript.unlink()
+        save_res = self.save_transcript(transcript)       
+        if save_res and os.name == "nt":
+            # hide file on windows systems
+            hide_file(str(transcript))
+            self.send_message.emit("Autosave complete.")
+         
     def close_transcript(self):
         if not self.undo_stack.isClean():
             user_choice = QMessageBox.question(self, "Close", "Are you sure you want to close without saving changes?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -162,11 +333,33 @@ class PloverCATEditor(QTextEdit):
         porcelain.add(self.repo.path, paths = files)
         porcelain.commit(self.repo, message = message, author = "plover2CAT <fake_email@fakedomain.com>", committer= "plover2CAT <fake_email@fakedomain.com>")
 
-    def load_config_file(self, path, engine):
+    def get_dulwich_commits(self):
+        commit_choices = return_commits(self.repo)
+        return(commit_choices)
+
+    def revert_transcript(self, commit_id):
+        transcript = str(self.file_name.stem) + (".transcript")
+        porcelain.reset_file(self.repo, transcript, commit_id)
+        new_commit_message = "revert to %s" % commit_id.decode("ascii")
+        self.dulwich_save(message=new_commit_message)
+        self.undo_stack.clear()
+        self.clear()
+        transcript = self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript")
+        if pathlib.Path(transcript).is_file():
+            self.load_transcript(transcript)
+        self.setCursorWidth(5)
+        self.moveCursor(QTextCursor.End)
+
+    def load_config_file(self, path, engine = None):
         config_path = pathlib.Path(path) / "config.CONFIG"
         if not config_path.exists():
             log.debug("No config file exists. Creating default config file.")
-            default_config["space_placement"] = engine.config["space_placement"]
+            if not engine and not self.engine:
+                default_config["space_placement"] = "Before Output"
+            elif engine:
+                default_config["space_placement"] = engine.config["space_placement"]
+            else:
+                default_config["space_placement"] = self.engine.config["space_placement"]
             with open(config_path, "w") as f:
                 json.dump(default_config, f)
                 log.debug("Project configuration file created.")            
@@ -175,6 +368,8 @@ class PloverCATEditor(QTextEdit):
             config_contents = json.loads(f.read())
         log.debug(config_contents)
         self.config = config_contents
+        self.user_field_dict = self.config["user_field_dict"]
+        self.auto_paragraph_affixes = self.config["auto_paragraph_affixes"]
 
     def save_config_file(self):
         config_path = self.file_name / "config.CONFIG"
@@ -187,6 +382,8 @@ class PloverCATEditor(QTextEdit):
     def set_config_value(self, key, value):
         self.config[key] = value
         self.save_config_file()
+        self.load_config_file(self.file_name)
+        self.config_updated.emit()
 
     def load_spellcheck_dicts(self):
         default_spellcheck_path = pathlib.Path(self.file_name) / "spellcheck"
@@ -303,9 +500,6 @@ class PloverCATEditor(QTextEdit):
         else:
             return(self.styles[name][attribute])
    
-    def load_paper_tape(self):
-        pass    
-
     def on_stroke(self, stroke_pressed, end = False):
         current_cursor = self.textCursor()
         current_block = current_cursor.block()        
@@ -315,6 +509,7 @@ class PloverCATEditor(QTextEdit):
         backspaces_sent = self.last_backspaces_sent
         self.cursor_block = current_cursor.blockNumber()
         self.cursor_block_position = current_cursor.positionInBlock()        
+        self.stroke_time = stroke_time
         if len(current_block.text()) == 0 and not string_sent and backspaces_sent > 0 and current_block.blockNumber() == 0:
             return
         if string_sent and backspaces_sent > 0 and self.track_lengths[-1] > 0 and backspaces_sent >= self.track_lengths[-1]:
@@ -349,8 +544,8 @@ class PloverCATEditor(QTextEdit):
                 self.setTextCursor(current_cursor)
                 self.cut_steno(store=False)
             else:
-                end_pos = current_cursor.position() - focus_block.position()
-                start_pos = backtrack_coord(end_pos, backspaces_sent, focus_block.userData()["strokes"].lens(), focus_block.userData()["strokes"].lengths())
+                end_pos = current_cursor.position() - current_block.position()
+                start_pos = backtrack_coord(end_pos, backspaces_sent, current_block.userData()["strokes"].lens(), current_block.userData()["strokes"].lengths())
                 remove_cmd = steno_remove(current_cursor, self, current_cursor.blockNumber(), start_pos, end_pos - start_pos)
                 self.undo_stack.push(remove_cmd)
             self.last_backspaces_sent = 0
@@ -385,11 +580,11 @@ class PloverCATEditor(QTextEdit):
             self.track_lengths.append(len(self.last_string_sent))
             stroke = stroke_text(stroke = self.last_raw_steno, text = string_sent)
             stroke.audiotime = self.get_audio_time(convert = False)
-            # if self.config["enable_automatic_affix"]:
-            #     if self.last_string_sent == "\n":
-            #         stroke = self.add_end_auto_affix(stroke, block_dict["style"])
-            #     if block_dict["strokes"].element_count() == 0:
-            #         stroke = self.add_begin_auto_affix(stroke, block_dict["style"])            
+            if self.config["enable_automatic_affix"]:
+                if self.last_string_sent == "\n":
+                    stroke = self.add_end_auto_affix(stroke, current_block.userData()["style"])
+                if current_block.userData()["strokes"].element_count() == 0:
+                    stroke = self.add_begin_auto_affix(stroke, current_block.userData()["style"])            
             if not current_cursor.atBlockEnd() and self.last_string_sent == "\n":
                 self.split_paragraph()
             else:
@@ -397,6 +592,25 @@ class PloverCATEditor(QTextEdit):
                 self.undo_stack.push(insert_cmd)
             self.last_string_sent = ""
         self.document().setModified(True)
+
+    def log_to_tape(self, stroke):
+        keys = set()
+        for key in stroke.steno_keys:
+            if key in self.numbers:
+                keys.add(self.numbers[key])
+                keys.add(plover.system.NUMBER_KEY)
+            else:
+                keys.add(key)
+        steno = ''.join(key.strip('-') if key in keys else ' ' for key in plover.system.KEYS)
+        audio_time = self.get_audio_time()
+        log_string = "{0}|{1}|({2},{3})\t|{4}|".format(self.stroke_time, audio_time, self.cursor_block, self.cursor_block_position, steno)
+        self.send_tape.emit(log_string)
+        self.tape = "\n".join([self.tape, log_string])
+        # self.tape.append(log_string + "\n")
+        transcript_tape = self.file_name.joinpath(self.file_name.stem).with_suffix(".tape")
+        with open(transcript_tape, "a") as f:
+            f.write(log_string)
+            f.write("\n")
 
     def update_block_times(self, block, edit_time):
         block_dict = block.userData()
@@ -426,9 +640,8 @@ class PloverCATEditor(QTextEdit):
         self.cursor_block = current_cursor.blockNumber()
         self.cursor_block_position = current_cursor.positionInBlock()
         new_line_stroke = stroke_text(stroke = "R-R", text = "\n")
-        # todo
-        # if self.config["enable_automatic_affix"]:
-        #     new_line_stroke = self.add_end_auto_affix(new_line_stroke, current_cursor.block().userData()["style"])
+        if self.config["enable_automatic_affix"]:
+            new_line_stroke = self.add_end_auto_affix(new_line_stroke, current_cursor.block().userData()["style"])
         split_cmd = split_steno_par(current_cursor, self, self.cursor_block, self.cursor_block_position, self.config["space_placement"], new_line_stroke, remove_space)
         self.undo_stack.push(split_cmd)
 
@@ -464,6 +677,130 @@ class PloverCATEditor(QTextEdit):
         if store:
             return(result)
 
+    def mock_del(self): 
+        current_cursor = self.textCursor()
+        if current_cursor.hasSelection():
+            self.cut_steno(store = False)
+        else:
+            if current_cursor.atBlockEnd():
+                return
+            else:
+                block_strokes = current_cursor.block().userData()["strokes"]
+                # "delete" means removing one ahead, so has to "reverse" to get start pos
+                start_pos = backtrack_coord(current_cursor.positionInBlock() + 1, 1, block_strokes.lens(), block_strokes.lengths())
+                current_cursor.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor)
+                current_cursor.setPosition(current_cursor.block().position() + start_pos, QTextCursor.KeepAnchor)
+                self.setTextCursor(current_cursor)
+                self.cut_steno(store = False)  
+
+    def insert_text(self, text = None):
+        current_cursor = self.textCursor()
+        current_block_num = current_cursor.blockNumber()
+        current_block = current_cursor.block()
+        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        self.undo_stack.beginMacro(f"Insert: {text}")
+        fake_steno = text_element(text = text)
+        insert_cmd = steno_insert(current_cursor, self, current_block_num, start_pos, fake_steno)
+        self.undo_stack.push(insert_cmd)
+        self.undo_stack.endMacro()   
+
+    def insert_field(self, name):
+        el = text_field(name = name, user_dict = self.user_field_dict)
+        current_cursor = self.textCursor()
+        current_block = current_cursor.blockNumber()
+        start_pos = current_cursor.positionInBlock()
+        insert_cmd = steno_insert(current_cursor, self, current_block, start_pos, el)
+        self.undo_stack.push(insert_cmd)
+
+    def update_fields(self, new_field_dict):
+        current_cursor = self.textCursor()
+        update_cmd = update_field(current_cursor, self, current_cursor.blockNumber(), current_cursor.positionInBlock(), self.user_field_dict, new_field_dict)
+        self.undo_stack.push(update_cmd)
+        # self.update_field_menu()   
+
+    def extract_indexes(self):
+        index_dict = {}
+        current_cursor = self.textCursor()
+        block = self.document().begin()
+        # if len(self.toPlainText()) == 0:
+        #     return(index_dict)
+        for i in range(self.document().blockCount()):
+            # print(block.blockNumber())
+            if block.userData():
+                block_strokes = block.userData()["strokes"]
+                for ind, el in enumerate(block_strokes.data):
+                    # print(ind)
+                    if el.element == "index":
+                        if el.indexname not in index_dict:
+                            index_dict[el.indexname] = {}
+                        if "prefix" not in index_dict[el.indexname]:
+                            index_dict[el.indexname]["prefix"] = el.prefix
+                        if "hidden" not in index_dict[el.indexname]:
+                            index_dict[el.indexname]["hidden"] = el.hidden
+                        if "entries" not in index_dict[el.indexname]:
+                            index_dict[el.indexname]["entries"] = {}
+                        index_dict[el.indexname]["entries"][el.data] = el.description
+            if block == self.document().lastBlock():
+                break
+            block = block.next()
+        return(index_dict)       
+
+    def insert_index_entry(self, el):
+        current_cursor = self.textCursor()
+        start_pos = current_cursor.positionInBlock()
+        current_block = current_cursor.blockNumber()
+        self.undo_stack.beginMacro("Insert: index entry")
+        if current_cursor.hasSelection() and el == None:
+            self.cut_steno(store = False)
+            self.setTextCursor(current_cursor)
+            start_pos = current_cursor.positionInBlock()
+        else:
+            current_cursor.setPosition(min(current_cursor.position(), current_cursor.anchor()))
+            start_pos = current_cursor.positionInBlock()
+        insert_cmd = steno_insert(current_cursor, self, current_block, start_pos, el)
+        self.undo_stack.push(insert_cmd)
+        self.undo_stack.endMacro()
+        self.send_message.emit("Index inserted.")
+
+    def update_indices(self, old, new):
+        current_cursor = self.textCursor()
+        current_block = current_cursor.blockNumber()
+        start_pos = current_cursor.positionInBlock()            
+        update_cmd = update_entries(current_cursor, self, current_block, start_pos, old, new)
+        self.undo_stack.push(update_cmd)
+
+    def add_begin_auto_affix(self, element, style):
+        if style not in self.auto_paragraph_affixes:
+            return(element)
+        auto_el = automatic_text(prefix = self.auto_paragraph_affixes[style]["prefix"])  
+        auto_el.from_dict(element.to_json())
+        auto_el.element = "automatic"
+        return(auto_el)                    
+
+    def add_end_auto_affix(self, element, style):
+        if style not in self.auto_paragraph_affixes:
+            return(element)
+        auto_el = automatic_text(prefix = self.auto_paragraph_affixes[style]["suffix"])  
+        auto_el.from_dict(element.to_json())
+        auto_el.element = "automatic"
+        return(auto_el)    
+
+    def mock_type(self, text):
+        if self.engine.output:
+            return          
+        if len(text) > 0:
+            self.insert_text(text)        
+
+    def mock_bks(self):
+        if self.engine.output:
+            return      
+        current_cursor = self.textCursor()
+        if current_cursor.atBlockStart():
+            return
+        current_cursor.movePosition(QTextCursor.PreviousCharacter)
+        self.setTextCursor(current_cursor)
+        self.mock_del()
+
     def navigate_to(self, block_number):
         new_block = self.document().findBlockByNumber(block_number)
         current_cursor = self.textCursor()
@@ -489,3 +826,28 @@ class PloverCATEditor(QTextEdit):
             return(audio_time)
         else:
             return(real_time)
+    
+    def load_audio(self, path):
+        self.audio_file = pathlib.Path(path)
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(str(self.audio_file))))
+        self.send_message.emit(f"Player set to selected audio {str(path)}.")
+
+    def play_pause_audio(self):
+        if self.recorder.state() == QMediaRecorder.StoppedState:
+            pass
+        else:
+            self.send_message.emit("Recording in progress.")
+            return
+        if self.player.state() == QMediaPlayer.PlayingState:
+            self.player.pause()
+            self.send_message.emit("Paused audio")
+        else:
+            self.player.play()
+            self.send_message.emit("Playing audio")
+    
+    def update_audio_duration(self, duration):
+        self.audio_length_changed.emit(duration)
+    
+    def update_audio_position(self, position):
+        self.audio_position = position
+        self.audio_position_changed.emit(position)
