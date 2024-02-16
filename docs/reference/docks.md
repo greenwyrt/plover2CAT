@@ -125,25 +125,6 @@ This tab holds inputs for the common paragraph properties that are saved as seco
 
 To discourage any accidental editing, a checkbox has to be clicked to enable editing and a button for confirming changes, and it locks when any writing is done.
 
-### Audio recording
-
-This tab holds the parameters that can be specified for audio recording. 
-
-- Input Device:  Choices will be any audio inputs available to the computer such as a microphone. If the computer has a microphone, and the headphone also has mic input, these will be different choices in the menu.
-
-- Audio Codec: Windows systems like have PCM WAV at a minimum.
-
-- File Container: A guess on the file format for the audio will be made based on the audio codec. If the codec is not one of the common ones, the audio file will not have a file extension, and users have to manually adding a file extension after recording is done.
-
-- Sample Rate and Channels can be left on default, and the software will pick the best fit.
-
-- Encoding Mode
-
-  - Constant Quality: The recording will be done based on the quality slider, varying the bitrate to keep the same quality.
-  - Constant Bitrate: The recording will use the same bitrate throughout, but quality of the recording will vary.
-
-By default, the audio recording is saved into the `audio` folder. 
-
 ### Spellcheck
 
 This tab contains the controls needed for spellchecking.

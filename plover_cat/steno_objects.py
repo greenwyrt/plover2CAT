@@ -237,7 +237,7 @@ class automatic_text(stroke_text):
         self.suffix = suffix
     def __add__(self, other):
         return NotImplemented
-        # raise NotImplementedError("Cannot add on automatic text element.")
+    # raise NotImplementedError("Cannot add on automatic text element.")
     def __radd__(self, other):
         return NotImplemented
     def __len__(self):

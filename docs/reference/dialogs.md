@@ -25,3 +25,28 @@ This dialog is modal.
 Used to create indexes, setting prefixes and visibility + add entries and descriptions for each index. Also adds 
 
 This dialog is non-modal.
+
+## Caption Dialog
+
+Used to set parameters for caption display and host endpoint for remote captions. 
+
+This dialog is modal.
+
+## Audio Recording Settings Dialog
+
+Used to set parameters for audio recording on computer.
+
+- Input Device:  Choices will be any audio inputs available to the computer such as a microphone. If the computer has a microphone, and the headphone also has mic input, these will be different choices in the menu.
+
+- Audio Codec: Windows systems like have PCM WAV at a minimum.
+
+- File Container: A guess on the file format for the audio will be made based on the audio codec. If the codec is not one of the common ones, the audio file will not have a file extension, and users have to manually adding a file extension after recording is done.
+
+- Sample Rate and Channels can be left on default, and the software will pick the best fit.
+
+- Encoding Mode
+
+  - Constant Quality: The recording will be done based on the quality slider, varying the bitrate to keep the same quality.
+  - Constant Bitrate: The recording will use the same bitrate throughout, but quality of the recording will vary.
+
+By default, the audio recording is saved into the `audio` folder. 

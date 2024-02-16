@@ -48,6 +48,7 @@ from plover_cat.shortcutDialogWindow import shortcutDialogWindow
 from plover_cat.indexDialogWindow import indexDialogWindow
 from plover_cat.suggestDialogWindow import suggestDialogWindow
 from plover_cat.captionDialogWindow import captionDialogWindow
+from plover_cat.recorderDialogWindow import recorderDialogWindow
 
 from plover_cat.rtf_parsing import *
 from plover_cat.constants import *
@@ -74,22 +75,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.flowparent.addLayout(self.recentfileflow)
         self.flowparent.addStretch()
         self.video = None
-        # self.player = QMediaPlayer()
-        # self.recorder = QAudioRecorder()
-        # # self.player.videoAvailableChanged.connect(self.set_up_video)
-        # self.audio_device.addItems(self.recorder.audioInputs())
-        # self.audio_codec.addItems(self.recorder.supportedAudioCodecs())
-        # self.audio_container.addItems(self.recorder.supportedContainers())
-        # self.audio_sample_rate.addItems([str(rate) for rate in reversed(self.recorder.supportedAudioSampleRates()[0]) if rate < 50000])
-        # self.audio_channels.addItem("Default", -1)
-        # self.audio_channels.addItem("1-channel", 1)
-        # self.audio_channels.addItem("2-channel", 2)
-        # self.audio_channels.addItem("4-channel", 4)
-        # self.audio_bitrate.addItem("Default", -1)
-        # self.audio_bitrate.addItem("32000", 32000)
-        # self.audio_bitrate.addItem("64000", 64000)
-        # self.audio_bitrate.addItem("96000", 96000)
-        # self.audio_bitrate.addItem("128000", 128000)
         # vars for startup
         ## on very first startup, set tabs up
         ## later configs will use window settings
@@ -147,6 +132,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionNew.triggered.connect(lambda: self.create_new())
         self.actionClose.triggered.connect(lambda: self.close_file())
         self.actionSave.triggered.connect(lambda: self.save_file())
+        self.mainTabs.tabCloseRequested.connect(self.close_file)
         # self.actionSaveAs.triggered.connect(lambda: self.save_as_file())
         # self.menuRecentFiles.triggered.connect(self.recentfile_open)
         self.actionEnableAutosave.triggered.connect(self.autosave_setup)
@@ -156,13 +142,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # self.actionImportRTF.triggered.connect(lambda: self.import_rtf())
         ## audio connections
         self.actionOpenAudio.triggered.connect(lambda: self.open_audio())
-        # self.actionRecordPause.triggered.connect(lambda: self.record_or_pause())
-        # self.actionStopRecording.triggered.connect(lambda: self.stop_record())
-        # self.recorder.error.connect(lambda: self.recorder_error())
-        # self.recorder.durationChanged.connect(self.update_record_time)
+        self.actionRecordPause.triggered.connect(lambda: self.record_or_pause())
+        self.actionStopRecording.triggered.connect(lambda: self.stop_record())
         self.actionShowVideo.triggered.connect(lambda: self.show_hide_video())
-        # self.actionCaptioning.triggered.connect(self.setup_captions)
-        # self.actionFlushCaption.triggered.connect(self.flush_caption)
+        self.actionCaptioning.triggered.connect(self.setup_captions)
+        self.actionFlushCaption.triggered.connect(self.flush_caption)
         # self.actionAddChangeAudioTimestamps.triggered.connect(self.modify_audiotime)
         ## editor related connections
         self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
@@ -174,7 +158,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionCut.triggered.connect(lambda: self.cut_steno())
         self.actionPaste.triggered.connect(lambda: self.paste_steno())
         self.menuClipboard.triggered.connect(self.paste_steno)
-        # self.undo_stack.indexChanged.connect(self.check_undo_stack)
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.navigationList.itemDoubleClicked.connect(self.heading_navigation)
         self.actionRevertTranscript.triggered.connect(self.revert_file)
@@ -195,22 +178,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # self.actionRetroactiveDefine.triggered.connect(lambda: self.define_retroactive())
         # self.actionDefineLast.triggered.connect(lambda: self.define_scan())
         # self.actionDeleteLast.triggered.connect(lambda: self.delete_scan())
-        # self.actionAutocompletion.triggered.connect(self.setup_completion)
+        self.actionAutocompletion.triggered.connect(self.setup_completion)
         # self.actionAddAutocompletionTerm.triggered.connect(self.add_autocomplete_item)
         # self.actionTranslateTape.triggered.connect(self.tape_translate)
         ## dict related
         self.actionAddCustomDict.triggered.connect(lambda: self.add_dict())
         self.actionRemoveTranscriptDict.triggered.connect(lambda: self.remove_dict())
         self.actionTranscriptSuggestions.triggered.connect(lambda: self.transcript_suggest())
-        # ## style connections
-        # self.edit_page_layout.clicked.connect(self.update_config)
-        # self.editCurrentStyle.clicked.connect(self.style_edit)
+        ## style connections
+        self.editCurrentStyle.clicked.connect(self.style_edit)
         # self.actionCreateNewStyle.triggered.connect(self.new_style)
-        # self.actionRefreshEditor.triggered.connect(self.refresh_editor_styles)
-        # self.actionStyleFileSelect.triggered.connect(self.select_style_file)
-        # self.actionGenerateStyleFromTemplate.triggered.connect(self.style_from_template)
+        self.actionRefreshEditor.triggered.connect(self.refresh_editor_styles)
+        self.actionStyleFileSelect.triggered.connect(self.select_style_file)
+        self.actionGenerateStyleFromTemplate.triggered.connect(self.style_from_template)
         # self.style_selector.activated.connect(self.update_paragraph_style)
-        # self.blockFont.currentFontChanged.connect(self.calculate_space_width)
+        self.blockFont.currentFontChanged.connect(self.calculate_space_width)
         # self.menuParagraphStyle.triggered.connect(self.change_style)
         # # self.textEdit.ins.connect(self.change_style)
         # ## view
@@ -272,7 +254,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cursor_status.setObjectName("cursor_status")
         self.statusBar.addPermanentWidget(self.cursor_status)
         self.display_message("Create New Transcript or Open Existing...")
-        log.debug("Main window open.")
+
     def set_shortcuts(self):
         shortcut_file = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "shortcuts.json"
         if not shortcut_file.exists():
@@ -333,6 +315,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage(txt)
         log.debug(txt)
 
+    def update_gui(self):
+        self.refresh_steno_display()
+
     def update_tape(self, txt):
         # todo: if ever tape format changes, alter here
         lines = txt.splitlines()
@@ -353,6 +338,44 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = self.textEdit.textCursor()
         block_strokes = current_cursor.block().userData()["strokes"]
         self.display_block_steno(block_strokes)
+
+    def refresh_editor_styles(self):
+        if self.textEdit.document().blockCount() > 200:
+            user_choice = QMessageBox.question(self, "Refresh styles", f"There are {self.textEdit.document().blockCount()} paragraphs. Style refreshing may take some time. Continue?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if user_choice == QMessageBox.No:
+                return
+        self.textEdit.gen_style_formats()
+        block = self.textEdit.document().begin()
+        current_cursor = self.textEdit.textCursor()
+        self.progressBar = QProgressBar(self)
+        self.progressBar.setMaximum(self.textEdit.document().blockCount())
+        self.progressBar.setFormat("Re-style paragraph %v")
+        self.statusBar.addWidget(self.progressBar)
+        self.progressBar.show()
+        for i in range(self.textEdit.document().blockCount()):
+            try:
+                block_style = block.userData()["style"]
+            except TypeError:
+                # block_style = ""
+                continue                          
+            current_cursor.setPosition(block.position())
+            current_cursor.movePosition(QTextCursor.StartOfBlock)
+            current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+            current_cursor.setBlockFormat(self.textEdit.par_formats[block_style])
+            it = block.begin()
+            while not it.atEnd():
+                frag = it.fragment()
+                if frag.isValid() and not frag.charFormat().isImageFormat():
+                    current_cursor.setPosition(frag.position())
+                    current_cursor.setPosition(frag.position() + frag.length(), QTextCursor.KeepAnchor)
+                    current_cursor.setCharFormat(self.textEdit.txt_formats[block_style])
+                it += 1
+            self.progressBar.setValue(block.blockNumber())
+            QApplication.processEvents()
+            if block == self.textEdit.document().lastBlock():
+                break
+            block = block.next()
+        self.statusBar.removeWidget(self.progressBar)
 
     def context_menu(self, pos):
         log.debug("User activated context menu.")
@@ -378,8 +401,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.toolbarSteno.setEnabled(not value)
         self.toolbarAudio.setEnabled(not value)
         self.toolbarEdit.setEnabled(not value)
-        self.actionNew.setEnabled(value)
-        self.actionOpen.setEnabled(value)
         self.actionImportRTF.setEnabled(not value)
         self.actionSave.setEnabled(not value)
         self.actionSaveAs.setEnabled(not value)
@@ -435,6 +456,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def update_seeker_track(self, position):
         self.audio_seeker.setValue(position)
         self.audio_curr_pos.setText(ms_to_hours(position))
+
+    def update_record_time(self):
+        self.display_message(f"Recorded {ms_to_hours(self.textEdit.recorder.duration())}")
 
     def open_root(self):
         selected_folder = pathlib.Path(self.textEdit.file_name)
@@ -516,6 +540,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             doc_options.setFlags(doc_options.flags() & ~QTextOption.ShowTabsAndSpaces & ~QTextOption.ShowLineAndParagraphSeparators)
         self.textEdit.document().setDefaultTextOption(doc_options)
 
+    def calculate_space_width(self, font):
+        new_font = font
+        new_font.setPointSize(self.blockFontSize.value())
+        metrics = QFontMetrics(new_font)
+        space_space = metrics.averageCharWidth()
+        self.fontspaceInInch.setValue(round(pixel_to_in(space_space), 2))
+        log.debug("Update calculation of chararacter width for selected font.")
+
     def show_toolbox_pane(self, pane):
         if not self.dockProp.isVisible():
             self.dockProp.setVisible(True)    
@@ -551,9 +583,48 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug(f"User set jump to block {block_num}")
             self.textEdit.navigate_to(block_num)
 
+    def check_undo_stack(self, index):
+        if self.textEdit.undo_stack.undoText().startswith("Config") or self.textEdit.undo_stack.redoText().startswith("Config"):
+            self.update_config_gui()
+        if self.textEdit.undo_stack.undoText().startswith("Style:") or self.textEdit.undo_stack.redoText().startswith("Style:"):
+            self.refresh_editor_styles()
+
     def update_config_gui(self):
         self.update_field_menu()
-        # todo: update page dimensions here
+        config_contents = self.textEdit.config
+        self.style_file_path.setText(pathlib.Path(config_contents["style"]).as_posix())
+        self.page_width.setValue(float(config_contents["page_width"]))
+        self.page_height.setValue(float(config_contents["page_height"]))
+        self.page_left_margin.setValue(float(config_contents["page_left_margin"]))
+        self.page_top_margin.setValue(float(config_contents["page_top_margin"]))
+        self.page_right_margin.setValue(float(config_contents["page_right_margin"]))
+        self.page_bottom_margin.setValue(float(config_contents["page_bottom_margin"]))
+        self.enable_line_num.setChecked(config_contents["page_line_numbering"])
+        self.line_num_freq.setValue(int(config_contents["page_linenumbering_increment"]))
+        self.enable_timestamp.setChecked(config_contents["page_timestamp"])
+        self.page_max_char.setValue(int(config_contents["page_max_char"]))
+        self.page_max_lines.setValue(int(config_contents["page_max_line"]))
+        self.header_left.setText(config_contents["header_left"])
+        self.header_center.setText(config_contents["header_center"])
+        self.header_right.setText(config_contents["header_right"])
+        self.footer_left.setText(config_contents["footer_left"])
+        self.footer_center.setText(config_contents["footer_center"])
+        self.footer_right.setText(config_contents["footer_right"])
+        self.actionAutomaticAffixes.blockSignals(True)
+        self.actionAutomaticAffixes.setChecked(config_contents["enable_automatic_affix"])
+        self.actionAutomaticAffixes.blockSignals(False)
+        self.setup_page()
+
+    def setup_page(self):
+        doc = self.textEdit.document()
+        width = float(self.textEdit.config["page_width"])
+        height = float(self.textEdit.config["page_height"])
+        width_pt = int(in_to_pt(width))
+        height_pt = int(in_to_pt(height))
+        self.textEdit.setLineWrapMode(QTextEdit.FixedPixelWidth)
+        self.textEdit.setLineWrapColumnOrWidth(width_pt)
+        page_size = QPageSize(QSizeF(width, height), QPageSize.Inch, matchPolicy = QPageSize.FuzzyMatch) 
+        doc.setPageSize(page_size.size(QPageSize.Point))
 
     def update_field_menu(self):
         self.display_message("Updating field sub-menu.")
@@ -577,6 +648,24 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             action.setObjectName(f"index{ind}")
             action.setData((k, v["prefix"], v["hidden"]))
             self.menuIndexEntry.addAction(action)  
+
+    def update_navigation(self):     
+        block = self.textEdit.document().begin()
+        self.navigationList.clear()
+        log.debug("Nagivation pane updated.")
+        for i in range(self.textEdit.document().blockCount()):
+            block_data = block.userData()
+            if not block_data: continue
+            if block_data["style"] in self.textEdit.styles and "defaultoutlinelevel" in self.textEdit.styles[block_data["style"]]:
+                item = QListWidgetItem()
+                level = int(self.textEdit.styles[block_data["style"]]["defaultoutlinelevel"])
+                txt = " " * level + block.text()
+                item.setText(txt)
+                item.setData(Qt.UserRole, block.blockNumber())
+                self.navigationList.addItem(item)
+            if block == self.textEdit.document().lastBlock():
+                break
+            block = block.next()   
 
     def clipboard_menu(self):
         self.menuClipboard.clear()
@@ -614,6 +703,48 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             self.autosave_time.stop()
 
+    def setup_completion(self, checked):
+        log.debug("Setting up autocompletion.")
+        if not checked:
+            self.textEdit.setCompleter(None)
+            return
+        self.completer = QCompleter(self)
+        wordlist_path = self.textEdit.file_name / "sources" / "wordlist.json"
+        if not wordlist_path.exists():
+            log.warning("Wordlist does not exist.")
+            QMessageBox.warning(self, "Autocompletion", "The required file wordlist.json is not available in the sources folder. See user manual for format.")
+            self.display_message("Wordlist.json for autocomplete does not exist in sources directory. Passing.")
+            return
+        check_return = self.engine.reverse_lookup("{#Return}")
+        if not check_return:
+            log.warning("Active dictionaries missing a {#Return} stroke")
+            QMessageBox.warning(self, "Autocompletion", "No active dictionaries have an outline for {#Return}. One is recommended for autocompletion. See user manual.")
+            self.actionAutocompletion.setChecked(False)
+            return
+        self.completer.setModel(self.model_from_file(str(wordlist_path)))
+        self.completer.setModelSorting(QCompleter.CaseInsensitivelySortedModel)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.completer.setWrapAround(False)
+        self.textEdit.setCompleter(self.completer)
+        self.display_message("Autocompletion from wordlist.json enabled.")
+
+    def model_from_file(self, fileName):
+        f = QFile(fileName)
+        if not f.open(QFile.ReadOnly):
+            return(QStringListModel(self.completer))
+        with open(fileName, "r") as f:
+            completer_dict = json.loads(f.read())
+        words = QStandardItemModel(self.completer)
+        log.debug("Constructing autocomplete model.")
+        for key, value in completer_dict.items():
+            item = QStandardItem()
+            # removes any newlines/tabs, otherwise breaks autocomplete
+            key = " ".join(key.split())
+            item.setText(key)
+            item.setData(value, QtCore.Qt.UserRole)
+            words.appendRow(item)
+        return(words)
+
     def create_new(self):
         transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
         transcript_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
@@ -642,6 +773,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         editorTab.setObjectName(f"editorTab_{time.time()}")
         editorLayout = QtWidgets.QHBoxLayout(editorTab)
         editorLayout.setObjectName(f"editorLayout_{time.time()}")
+        if self.textEdit:
+            self.textEdit.restore_dictionary_from_backup(self.engine)
+            self.textEdit.disconnect()
+            self.breakdown_connections()
+            self.mainTabs.currentChanged.disconnect()
         self.textEdit = PloverCATEditor(editorTab)
         self.textEdit.load(selected_folder, self.engine)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
@@ -651,10 +787,29 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.setSizePolicy(sizePolicy) 
         editorLayout.addWidget(self.textEdit)
         tab_index = self.mainTabs.addTab(editorTab, self.textEdit.file_name.name)
-        self.update_tape(self.textEdit.tape)
         self.mainTabs.setCurrentIndex(tab_index)
         QApplication.restoreOverrideCursor()
         self.setup_connections()
+        self.mainTabs.currentChanged.connect(self.switch_restore)
+
+    def switch_restore(self, index):
+        if not index:
+            index = self.mainTabs.currentIndex()
+        if index == -1:
+            # if no tabs in widget, no closing
+            return True        
+        if self.textEdit:
+            self.textEdit.restore_dictionary_from_backup(self.engine)
+            self.breakdown_connections()
+            self.textEdit.disconnect()
+        focal_transcript = self.mainTabs.widget(index)
+        textEdit = focal_transcript.findChild(QTextEdit)
+        if textEdit:
+            self.textEdit = textEdit
+            self.textEdit.load(self.textEdit.file_name, self.engine, load_transcript = False)
+            self.setup_connections()
+        else:
+            self.textEdit = None
 
     def setup_connections(self):
         self.actionUndo = self.textEdit.undo_stack.createUndoAction(self.menuEdit)
@@ -684,14 +839,33 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.undoView.setStack(self.textEdit.undo_stack)
         self.update_field_menu()
         self.update_index_menu()
+        self.update_tape(self.textEdit.tape)
+        self.update_config_gui()
+        self.page_width.valueChanged.connect(lambda value, key = "page_width": self.textEdit.set_config_value(key, value))
+        self.page_height.valueChanged.connect(lambda value, key = "page_height": self.textEdit.set_config_value(key, value))
+        self.page_left_margin.valueChanged.connect(lambda value, key = "page_left_margin": self.textEdit.set_config_value(key, value))
+        self.page_top_margin.valueChanged.connect(lambda value, key = "page_top_margin": self.textEdit.set_config_value(key, value))
+        self.page_right_margin.valueChanged.connect(lambda value, key = "page_right_margin": self.textEdit.set_config_value(key, value))
+        self.page_bottom_margin.valueChanged.connect(lambda value, key = "page_bottom_margin": self.textEdit.set_config_value(key, value))
+        self.enable_line_num.stateChanged.connect(lambda value, key = "page_line_numbering": self.textEdit.set_config_value(key, True if value else False))
+        self.line_num_freq.valueChanged.connect(lambda value, key = "page_linenumbering_increment": self.textEdit.set_config_value(key, value))
+        self.enable_timestamp.stateChanged.connect(lambda value, key = "page_timestamp": self.textEdit.set_config_value(key, True if value else False))
+        self.page_max_char.valueChanged.connect(lambda value, key = "page_max_char": self.textEdit.set_config_value(key, value))
+        self.page_max_lines.valueChanged.connect(lambda value, key = "page_max_line": self.textEdit.set_config_value(key, value))
+        self.header_left.editingFinished.connect(lambda value, key = "header_left": self.textEdit.set_config_value(key, value))
+        self.header_center.editingFinished.connect(lambda value, key = "header_center": self.textEdit.set_config_value(key, value))
+        self.header_right.editingFinished.connect(lambda value, key = "header_right": self.textEdit.set_config_value(key, value))
+        self.footer_left.editingFinished.connect(lambda value, key = "footer_left": self.textEdit.set_config_value(key, value))
+        self.footer_center.editingFinished.connect(lambda value, key = "footer_center": self.textEdit.set_config_value(key, value))
+        self.footer_right.editingFinished.connect(lambda value, key = "footer_right": self.textEdit.set_config_value(key, value))
+        self.textEdit.undo_stack.indexChanged.connect(self.check_undo_stack)
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.textEdit.send_message.connect(self.display_message)
-        self.textEdit.send_tape.connect(self.update_tape) 
-        self.textEdit.config_updated.connect(self.update_config_gui)
+        self.textEdit.send_tape.connect(self.update_tape)
+        self.textEdit.cursorPositionChanged.connect(self.update_gui)
         self.textEdit.player.videoAvailableChanged.connect(self.set_up_video)
         if self.textEdit.player.isAudioAvailable():
             self.audio_menu_enabling()
-            # todo read audio position and set up gui
         if self.textEdit.player.isVideoAvailable():
             self.set_up_video()
 
@@ -699,13 +873,37 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.actionUndo:
             self.menuEdit.removeAction(self.actionUndo)
             self.actionUndo.deleteLater()
+            self.actionUndo = None
         if self.actionRedo:
             self.menuEdit.removeAction(self.actionRedo)
             self.actionRedo.deleteLater()
+            self.actionRedo = None
         self.actionShowAllCharacters.setChecked(False)
+        if self.cap_worker:
+            self.setup_captions(False)
+        self.actionCaptioning.setChecked(False)
         self.menu_enabling()
         self.strokeList.clear()
         self.undoView.setStack(None)
+        # disconnect all config
+        self.page_width.disconnect()
+        self.page_height.disconnect()
+        self.page_left_margin.disconnect()
+        self.page_top_margin.disconnect()
+        self.page_right_margin.disconnect()
+        self.page_bottom_margin.disconnect()
+        self.enable_line_num.disconnect()
+        self.line_num_freq.disconnect()
+        self.enable_timestamp.disconnect()
+        self.page_max_char.disconnect()
+        self.page_max_lines.disconnect()
+        self.header_left.disconnect()
+        self.header_center.disconnect()
+        self.header_right.disconnect()
+        self.footer_left.disconnect()
+        self.footer_center.disconnect()
+        self.footer_right.disconnect()
+        self.textEdit.undo_stack.indexChanged.disconnect(self.check_undo_stack)
         self.menuField.clear() # clear field submenu
         self.menuIndexEntry.clear() # clear index submenu
         if self.textEdit.player.isAudioAvailable(): # clear audio connections if transcript has them
@@ -714,7 +912,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.video:
             self.videoLayout.removeWidget(self.video)
             self.video.deleteLater()
-        # todo: break all connections to textEdit
+        # todo: break all connections to textEdit subobjects
         
     def action_close(self):
         self.display_message("User selected quit.")
@@ -726,10 +924,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         settings.setValue("backgroundcolor", self.palette().color(QPalette.Base))
         settings.setValue("suggestionsource", int(self.suggest_source.currentIndex()))
         self.display_message("Saved window settings")
-        choice = self.close_file()
-        if choice:
-            self.display_message("Closing window.")
-            self.parent().close()
+        textEdit = self.mainTabs.findChildren(QTextEdit)
+        if len(textEdit) > 1:
+            QMessageBox.information(self, "Close", "Multiple transcripts open. Close each in order to exit.")
+            return
+        else:
+            self.close_file()
+        self.display_message("Closing window.")
+        self.parent().close()
 
     def close_file(self, tab_index = None):
         if not tab_index:
@@ -740,9 +942,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         tab_page = self.mainTabs.widget(tab_index)
         if tab_page.objectName().startswith("editorTab"):
             choice = self.textEdit.close_transcript()
-            if choice:
+            if choice and self.textEdit:
                 self.textEdit.disconnect()
                 self.breakdown_connections()
+                self.textEdit = None
+            elif not choice:
+                return False
         self.mainTabs.removeTab(tab_index)
         tab_page.deleteLater()
         return True
@@ -827,6 +1032,98 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             self.display_message("Selected dictionary not a transcript dictionary, passing.")
 
+    def select_style_file(self):
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Select Style JSON or odt"),
+            str(self.textEdit.file_name), _("Style (*.json *.odt)"))[0]
+        if not selected_file:
+            return
+        log.debug(f"User selected style file at {selected_file}.")
+        self.textEdit.load_check_styles(selected_file)
+        self.style_file_path.setText(str(self.textEdit.get_config_value("style")))
+        self.refresh_editor_styles()
+
+    def style_from_template(self):
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Select Style ODT or RTF/CRE file"),
+            str(self.file_name), _("Style template file (*.odt *.rtf)"))[0]
+        if not selected_file:
+            return  
+        if selected_file.endswith("odt"):
+            json_styles = load_odf_styles(selected_file)
+            self.statusBar.showMessage("Extracted ODF styles to styles folder.")
+        elif selected_file.endswith("rtf"):
+            self.statusBar.showMessage("Parsing RTF.")
+            self.progressBar = QProgressBar(self)
+            self.statusBar.addWidget(self.progressBar)
+            parse_results = rtf_steno(selected_file, self.progressBar)
+            parse_results.parse_document()
+            json_styles, renamed_indiv_style = load_rtf_styles(parse_results)
+            self.statusBar.showMessage("Extracted RTF styles to styles folder.")
+        style_file_path = self.textEdit.file_name / "styles" / pathlib.Path(pathlib.Path(selected_file).name).with_suffix(".json")
+        save_json(remove_empty_from_dict(json_styles), style_file_path)
+
+    def style_edit(self):
+        style_name = self.style_selector.currentText()
+        log.debug(f"Editing style {style_name}.")
+        new_style_dict = {"family": "paragraph"}
+        if self.blockParentStyle.currentIndex() != -1:
+            # this is important so a style is not based on itself
+            if self.blockParentStyle.currentText() != style_name:
+                new_style_dict["parentstylename"] = self.blockParentStyle.currentText()
+            else:
+                QMessageBox.warning(self, "Edit style", "Style cannot be parent of itself.")
+                return
+        if self.blockNextStyle.currentIndex() != -1:
+            new_style_dict["nextstylename"] = self.blockNextStyle.currentText()
+        if self.blockHeadingLevel.currentText() != "":
+            new_style_dict["defaultoutlinelevel"] = self.blockHeadingLevel.currentText()
+        # compare par and text properties to recursive original format
+        original_style_par = recursive_style_format(self.styles, style_name, prop = "paragraphproperties")
+        original_style_txt = recursive_style_format(self.styles, style_name, prop = "textproperties")
+        log.debug("Old paragraph properties: %s" % original_style_par)
+        log.debug("Old text properties: %s" % original_style_txt)
+        new_txt_dict = {"fontname": self.blockFont.currentFont().family(), "fontfamily": self.blockFont.currentFont().family(), 
+                        "fontsize": "%spt" % self.blockFontSize.value(), "fontweight": "bold" if self.blockFontBold.isChecked() else "", 
+                        "fontstyle": "italic" if self.blockFontItalic.isChecked() else "", 
+                        "textunderlinetype": "single" if self.blockFontUnderline.isChecked() else "", 
+                        "textunderlinestyle": "solid" if self.blockFontUnderline.isChecked() else ""}
+        if self.blockJustify.isChecked():
+            textalign = "justify"
+        elif self.blockRightAlign.isChecked():
+            textalign = "right"
+        elif self.blockCenterAlign.isChecked():
+            textalign = "center"
+        else:
+            textalign = "left"       
+        new_par_dict = {"textalign": textalign, "textindent": "%.2fin" % self.blockTextIndent.value(), 
+                        "marginleft": "%.2fin" % self.blockLeftMargin.value(), "marginright": "%.2fin" % self.blockRightMargin.value(), 
+                        "margintop": "%.2fin" % self.blockTopMargin.value(), "marginbottom": "%.2fin" % self.blockBottomMargin.value(), 
+                        "linespacing": "%d%%" % self.blockLineSpace.value()}
+        if self.blockTabStop.isEnabled():
+            # the input is disabled with multiple tabstops
+            tab_pos = self.blockTabStop.value() if self.blockTabStop.value() != 0 else None
+            # do not set if tabstop = 0, weird things might happen
+            if tab_pos:
+                new_par_dict["tabstop"] = "%.2fin" % tab_pos
+        min_txt_style = {}
+        for k, v in new_txt_dict.items():
+            if k in original_style_txt and v == original_style_txt[k]:
+                continue
+            else:
+                min_txt_style[k] = v
+        min_par_style = {}
+        for k, v in new_par_dict.items():
+            if k in original_style_par and v == original_style_par[k]:
+                continue
+            else:
+                min_par_style[k] = v
+        new_style_dict["paragraphproperties"] = min_par_style
+        new_style_dict["textproperties"] = min_txt_style
+        self.textEdit.set_style_properties(style_name, new_style_dict)
+
     def transcript_suggest(self):
         self.display_message("Generate transcript suggestions.")
         if not self.suggest_dialog:
@@ -867,8 +1164,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         # case if stroke only sends commands
         if not self.textEdit.last_string_sent and self.textEdit.last_backspaces_sent == 0:
-            return
-        # self.display_captions()
+            return          
+        self.display_captions()
         self.textEdit.on_stroke(stroke_pressed, self.actionCursorAtEnd.isChecked())
 
     def reset_paragraph(self):
@@ -1046,19 +1343,139 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         else:
             pass
-        if self.textEdit.recorder.state() != QMediaPlayer.RecordingState:
+        if self.textEdit.recorder.state() == QMediaRecorder.StoppedState:
+            self.recorder_settings = recorderDialogWindow(self.textEdit.recorder)
+            res = self.recorder_settings.exec_()
+            if res == QDialog.Accepted:
+                self.actionStopRecording.setEnabled(True)
+                settings = QAudioEncoderSettings()
+                audio_input = self.recorder_settings.audio_device.itemText(self.recorder_settings.audio_device.currentIndex())
+                audio_codec = self.recorder_settings.audio_device.itemText(self.recorder_settings.audio_codec.currentIndex())
+                audio_container = self.recorder_settings.audio_container.itemText(self.recorder_settings.audio_container.currentIndex())
+                audio_sample_rate = int(self.recorder_settings.audio_sample_rate.itemText(self.recorder_settings.audio_sample_rate.currentIndex()))
+                audio_channels = self.recorder_settings.audio_channels.itemData(self.recorder_settings.audio_channels.currentIndex())
+                audio_bitrate = self.recorder_settings.audio_bitrate.itemData(self.recorder_settings.audio_bitrate.currentIndex())
+                audio_encoding = QMultimedia.ConstantQualityEncoding if self.recorder_settings.constant_quality.isChecked() else QMultimedia.ConstantBitRateEncoding
+                self.textEdit.recorder.setAudioInput(audio_input)
+                settings.setCodec(audio_codec)
+                settings.setSampleRate(audio_sample_rate)
+                settings.setBitRate(audio_bitrate)
+                settings.setChannelCount(audio_channels)
+                settings.setQuality(QMultimedia.EncodingQuality(self.recorder_settings.quality_slider.value()))
+                settings.setEncodingMode(audio_encoding)
+                self.textEdit.recorder.setEncodingSettings(settings, QVideoEncoderSettings(), audio_container)                
+                self.display_message(f"Audio settings:\nAudio Input: {audio_input}\nCodec: {audio_codec}\nMIME Type: {audio_container}\nSample Rate: {audio_sample_rate}\nChannels: {audio_channels}\nQuality: {audio_channels}\nBitrate: {str(QMultimedia.EncodingQuality(self.recorder_settings.quality_slider.value()))}\nEncoding:{audio_encoding}")
+                common_file_formats = ["aac", "amr", "flac", "gsm", "m4a", "mp3", "mpc", "ogg", "opus", "raw", "wav"]
+                guessed_format = [ext for ext in common_file_formats if ext in audio_container]
+                if len(guessed_format) == 0:
+                    audio_file_path = self.textEdit.file_name / "audio" / self.textEdit.file_name.stem
+                else:
+                    audio_file_path = self.textEdit.file_name / "audio" / (self.textEdit.file_name.stem + "." + guessed_format[0])
+                try:
+                    os.mkdir(self.textEdit.file_name / "audio")
+                except FileExistsError:
+                    pass
+                if audio_file_path.exists():
+                    user_choice = QMessageBox.question(self, "Record", "Are you sure you want to replace existing audio?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                    if user_choice == QMessageBox.Yes:
+                        self.display_message("Overwriting existing audio file.")
+                        pass
+                    else:
+                        self.display_message("Abort recording attempt due to pre-existing audio file.")
+                        return
+                self.textEdit.recorder.setOutputLocation(QUrl.fromLocalFile(str(audio_file_path)))
+                self.textEdit.recorder.record()
+                self.display_message("Recording started.")
+                self.textEdit.recorder.durationChanged.connect(self.update_record_time)
+        elif self.textEdit.recorder.state() == QMediaRecorder.RecordingState:
             self.textEdit.recorder.pause()
             self.display_message("Recording paused.")
         else:
-            # todo: dialog controls, file location
-            self.actionStopRecording.setEnabled(True)
-            self.textEdit.recorder.play()
-            self.display_message("Recording started.")
-
+            self.textEdit.recorder.record()
+            self.display_message("Recording continued.")
+            
     def stop_record(self):
         self.textEdit.recorder.stop()
         self.actionStopRecording.setEnabled(False)
         self.display_message("Recording stopped.")
+        self.textEdit.recorder.durationChanged.disconnect()
+
+    def setup_caption_window(self, display_font, max_blocks):
+        self.caption_window = QMainWindow(self)
+        self.caption_window.setMinimumSize(50, 50)
+        self.caption_window.setWindowFlags(self.caption_window.windowFlags() | Qt.WindowStaysOnTopHint)
+        self.caption_window.setWindowFlags(self.caption_window.windowFlags() | QtCore.Qt.CustomizeWindowHint)
+        self.caption_window.setWindowFlags(self.caption_window.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
+        self.caption_window.setWindowTitle("Plover2CAT Captions")
+        self.caption_edit = QPlainTextEdit()
+        self.caption_edit.setReadOnly(True)
+        self.caption_edit.setCursorWidth(5)
+        self.caption_edit.moveCursor(QTextCursor.End)
+        self.caption_edit.ensureCursorVisible()
+        # use same font for tape and caption
+        self.caption_edit.document().setDefaultFont(display_font)
+        if max_blocks != 0:
+            self.caption_edit.document().setMaximumBlockCount(max_blocks)
+        self.caption_window.setCentralWidget(self.caption_edit)
+        self.caption_window.show()
+
+    def add_cap(self, cap):
+        self.caption_edit.setPlainText(cap)
+        self.caption_edit.ensureCursorVisible()
+
+    def setup_captions(self, checked):
+        if checked:
+            res = self.caption_dialog.exec_()
+            # need to always keep cursor at end, so can undo from end, but never from middle
+            self.actionCursorAtEnd.setChecked(True)
+            if res:
+                self.setup_caption_window(self.caption_dialog.font, self.caption_dialog.maxDisplayLines.value())
+                # if captions are enabled in middle of document, don't start from beginning
+                self.caption_cursor_pos = self.textEdit.textCursor().position()
+                self.thread = QThread()
+                self.cap_worker = captionWorker(max_length = self.caption_dialog.capLength.value(), max_lines = self.caption_dialog.maxDisplayLines.value(),
+                                    remote = self.caption_dialog.remoteCapHost.currentText(), endpoint = self.caption_dialog.hostURL.text(), 
+                                    port = self.caption_dialog.serverPort.text(), password = self.caption_dialog.serverPassword.text())
+                self.cap_worker.moveToThread(self.thread)
+                self.thread.started.connect(self.cap_worker.make_caps)
+                self.cap_worker.finished.connect(self.thread.quit)
+                self.cap_worker.finished.connect(self.cap_worker.deleteLater)
+                # self.thread.finished.connect(self.thread.deleteLater)
+                self.cap_worker.capSend.connect(self.add_cap)
+                self.cap_worker.postMessage.connect(self.statusBar.showMessage)
+                self.thread.start()
+            else:
+                self.actionCaptioning.setChecked(False)
+        else:
+            # do cleanup
+            self.cap_worker.clean_and_stop()
+            self.caption_edit.clear()
+            self.caption_window.hide()
+
+    def display_captions(self):
+        if not self.actionCaptioning.isChecked():
+            return
+        current_cursor = self.textEdit.textCursor()
+        current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, self.caption_dialog.charOffset.value())
+        new_pos = current_cursor.position()
+        if self.caption_cursor_pos >= new_pos:
+            return
+        current_cursor.setPosition(self.caption_cursor_pos, QTextCursor.KeepAnchor)
+        new_text = current_cursor.selectedText()
+        self.caption_cursor_pos = new_pos
+        self.cap_worker.intake(new_text)
+
+    def flush_caption(self):
+        old_pos = self.caption_cursor_pos
+        current_cursor = self.textEdit.textCursor()
+        current_cursor.setPosition(old_pos) 
+        current_cursor.movePosition(QTextCursor.End, QTextCursor.KeepAnchor)
+        new_text = current_cursor.selectedText()
+        if new_text == "":
+            self.cap_worker.intake("\n" + "\u2029")
+        else:
+            self.cap_worker.intake(new_text)
+        self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
 
     def export_text(self):
         selected_folder = pathlib.Path(self.file_name)  / "export"

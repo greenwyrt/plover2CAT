@@ -4,6 +4,4 @@ The page size is used to determine page size for supported export formats, and i
 
 The page margins are not used in the editor when displaying text, only for exporting.
 
-These page properties controls are located under `Page Format` in the `Toolbox` pane and are all in inch units. 
-
-After making a change to to the properties, click `Change Page Layout` to apply and save the changes.
+These page properties controls are located under `Page Format` in the `Toolbox` pane and are all in inch units. Use the up/down buttons to adjust the value or edit directly using the keyboard. Changes are saved once the `Enter` key is pressed or the cursor is moved away.

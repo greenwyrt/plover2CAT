@@ -78,10 +78,19 @@
        <enum>Qt::NoFocus</enum>
       </property>
       <property name="tabPosition">
-       <enum>QTabWidget::South</enum>
+       <enum>QTabWidget::North</enum>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
+      </property>
+      <property name="documentMode">
+       <bool>true</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
       </property>
       <property name="tabBarAutoHide">
        <bool>false</bool>
@@ -759,6 +768,9 @@ position.</string>
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockProp">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="minimumSize">
     <size>
      <width>137</width>
@@ -800,7 +812,7 @@ position.</string>
         <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>0</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -870,6 +882,9 @@ position.</string>
              </item>
              <item>
               <widget class="QGroupBox" name="groupBox_4">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="title">
                 <string>Style Settings</string>
                </property>
@@ -1118,6 +1133,9 @@ position.</string>
                     <property name="buttonSymbols">
                      <enum>QAbstractSpinBox::NoButtons</enum>
                     </property>
+                    <property name="keyboardTracking">
+                     <bool>true</bool>
+                    </property>
                     <property name="suffix">
                      <string>in</string>
                     </property>
@@ -1137,6 +1155,9 @@ position.</string>
                     </property>
                     <property name="toolTip">
                      <string>Specify text indent in inches relative to page margin</string>
+                    </property>
+                    <property name="keyboardTracking">
+                     <bool>true</bool>
                     </property>
                     <property name="suffix">
                      <string>in</string>
@@ -1164,6 +1185,9 @@ position.</string>
                     <property name="toolTip">
                      <string>Specify position of tab stop</string>
                     </property>
+                    <property name="keyboardTracking">
+                     <bool>true</bool>
+                    </property>
                     <property name="suffix">
                      <string>in</string>
                     </property>
@@ -1186,6 +1210,9 @@ position.</string>
                     </property>
                     <property name="toolTip">
                      <string>Specify paragraph margin relative to left page margin</string>
+                    </property>
+                    <property name="keyboardTracking">
+                     <bool>true</bool>
                     </property>
                     <property name="suffix">
                      <string>in</string>
@@ -1213,6 +1240,9 @@ position.</string>
                     <property name="toolTip">
                      <string>Specify right margin relative to right page margin</string>
                     </property>
+                    <property name="keyboardTracking">
+                     <bool>true</bool>
+                    </property>
                     <property name="suffix">
                      <string>in</string>
                     </property>
@@ -1238,6 +1268,9 @@ position.</string>
                     </property>
                     <property name="toolTip">
                      <string>Specify padding for top of paragraph</string>
+                    </property>
+                    <property name="keyboardTracking">
+                     <bool>true</bool>
                     </property>
                     <property name="suffix">
                      <string>in</string>
@@ -1267,6 +1300,9 @@ position.</string>
                     </property>
                     <property name="readOnly">
                      <bool>false</bool>
+                    </property>
+                    <property name="keyboardTracking">
+                     <bool>true</bool>
                     </property>
                     <property name="suffix">
                      <string>in</string>
@@ -1320,7 +1356,7 @@ position.</string>
                   <item row="9" column="1">
                    <widget class="QComboBox" name="blockHeadingLevel">
                     <property name="enabled">
-                     <bool>true</bool>
+                     <bool>false</bool>
                     </property>
                     <property name="focusPolicy">
                      <enum>Qt::NoFocus</enum>
@@ -1442,7 +1478,7 @@ position.</string>
               <x>0</x>
               <y>0</y>
               <width>351</width>
-              <height>415</height>
+              <height>386</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1459,6 +1495,9 @@ position.</string>
                 <widget class="QDoubleSpinBox" name="page_width">
                  <property name="toolTip">
                   <string>Paper width</string>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
                  </property>
                  <property name="suffix">
                   <string>in.</string>
@@ -1480,6 +1519,9 @@ position.</string>
                  <property name="toolTip">
                   <string>Page height</string>
                  </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
                  <property name="suffix">
                   <string>in.</string>
                  </property>
@@ -1499,6 +1541,9 @@ position.</string>
                 <widget class="QDoubleSpinBox" name="page_left_margin">
                  <property name="toolTip">
                   <string>Page left margin</string>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
                  </property>
                  <property name="suffix">
                   <string>in.</string>
@@ -1523,6 +1568,9 @@ position.</string>
                  <property name="toolTip">
                   <string>Page top margin</string>
                  </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
                  <property name="suffix">
                   <string>in.</string>
                  </property>
@@ -1546,6 +1594,9 @@ position.</string>
                  <property name="toolTip">
                   <string>Page right margin</string>
                  </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
                  <property name="suffix">
                   <string>in.</string>
                  </property>
@@ -1568,6 +1619,9 @@ position.</string>
                 <widget class="QDoubleSpinBox" name="page_bottom_margin">
                  <property name="toolTip">
                   <string>Page bottom margin</string>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
                  </property>
                  <property name="suffix">
                   <string>in.</string>
@@ -1595,6 +1649,9 @@ position.</string>
                  <property name="specialValueText">
                   <string>Automatic</string>
                  </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
                 </widget>
                </item>
                <item row="7" column="0">
@@ -1608,6 +1665,9 @@ position.</string>
                 <widget class="QSpinBox" name="page_max_lines">
                  <property name="specialValueText">
                   <string>Automatic</string>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -1639,6 +1699,9 @@ position.</string>
                 <widget class="QSpinBox" name="line_num_freq">
                  <property name="toolTip">
                   <string>Show line number every nth line for ODF</string>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
                  </property>
                  <property name="minimum">
                   <number>1</number>
@@ -1762,19 +1825,6 @@ position.</string>
               </layout>
              </item>
              <item>
-              <widget class="QPushButton" name="edit_page_layout">
-               <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
-               </property>
-               <property name="toolTip">
-                <string>Confirm and save changes to page and margin parameters</string>
-               </property>
-               <property name="text">
-                <string>Change Page Layout</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <spacer name="verticalSpacer_2">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -1876,6 +1926,9 @@ position.</string>
                </item>
                <item>
                 <widget class="QPushButton" name="search_forward">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
                  <property name="toolTip">
                   <string>Perform selected search forwards</string>
                  </property>
@@ -3215,6 +3268,9 @@ position.</string>
    </property>
   </action>
   <action name="actionCreateNewStyle">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Create New Style</string>
    </property>

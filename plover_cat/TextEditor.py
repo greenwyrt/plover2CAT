@@ -35,7 +35,6 @@ class PloverCATEditor(QTextEdit):
     complete = pyqtSignal(QModelIndex)
     send_message = pyqtSignal(str)
     send_tape = pyqtSignal(str)
-    config_updated = pyqtSignal()
     audio_position_changed = pyqtSignal(int)
     audio_length_changed = pyqtSignal(int)
     def __init__(self, widget):
@@ -83,6 +82,7 @@ class PloverCATEditor(QTextEdit):
         self.player.positionChanged.connect(self.update_audio_position)
         self.recorder = QAudioRecorder()
         self.audio_delay = 0
+
     def setCompleter(self, c):
         if not c:
             self._completer = c
@@ -93,17 +93,16 @@ class PloverCATEditor(QTextEdit):
         c.setWidget(self)
         c.setCompletionMode(QCompleter.PopupCompletion)
         c.setCaseSensitivity(Qt.CaseInsensitive)
-        c.activated[QtCore.QModelIndex].connect(self.insertCompletion)
+        c.activated[QtCore.QModelIndex].connect(self.insert_autocomplete)
+
     def completer(self):
         return self._completer
-    def insertCompletion(self, completion):
-        if self._completer.widget() is not self:
-            return
-        self.complete.emit(completion)
+
     def textUnderCursor(self):
         tc = self.textCursor()
         tc.select(QTextCursor.WordUnderCursor)
         return tc.selectedText()
+
     def showPossibilities(self):
         completionPrefix = self.textUnderCursor()
         if not completionPrefix or not self._completer:
@@ -115,10 +114,12 @@ class PloverCATEditor(QTextEdit):
         cr = self.cursorRect()
         cr.setWidth(self._completer.popup().sizeHintForColumn(0) + self._completer.popup().verticalScrollBar().sizeHint().width())
         self._completer.complete(cr)
+
     def focusInEvent(self, e):
         if self._completer is not None:
             self._completer.setWidget(self)
         super(PloverCATEditor, self).focusInEvent(e)
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Delete:
             self.mock_del()
@@ -130,13 +131,13 @@ class PloverCATEditor(QTextEdit):
                     self.mock_type(event.text())
             QTextEdit.keyPressEvent(self, event)
 
-    def load(self, path, engine):
+    def load(self, path, engine, load_transcript = True):
         self.send_message.emit("Loading data")
         self.file_name = pathlib.Path(path)
         self.file_name.mkdir(parents = True, exist_ok=True)
         self.load_config_file(self.file_name, engine)
         self.load_dicts(engine, self.config["dictionaries"])
-        self.load_check_styles(self.config["style"])
+        self.load_check_styles(self.file_name / self.config["style"])
         self.load_spellcheck_dicts()
         export_path = self.file_name / "export"
         pathlib.Path(export_path).mkdir(parents = True, exist_ok=True)
@@ -145,7 +146,9 @@ class PloverCATEditor(QTextEdit):
             self.dulwich_save()
         except NotGitRepository:
             self.repo = Repo.init(self.file_name)
-        self.load_transcript(self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript"))
+        transcript = self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript")
+        if load_transcript and transcript.is_file():
+            self.load_transcript(transcript)
         self.load_tape()
         self.engine = engine      
 
@@ -366,7 +369,10 @@ class PloverCATEditor(QTextEdit):
         self.send_message.emit(f"Loading configuration file from {str(config_path)}")
         with open(config_path, "r") as f:
             config_contents = json.loads(f.read())
-        log.debug(config_contents)
+        new_vals = {"page_line_numbering": False, "page_linenumbering_increment": 1, "page_timestamp": False, "page_max_char": 0, "page_max_line": 0, 
+                    "header_left": "", "header_center": "", "header_right": "", "footer_left": "", "footer_center": "", "footer_right": "", "enable_automatic_affix": False}
+        new_vals.update(config_contents)
+        log.debug(new_vals)
         self.config = config_contents
         self.user_field_dict = self.config["user_field_dict"]
         self.auto_paragraph_affixes = self.config["auto_paragraph_affixes"]
@@ -380,10 +386,8 @@ class PloverCATEditor(QTextEdit):
         return(self.config[key])
 
     def set_config_value(self, key, value):
-        self.config[key] = value
-        self.save_config_file()
-        self.load_config_file(self.file_name)
-        self.config_updated.emit()
+        cmd = update_config_value(key, value, self.config)
+        self.undo_stack.push(cmd)
 
     def load_spellcheck_dicts(self):
         default_spellcheck_path = pathlib.Path(self.file_name) / "spellcheck"
@@ -419,7 +423,7 @@ class PloverCATEditor(QTextEdit):
         new_dict_config = add_custom_dicts(full_paths, list_dicts)
         engine.config = {'dictionaries': new_dict_config}
         self.config["dictionaries"] = list(set(self.config["dictionaries"] + dictionaries))
-        self.save_config_file()
+        # self.save_config_file()
 
     def restore_dictionary_from_backup(self, engine):
         selected_folder = pathlib.Path(self.file_name)
@@ -432,7 +436,8 @@ class PloverCATEditor(QTextEdit):
             log.debug("Dictionaries restored from backup file.")
 
     def load_check_styles(self, path):
-        path = self.file_name / path
+        # path = self.file_name / path
+        path = pathlib.Path(path)
         if not path.exists():
             # go to default if the config style doesn't exist
             log.debug("Supplied config style file does not exist. Loading default.")
@@ -468,6 +473,8 @@ class PloverCATEditor(QTextEdit):
             log.debug(f"Copying style file at {original_style_path} to {new_style_path}")
             copyfile(original_style_path, new_style_path)
             self.config["style"] = new_style_path
+        else:
+            self.config["style"] = original_style_path
         self.styles = json_styles
         self.gen_style_formats()
 
@@ -492,6 +499,10 @@ class PloverCATEditor(QTextEdit):
         else:
             self.styles[name][attribute] = value
 
+    def set_style_properties(self, name, properties):
+        cmd = update_style(self, self.styles, name, properties)
+        self.undo_stack.push(cmd)
+
     def get_style_property(self, name, attribute, paragraph = False, text = False):
         if paragraph:
             return(self.styles[name]["paragraphproperties"][attribute])
@@ -499,7 +510,7 @@ class PloverCATEditor(QTextEdit):
             return(self.styles[name]["textproperties"][attribute])
         else:
             return(self.styles[name][attribute])
-   
+
     def on_stroke(self, stroke_pressed, end = False):
         current_cursor = self.textCursor()
         current_block = current_cursor.block()        
@@ -654,8 +665,8 @@ class PloverCATEditor(QTextEdit):
         current_block_num = current_cursor.blockNumber()
         current_block = self.document().findBlockByNumber(current_block_num)
         # get coordinates of selection in block
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-        stop_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
+        stop_pos = current_cursor.selectionEnd() - current_block.position()
         self.send_message.emit(f"{action}: {action} in paragraph {current_block_num} from {start_pos} to {stop_pos}.")
         selected_text = current_cursor.selectedText()
         if re.search("\u2029", selected_text):
@@ -697,7 +708,7 @@ class PloverCATEditor(QTextEdit):
         current_cursor = self.textCursor()
         current_block_num = current_cursor.blockNumber()
         current_block = current_cursor.block()
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         self.undo_stack.beginMacro(f"Insert: {text}")
         fake_steno = text_element(text = text)
         insert_cmd = steno_insert(current_cursor, self, current_block_num, start_pos, fake_steno)
@@ -715,8 +726,7 @@ class PloverCATEditor(QTextEdit):
     def update_fields(self, new_field_dict):
         current_cursor = self.textCursor()
         update_cmd = update_field(current_cursor, self, current_cursor.blockNumber(), current_cursor.positionInBlock(), self.user_field_dict, new_field_dict)
-        self.undo_stack.push(update_cmd)
-        # self.update_field_menu()   
+        self.undo_stack.push(update_cmd) 
 
     def extract_indexes(self):
         index_dict = {}
@@ -755,7 +765,7 @@ class PloverCATEditor(QTextEdit):
             self.setTextCursor(current_cursor)
             start_pos = current_cursor.positionInBlock()
         else:
-            current_cursor.setPosition(min(current_cursor.position(), current_cursor.anchor()))
+            current_cursor.setPosition(current_cursor.selectionStart())
             start_pos = current_cursor.positionInBlock()
         insert_cmd = steno_insert(current_cursor, self, current_block, start_pos, el)
         self.undo_stack.push(insert_cmd)
@@ -784,6 +794,39 @@ class PloverCATEditor(QTextEdit):
         auto_el.from_dict(element.to_json())
         auto_el.element = "automatic"
         return(auto_el)    
+
+    def insert_autocomplete(self, index):
+        if self._completer.widget() is not self:
+            return
+        steno = index.data(QtCore.Qt.UserRole)
+        text = index.data()
+        current_cursor = self.textCursor()
+        current_block = current_cursor.block()
+        current_cursor.select(QTextCursor.WordUnderCursor)
+        start_pos = current_cursor.selectionStart() - current_block.position()
+        end_pos = current_cursor.selectionEnd() - current_block.position()
+        self.send_message.emit(f"Autocomplete: autocomplete word {text} from {start_pos} to {end_pos}.")
+        start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
+        end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
+        current_cursor.setPosition(current_block.position() + start_stroke_pos[0])
+        current_cursor.setPosition(current_block.position() + end_stroke_pos[1], QTextCursor.KeepAnchor)
+        self.setTextCursor(current_cursor)
+        selected_text = current_cursor.selectedText()
+        if self.config["space_placement"] == "Before Output" and selected_text.startswith(" "):
+            text = " " + text
+        else:
+            # this is unlikely as after output would not trigger autocomplete 
+            text = text + " "
+        autocomplete_steno = stroke_text(stroke = steno, text = text)
+        self.undo_stack.beginMacro("Autocomplete: %s" % text)
+        remove_cmd = steno_remove(current_cursor, self, current_cursor.blockNumber(), 
+                        current_cursor.anchor() - current_block.position(), len(selected_text))
+        self.undo_stack.push(remove_cmd)
+        current_cursor = self.textCursor()
+        insert_cmd = steno_insert(current_cursor, self, current_cursor.blockNumber(), 
+                        current_cursor.positionInBlock(), autocomplete_steno)
+        self.undo_stack.push(insert_cmd)
+        self.undo_stack.endMacro()
 
     def mock_type(self, text):
         if self.engine.output:

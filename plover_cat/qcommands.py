@@ -440,9 +440,10 @@ class set_par_style(QUndoCommand):
             log_dict = {"action": "set_style", "block": self.block, "style": self.old_style}
             log.info(f"Style: {log_dict}")
 
-class style_update(QUndoCommand):
-    def __init__(self, styles, style_name, new_style_dict):
+class update_style(QUndoCommand):
+    def __init__(self, document, styles, style_name, new_style_dict):
         super().__init__()
+        self.document = document
         self.styles = styles
         self.style_name = style_name
         self.new_style_dict = deepcopy(new_style_dict)
@@ -454,11 +455,31 @@ class style_update(QUndoCommand):
         log_dict = {"action": "edit_style", "style_dict": self.new_style_dict}
         log.info(f"Style: {log_dict}")
         self.setText(f"Style: update style attributes for style {self.style_name}")
+        self.document.gen_style_formats()
     def undo(self):
         if self.old_style_dict:
             self.styles[self.style_name] = self.old_style_dict
         log_dict = {"action": "edit_style", "style_dict": self.old_style_dict}
         log.info(f"Style undo: {log_dict}")
+        self.document.gen_style_formats()
+
+class update_config_value(QUndoCommand):
+    def __init__(self, key, value, config):
+        super().__init__()
+        self.config_key = key
+        self.old_value = None
+        self.new_value = value
+        self.config = config
+    def redo(self):
+        self.old_value = deepcopy(self.config[self.config_key])
+        self.config[self.config_key] = self.new_value
+        log_dict = {"action": "config", "key": self.config_key, "value": self.new_value}
+        log.info(f"Config: {log_dict}")
+        self.setText("Config: updated value.")
+    def undo(self):
+        self.config[self.config_key] = self.old_value
+        log_dict = {"action": "config", "key": self.config_key, "value": self.old_value}
+        log.info(f"Config (undo): {log_dict}")
 
 class update_field(QUndoCommand):
     def __init__(self, cursor, document, block, position, old_dict, new_dict):

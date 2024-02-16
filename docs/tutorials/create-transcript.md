@@ -26,5 +26,9 @@ Click on **File > New** in the menu.
 
 A file dialog will appear. You will be allowed to select an existing folder from your filesystem or you can create a new folder.
 
-Upon pressing `Select Folder`, a folder named `transcript-TIMESTAMP` will be created (`TIMESTAMP` is the date and time of creation) in the selected folder.
+## Make transcript name
+
+The default name for the transcript uses the format `transcript-TIMESTAMP`. It is possible to change the default name to any that the file system will accept (those without forbidden characters such as `"` in Windows).
+
+A folder with this name will be created containing necessary subfolders and text files.
 
