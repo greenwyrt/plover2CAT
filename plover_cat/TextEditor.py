@@ -7,6 +7,7 @@ from collections import deque
 from dulwich.repo import Repo
 from dulwich.errors import NotGitRepository
 from dulwich import porcelain
+from spylls.hunspell import Dictionary
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument
@@ -72,7 +73,8 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack = QUndoStack(self)
         self.track_lengths = deque(maxlen = 10)
         self.spell_ignore = []
-        self.spellcheck_dicts = []
+        self.dictionary = Dictionary.from_files('en_US')
+        self.dictionary_name = "en_US"
         self._completer = None
         # media
         self.audio_file = ""
@@ -138,7 +140,7 @@ class PloverCATEditor(QTextEdit):
         self.load_config_file(self.file_name, engine)
         self.load_dicts(engine, self.config["dictionaries"])
         self.load_check_styles(self.file_name / self.config["style"])
-        self.load_spellcheck_dicts()
+        self.load_spellcheck_dict()
         export_path = self.file_name / "export"
         pathlib.Path(export_path).mkdir(parents = True, exist_ok=True)
         try:
@@ -237,6 +239,7 @@ class PloverCATEditor(QTextEdit):
                 QApplication.processEvents()
         if document_cursor.block().userData() == None:
             document_cursor.block().setUserData(BlockUserData())
+        # todo: set textcursor paragraph and text properties
         self.undo_stack.clear()
         self.send_message.emit("Loaded transcript.")   
 
@@ -254,7 +257,7 @@ class PloverCATEditor(QTextEdit):
         transcript = selected_folder.joinpath(selected_folder.stem).with_suffix(".transcript")        
         self.save_transcript(transcript)
         if str(self.config["style"]).endswith(".json"):
-            save_json(self.styles, self.styles_path)
+            self.save_style_file()
         self.document().setModified(False)
         self.undo_stack.setClean()
         self.dulwich_save(message = "user save")
@@ -370,10 +373,12 @@ class PloverCATEditor(QTextEdit):
         with open(config_path, "r") as f:
             config_contents = json.loads(f.read())
         new_vals = {"page_line_numbering": False, "page_linenumbering_increment": 1, "page_timestamp": False, "page_max_char": 0, "page_max_line": 0, 
-                    "header_left": "", "header_center": "", "header_right": "", "footer_left": "", "footer_center": "", "footer_right": "", "enable_automatic_affix": False}
+                    "header_left": "", "header_center": "", "header_right": "", 
+                    "footer_left": "", "footer_center": "", "footer_right": "", "enable_automatic_affix": False,
+                    "user_field_dict": {}, "auto_paragraph_affixes": {}}
         new_vals.update(config_contents)
         log.debug(new_vals)
-        self.config = config_contents
+        self.config = new_vals
         self.user_field_dict = self.config["user_field_dict"]
         self.auto_paragraph_affixes = self.config["auto_paragraph_affixes"]
 
@@ -389,10 +394,9 @@ class PloverCATEditor(QTextEdit):
         cmd = update_config_value(key, value, self.config)
         self.undo_stack.push(cmd)
 
-    def load_spellcheck_dicts(self):
-        default_spellcheck_path = pathlib.Path(self.file_name) / "spellcheck"
-        if default_spellcheck_path.exists():
-            self.spellcheck_dicts = [file for file in default_spellcheck_path.iterdir() if str(file).endswith("dic")]
+    def load_spellcheck_dict(self, dic_path = "en_US"):
+        self.dictionary = Dictionary.from_files(dic_path)
+        self.dictionary_name = pathlib.Path(dic_path).stem
 
     def load_dicts(self, engine, dictionaries = None):
         list_dicts = engine.config["dictionaries"]
@@ -423,7 +427,6 @@ class PloverCATEditor(QTextEdit):
         new_dict_config = add_custom_dicts(full_paths, list_dicts)
         engine.config = {'dictionaries': new_dict_config}
         self.config["dictionaries"] = list(set(self.config["dictionaries"] + dictionaries))
-        # self.save_config_file()
 
     def restore_dictionary_from_backup(self, engine):
         selected_folder = pathlib.Path(self.file_name)
@@ -472,9 +475,9 @@ class PloverCATEditor(QTextEdit):
         if original_style_path != new_style_path:
             log.debug(f"Copying style file at {original_style_path} to {new_style_path}")
             copyfile(original_style_path, new_style_path)
-            self.config["style"] = new_style_path
+            self.config["style"] = str(new_style_path)
         else:
-            self.config["style"] = original_style_path
+            self.config["style"] = str(original_style_path)
         self.styles = json_styles
         self.gen_style_formats()
 
@@ -511,6 +514,38 @@ class PloverCATEditor(QTextEdit):
         else:
             return(self.styles[name][attribute])
 
+    def set_paragraph_style(self, style):
+        style_cmd = set_par_style(self, self.textCursor().blockNumber(), style, self.par_formats, self.txt_formats)
+        self.undo_stack.push(style_cmd)
+
+    def set_paragraph_property(self, paragraph, prop, value):
+        prop_cmd = set_par_property(self, paragraph, prop, value)
+        self.undo_stack.push(prop_cmd)
+
+    def save_style_file(self):
+        style_file_path = self.file_name / self.config["style"]
+        log.debug(f"Saving styles to {str(style_file_path)}")
+        save_json(self.styles, style_file_path)
+
+    def to_next_style(self):
+        current_cursor = self.textCursor()
+        current_block = current_cursor.block()
+        if current_cursor.blockNumber() == 0:
+            return
+        style_data = self.styles
+        if len(style_data) == 0:
+            return
+        # keep using style as default if nothing is set
+        previous_style = None
+        new_style = current_cursor.block().userData()["style"]
+        previous_block = current_block.previous()
+        if previous_block:
+            previous_dict = previous_block.userData()
+            previous_style = previous_dict["style"]
+        if previous_style and "nextstylename" in style_data[previous_style]:
+            new_style = style_data[previous_style]["nextstylename"]
+        self.set_paragraph_style(new_style)
+        
     def on_stroke(self, stroke_pressed, end = False):
         current_cursor = self.textCursor()
         current_block = current_cursor.block()        
@@ -850,10 +885,6 @@ class PloverCATEditor(QTextEdit):
         current_cursor.setPosition(new_block.position())
         self.setTextCursor(current_cursor)
         log.debug(f"Editor cursor set to start of block {block_number}.")
-
-    def to_next_style(self):
-        # todo
-        pass
 
     def get_audio_time(self, convert = True):
         real_time = None

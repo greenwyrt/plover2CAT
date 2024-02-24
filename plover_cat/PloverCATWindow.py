@@ -134,7 +134,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionSave.triggered.connect(lambda: self.save_file())
         self.mainTabs.tabCloseRequested.connect(self.close_file)
         # self.actionSaveAs.triggered.connect(lambda: self.save_as_file())
-        # self.menuRecentFiles.triggered.connect(self.recentfile_open)
+        self.menuRecentFiles.triggered.connect(self.recentfile_open)
         self.actionEnableAutosave.triggered.connect(self.autosave_setup)
         self.actionSetAutosaveTime.triggered.connect(self.set_autosave_time)
         self.autosave_time.timeout.connect(self.autosave)
@@ -151,9 +151,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         ## editor related connections
         self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
         # self.textEdit.complete.connect(self.insert_autocomplete)
-        # self.textEdit.cursorPositionChanged.connect(self.update_gui)
-        # self.editorCheck.stateChanged.connect(self.editor_lock)
-        # self.submitEdited.clicked.connect(self.edit_user_data)
         self.actionCopy.triggered.connect(lambda: self.cut_steno(cut = False))
         self.actionCut.triggered.connect(lambda: self.cut_steno())
         self.actionPaste.triggered.connect(lambda: self.paste_steno())
@@ -187,15 +184,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionTranscriptSuggestions.triggered.connect(lambda: self.transcript_suggest())
         ## style connections
         self.editCurrentStyle.clicked.connect(self.style_edit)
-        # self.actionCreateNewStyle.triggered.connect(self.new_style)
+        self.actionCreateNewStyle.triggered.connect(self.create_new_style)
         self.actionRefreshEditor.triggered.connect(self.refresh_editor_styles)
         self.actionStyleFileSelect.triggered.connect(self.select_style_file)
         self.actionGenerateStyleFromTemplate.triggered.connect(self.style_from_template)
-        # self.style_selector.activated.connect(self.update_paragraph_style)
         self.blockFont.currentFontChanged.connect(self.calculate_space_width)
-        # self.menuParagraphStyle.triggered.connect(self.change_style)
-        # # self.textEdit.ins.connect(self.change_style)
-        # ## view
+        ## view
         self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
         self.actionBackgroundColor.triggered.connect(lambda: self.change_backgrounds())
         self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
@@ -206,7 +200,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionFindReplacePane.triggered.connect(lambda: self.show_find_replace())
         self.actionParagraph.triggered.connect(lambda: self.show_toolbox_pane(self.paragraph_pane))
         self.actionSpellcheck.triggered.connect(lambda: self.show_toolbox_pane(self.spellcheck_pane))
-        # self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
+        self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
         self.actionSearchWikipedia.triggered.connect(lambda: self.search_online("https://en.wikipedia.org/wiki/Special:Search/{0}"))
         self.actionSearchMerriamWebster.triggered.connect(lambda: self.search_online("http://www.merriam-webster.com/dictionary/{0}"))
         self.actionSearchOED.triggered.connect(lambda: self.search_online("https://www.oed.com/search/dictionary/?scope=Entries&q={0}"))
@@ -220,21 +214,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # self.search_backward.clicked.connect(lambda: self.search(-1))
         # self.replace_selected.clicked.connect(lambda: self.replace())
         # self.replace_all.clicked.connect(lambda: self.replace_everything())
-        # ## spellcheck
-        # self.dictionary = Dictionary.from_files('en_US')
-        # self.spell_search.clicked.connect(lambda: self.spellcheck())
-        # self.spell_skip.clicked.connect(lambda: self.spellcheck())
-        # self.spell_ignore_all.clicked.connect(lambda: self.sp_ignore_all())
+        ## spellcheck
         # self.spellcheck_suggestions.itemDoubleClicked.connect(self.sp_insert_suggest)
-        # self.dict_selection.activated.connect(self.set_sp_dict)
-        # ## steno search
-        # self.steno_search.clicked.connect(lambda: self.spell_steno())
-        # ## suggestions
-        # self.suggest_sort.toggled.connect(lambda: self.get_suggestions())
-        # self.suggest_source.currentIndexChanged.connect(lambda: self.get_suggestions())
-        # ## tape
-        # self.textEdit.document().blockCountChanged.connect(lambda: self.get_suggestions())
-        # self.strokeLocate.clicked.connect(lambda: self.stroke_to_text_move())
+        ## steno search
+        self.steno_search.clicked.connect(lambda: self.spell_steno())
+        ## suggestions
+        self.suggest_sort.toggled.connect(lambda: self.get_suggestions())
+        self.suggest_source.currentIndexChanged.connect(lambda: self.get_suggestions())
+        ## tape
+        self.strokeLocate.clicked.connect(lambda: self.stroke_to_text_move())
         # # export
         # self.actionPlainText.triggered.connect(lambda: self.export_text())
         # self.actionASCII.triggered.connect(lambda: self.export_ascii())
@@ -316,7 +304,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(txt)
 
     def update_gui(self):
-        self.refresh_steno_display()
+        current_cursor = self.textEdit.textCursor()
+        if current_cursor.block().userData():
+            self.text_to_stroke_move()
+            self.refresh_steno_display(current_cursor)
+            self.display_block_data()
+            self.update_style_display(self.textEdit.textCursor().block().userData()["style"])        
 
     def update_tape(self, txt):
         # todo: if ever tape format changes, alter here
@@ -334,9 +327,39 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             item.setData(Qt.UserRole, ind)
             self.parSteno.addItem(item)     
 
-    def refresh_steno_display(self):
+    def display_block_data(self):
         current_cursor = self.textEdit.textCursor()
-        block_strokes = current_cursor.block().userData()["strokes"]
+        block_number = current_cursor.blockNumber()
+        block_data = current_cursor.block().userData()
+        log.debug(f"Update GUI to display block {block_number} data")
+        if not block_data:
+            return
+        self.editorParagraphLabel.setText(str(block_number))
+        if block_data["creationtime"]:
+            self.editorCreationTime.setDateTime(QDateTime.fromString(block_data["creationtime"],  "yyyy-MM-ddTHH:mm:ss.zzz")) 
+        if block_data["edittime"]:
+            self.editorEditTime.setDateTime(QDateTime.fromString(block_data["edittime"],  "yyyy-MM-ddTHH:mm:ss.zzz"))
+        if block_data["audiostarttime"]:
+            self.editorAudioStart.setTime(QTime.fromString(block_data["audiostarttime"], "HH:mm:ss.zzz"))
+        else:
+            self.editorAudioStart.setTime(QTime(0, 0, 0, 0))
+        if block_data["audioendtime"]:
+            self.editorAudioEnd.setTime(QTime.fromString(block_data["audioendtime"], "HH:mm:ss.zzz"))
+        else:
+            self.editorAudioEnd.setTime(QTime(0, 0, 0, 0))
+        if block_data["notes"]:
+            self.editorNotes.setText(block_data["notes"])
+        else:
+            self.editorNotes.clear()
+        if not block_data["style"]:
+            self.textEdit.to_next_style()
+        self.style_selector.setCurrentText(block_data["style"])
+        self.textEdit.showPossibilities()
+
+    def refresh_steno_display(self, cursor = None):
+        if not cursor:
+            cursor = self.textEdit.textCursor()
+        block_strokes = cursor.block().userData()["strokes"]
         self.display_block_steno(block_strokes)
 
     def refresh_editor_styles(self):
@@ -376,6 +399,70 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 break
             block = block.next()
         self.statusBar.removeWidget(self.progressBar)
+
+    def update_style_display(self, style):
+        # log.debug(f"Updating style GUI for style {style}.")
+        block_style = self.textEdit.par_formats[style]
+        text_style = self.textEdit.txt_formats[style]
+        self.blockFont.setCurrentFont(text_style.font())
+        self.blockFontSize.setValue(int(text_style.fontPointSize()))
+        self.blockFontBold.setChecked(text_style.font().bold())
+        self.blockFontItalic.setChecked(text_style.font().italic())
+        self.blockFontUnderline.setChecked(text_style.font().underline())
+        self.blockAlignment.setExclusive(False)
+        for but in self.blockAlignment.buttons():
+            but.setChecked(False)
+        if block_style.alignment() == Qt.AlignJustify:
+            self.blockJustify.setChecked(True)
+        elif block_style.alignment() == Qt.AlignRight:
+            self.blockRightAlign.setChecked(True)
+        elif block_style.alignment() == Qt.AlignHCenter:
+            self.blockCenterAlign.setChecked(True)
+        else:
+            self.blockLeftAlign.setChecked(True)
+        self.blockAlignment.setExclusive(True)
+        tabs = block_style.tabPositions()
+        if len(tabs) > 1:
+            self.blockTabStop.setEnabled(False)
+            self.blockTabStop.setValue(0)
+            tabs_in = [str(pixel_to_in(t.position)) for t in tabs]
+            self.blockTabStop.setSpecialValueText(",".join(tabs_in))
+        elif len(tabs) == 1:
+            self.blockTabStop.setEnabled(True)
+            self.blockTabStop.setSpecialValueText("")
+            self.blockTabStop.setValue(pixel_to_in(tabs[0].position))
+        else:
+            self.blockTabStop.setEnabled(True)
+            self.blockTabStop.setSpecialValueText("")
+            self.blockTabStop.setValue(0)
+        text_indent = block_style.textIndent() if block_style.textIndent() else 0
+        left_margin = block_style.leftMargin() if block_style.leftMargin() else 0
+        right_margin = block_style.rightMargin() if block_style.rightMargin() else 0
+        top_margin = block_style.topMargin() if block_style.topMargin() else 0
+        bottom_margin = block_style.bottomMargin() if block_style.bottomMargin() else 0
+        line_spacing = int(block_style.lineHeight() if block_style.lineHeight() else 100)
+        self.blockTextIndent.setValue(pixel_to_in(text_indent))
+        self.blockLeftMargin.setValue(pixel_to_in(left_margin))
+        self.blockRightMargin.setValue(pixel_to_in(right_margin))
+        self.blockTopMargin.setValue(pixel_to_in(top_margin))
+        self.blockBottomMargin.setValue(pixel_to_in(bottom_margin))
+        self.blockLineSpace.setValue(line_spacing)
+        self.blockParentStyle.clear()
+        self.blockParentStyle.addItems([*self.textEdit.styles])
+        if "defaultoutlinelevel" in self.textEdit.styles[style]:
+            self.blockHeadingLevel.setCurrentText(self.textEdit.styles[style]["defaultoutlinelevel"])
+        else:
+            self.blockHeadingLevel.setCurrentIndex(0)
+        if "parentstylename" in self.textEdit.styles[style]:
+            self.blockParentStyle.setCurrentText(self.textEdit.styles[style]["parentstylename"])
+        else:
+            self.blockParentStyle.setCurrentIndex(-1)
+        self.blockNextStyle.clear()
+        self.blockNextStyle.addItems([*self.textEdit.styles])
+        if "nextstylename" in self.textEdit.styles[style]:
+            self.blockNextStyle.setCurrentText(self.textEdit.styles[style]["nextstylename"])
+        else:
+            self.blockNextStyle.setCurrentIndex(-1)
 
     def context_menu(self, pos):
         log.debug("User activated context menu.")
@@ -457,6 +544,76 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.audio_seeker.setValue(position)
         self.audio_curr_pos.setText(ms_to_hours(position))
 
+    def get_tapey_tape(self):
+        ## from tapeytape default, maybe make selectable in future?
+        config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
+        tapey_tape_location = config_dir.joinpath('tapey_tape.txt')
+        log.debug("Trying to load tapey tape from default location.")
+        if not tapey_tape_location.exists():
+            return
+        stroke_search = [re.findall(re_strokes,line) for line in open(tapey_tape_location)]
+        stroke_search = [x[0] for x in stroke_search if x]
+        ## number maybe adjusted in future? both number of occurrences and number of words to place into table
+        ## this uses frequency order
+        if self.suggest_sort.isChecked():
+            most_common_strokes = [word for word, word_count in Counter(stroke_search).items() if word_count > 2]
+            most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
+            most_common_strokes = most_common_strokes[::-1]
+        else: 
+            most_common_strokes= [word for word, word_count in Counter(stroke_search).most_common(10) if word_count > 2]
+        first_stroke = [stroke.split()[0] for stroke in most_common_strokes]
+        words = [self.engine.lookup(tuple(stroke.split("/"))) for stroke in first_stroke]
+        self.suggestTable.clearContents()
+        self.suggestTable.setRowCount(len(words))
+        self.suggestTable.setColumnCount(2)
+        for row in range(len(words)):
+            self.suggestTable.setItem(row, 0, QTableWidgetItem(words[row]))
+            self.suggestTable.setItem(row, 1, QTableWidgetItem(most_common_strokes[row]))
+        self.suggestTable.resizeColumnsToContents()
+
+    def get_clippy(self):
+        '''Now parses default clippy output based on color codes.'''
+        config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
+        clippy_location = config_dir.joinpath('clippy_2.org')
+        log.debug("Trying to load clippy from default location")
+        if not clippy_location.exists():
+            # log.debug("Clippy load failed")
+            return
+        raw_lines = [line for line in open(clippy_location)]
+        stroke_search = []
+        for line in raw_lines:
+            search_hit = clippy_strokes.search(line)
+            if search_hit:
+                stroke_search.append(search_hit.group(1).split(", "))
+        first_stroke_search = [x[0] for x in stroke_search]
+        combined_stroke_search = dict(zip(first_stroke_search, stroke_search))
+        log.debug("stroke_search = " + str(stroke_search))
+        if self.suggest_sort.isChecked():
+            most_common_strokes = [word for word, word_count in reversed(Counter(first_stroke_search).items()) if word_count > 2]
+            most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
+        else:
+            most_common_strokes = [word for word, word_count in Counter(first_stroke_search).most_common(10) if word_count > 2]
+        log.debug("most_common_strokes = " + str(most_common_strokes))
+        words = [self.engine.lookup(tuple(stroke.split("/"))).strip() for stroke in most_common_strokes]
+        log.debug("words = " + str(words))
+        self.suggestTable.clearContents()
+        self.suggestTable.setRowCount(len(words))
+        self.suggestTable.setColumnCount(2)
+        for row in range(len(words)):
+            self.suggestTable.setItem(row, 0, QTableWidgetItem(words[row]))
+            self.suggestTable.setItem(row, 1, QTableWidgetItem(", ".join(combined_stroke_search[most_common_strokes[row]])))
+        self.suggestTable.resizeColumnsToContents()
+
+    def get_suggestions(self):
+        if not self.textEdit:
+            return
+        if self.suggest_source.currentText() == "tapey-tape":
+            self.get_tapey_tape()
+        elif self.suggest_source.currentText() == "clippy_2":
+            self.get_clippy()
+        else:
+            log.debug("Unknown suggestion source %s!" % self.suggest_source.currentText())
+
     def update_record_time(self):
         self.display_message(f"Recorded {ms_to_hours(self.textEdit.recorder.duration())}")
 
@@ -485,7 +642,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             label = transcript_path.stem
             action = QAction(label, self.menuRecentFiles)
             action.setData(dir_path)
-            action.setToolTip(dir_path)
+            action.setToolTip(str(dir_path))
             self.menuRecentFiles.addAction(action)
             tb = QToolButton()
             icon = QtGui.QIcon()
@@ -495,7 +652,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             tb.setIconSize(QSize(32, 32))
             tb.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
             tb.setAutoRaise(True)
-            tb.setToolTip(dir_path)
+            tb.setToolTip(str(dir_path))
             self.recentfileflow.addWidget(tb)
 
     def clear_layout(self, layout):
@@ -562,6 +719,22 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.tabWidget.setCurrentWidget(self.find_replace_pane)
         log.debug("User set find pane visible.")
 
+    def show_stenospell(self):
+        current_cursor = self.textEdit.textCursor()
+        if current_cursor.hasSelection():
+            current_block = current_cursor.block()
+            start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+            end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+            start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
+            end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
+            underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
+            underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])        
+            self.steno_outline.setText(underlying_steno)
+        if not self.dockProp.isVisible():
+            self.dockProp.setVisible(True) 
+        self.tabWidget.setCurrentWidget(self.stenospell_pane)  
+        log.debug("User set steno spell pane visible.")
+
     def search_online(self, link):
         current_cursor = self.textEdit.textCursor()
         if not current_cursor.hasSelection():
@@ -626,6 +799,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         page_size = QPageSize(QSizeF(width, height), QPageSize.Inch, matchPolicy = QPageSize.FuzzyMatch) 
         doc.setPageSize(page_size.size(QPageSize.Point))
 
+    def update_style_menu(self):
+        # log.debug("Updating style sub-menu.")
+        self.menuParagraphStyle.clear()
+        for ind, name in enumerate(self.textEdit.styles.keys()):
+            label = name
+            action = QAction(label, self.menuParagraphStyle)
+            if ind < 10:
+                action.setShortcut(f"Ctrl+{ind}")
+            action.setData(ind)
+            self.menuParagraphStyle.addAction(action)
+
     def update_field_menu(self):
         self.display_message("Updating field sub-menu.")
         self.menuField.clear()
@@ -666,6 +850,70 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if block == self.textEdit.document().lastBlock():
                 break
             block = block.next()   
+
+    def stroke_to_text_move(self):
+        stroke_cursor = self.strokeList.textCursor()
+        edit_cursor = self.textEdit.textCursor()
+        self.textEdit.blockSignals(True)
+        try:
+            stroke_cursor.movePosition(QTextCursor.StartOfBlock)
+            stroke_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+            cursor_position_stroke = stroke_cursor.selectedText().split("|")[2].split(",")
+            par = int(cursor_position_stroke[0].replace("(", ""))
+            col = int(cursor_position_stroke[1].replace(")", ""))
+            edit_cursor.movePosition(QTextCursor.Start)
+            for i in range(par):
+                edit_cursor.movePosition(QTextCursor.NextBlock)
+            for i in range(col):
+                edit_cursor.movePosition(QTextCursor.NextCharacter)
+            self.textEdit.setTextCursor(edit_cursor)
+            log.debug("Move text cursor to tape position.")
+        except:
+            pass
+        self.textEdit.blockSignals(False)
+
+    def text_to_stroke_move(self):
+        stroke_cursor = self.strokeList.textCursor()
+        edit_cursor = self.textEdit.textCursor()
+        edit_block = edit_cursor.block()
+        block_data = edit_block.userData()
+        self.strokeList.blockSignals(True)
+        stroke_text = self.strokeList.document().toPlainText().split("\n")
+        pos = edit_cursor.positionInBlock()
+        self.cursor_status.setText("Par,Char: {line},{char}".format(line = edit_cursor.blockNumber(), char = pos)) 
+        try:
+            if edit_cursor.atBlockStart():
+                stroke_time = block_data["strokes"].data[0].time
+            elif edit_cursor.atBlockEnd():
+                stroke_time = block_data["strokes"].data[-1].time
+            else:
+                stroke_data = block_data["strokes"].extract_steno(pos, pos + 1)
+                stroke_time = stroke_data.data[0].time
+            # no idea how fast this will be with many many more lines, probably slow
+            for index, i in enumerate(stroke_text):
+                if i.startswith(stroke_time):
+                    stroke_pos = index
+                    break
+            stroke_cursor.movePosition(QTextCursor.Start)
+            for i in range(stroke_pos):
+                stroke_cursor.movePosition(QTextCursor.NextBlock)
+            stroke_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+            self.strokeList.setTextCursor(stroke_cursor)
+            self.strokeList.setCursorWidth(5)
+            self.strokeList.ensureCursorVisible()
+        except:
+            pass
+        self.strokeList.blockSignals(False)
+
+    def update_spell_gui(self):
+        self.dict_selection.clear()
+        self.dict_selection.addItem("en_US", "en_US")
+        default_spellcheck_path = pathlib.Path(self.textEdit.file_name) / "spellcheck"
+        if default_spellcheck_path.exists():
+            dics = [file for file in default_spellcheck_path.iterdir() if str(file).endswith("dic")]
+            for dic in dics:
+                    self.dict_selection.addItem(dic.stem, dic)
+        self.dict_selection.setCurrentText(self.textEdit.dictionary_name)
 
     def clipboard_menu(self):
         self.menuClipboard.clear()
@@ -777,6 +1025,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.textEdit.restore_dictionary_from_backup(self.engine)
             self.textEdit.disconnect()
             self.breakdown_connections()
+        if self.mainTabs.currentChanged.connect(self.switch_restore):
             self.mainTabs.currentChanged.disconnect()
         self.textEdit = PloverCATEditor(editorTab)
         self.textEdit.load(selected_folder, self.engine)
@@ -789,8 +1038,30 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         tab_index = self.mainTabs.addTab(editorTab, self.textEdit.file_name.name)
         self.mainTabs.setCurrentIndex(tab_index)
         QApplication.restoreOverrideCursor()
+        self.recentfile_store(self.textEdit.file_name)
         self.setup_connections()
         self.mainTabs.currentChanged.connect(self.switch_restore)
+
+    def recentfile_open(self, action):
+        self.open_file(action.data())
+
+    def recentfile_store(self, path):
+        settings = QSettings("Plover2CAT", "OpenCAT")
+        recent_file_paths = settings.value("recentfiles", [])
+        try:
+            recent_file_paths.remove(path)
+        except ValueError:
+            pass  
+        recent_file_paths.insert(0, path)
+        deleted = []
+        for dir_path in recent_file_paths:
+            if not pathlib.Path(dir_path).exists():
+                deleted.append(dir_path)
+        for remove_path in deleted:
+            recent_file_paths.remove(remove_path)
+        del recent_file_paths[10:]
+        settings.setValue("recentfiles", recent_file_paths)
+        self.recent_file_menu()
 
     def switch_restore(self, index):
         if not index:
@@ -838,8 +1109,19 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.set_shortcuts()
         self.undoView.setStack(self.textEdit.undo_stack)
         self.update_field_menu()
+        self.update_style_menu()
+        self.menuParagraphStyle.triggered.connect(lambda action: self.update_paragraph_style(action = action))
+        self.style_file_path.setText(str(self.textEdit.config["style"]))
+        if pathlib.Path(self.textEdit.config["style"]).suffix == ".json":
+            self.style_controls.setEnabled(True)
+            self.actionCreateNewStyle.setEnabled(True)
         self.update_index_menu()
         self.update_tape(self.textEdit.tape)
+        self.update_spell_gui()
+        self.spell_search.clicked.connect(lambda: self.spellcheck())
+        self.spell_skip.clicked.connect(lambda: self.spellcheck())
+        self.spell_ignore_all.clicked.connect(lambda: self.sp_ignore_all())
+        self.dict_selection.activated.connect(self.set_sp_dict)
         self.update_config_gui()
         self.page_width.valueChanged.connect(lambda value, key = "page_width": self.textEdit.set_config_value(key, value))
         self.page_height.valueChanged.connect(lambda value, key = "page_height": self.textEdit.set_config_value(key, value))
@@ -858,10 +1140,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.footer_left.editingFinished.connect(lambda value, key = "footer_left": self.textEdit.set_config_value(key, value))
         self.footer_center.editingFinished.connect(lambda value, key = "footer_center": self.textEdit.set_config_value(key, value))
         self.footer_right.editingFinished.connect(lambda value, key = "footer_right": self.textEdit.set_config_value(key, value))
+        self.style_selector.clear()
+        self.style_selector.addItems([*self.textEdit.styles])
+        self.style_selector.activated.connect(self.update_paragraph_style)
+        self.submitEdited.setEnabled(True)
+        self.submitEdited.clicked.connect(self.edit_paragraph_properties)
         self.textEdit.undo_stack.indexChanged.connect(self.check_undo_stack)
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.textEdit.send_message.connect(self.display_message)
         self.textEdit.send_tape.connect(self.update_tape)
+        self.textEdit.document().blockCountChanged.connect(lambda: self.get_suggestions())
         self.textEdit.cursorPositionChanged.connect(self.update_gui)
         self.textEdit.player.videoAvailableChanged.connect(self.set_up_video)
         if self.textEdit.player.isAudioAvailable():
@@ -885,27 +1173,43 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.menu_enabling()
         self.strokeList.clear()
         self.undoView.setStack(None)
+        self.dict_selection.clear()
+        self.spell_search.clicked.disconnect()
+        self.spell_skip.clicked.disconnect()
+        self.dict_selection.activated.disconnect()
+        self.spell_ignore_all.clicked.disconnect()
         # disconnect all config
-        self.page_width.disconnect()
-        self.page_height.disconnect()
-        self.page_left_margin.disconnect()
-        self.page_top_margin.disconnect()
-        self.page_right_margin.disconnect()
-        self.page_bottom_margin.disconnect()
-        self.enable_line_num.disconnect()
-        self.line_num_freq.disconnect()
-        self.enable_timestamp.disconnect()
-        self.page_max_char.disconnect()
-        self.page_max_lines.disconnect()
-        self.header_left.disconnect()
-        self.header_center.disconnect()
-        self.header_right.disconnect()
-        self.footer_left.disconnect()
-        self.footer_center.disconnect()
-        self.footer_right.disconnect()
+        self.page_width.valueChanged.disconnect()
+        self.page_height.valueChanged.disconnect()
+        self.page_left_margin.valueChanged.disconnect()
+        self.page_top_margin.valueChanged.disconnect()
+        self.page_right_margin.valueChanged.disconnect()
+        self.page_bottom_margin.valueChanged.disconnect()
+        self.enable_line_num.stateChanged.disconnect()
+        self.line_num_freq.valueChanged.disconnect()
+        self.enable_timestamp.stateChanged.disconnect()
+        self.page_max_char.valueChanged.disconnect()
+        self.page_max_lines.valueChanged.disconnect()
+        self.header_left.editingFinished.disconnect()
+        self.header_center.editingFinished.disconnect()
+        self.header_right.editingFinished.disconnect()
+        self.footer_left.editingFinished.disconnect()
+        self.footer_center.editingFinished.disconnect()
+        self.footer_right.editingFinished.disconnect()
+        self.style_selector.clear()
+        self.style_selector.activated.disconnect()
         self.textEdit.undo_stack.indexChanged.disconnect(self.check_undo_stack)
+        self.textEdit.document().blockCountChanged.disconnect()
+        self.submitEdited.clicked.disconnect()
+        self.submitEdited.setEnabled(False)
+        self.menuParagraphStyle.clear()
+        self.menuParagraphStyle.triggered.disconnect()
+        self.style_file_path.setText("")
+        self.style_controls.setEnabled(False)
+        self.actionCreateNewStyle.setEnabled(False)
         self.menuField.clear() # clear field submenu
         self.menuIndexEntry.clear() # clear index submenu
+        self.parSteno.clear()
         if self.textEdit.player.isAudioAvailable(): # clear audio connections if transcript has them
             self.textEdit.player.stop()
             self.audio_menu_enabling(False)
@@ -954,7 +1258,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     def save_file(self):
         self.textEdit.save()
-        self.update_commit_list()
 
     def save_as_file(self):
         self.textEdit.save_as()
@@ -1042,6 +1345,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(f"User selected style file at {selected_file}.")
         self.textEdit.load_check_styles(selected_file)
         self.style_file_path.setText(str(self.textEdit.get_config_value("style")))
+        if pathlib.Path(self.textEdit.config["style"]).suffix == ".json":
+            self.style_controls.setEnabled(True)
+            self.actionCreateNewStyle.setEnabled(True)
+        else:
+            self.style_controls.setEnabled(False)
+            self.actionCreateNewStyle.setEnabled(False)                    
         self.refresh_editor_styles()
 
     def style_from_template(self):
@@ -1124,6 +1433,28 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         new_style_dict["textproperties"] = min_txt_style
         self.textEdit.set_style_properties(style_name, new_style_dict)
 
+    def create_new_style(self):
+        log.debug("User create new style")
+        text, ok = QInputDialog().getText(self, "Create New Style", "Style Name (based on %s)" % self.style_selector.currentText(), inputMethodHints  = Qt.ImhLatinOnly)
+        if not ok:
+            log.debug("User cancelled style creation")
+            return
+        log.debug(f"Creating new style with name {text.strip()}")
+        if text in self.textEdit.styles:
+            QMessageBox.critical(self, "Create New Style", "New style cannot have same name as existing style.")
+            return
+        self.textEdit.set_style_properties(text, {"family": "paragraph", "parentstylename": self.style_selector.currentText()})
+        self.style_selector.clear()
+        self.style_selector.addItems([*self.textEdit.styles])
+        self.update_style_menu()
+
+    def update_paragraph_style(self, index = None, action = None):
+        if not index:
+            index = action.data()
+        new_style = self.style_selector.itemText(index)
+        self.textEdit.set_paragraph_style(new_style)
+        self.update_gui()
+
     def transcript_suggest(self):
         self.display_message("Generate transcript suggestions.")
         if not self.suggest_dialog:
@@ -1154,7 +1485,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.last_backspaces_sent = backspace
 
     def on_stroke(self, stroke_pressed):
-        self.editorCheck.setChecked(True)
         if not self.textEdit:
             return
         if not self.engine.output:
@@ -1305,6 +1635,65 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         self.textEdit.update_indices(present_index, new_index)
         self.update_index_menu(self.index_dialog.index_dict)
+
+    def edit_paragraph_properties(self):
+        block_number = int(self.editorParagraphLabel.text())
+        self.textEdit.undo_stack.beginMacro("Update paragraph properties")
+        self.textEdit.set_paragraph_property(block_number, "creationtime", self.editorCreationTime.dateTime().toString(Qt.ISODateWithMs))
+        val = self.editorAudioStart.time().toString(Qt.ISODateWithMs)
+        if val != "00:00:00.000":
+            self.textEdit.set_paragraph_property(block_number, "audiostarttime", val)
+        val = self.editorAudioEnd.time().toString(Qt.ISODateWithMs)
+        if val != "00:00:00.000":
+            self.textEdit.set_paragraph_property(block_number, "audioendtime", val)  
+        val = self.editorEditTime.dateTime().toString(Qt.ISODateWithMs)
+        if val != "2000-01-01T00:00:00.000":
+            self.textEdit.set_paragraph_property(block_number, "edittime", val)
+        self.textEdit.set_paragraph_property(block_number, "notes", self.editorNotes.text())
+        self.textEdit.undo_stack.endMacro()
+
+    def spell_steno(self):
+        outline = self.steno_outline.text()
+        pos = multi_gen_alternative(outline)
+        res = get_sorted_suggestions(pos, self.engine)
+        self.stenospell_res.clear()
+        for candidate in res:
+            self.stenospell_res.addItem(candidate[0])
+
+    def set_sp_dict(self, index):
+        lang = self.dict_selection.itemText(index)
+        log.debug("Selecting %s dictionary for spellcheck" % lang)
+        dict_path = self.dict_selection.itemData(index)
+        self.textEdit.load_spellcheck_dict(dict_path)
+
+    def sp_check(self, word):
+        return self.textEdit.dictionary.lookup(word)
+
+    def spellcheck(self):
+        log.debug("Perform spellcheck.")
+        current_cursor = self.textEdit.textCursor()
+        old_cursor_position = current_cursor.block().position()
+        self.textEdit.setTextCursor(current_cursor)
+        while not current_cursor.atEnd():
+            current_cursor.movePosition(QTextCursor.NextWord)
+            current_cursor.movePosition(QTextCursor.EndOfWord, QTextCursor.KeepAnchor)
+            result = self.sp_check(current_cursor.selectedText())
+            if not result and current_cursor.selectedText() not in self.textEdit.spell_ignore:
+                self.textEdit.setTextCursor(current_cursor)
+                log.debug("Spellcheck: this word %s not in dictionary." % current_cursor.selectedText())
+                suggestions = [sug for sug in self.textEdit.dictionary.suggest(current_cursor.selectedText())]
+                self.spellcheck_result.setText(current_cursor.selectedText())
+                self.spellcheck_suggestions.clear()
+                self.spellcheck_suggestions.addItems(suggestions)
+                break
+        if current_cursor.atEnd():
+            QMessageBox.information(self, "Spellcheck", "End of document.")
+
+    def sp_ignore_all(self):
+        if self.spellcheck_result.text() != "":
+            self.textEdit.spell_ignore.append(self.spellcheck_result.text())
+            log.debug("Ignored spellcheck words: %s" % self.textEdit.spell_ignore)
+        self.spellcheck()
 
     def open_audio(self):
         if self.textEdit.recorder.state() == QMediaRecorder.StoppedState:

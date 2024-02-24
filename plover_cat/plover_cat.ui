@@ -812,7 +812,7 @@ position.</string>
         <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>4</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -881,7 +881,7 @@ position.</string>
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox_4">
+              <widget class="QGroupBox" name="style_controls">
                <property name="enabled">
                 <bool>false</bool>
                </property>
@@ -2064,22 +2064,6 @@ position.</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
              <item>
-              <widget class="QCheckBox" name="editorCheck">
-               <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
-               </property>
-               <property name="toolTip">
-                <string>Unlock to edit paragraph properties</string>
-               </property>
-               <property name="text">
-                <string>Lock</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
               <layout class="QFormLayout" name="formLayout_2">
                <item row="0" column="0">
                 <widget class="QLabel" name="label_2">
@@ -2113,6 +2097,9 @@ position.</string>
                  <property name="toolTip">
                   <string>Modifies creation time of paragraph</string>
                  </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
                  <property name="displayFormat">
                   <string>yyyy-MM-dd hh:mm:ss.zzz</string>
                  </property>
@@ -2136,6 +2123,9 @@ position.</string>
                  <property name="readOnly">
                   <bool>true</bool>
                  </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
                  <property name="displayFormat">
                   <string>yyyy-MM-dd hh:mm:ss.zzz</string>
                  </property>
@@ -2155,6 +2145,9 @@ position.</string>
                  </property>
                  <property name="toolTip">
                   <string>Modifies audio start time of paragraph.</string>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
                  </property>
                  <property name="currentSection">
                   <enum>QDateTimeEdit::HourSection</enum>
@@ -2178,6 +2171,9 @@ position.</string>
                  </property>
                  <property name="toolTip">
                   <string>Sets audio end time for this paragraph. </string>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
                  </property>
                  <property name="displayFormat">
                   <string>hh:mm:ss.zzz</string>
@@ -2270,13 +2266,7 @@ position.</string>
                <item>
                 <layout class="QVBoxLayout" name="verticalLayout_18">
                  <item>
-                  <widget class="QComboBox" name="dict_selection">
-                   <item>
-                    <property name="text">
-                     <string>en-US</string>
-                    </property>
-                   </item>
-                  </widget>
+                  <widget class="QComboBox" name="dict_selection"/>
                  </item>
                  <item>
                   <widget class="QPushButton" name="spell_search">

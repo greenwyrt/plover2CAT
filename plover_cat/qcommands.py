@@ -370,7 +370,7 @@ class merge_steno_par(QUndoCommand):
 
 class set_par_style(QUndoCommand):
     """Set paragraph style"""
-    def __init__(self, block, style, document, par_formats, txt_formats):
+    def __init__(self, document, block, style, par_formats, txt_formats):
         super().__init__()
         self.block = block
         self.style = style
@@ -439,6 +439,29 @@ class set_par_style(QUndoCommand):
             self.document.setTextCursor(current_cursor)
             log_dict = {"action": "set_style", "block": self.block, "style": self.old_style}
             log.info(f"Style: {log_dict}")
+
+class set_par_property(QUndoCommand):
+    def __init__(self, document, block, prop, value):
+        super().__init__()
+        self.block = block
+        self.prop = prop
+        self.new_value = value
+        self.old_value = None
+        self.document = document
+    def redo(self):
+        self.setText(f"Property: set paragraph property {self.prop} to {self.new_value}")
+        current_block = self.document.document().findBlockByNumber(self.block)
+        block_data = current_block.userData()
+        self.old_value = block_data[self.prop]
+        block_data[self.prop] = self.new_value
+        log_dict = {"action": "set_par_prop", "block": self.block, "prop": self.prop, "value": self.new_value}
+        log.info(f"Property: {log_dict}")
+    def undo(self):
+        current_block = self.document.document().findBlockByNumber(self.block)
+        block_data = current_block.userData()
+        block_data[self.prop] = self.old_value
+        log_dict = {"action": "set_par_prop", "block": self.block, "prop": self.prop, "value": self.old_value}
+        log.info(f"Property undo: {log_dict}")
 
 class update_style(QUndoCommand):
     def __init__(self, document, styles, style_name, new_style_dict):
