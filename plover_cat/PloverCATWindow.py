@@ -133,13 +133,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionClose.triggered.connect(lambda: self.close_file())
         self.actionSave.triggered.connect(lambda: self.save_file())
         self.mainTabs.tabCloseRequested.connect(self.close_file)
-        # self.actionSaveAs.triggered.connect(lambda: self.save_as_file())
+        self.actionSaveAs.triggered.connect(lambda: self.save_as_file())
         self.menuRecentFiles.triggered.connect(self.recentfile_open)
         self.actionEnableAutosave.triggered.connect(self.autosave_setup)
         self.actionSetAutosaveTime.triggered.connect(self.set_autosave_time)
         self.autosave_time.timeout.connect(self.autosave)
         self.actionOpenTranscriptFolder.triggered.connect(lambda: self.open_root())
-        # self.actionImportRTF.triggered.connect(lambda: self.import_rtf())
+        self.actionImportRTF.triggered.connect(lambda: self.import_rtf())
         ## audio connections
         self.actionOpenAudio.triggered.connect(lambda: self.open_audio())
         self.actionRecordPause.triggered.connect(lambda: self.record_or_pause())
@@ -150,7 +150,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # self.actionAddChangeAudioTimestamps.triggered.connect(self.modify_audiotime)
         ## editor related connections
         self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
-        # self.textEdit.complete.connect(self.insert_autocomplete)
         self.actionCopy.triggered.connect(lambda: self.cut_steno(cut = False))
         self.actionCut.triggered.connect(lambda: self.cut_steno())
         self.actionPaste.triggered.connect(lambda: self.paste_steno())
@@ -172,12 +171,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         ## steno related edits
         self.actionMergeParagraphs.triggered.connect(lambda: self.merge_paragraphs())
         self.actionSplitParagraph.triggered.connect(lambda: self.split_paragraph())
-        # self.actionRetroactiveDefine.triggered.connect(lambda: self.define_retroactive())
-        # self.actionDefineLast.triggered.connect(lambda: self.define_scan())
-        # self.actionDeleteLast.triggered.connect(lambda: self.delete_scan())
+        self.actionRetroactiveDefine.triggered.connect(lambda: self.define_retroactive())
+        self.actionDefineLast.triggered.connect(lambda: self.define_scan())
+        self.actionDeleteLast.triggered.connect(lambda: self.delete_scan())
         self.actionAutocompletion.triggered.connect(self.setup_completion)
-        # self.actionAddAutocompletionTerm.triggered.connect(self.add_autocomplete_item)
-        # self.actionTranslateTape.triggered.connect(self.tape_translate)
+        self.actionAddAutocompletionTerm.triggered.connect(self.add_autocomplete_item)
+        self.actionTranslateTape.triggered.connect(self.tape_translate)
         ## dict related
         self.actionAddCustomDict.triggered.connect(lambda: self.add_dict())
         self.actionRemoveTranscriptDict.triggered.connect(lambda: self.remove_dict())
@@ -206,32 +205,27 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionSearchOED.triggered.connect(lambda: self.search_online("https://www.oed.com/search/dictionary/?scope=Entries&q={0}"))
         self.actionSearchGoogle.triggered.connect(lambda: self.search_online("https://www.google.com/search?q={0}"))
         self.actionSearchDuckDuckGo.triggered.connect(lambda: self.search_online("https://duckduckgo.com/?q={0}"))
-        # ## search/replace connections
-        # self.search_text.toggled.connect(lambda: self.search_text_options())
-        # self.search_steno.toggled.connect(lambda: self.search_steno_options())
-        # self.search_untrans.toggled.connect(lambda: self.search_untrans_options())
-        # self.search_forward.clicked.connect(lambda: self.search())
-        # self.search_backward.clicked.connect(lambda: self.search(-1))
-        # self.replace_selected.clicked.connect(lambda: self.replace())
-        # self.replace_all.clicked.connect(lambda: self.replace_everything())
+        ## search/replace connections
+        self.search_text.toggled.connect(lambda: self.search_text_options())
+        self.search_steno.toggled.connect(lambda: self.search_steno_options())
+        self.search_untrans.toggled.connect(lambda: self.search_untrans_options())
         ## spellcheck
-        # self.spellcheck_suggestions.itemDoubleClicked.connect(self.sp_insert_suggest)
         ## steno search
-        self.steno_search.clicked.connect(lambda: self.spell_steno())
+        self.steno_spellcheck.clicked.connect(lambda: self.spell_steno())
         ## suggestions
         self.suggest_sort.toggled.connect(lambda: self.get_suggestions())
         self.suggest_source.currentIndexChanged.connect(lambda: self.get_suggestions())
         ## tape
         self.strokeLocate.clicked.connect(lambda: self.stroke_to_text_move())
-        # # export
-        # self.actionPlainText.triggered.connect(lambda: self.export_text())
-        # self.actionASCII.triggered.connect(lambda: self.export_ascii())
-        # self.actionPlainASCII.triggered.connect(lambda: self.export_plain_ascii())
-        # self.actionHTML.triggered.connect(lambda: self.export_html())
-        # self.actionSubRip.triggered.connect(lambda: self.export_srt())
-        # self.actionODT.triggered.connect(lambda: self.export_odt())
-        # self.actionRTF.triggered.connect(lambda: self.export_rtf())
-        # self.actionTape.triggered.connect(lambda: self.export_tape())
+        ## export
+        self.actionPlainText.triggered.connect(lambda: self.export_text())
+        self.actionASCII.triggered.connect(lambda: self.export_ascii())
+        self.actionPlainASCII.triggered.connect(lambda: self.export_plain_ascii())
+        self.actionHTML.triggered.connect(lambda: self.export_html())
+        self.actionSubRip.triggered.connect(lambda: self.export_srt())
+        self.actionODT.triggered.connect(lambda: self.export_odt())
+        self.actionRTF.triggered.connect(lambda: self.export_rtf())
+        self.actionTape.triggered.connect(lambda: self.export_tape())
         # help
         self.actionUserManual.triggered.connect(lambda: self.open_help())
         self.actionAbout.triggered.connect(lambda: self.about())
@@ -1121,6 +1115,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.spell_search.clicked.connect(lambda: self.spellcheck())
         self.spell_skip.clicked.connect(lambda: self.spellcheck())
         self.spell_ignore_all.clicked.connect(lambda: self.sp_ignore_all())
+        self.spellcheck_suggestions.itemDoubleClicked.connect(self.sp_insert_suggest)
         self.dict_selection.activated.connect(self.set_sp_dict)
         self.update_config_gui()
         self.page_width.valueChanged.connect(lambda value, key = "page_width": self.textEdit.set_config_value(key, value))
@@ -1145,6 +1140,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.style_selector.activated.connect(self.update_paragraph_style)
         self.submitEdited.setEnabled(True)
         self.submitEdited.clicked.connect(self.edit_paragraph_properties)
+        self.search_forward.clicked.connect(lambda: self.search())
+        self.search_backward.clicked.connect(lambda: self.search(-1))
+        self.replace_selected.clicked.connect(lambda: self.replace())
+        self.replace_all.clicked.connect(lambda: self.replace_everything())        
         self.textEdit.undo_stack.indexChanged.connect(self.check_undo_stack)
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.textEdit.send_message.connect(self.display_message)
@@ -1176,6 +1175,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.dict_selection.clear()
         self.spell_search.clicked.disconnect()
         self.spell_skip.clicked.disconnect()
+        self.spellcheck_suggestions.itemDoubleClicked.disconnect()
         self.dict_selection.activated.disconnect()
         self.spell_ignore_all.clicked.disconnect()
         # disconnect all config
@@ -1202,6 +1202,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.document().blockCountChanged.disconnect()
         self.submitEdited.clicked.disconnect()
         self.submitEdited.setEnabled(False)
+        self.search_forward.clicked.disconnect()
+        self.replace_selected.clicked.disconnect()
+        self.replace_all.clicked.disconnect()
         self.menuParagraphStyle.clear()
         self.menuParagraphStyle.triggered.disconnect()
         self.style_file_path.setText("")
@@ -1260,8 +1263,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.save()
 
     def save_as_file(self):
-        self.textEdit.save_as()
-        
+        transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
+        transcript_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
+        default_path = transcript_dir / transcript_name
+        # newer creation wizard should be here to add additional dictionaries, spellcheck and other data
+        selected_name = QFileDialog.getSaveFileName(self, _("Transcript name and location"), str(default_path))[0]
+        if not selected_name:
+            return
+        self.display_message(f"Creating project files at {str(selected_name)}")
+        self.textEdit.save_as(selected_name)
+        self.textEdit.undo_stack.setClean()
+        success = self.close_file()
+        if success:
+            self.open_file(str(selected_name))
+
     def autosave(self):
         if not self.textEdit:
             return
@@ -1281,6 +1296,63 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             ind = commit_times.index(commit_time)
             commit_id = commit_choices[ind][0]
             self.textEdit.revert_transcript(commit_id)
+
+    def import_rtf(self):
+        selected_folder = pathlib.Path(self.textEdit.file_name)
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Import Transcript"),
+            str(selected_folder.joinpath(selected_folder.stem).with_suffix(".rtf"))
+            , _("RTF (*.rtf)")
+        )
+        if not selected_file[0]:
+            return
+        log.debug(f"Import RTF {selected_file[0]}.")            
+        if not self.textEdit.document().isEmpty():
+            user_choice = QMessageBox.question(self, "Import RTF", "Are you sure you want to import? This erases the present transcript.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if user_choice == QMessageBox.Yes:
+                log.debug("User choice to import and erase present document.")
+                pass
+            else:
+                log.debug("Abort import.")
+                return
+        self.textEdit.clear()
+        self.statusBar.showMessage("Parsing RTF.")
+        self.progressBar = QProgressBar(self)
+        self.statusBar.addWidget(self.progressBar)
+        # self.progressBar.show()
+        parse_results = rtf_steno(selected_file[0], self.progressBar)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        parse_results.parse_document()
+        QApplication.restoreOverrideCursor()
+        style_dict, renamed_indiv_style = load_rtf_styles(parse_results)
+        rtf_paragraphs = parse_results.paragraphs
+        for ind, par in rtf_paragraphs.items():
+            par["style"] = renamed_indiv_style[int(ind)]
+        file_path = pathlib.Path(pathlib.Path(selected_file[0]).name).with_suffix(".transcript")
+        transcript_dir = self.textEdit.file_name
+        new_file_path = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".transcript")
+        save_json(rtf_paragraphs, new_file_path)
+        style_file_path = self.textEdit.file_name / "styles" / pathlib.Path(pathlib.Path(selected_file[0]).name).with_suffix(".json")
+        save_json(remove_empty_from_dict(style_dict), style_file_path)
+        self.textEdit.set_config_value("style", str(style_file_path))
+        if "paperw" in parse_results.page:
+            self.textEdit.set_config_value("page_width", parse_results.page["paperw"])
+        if "paperh" in parse_results.page:
+            self.textEdit.set_config_value("page_height", parse_results.page["paperh"])
+        if "margl" in parse_results.page:
+            self.textEdit.set_config_value("page_left_margin", parse_results.page["margl"])
+        if "margt" in parse_results.page:
+            self.textEdit.set_config_value("page_top_margin", parse_results.page["margt"])
+        if "margr" in parse_results.page:
+            self.textEdit.set_config_value("page_right_margin", parse_results.page["margr"])
+        if "margb" in parse_results.page:
+            self.textEdit.set_config_value("page_bottom_margin", parse_results.page["margb"])
+        self.textEdit.save_config_file()
+        self.textEdit.undo_stack.setClean()
+        success = self.close_file()
+        if success:
+            self.open_file(str(transcript_dir))
 
     def add_dict(self):
         ## select a dict from not file location to add to plover stack
@@ -1357,7 +1429,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         selected_file = QFileDialog.getOpenFileName(
             self,
             _("Select Style ODT or RTF/CRE file"),
-            str(self.file_name), _("Style template file (*.odt *.rtf)"))[0]
+            str(self.textEdit.file_name), _("Style template file (*.odt *.rtf)"))[0]
         if not selected_file:
             return  
         if selected_file.endswith("odt"):
@@ -1498,6 +1570,53 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_captions()
         self.textEdit.on_stroke(stroke_pressed, self.actionCursorAtEnd.isChecked())
 
+    def tape_translate(self):
+        if not self.engine.output:
+            self.statusBar.showMessage("Plover is not enabled.")
+            return
+        # do not erase any content before, case of too many asterisks for example
+        self.engine.clear_translator_state()
+        # bit of a hack since triggering stroked hook through code
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Select tape file to translate"),
+            str(self.textEdit.file_name), _("Tape (*.tape *.txt)"))[0]
+        if not selected_file:
+            return
+        transcript_dir = self.textEdit.file_name 
+        if pathlib.Path(selected_file) == transcript_dir.joinpath(transcript_dir.stem).with_suffix(".tape"):
+            self.statusBar.showMessage("Cannot translate from own transcript tape.")
+            return
+        selected_file = pathlib.Path(selected_file)   
+        paper_format, ok = QInputDialog.getItem(self, "Translate Tape", "Format of tape file:", ["Plover2CAT", "Plover (raw)", "Plover (paper)"], editable = False)
+        log.debug(f"Translating tape from {selected_file} with {paper_format} format.") 
+        if paper_format == "Plover (raw)":
+            with open(selected_file) as f:
+                for line in f:
+                    stroke = Stroke(normalize_stroke(line.strip().replace(" ", "")))
+                    self.engine._translator.translate(stroke)
+                    self.engine._trigger_hook('stroked', stroke)
+        elif paper_format == "Plover2CAT":
+            with open(selected_file) as f:
+                for line in f:
+                    stroke_contents = line.strip().split("|")[3]
+                    keys = []
+                    for i in range(len(stroke_contents)):
+                        if not stroke_contents[i].isspace() and i < len(plover.system.KEYS):
+                            keys.append(plover.system.KEYS[i])                    
+                    self.engine._translator.translate(Stroke(keys))
+                    self.engine._trigger_hook('stroked', Stroke(keys))
+        elif paper_format == "Plover (paper)":
+            with open(selected_file) as f:
+                for line in f:
+                    keys = []
+                    for i in range(len(line)):
+                        if not line[i].isspace() and i < len(plover.system.KEYS):
+                            keys.append(plover.system.KEYS[i])
+                    self.engine._translator.translate(Stroke(keys))
+                    self.engine._trigger_hook('stroked', Stroke(keys))
+        # todo, if format has time data, that should be inserted into stroke data of editor too
+
     def reset_paragraph(self):
         user_choice = QMessageBox.critical(self, "Reset Paragraph", "This will clear all data from this paragraph. This cannot be undone. You will lose all history. Are you sure?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if user_choice != QMessageBox.Yes:
@@ -1541,6 +1660,99 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.undo_stack.endMacro()
         self.display_message(f"Pasting to paragraph {current_block_num} at position {start_pos}.")  
 
+    def define_retroactive(self):
+        log.debug("Define retroactive.")
+        current_cursor = self.textEdit.textCursor()
+        current_block = current_cursor.block()
+        if not current_cursor.hasSelection():
+            log.debug("No text selected, skipping")
+            self.statusBar.showMessage("Selection needed for define.")
+            return
+        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        # end_pos is in prep for future multi-stroke untrans
+        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
+        end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
+        current_cursor.setPosition(current_block.position() + start_stroke_pos[0])
+        current_cursor.setPosition(current_block.position() + end_stroke_pos[1], QTextCursor.KeepAnchor)
+        self.textEdit.setTextCursor(current_cursor)
+        underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
+        underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])
+        selected_untrans = current_cursor.selectedText()
+        text, ok = QInputDialog().getText(self, "Retroactive Define", "Stroke: %s \nTranslation:" % underlying_steno)
+        if self.textEdit.config["space_placement"] == "Before Output":
+            text = " " + text.strip()
+        else:
+            text = text.strip() + " "
+        if ok:
+            log.debug(f"Define: Outline {underlying_steno} with translation {text}.")
+            self.engine.add_translation(normalize_steno(underlying_steno, strict = True), text.strip())
+            hold_replace_text = self.replace_term.text()
+            hold_search_text = self.search_term.text()
+            hold_search_case = self.search_case.isChecked()
+            hold_search_whole = self.search_whole.isChecked()
+            self.replace_term.setText(text)
+            self.search_term.setText(selected_untrans)
+            self.search_case.setChecked(False)
+            self.search_whole.setChecked(False)
+            self.replace_everything(steno = underlying_steno)
+            self.replace_term.setText(hold_replace_text)
+            self.search_term.setText(hold_search_text)
+            self.search_case.setChecked(hold_search_case)
+            self.search_whole.setChecked(hold_search_whole)
+            current_cursor = self.textEdit.textCursor()
+            current_cursor.movePosition(QTextCursor.End)
+            self.textEdit.setTextCursor(current_cursor)
+
+    def define_scan(self):
+        log.debug("Scan to redefine.")
+        search_result = self.untrans_search(-1)
+        self.define_retroactive()
+
+    def delete_scan(self):
+        log.debug("Scan to delete.")
+        search_result = self.untrans_search(-1)
+        if not search_result:
+            return
+        self.textEdit.cut_steno(store = False)
+        # current_cursor = self.textEdit.textCursor()
+        # current_block = current_cursor.block()
+        # current_block_num = current_block.blockNumber()
+        # start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        # stop_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        # remove_cmd = steno_remove(self.textEdit, current_block_num, 
+        #                     start_pos, stop_pos - start_pos)  
+        # self.undo_stack.push(remove_cmd)
+
+    def add_autocomplete_item(self):
+        log.debug("Add term to autocomplete.")
+        current_cursor = self.textEdit.textCursor()
+        if not current_cursor.hasSelection():
+            self.statusBar.showMessage("No text selected for autocomplete")
+            return
+        current_block = current_cursor.block()
+        selected_text = current_cursor.selectedText()        
+        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        # end_pos has a one char deletion since otherwise it will include unwanted next stroke
+        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position() - 1
+        start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
+        end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
+        underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
+        underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])
+        text, ok = QInputDialog().getText(self, "Add Autocomplete Term", "Text: %s \nSteno:" % selected_text, text = underlying_steno)
+        if not ok:
+            return
+        wordlist_path = self.textEdit.file_name / "sources" / "wordlist.json"
+        if wordlist_path.exists():
+            with open(wordlist_path, "r") as f:
+                completer_dict = json.loads(f.read())
+        else:
+            completer_dict = {}
+        completer_dict[selected_text.strip()] = text
+        save_json(completer_dict, wordlist_path)
+        log.debug(f"Adding term {text} to autocompletion.")
+        self.setup_completion(self.actionAutocompletion.isChecked())
+
     def enable_affix(self, check):
         self.display_message("Toggle automatic paragraph affixes.")
         self.textEdit.set_config_value("enable_automatic_affix", check)
@@ -1569,21 +1781,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.display_message("No image selected, aborting")
             return
         self.display_message(f"User selected image file: {selected_file}")
-        selected_file = pathlib.Path(selected_file)
-        asset_dir_path = self.textEdit.file_name / "assets"
-        try:
-            os.mkdir(asset_dir_path)
-            self.display_message("Created asset directory.")
-        except FileExistsError:
-            pass
-        asset_dir_name = asset_dir_path / selected_file.name
-        if selected_file != asset_dir_name:
-            self.display_message(f"Copying image at {str(selected_file)} to {str(asset_dir_name)}")
-            copyfile(selected_file, asset_dir_name)
-        im_element = image_text(path = asset_dir_name.as_posix())
-        insert_cmd = image_insert(self.textEdit, self.textEdit.textCursor().blockNumber(), 
-                        self.textEdit.textCursor().positionInBlock(), im_element)
-        self.textEdit.undo_stack.push(insert_cmd)
+        self.textEdit.insert_image(selected_file)
 
     def insert_field(self, action):
         name = action.data()
@@ -1694,6 +1892,243 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.textEdit.spell_ignore.append(self.spellcheck_result.text())
             log.debug("Ignored spellcheck words: %s" % self.textEdit.spell_ignore)
         self.spellcheck()
+
+    def sp_insert_suggest(self, item = None):
+        if not item:
+            item = self.spellcheck_suggestions.currentItem()
+        log.debug("Spellcheck correction: %s" % item.text())
+        self.textEdit.undo_stack.beginMacro("Spellcheck: correct to %s" % item.text())
+        self.replace(to_next= False, steno = "", replace_term= item.text())
+        self.textEdit.undo_stack.endMacro()  
+
+    def search(self, direction = 1):
+        if self.search_untrans.isChecked():
+            search_status = self.untrans_search(direction)
+        elif self.search_steno.isChecked():
+            search_status = self.steno_wrapped_search(direction)
+        else:
+            search_status = self.text_search(direction)
+        return(search_status)
+
+    def text_search(self, direction = 1):
+        flags = QTextDocument.FindFlags()
+        search = self.search_term.text()
+        if self.search_case.isChecked():
+            flags |= QTextDocument.FindCaseSensitively
+        if self.search_whole.isChecked():
+            flags |= QTextDocument.FindWholeWords
+        if direction == -1:
+            flags |= QTextDocument.FindBackward
+        cursor = self.textEdit.textCursor()
+        log.debug("Performing text search with term %s, flags %s.", search, flags)
+        found = self.textEdit.document().find(search, cursor, flags)
+        if not found.isNull():
+            log.debug("Search success.")
+            self.textEdit.setTextCursor(found)
+            self.statusBar.showMessage("Match found")
+            return True
+        elif self.search_wrap.isChecked():
+            log.debug("Search failure. Wrapping.")
+            if direction == 1:
+                cursor.movePosition(QTextCursor.Start)
+            else:
+                cursor.movePosition(QTextCursor.End)
+            found = self.textEdit.document().find(search, cursor, flags)
+            if not found.isNull():
+                log.debug("Search success.")
+                self.textEdit.setTextCursor(found)
+                self.statusBar.showMessage("Wrapped search. Match found.")
+                return True
+            else:
+                log.debug("Search failure.")
+                self.statusBar.showMessage("Wrapped search. No match found.")
+                return None
+        else:
+            log.debug("Search failure.")
+            self.statusBar.showMessage("No match found.")
+            return None
+
+    def steno_wrapped_search(self, direction = 1):
+        log.debug("Steno search.")
+        found = self.steno_search(direction = direction)
+        if not found and self.search_wrap.isChecked():
+            log.debug("Wrap steno search.")
+            cursor = self.textEdit.textCursor()
+            if direction == -1:
+                log.debug("Search starting from end.")
+                cursor.movePosition(QTextCursor.End)
+            else:
+                log.debug("Search starting from top.")
+                cursor.movePosition(QTextCursor.Start)
+            self.textEdit.setTextCursor(cursor)
+            found = self.steno_search(direction = direction)
+        return(found)
+
+    def steno_search(self, direction = 1):
+        cursor = self.textEdit.textCursor()
+        steno = self.search_term.text()
+        log.debug("Searching for stroke %s in stroke data.", steno)
+        if direction == -1:
+            current_block = cursor.block()
+            if cursor.hasSelection():
+                start_pos = min(cursor.position(), cursor.anchor())
+                cursor.setPosition(start_pos)
+            cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.MoveAnchor)
+            self.textEdit.setTextCursor(cursor)
+            cursor_pos = cursor.positionInBlock()
+            stroke_data = current_block.userData()["strokes"].extract_steno(0, cursor_pos)
+            while True:
+                check_match = stroke_data.search_strokes(steno)
+                if check_match is not None:
+                    break
+                if current_block == self.textEdit.document().firstBlock():
+                    # end search after searching first block
+                    check_match = None
+                    break
+                current_block = current_block.previous()
+                stroke_data = current_block.userData()["strokes"] 
+            if check_match is not None:
+                block_pos = current_block.position()
+                cursor.setPosition(block_pos + check_match[0])
+                cursor.setPosition(block_pos + check_match[1], QTextCursor.KeepAnchor)
+                self.textEdit.setTextCursor(cursor)
+                log.debug("Search success.")
+                self.statusBar.showMessage("Steno match found.")
+                return True
+            else:
+                log.debug("Search failure.")
+                self.statusBar.showMessage("No steno match found.")
+                return None                                                                            
+        else:
+            current_block = cursor.block()
+            if cursor.hasSelection():
+                start_pos = max(cursor.position(), cursor.anchor())
+                cursor.setPosition(start_pos + 1)
+            cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.MoveAnchor)
+            self.textEdit.setTextCursor(cursor)
+            cursor_pos = cursor.positionInBlock()
+            stroke_data = current_block.userData()["strokes"].extract_steno(cursor_pos, len(current_block.userData()["strokes"]))
+            while True:
+                # this is different from loop above since there is an offset 
+                # so cursor pos below has to add the offset
+                check_match = stroke_data.search_strokes(steno)
+                if check_match is not None:
+                    break
+                if current_block == self.textEdit.document().lastBlock():
+                    # end search after searching last block
+                    check_match = None
+                    break
+                current_block = current_block.next()
+                stroke_data = current_block.userData()["strokes"] 
+                cursor_pos = 0
+            if check_match is not None:
+                block_pos = current_block.position()               
+                cursor.setPosition(block_pos + cursor_pos + check_match[0])
+                cursor.setPosition(block_pos + cursor_pos + check_match[1], QTextCursor.KeepAnchor)
+                self.textEdit.setTextCursor(cursor)
+                log.debug("Search success.")
+                self.statusBar.showMessage("Steno match found.")
+                return True
+            else:
+                log.debug("Search failure.")
+                self.statusBar.showMessage("No steno match found.")
+                return None
+
+    def untrans_search(self, direction = 1):
+        flags = QTextDocument.FindFlags()
+        untrans_reg = QRegExp("(\\b|\\*)(?=[STKPWHRAO*EUFBLGDZ]{3,})S?T?K?P?W?H?R?A?O?\*?E?U?F?R?P?B?L?G?T?S?D?Z?\\b")
+        if direction == -1:
+            flags |= QTextDocument.FindBackward
+        cursor = self.textEdit.textCursor()
+        found = self.textEdit.document().find(untrans_reg, cursor, flags)
+        log.debug("Search for untranslated steno.")
+        if not found.isNull():
+            self.textEdit.setTextCursor(found)
+            log.debug("Search success.")
+            self.statusBar.showMessage("Untrans found") 
+            return True
+        elif self.search_wrap.isChecked():
+            if direction == 1:
+                cursor.movePosition(QTextCursor.Start)
+            else:
+                cursor.movePosition(QTextCursor.End)
+            found = self.textEdit.document().find(untrans_reg, cursor, flags)
+            if not found.isNull():
+                self.textEdit.setTextCursor(found)
+                log.debug("Wrapped. Search success.")
+                self.statusBar.showMessage("Wrapped search. Untrans found.")
+                return True
+            else:
+                log.debug("Wrapped. Search failure.")
+                self.statusBar.showMessage("Wrapped search. No untrans found.")
+                return None
+        else:
+            log.debug("Search failure.")
+            self.statusBar.showMessage("No untrans found.") 
+            return None     
+
+    def search_text_options(self):
+        if self.search_text.isChecked():
+            log.debug("Set options for text search.")
+            self.search_case.setEnabled(True)
+            self.search_whole.setChecked(False)
+            self.search_term.setEnabled(True)
+            self.search_whole.setEnabled(True)
+
+    def search_steno_options(self):
+        if self.search_steno.isChecked():
+            log.debug("Set options for steno search.")
+            self.search_case.setEnabled(False)
+            self.search_whole.setChecked(True)
+            self.search_term.setEnabled(True)
+            self.search_whole.setEnabled(False)
+
+    def search_untrans_options(self):
+        if self.search_untrans.isChecked():
+            log.debug("Set options for untrans search.")
+            self.search_term.setEnabled(False)
+            self.search_case.setEnabled(False)
+            self.search_whole.setChecked(False)
+            self.search_whole.setEnabled(False)  
+
+    def replace(self, to_next = True, steno = "", replace_term = None):
+        log.debug("Perform replacement.")
+        if not replace_term:
+            replace_term = self.replace_term.text()
+        if self.textEdit.textCursor().hasSelection():
+            self.textEdit.replace(steno, replace_term)
+        if to_next:
+            log.debug("Moving to next match.")        
+            if self.search_untrans.isChecked():
+                search_status = self.untrans_search()
+            elif self.search_steno.isChecked():
+                search_status = self.steno_wrapped_search()
+            else:
+                search_status = self.text_search()
+            return(search_status)        
+
+    def replace_everything(self, steno = ""):
+        cursor = self.textEdit.textCursor()
+        old_wrap_state = self.search_wrap.isChecked()
+        if old_wrap_state:
+            self.search_wrap.setChecked(False)
+        old_cursor_position = cursor.block().position()        
+        cursor.movePosition(QTextCursor.Start)
+        self.textEdit.setTextCursor(cursor)
+        search_status = True
+        log.debug("Replace all, starting from beginning.")
+        self.textEdit.undo_stack.beginMacro("Replace All")
+        while search_status:
+            search_status = self.search()
+            if search_status is None:
+                break
+            self.replace(to_next = False, steno = steno)
+        self.textEdit.undo_stack.endMacro()
+        # not the exact position but hopefully close
+        log.debug("Attempting to set cursor back to original position after replacements.")
+        cursor.setPosition(old_cursor_position)
+        self.textEdit.setTextCursor(cursor)
+        self.search_wrap.setChecked(old_wrap_state)
 
     def open_audio(self):
         if self.textEdit.recorder.state() == QMediaRecorder.StoppedState:
@@ -1867,11 +2302,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
 
     def export_text(self):
-        selected_folder = pathlib.Path(self.file_name)  / "export"
+        selected_folder = pathlib.Path(self.textEdit.file_name)  / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
             _("Export Transcript"),
-            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".txt"))
+            str(selected_folder.joinpath(self.textEdit.file_name.stem).with_suffix(".txt"))
             , _("Transcript (*.txt)")
         )
         if not selected_file[0]:
@@ -1887,11 +2322,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.statusBar.showMessage("Exported in plain text format")
 
     def export_tape(self):
-        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
             _("Export Transcript"),
-            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".tape"))
+            str(selected_folder.joinpath(self.textEdit.file_name.stem).with_suffix(".tape"))
             , _("Tape (*.tape)")
         )
         if not selected_file[0]:
@@ -1906,11 +2341,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 f.write(f"{line}\n")
 
     def export_ascii(self):
-        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
             _("Export Transcript"),
-            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".txt"))
+            str(selected_folder.joinpath(self.textEdit.file_name.stem).with_suffix(".txt"))
             , _("Transcript (*.txt)")
         )
         if not selected_file[0]:
@@ -1922,11 +2357,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(f"Exporting in ASCII to {selected_file[0]}")
         self.thread = QThread()
         self.progressBar = QProgressBar(self)
-        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setMaximum(len(self.textEdit.backup_document))
         self.progressBar.setFormat("Export transcript paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
-        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker = documentWorker(deepcopy(self.textEdit.backup_document), selected_file[0], deepcopy(self.textEdit.config), deepcopy(self.textEdit.styles), deepcopy(self.textEdit.user_field_dict), self.textEdit.file_name)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.save_ascii)
         self.worker.progress.connect(self.progressBar.setValue)
@@ -1937,11 +2372,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start() 
 
     def export_html(self):
-        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
             _("Export Transcript"),
-            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".html"))
+            str(selected_folder.joinpath(self.textEdit.file_name.stem).with_suffix(".html"))
             , _("Transcript (*.html)")
         )
         if not selected_file[0]:
@@ -1954,11 +2389,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(f"Exporting in HTML to {selected_file[0]}")
         self.thread = QThread()
         self.progressBar = QProgressBar(self)
-        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setMaximum(len(self.textEdit.backup_document))
         self.progressBar.setFormat("Export transcript paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
-        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker = documentWorker(deepcopy(self.textEdit.backup_document), selected_file[0], deepcopy(self.textEdit.config), deepcopy(self.textEdit.styles), deepcopy(self.textEdit.user_field_dict), self.textEdit.file_name)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.save_html)
         self.worker.progress.connect(self.progressBar.setValue)
@@ -1969,11 +2404,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start()          
 
     def export_plain_ascii(self):
-        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
             _("Export Transcript"),
-            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".txt"))
+            str(selected_folder.joinpath(self.textEdit.file_name.stem).with_suffix(".txt"))
             , _("Transcript (*.txt)")
         )
         if not selected_file[0]:
@@ -1985,11 +2420,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.save_file()        
         self.thread = QThread()
         self.progressBar = QProgressBar(self)
-        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setMaximum(len(self.textEdit.backup_document))
         self.progressBar.setFormat("Export transcript paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
-        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker = documentWorker(deepcopy(self.textEdit.backup_document), selected_file[0], deepcopy(self.textEdit.config), deepcopy(self.textEdit.styles), deepcopy(self.textEdit.user_field_dict), self.textEdit.file_name)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.save_plain_ascii)
         self.worker.progress.connect(self.progressBar.setValue)
@@ -2007,11 +2442,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     line 4: empty
                     line 7: textstart
         """
-        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
             _("Export Transcript"),
-            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".srt"))
+            str(selected_folder.joinpath(self.textEdit.file_name.stem).with_suffix(".srt"))
             , _("Captions (*.srt)")
         )
         if not selected_file[0]:
@@ -2022,11 +2457,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.save_file()
         self.thread = QThread()
         self.progressBar = QProgressBar(self)
-        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setMaximum(len(self.textEdit.backup_document))
         self.progressBar.setFormat("Export transcript paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
-        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker = documentWorker(deepcopy(self.textEdit.backup_document), selected_file[0], deepcopy(self.textEdit.config), deepcopy(self.textEdit.styles), deepcopy(self.textEdit.user_field_dict), self.textEdit.file_name)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.save_srt)
         self.worker.progress.connect(self.progressBar.setValue)
@@ -2037,11 +2472,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start()
         
     def export_odt(self):   
-        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
             _("Export Transcript"),
-            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".odt"))
+            str(selected_folder.joinpath(self.textEdit.file_name.stem).with_suffix(".odt"))
             , _("OpenDocumentText (*.odt)")
         )
         if not selected_file[0]:
@@ -2054,11 +2489,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.save_file()
         self.thread = QThread()
         self.progressBar = QProgressBar(self)
-        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setMaximum(len(self.textEdit.backup_document))
         self.progressBar.setFormat("Export transcript paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
-        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker = documentWorker(deepcopy(self.textEdit.backup_document), selected_file[0], deepcopy(self.textEdit.config), deepcopy(self.textEdit.styles), deepcopy(self.textEdit.user_field_dict), self.textEdit.file_name)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.save_odf)
         self.worker.progress.connect(self.progressBar.setValue)
@@ -2069,11 +2504,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start()
 
     def export_rtf(self):
-        selected_folder = pathlib.Path(self.file_name) / "export"
+        selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
             _("Export Transcript"),
-            str(selected_folder.joinpath(self.file_name.stem).with_suffix(".rtf"))
+            str(selected_folder.joinpath(self.textEdit.file_name.stem).with_suffix(".rtf"))
             , _("RTF/CRE (*.rtf)")
         )
         if not selected_file[0]:
@@ -2086,11 +2521,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.save_file()
         self.thread = QThread()
         self.progressBar = QProgressBar(self)
-        self.progressBar.setMaximum(len(self.backup_document))
+        self.progressBar.setMaximum(len(self.textEdit.backup_document))
         self.progressBar.setFormat("Export transcript paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
-        self.worker = documentWorker(deepcopy(self.backup_document), selected_file[0], deepcopy(self.config), deepcopy(self.styles), deepcopy(self.user_field_dict), self.file_name)
+        self.worker = documentWorker(deepcopy(self.textEdit.backup_document), selected_file[0], deepcopy(self.textEdit.config), deepcopy(self.textEdit.styles), deepcopy(self.textEdit.user_field_dict), self.textEdit.file_name)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.save_rtf)
         self.worker.progress.connect(self.progressBar.setValue)

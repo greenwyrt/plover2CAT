@@ -2,7 +2,7 @@ import string
 import pathlib
 import json
 import os
-from shutil import copyfile
+from shutil import copyfile, copytree
 from collections import deque
 from dulwich.repo import Repo
 from dulwich.errors import NotGitRepository
@@ -218,7 +218,9 @@ class PloverCATEditor(QTextEdit):
                 if any([el.element == "image" for el in el_list]):
                     for el in el_list:
                         if el.element == "image":
-                            imageUri = QUrl("file://{0}".format(el.path))
+                            i_path = self.file_name / pathlib.Path(el.path)
+                            imageUri = QUrl(i_path.as_uri())
+                            el.path = i_path.as_posix()
                             image = QImage(QImageReader(el.path).read())
                             self.document().addResource(
                                 QTextDocument.ImageResource,
@@ -263,11 +265,22 @@ class PloverCATEditor(QTextEdit):
         self.dulwich_save(message = "user save")
         self.send_message.emit("Saved project data")  
 
-    def save_as(self, path):
-        # todo
-        # use pathlib to explore everything, replace stem, 
-        # disable for now, deal with paths for image assets in json
-        self.send_message.emit("Temporarily disabled.")
+    def save_as(self, new_path):
+        transcript_dir = pathlib.Path(new_path)
+        transcript_dir.mkdir()
+        self.save_config_file(transcript_dir/ "config.CONFIG")
+        transcript_name = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".transcript")        
+        self.save_transcript(transcript_name)
+        transcript_tape = self.file_name.joinpath(self.file_name.stem).with_suffix(".tape")
+        new_tape = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".tape")
+        copyfile(transcript_tape, new_tape)
+        transcript_style = self.file_name / self.config["style"]
+        transcript_dir.joinpath("styles").mkdir()
+        new_style = transcript_dir / self.config["style"]
+        copyfile(transcript_style, new_style)
+        if self.file_name.joinpath("assets").exists():
+            asset_dir = transcript_dir / "assets"
+            copytree(self.file_name.joinpath("assets"), asset_dir)
 
     def save_transcript(self, path):      
         json_document = self.backup_document
@@ -382,8 +395,9 @@ class PloverCATEditor(QTextEdit):
         self.user_field_dict = self.config["user_field_dict"]
         self.auto_paragraph_affixes = self.config["auto_paragraph_affixes"]
 
-    def save_config_file(self):
-        config_path = self.file_name / "config.CONFIG"
+    def save_config_file(self, config_path = None):
+        if not config_path:
+            config_path = self.file_name / "config.CONFIG"
         log.debug(f"Saving config to {str(config_path)}")
         save_json(self.config, config_path)
 
@@ -475,9 +489,8 @@ class PloverCATEditor(QTextEdit):
         if original_style_path != new_style_path:
             log.debug(f"Copying style file at {original_style_path} to {new_style_path}")
             copyfile(original_style_path, new_style_path)
-            self.config["style"] = str(new_style_path)
-        else:
-            self.config["style"] = str(original_style_path)
+        posix_path = pathlib.Path("styles").joinpath(original_style_path.name).as_posix()
+        self.config["style"] = posix_path
         self.styles = json_styles
         self.gen_style_formats()
 
@@ -723,6 +736,20 @@ class PloverCATEditor(QTextEdit):
         if store:
             return(result)
 
+    def replace(self, steno = "", replace_term = None):
+        log.debug("Replace %s with %s", self.textCursor().selectedText(), replace_term)
+        self.undo_stack.beginMacro(f"Replace: {self.textCursor().selectedText()} with {replace_term}")
+        current_cursor = self.textCursor()
+        current_block = current_cursor.block()
+        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        fake_steno = stroke_text(stroke = steno, text = replace_term)
+        remove_cmd = steno_remove(current_cursor, self, current_cursor.blockNumber(), start_pos, 
+                        len(self.textCursor().selectedText()))
+        self.undo_stack.push(remove_cmd)    
+        insert_cmd = steno_insert(current_cursor, self, current_cursor.blockNumber(), start_pos, fake_steno)
+        self.undo_stack.push(insert_cmd)
+        self.undo_stack.endMacro()        
+
     def mock_del(self): 
         current_cursor = self.textCursor()
         if current_cursor.hasSelection():
@@ -756,6 +783,13 @@ class PloverCATEditor(QTextEdit):
         current_block = current_cursor.blockNumber()
         start_pos = current_cursor.positionInBlock()
         insert_cmd = steno_insert(current_cursor, self, current_block, start_pos, el)
+        self.undo_stack.push(insert_cmd)
+
+    def insert_image(self, img_path):
+        selected_file = pathlib.Path(img_path)
+        im_element = image_text(path = selected_file.as_posix())
+        insert_cmd = image_insert(self.textCursor(), self, self.textCursor().blockNumber(), 
+                        self.textCursor().positionInBlock(), im_element)
         self.undo_stack.push(insert_cmd)
 
     def update_fields(self, new_field_dict):

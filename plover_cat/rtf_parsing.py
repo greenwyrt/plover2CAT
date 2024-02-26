@@ -37,7 +37,7 @@ LBRACE, RBRACE, BKS = map(Suppress, "{}\\")
 
 text_whitespace = Opt(White(" \t")) + Word(printables, exclude_chars="\\{}") + Opt(White(" \t"))
 text_whitespace.set_name("text")
-text_whitespace.leave_whitespace()
+# text_whitespace.leave_whitespace()
 
 # special chars that exist as control words, should be replaced by actual unicode equivalents, 
 tab_char = Literal("\\tab").set_parse_action(replace_with("\N{CHARACTER TABULATION}")) # "\t" or "\N{CHARACTER TABULATION}"
@@ -152,11 +152,10 @@ def collapse_dict(element):
             append_value(new_dict, i["control"], "")
     return(new_dict)
 
-
 # with rtf_steno parsing, each control word parses as a dict, and text as a dict
 # each group parses as a list (ParseResults), and so results in a list with control words as dicts, more groups as lists, and text as dicts
 class rtf_steno:
-    def __init__(self, file_name, progress_bar):
+    def __init__(self, file_name, progress_bar = None):
         self.rtf_file = file_name
         self.parse_results = None
         self.scanned_styles = {}
@@ -263,7 +262,8 @@ class rtf_steno:
         self.par = []
     def parse_document(self):
         parse_results = expr.parse_file(self.rtf_file)
-        self.progress_bar.setMaximum(len(parse_results[0]))
+        if self.progress_bar:
+            self.progress_bar.setMaximum(len(parse_results[0]))
         self.parse_results = parse_results
         for num, i in enumerate(parse_results[0]):
             if isinstance(i, dict):
@@ -300,8 +300,9 @@ class rtf_steno:
                     self.parse_cxa(i)
             else:
                 pass
-            self.progress_bar.setValue(num)
-            QApplication.processEvents()
+            if self.progress_bar:
+                self.progress_bar.setValue(num)
+                QApplication.processEvents()
         self.set_new_paragraph()
         self.scan_par_styles()
     def scan_par_styles(self):
@@ -325,7 +326,7 @@ test_string = """
 {\\f0\\fcharset1 Times New Roman;}
 {\\f1\\froman\\fcharset1 Times New Roman{\\*\\falt Base Font};}}
 {\\colortbl;\\red0\\green0\\blue0;\\red0\\green0\\blue255;\\red0\\green255\\blue255;\\red0\\green255\\blue0;}
-{\\xe{\\*\cxexnum 1}Exhibit 1:  A knife }}
+{\\xe{\\*\cxexnum 1}Exhibit 1:  A knife }} sss
 """
 test_string = r"{\par\pard\s0\f0\fs24{\*\cxt 20:46:25:00}{\*\cxs WELG}Welcome{\*\cxt 20:46:26:00}{\*\cxs TOT} to the{\*\cxt 20:46:27:00}{\*\cxs SROEUS} Voice{\*\cxt 20:46:27:00}{\*\cxs -F} of{\*\cxt 20:46:27:00}{\*\cxs PHERBG} America{\xe{\*\cxexnum 1}Exhibit 1:  A knife }{\*\cxt 20:46:28:00}{\*\cxs AES}'s{\*\cxt 20:46:29:00}{\*\cxs TPHUS} News{\*\cxt 20:46:30:00}{\*\cxs WORDZ} Words{\*\cxt 20:46:30:00}{\*\cxs TP-PL}.}"
 

@@ -812,7 +812,7 @@ position.</string>
         <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>4</number>
+        <number>2</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -850,7 +850,7 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
+              <y>-226</y>
               <width>351</width>
               <height>466</height>
              </rect>
@@ -1476,7 +1476,7 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
+              <y>-146</y>
               <width>351</width>
               <height>386</height>
              </rect>
@@ -1878,6 +1878,9 @@ position.</string>
                <layout class="QVBoxLayout" name="verticalLayout_14">
                 <item>
                  <widget class="QRadioButton" name="search_text">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="toolTip">
                    <string>Search visible text for match</string>
                   </property>
@@ -1891,6 +1894,9 @@ position.</string>
                 </item>
                 <item>
                  <widget class="QRadioButton" name="search_steno">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="toolTip">
                    <string>Search strokes, find text has to match stroke completely</string>
                   </property>
@@ -1901,6 +1907,9 @@ position.</string>
                 </item>
                 <item>
                  <widget class="QRadioButton" name="search_untrans">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
                   <property name="toolTip">
                    <string>Search what appears to be untranslated chords in visible text</string>
                   </property>
@@ -1939,6 +1948,9 @@ position.</string>
                </item>
                <item>
                 <widget class="QPushButton" name="search_backward">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
                  <property name="toolTip">
                   <string>Perform selected search backwards</string>
                  </property>
@@ -1963,6 +1975,9 @@ position.</string>
                </item>
                <item>
                 <widget class="QPushButton" name="replace_selected">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
                  <property name="toolTip">
                   <string>Replace the found match with the text in the replace textbox</string>
                  </property>
@@ -1973,6 +1988,9 @@ position.</string>
                </item>
                <item>
                 <widget class="QPushButton" name="replace_all">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
                  <property name="toolTip">
                   <string>Replace all matches with text in replace textbox</string>
                  </property>
@@ -1987,6 +2005,9 @@ position.</string>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
                 <widget class="QCheckBox" name="search_case">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
                  <property name="toolTip">
                   <string>Case sensitive search</string>
                  </property>
@@ -1997,6 +2018,9 @@ position.</string>
                </item>
                <item>
                 <widget class="QCheckBox" name="search_whole">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
                  <property name="toolTip">
                   <string>Text in find has to match text as a whole word/stroke</string>
                  </property>
@@ -2007,6 +2031,9 @@ position.</string>
                </item>
                <item>
                 <widget class="QCheckBox" name="search_wrap">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
                  <property name="toolTip">
                   <string>Search will continue from top/bottom if a match is not found in forward/back search</string>
                  </property>
@@ -2270,6 +2297,9 @@ position.</string>
                  </item>
                  <item>
                   <widget class="QPushButton" name="spell_search">
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
                    <property name="text">
                     <string>Search</string>
                    </property>
@@ -2277,6 +2307,9 @@ position.</string>
                  </item>
                  <item>
                   <widget class="QPushButton" name="spell_skip">
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
                    <property name="text">
                     <string>Skip</string>
                    </property>
@@ -2284,6 +2317,9 @@ position.</string>
                  </item>
                  <item>
                   <widget class="QPushButton" name="spell_ignore_all">
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
                    <property name="text">
                     <string>Ignore All</string>
                    </property>
@@ -2291,6 +2327,9 @@ position.</string>
                  </item>
                  <item>
                   <widget class="QPushButton" name="spell_change">
+                   <property name="focusPolicy">
+                    <enum>Qt::NoFocus</enum>
+                   </property>
                    <property name="text">
                     <string>Change</string>
                    </property>
@@ -2397,7 +2436,7 @@ position.</string>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="steno_search">
+                <widget class="QPushButton" name="steno_spellcheck">
                  <property name="focusPolicy">
                   <enum>Qt::NoFocus</enum>
                  </property>

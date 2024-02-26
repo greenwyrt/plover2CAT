@@ -1,5 +1,7 @@
 import collections
 import time
+import pathlib
+from shutil import copyfile
 from plover import log
 from PyQt5.QtGui import QTextBlockUserData, QTextDocument, QTextCursor, QTextBlock, QImage, QImageReader, QTextImageFormat
 from PyQt5.QtCore import QUrl, QVariant
@@ -148,8 +150,9 @@ class steno_remove(QUndoCommand):
 
 class image_insert(QUndoCommand):
     """Insert image into text block"""
-    def __init__(self, document, block, position_in_block, image_element):
+    def __init__(self, cursor, document, block, position_in_block, image_element):
         super().__init__()
+        self.cursor = cursor
         self.document = document        
         self.block = block
         self.position_in_block = position_in_block
@@ -157,7 +160,14 @@ class image_insert(QUndoCommand):
         self.block_state = 1
     def redo(self):
         # prep image for qt insert
-        imageUri = QUrl("file://{0}".format(self.image_element.path))
+        asset_dir_path = self.document.file_name / "assets"
+        asset_dir_path.mkdir(exist_ok = True)
+        asset_dir_name = asset_dir_path / pathlib.Path(self.image_element.path).name
+        if not asset_dir_name.exists():
+            copyfile(self.image_element.path, asset_dir_name)
+        self.image_element.path = asset_dir_name.as_posix()
+        # double check and only use path to assets
+        imageUri = QUrl(pathlib.Path(self.image_element.path).as_uri())
         image = QImage(QImageReader(self.image_element.path).read())
         self.document.document().addResource(
             QTextDocument.ImageResource,
@@ -170,10 +180,10 @@ class image_insert(QUndoCommand):
         imageFormat.setName(imageUri.toString())
         self.image_element.width = image.width()
         self.image_element.height = image.height()
-        current_block = self.document.document().findBlockByNumber(self.block)
+        current_block = self.cursor.block()
         current_block.userData()["strokes"].insert_steno(self.position_in_block, self.image_element)
         self.block_state = current_block.userState()
-        current_cursor = self.document.textCursor()
+        current_cursor = self.cursor
         current_cursor.setPosition(current_block.position() + self.position_in_block)
         log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.image_element.to_json()}
         log.info(f"Insert: {log_dict}")
