@@ -7,6 +7,16 @@ from plover_cat.field_dialog_ui import Ui_fieldDialog
 
 class fieldDialogWindow(QDialog, Ui_fieldDialog):
     def __init__(self, user_field_dict):
+        """Create, save and edit field values.
+        The field editor is a modeal dialog opened through the menu. 
+        Each field has an unique name and value. Fields are inserted
+        into the transcript text by name and their value is displayed.
+        :param user_field_dict: dict of {name: value}
+        :type user_field_dict: dict, required
+        :return: QDialog status code inherited from the QDialog class.
+            Editor will access ``affix_dict`` from instance.
+        :rtype: QDialog.DialogCode, either Accepted or Rejected         
+        """
         super().__init__()
         self.setupUi(self)
         self.user_field_dict = deepcopy(user_field_dict)
@@ -23,10 +33,12 @@ class fieldDialogWindow(QDialog, Ui_fieldDialog):
             self.userDictTable.setItem(row, 1, QTableWidgetItem(v))
         self.userDictTable.cellChanged.connect(self.update_cell)
     def update_cell(self, row, col):
+        """Update underlying field dict based on the cell changed"""
         key = self.userDictTable.item(row, 0).text()
         val = self.userDictTable.item(row, 1).text()
         self.user_field_dict[key] = val
     def new_field(self):
+        """Add new field to field dict"""
         if self.fieldName.text().strip(" ") == "":
             return
         else:
@@ -40,6 +52,7 @@ class fieldDialogWindow(QDialog, Ui_fieldDialog):
             self.user_field_dict[self.fieldName.text()] = self.fieldValue.text()
             self.userDictTable.blockSignals(False)
     def remove_field(self):
+        """Delete field from field dict by deleting key:value pair"""
         select_item = self.userDictTable.selectedItems()
         if select_item:
             row = select_item[0].row()

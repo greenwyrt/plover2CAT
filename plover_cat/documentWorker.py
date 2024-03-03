@@ -21,16 +21,28 @@ from odf.teletype import addTextToElement
 from odf.draw import Frame, TextBox, Image
 
 class documentWorker(QObject):
+    """Create exported files in separate thread"""
     progress = pyqtSignal(int)
+    """Signal sent progress based on export of paragraph"""
     finished = pyqtSignal()
+    """Signal sent when export is finished"""
     def __init__(self, document, path, config, styles, user_field_dict, home_dir):
+        """Worker to create export files, each save_* function creates one
+        specific file format
+        """
         QObject.__init__(self)  
         self.document = document
+        """dict of form {"par_number": {paragraph data}, ...}"""
         self.path = path
+        """path for export file"""
         self.styles = styles
+        """dict of style parameters"""
         self.config = config
+        """dict of config parameters"""
         self.user_field_dict = user_field_dict
+        """dict of field values"""
         self.home_dir = home_dir
+        """path of transcript directory"""
     def save_ascii(self):
         ef = element_factory()
         doc_lines = {}

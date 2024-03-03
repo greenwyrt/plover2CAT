@@ -23,8 +23,22 @@ def extract_ngram(text, n = 2):
     return zip(*[text.split()[i:] for i in range(n)])
 
 class suggestDialogWindow(QDialog, Ui_suggestDialog):
+    """Analyze existing transcript for common phrases and words.
+        The suggest dialog presently works by analyzing the open transcript,
+        through other sources are possible in the future. It can do a word frequency
+        search, an n-gram search, or both, filtering by minimum occurrence. The
+        word frequency search can use the SCOWL size filter, 
+        while very common words are filtered out first.
+    
+    :param text: string of text
+    :type text: str
+    :param engine: existing Plover engine
+    :param scowl_dict: SCOWL word list packaged with Plover
+    :type scowl_dict: dict
+    """
     # insert_autocomplete = pyqtSignal(tuple)
     def __init__(self, text, engine, scowl_dict):
+        """Sets up connections for analysis with dialog UI"""
         super().__init__()
         self.setupUi(self)  
         self.document = text
@@ -36,6 +50,7 @@ class suggestDialogWindow(QDialog, Ui_suggestDialog):
         self.displaySuggest.setColumnCount(3)
         self.displaySuggest.setHorizontalHeaderLabels(["Candidate", "Outline", "Alternative outlines"])
     def analyze(self):
+        """Starts analyzing text based on selected filters and parameters"""
         search_type = self.searchType.currentText()
         if search_type == "Words only":
             result_list = self.analyze_words(self.scowlSize.currentText(), self.minOccur.value())
@@ -62,6 +77,7 @@ class suggestDialogWindow(QDialog, Ui_suggestDialog):
                 self.displaySuggest.setItem(row, 1, QTableWidgetItem(""))
                 self.displaySuggest.setItem(row, 2, QTableWidgetItem(""))
     def analyze_ngrams(self, min_ngram = 2, max_ngram = 3, min_occurrence = 3):
+        """Run n-gram search and filter for display"""
         log.debug("Running ngram search.")
         if max_ngram < min_ngram:
             max_ngram = min_ngram + 1
@@ -73,6 +89,7 @@ class suggestDialogWindow(QDialog, Ui_suggestDialog):
         result_list = [" ".join(list(k)) for k, v in word_counter.items() if v >= min_occurrence]
         return(result_list)
     def analyze_words(self, scowl_size = 35,  min_occurrence = 1):
+        """Run word search and filter based on occurrence and SCOWL size"""
         log.debug("Running word frequency search.")
         word_counter = Counter(self.document.split())
         common = result_list = [k for k, v in word_counter.items() if v >= min_occurrence]
@@ -90,10 +107,12 @@ class suggestDialogWindow(QDialog, Ui_suggestDialog):
                     result_list.append(word)
         return(result_list)
     def get_outline(self, translation):
+        """Get list of outlines for translation from engine"""
         # one day, lookup strokes from rtf or other transcripts
         res = self.engine.reverse_lookup(translation)
         return(list(res))
     def update_text(self, text):
+        """Update text for analysis"""
         self.document = text
     # def send_autocomplete(self):
     #     selected_row = self.displaySuggest.currentRow()
@@ -104,6 +123,7 @@ class suggestDialogWindow(QDialog, Ui_suggestDialog):
     #     stroke = self.displaySuggest.item(selected_row, 1).text()
     #     self.insert_autocomplete.emit((word, stroke))
     def send_dictionary(self):
+        """Add selected outline to dictionary"""
         selected_row = self.displaySuggest.currentRow()
         if selected_row == -1:
             QMessageBox.warning(self, "Add to dictionary", "No row selected.")

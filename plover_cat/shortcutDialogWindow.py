@@ -5,6 +5,15 @@ from PyQt5.QtGui import QStandardItemModel, QKeySequence
 from plover_cat.shortcut_dialog_ui import Ui_shortcutDialog
 
 class shortcutDialogWindow(QDialog, Ui_shortcutDialog):
+    """Set shortcuts for menu items in editor through the modal dialog
+
+    :param shortcut_dict: existing dict of shortcuts, {action: "str of keys"}
+    :type shortcut_dict: dict
+    :param menu_names: visible text of QAction objects in menus
+    :type menu_names: list
+    :param action_names: object names of QAction objects in menus
+    :type action_names: list
+    """
     def __init__(self, shortcut_dict, menu_names, action_names):
         super().__init__()
         self.setupUi(self)
@@ -19,6 +28,7 @@ class shortcutDialogWindow(QDialog, Ui_shortcutDialog):
         self.validate.clicked.connect(self.check_save_shortcut)
         self.text_name.activated.connect(self.display_shortcut)          
     def display_shortcut(self, index):
+        """Display existing shortcut, if set, of selected menu item"""
         self.shortcut.clear()
         self.text_name.setCurrentIndex(index)
         action = self.text_name.currentData()
@@ -26,6 +36,7 @@ class shortcutDialogWindow(QDialog, Ui_shortcutDialog):
             keys = QKeySequence(self.shortcut_dict[action])
             self.shortcut.setKeySequence(keys)
     def check_save_shortcut(self):
+        """Check if shortcut displayed is valid"""
         action = self.text_name.currentData()
         if not action:
             return

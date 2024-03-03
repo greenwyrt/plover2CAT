@@ -3,6 +3,13 @@ from PyQt5.QtWidgets import QDialog
 from plover_cat.recorder_dialog_ui import Ui_recorderDialog
 
 class recorderDialogWindow(QDialog, Ui_recorderDialog):
+    """Set QRecorder settings for audio recording
+    :param recorder: a QAudioRecorder instance
+    :type recorder: QAudioRecorder
+    :return: QDialog status code inherited from the QDialog class.
+        Editor will access ``affix_dict`` from instance.
+    :rtype: QDialog.DialogCode, either Accepted or Rejected     
+    """
     def __init__(self, recorder):
         super().__init__()
         self.setupUi(self)

@@ -42,13 +42,13 @@ Now look to the right side. Click on the headings within the toolbar to open the
 
 Changes to properties of a style are applied document-wide. For example, you can make the Question style bold. Go to a paragraph that uses the question style, click the bold icon, and then click the "Modify Style" button at the bottom of the Styling pane.
 
- ![Example of style changed](images/changedstyle.png)
+ ![Example of style changed](images/changestyle.png)
 
  See how both paragraphs with the Question style now have bolded text.
  
  You can also change the alignment.
 
- ![Example of style changed](images/changedstyle2.png)
+ ![Example of style changed](images/changestyle2.png)
 
  ##  Save and Versioning
 

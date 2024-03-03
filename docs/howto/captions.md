@@ -18,10 +18,6 @@ For example, if the value is 2, and the text is `This is a first example`, after
 
 The max length for a caption line.
 
-### `Time delay between lines`
-
-The minimum time interval until a new caption is displayed. Lower values mean that captions scroll quickly if input is fast. 
-
 ### `Display max lines in window`
 
 If set to zero, all caption lines are kept in window, and the window will scroll if necessary. 

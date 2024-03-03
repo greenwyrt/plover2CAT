@@ -6,7 +6,7 @@ This dock shows the contents of the `transcript-{timestamp}.tape` file, an alter
 
 The paper tape is linked to the text and will scroll to the corresponding stroke when the cursor in the editor moves.
 
-![Example of Linking](../../images/paper_text_link.gif)
+![Example of Linking](../howto/images/paper_text_link.gif)
 
 Highlight a stroke in the paper tape, and click "Locate" to move to that position in the main text editor. 
 

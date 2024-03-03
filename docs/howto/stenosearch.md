@@ -2,7 +2,7 @@
 
 `Steno Search` will try to find valid steno outlines in the dictionaries based on a user-specified outline.
 
-`Steno Search` does not refer to finding steno in the underlying transcript. See [find/replace](howto/findreplace.md) on how to do that.
+`Steno Search` does not refer to finding steno in the underlying transcript. See [find/replace](findreplace.md) on how to do that.
 
 ## Usage
 
