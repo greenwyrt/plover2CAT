@@ -18,16 +18,28 @@ whitespace = r'[%s]' % re.escape(_whitespace)
 wordsep_simple_re = re.compile(r'(%s+)' % whitespace)
 
 class text_element(UserString):
-    """
-    base class, only text
+    """The base text element used in editor.
+
+    :param text: string that can be set
+    :type text: str
+    :param time: time element is created in ISO milliseconds format
+    :type time: str
     """
     def __init__(self, text = "", time = None):
         super().__init__(text)
         self.element = "text"
+        """type of element, ``text``"""
         self.time = time or datetime.now().isoformat("T", "milliseconds")
     def __len__(self):
+        """return length of string"""
         return(len(self.data))
     def split(self):
+        """Splits text string on whitespace (re from textwrapper).
+
+        :return: s list of elements containing each text piece separately,
+            but same otherwise as original
+        :rtype: list
+        """
         if self.length() > 1:
             chunks = [c for c in wordsep_simple_re.split(self.data) if c]
             list_chunks = []
@@ -44,6 +56,14 @@ class text_element(UserString):
             new_element.from_dict(class_dict)
             return([new_element])            
     def __add__(self, other):
+        """Adds together text, and updates time from other.
+        
+        :param other: any type of element
+        :type other: ``text_element``
+        :return: ``text_element`` object with updated attributes
+        :rtype: ``text_element``
+        :raise NotImplemented: if type of ``other`` not ``text_element``         
+        """
         if type(other) == type(self):
             data = self.data + other.data
             time = other.time
@@ -51,34 +71,69 @@ class text_element(UserString):
         else:
             return NotImplemented
     def __radd__(self, other):
+        """Override __radd__ from ``Userstring`` so inherited classes can override.
+        
+        :raises NotImplemented: __radd__ should not be needed with purely ``text_element`` objects
+        """
         return NotImplemented
     def __getitem__(self, key):
+        """Get from class dict based on key.
+        
+        :param key: key
+        :return: returns new instance of class after deepcopy
+        """
         class_dict = deepcopy(self.__dict__)
         class_dict["data"] = self.data[key]
         new_element = self.__class__()
         new_element.from_dict(class_dict)
         return(new_element)
     def __repr__(self):
+        """Return representation as ``dict``."""
         items = ("%s = %r" % (k, v) for k, v in self.__dict__.items())
         return("{name}({args})".format(name = self.__class__.__name__, args = ", ".join(items)))
     def length(self):
+        """Return functional length.
+        
+        :return: functional length of element, length of text string
+        :rtype: int
+        """
         return(len(self.data))
     def from_dict(self, dictionary):
+        """Populate class using a dict."""
         for k, v in dictionary.items():
             setattr(self, k, v)
     def to_display(self):
+        """Formatted string for display in GUI.
+
+        Should be a string for three lines, 1) icon letter, 2) element data, if any, 3) text
+        """
         return("\U0001F163\n\n%s" % self.to_text())
     def to_json(self):
+        """Return dict of attributes."""
         return(self.__dict__)
     def to_text(self):
+        """Return "text" representation as imagined for ``QTextEdit``."""
         return(self.data)
     def to_rtf(self):
+        """Return string representation with control groups from RTF/CRE spec as necessary."""
         time_string = datetime.strptime(self.time, "%Y-%m-%dT%H:%M:%S.%f").strftime('%H:%M:%S')      
         string = write_command("cxt", time_string + ":00", visible = False, group = True) + write_command("cxs", "", visible = False, group = True) + self.to_text()
         return(string)
     def to_odt(self, paragraph, document):
+        """Populate ODF paragraph element with instance text.
+        
+        :param paragraph: odfpy paragraph element
+        :param document: odfpy document that the paragraph (will) belongs to
+        """
+        # if there is style highlighting on element level
+        # need to general styled text here and add style to document
         addTextToElement(paragraph, self.to_text())
     def replace_initial_tab(self, expand = "    "):
+        """Replace first tab in string.
+        
+        :param expand: string to replace tab with, default four spaces
+        :type expand: str
+        """
         if "\t" in self.data:
             self.data = self.data.replace("\t", expand, 1)
             return True
@@ -86,25 +141,42 @@ class text_element(UserString):
             return None
 
 class dummy_element(text_element):
-    """
-    Used for testing
+    """Dummy element used for testing.
     """
     def __init__(self, **kargs):
         super().__init__(**kargs)
         self.element = "dummy"
+        """type of element, ```dummy```"""
     def length(self):
         return(1)
 
 class stroke_text(text_element):
-    """
-    custom stroke class with timestamps and stroke
+    """Stroke element used in editor.
+
+    :param stroke: steno outline, separated by slashes
+    :type stroke: str
+    :param audiotime: time of media at time of stroke
+    :type audiotime: str
+
     """
     def __init__(self, stroke = "", audiotime = "", **kargs):
         super().__init__(**kargs)
         self.element = "stroke"
+        """Type of element, ``stroke``."""
         self.stroke = stroke
         self.audiotime = audiotime
     def __add__(self, other):
+        """Adds together stroke elements or stroke and text elements.
+        Will only combine elements but not across word boundaries (spaces), 
+        can accept `stroke_text` and `text_element` but not others while updating
+        necessary attributes.
+
+        :param other: ``stroke_element`` or ``text_element``
+        :type other: ``stroke_element`` or ``text_element``
+        :return: ``stroke_text`` object with updated attributes
+        :rtype: ``stroke_text``
+        :raise TypeError: if type of ``other`` not correct 
+        """
         if self.data.endswith(" ") or other.data.startswith(" "):
             raise ValueError("Elements should not be combined across word boundaries")
         if type(other) == type(self):
@@ -122,6 +194,14 @@ class stroke_text(text_element):
         else:
             raise TypeError("Stroke elements can only combine with other stroke or text elements.")
     def __radd__(self, other):
+        """Add together elements.
+
+        :param other: ``text_element`` object
+        :return: ``stroke_text`` object with updated attributes
+        :rtype: ``stroke_text``
+        :raise NotImplemented: if type of ``other`` is not ``text_element``
+        :raise ValueError: if trying to combine across word boundaries        
+        """
         if self.data.startswith(" ") or other.data.endswith(" "):
             raise ValueError("Elements should not be combined across word boundaries")        
         if isinstance(other, text_element):
@@ -141,20 +221,37 @@ class stroke_text(text_element):
         return("\U0001F162\n%s\n%s" % (self.stroke, self.data))
 
 class image_text(text_element):
+    """Image element used in editor.
+
+    :param path: path to image
+    :type path: str or `Path`
+    :param width: pixel width of image
+    :type width: int
+    :param height: pixel height of image
+    :type height: int
     """
-    custom equivalent of qtextimageformat
-    """
-    def __init__(self, path = None, width = None, height = None, caption = None, **kargs):
+    def __init__(self, path = None, width = None, height = None, **kargs):
         super().__init__(**kargs)
         self.data = "\ufffc"
+        """Representation of image when image cannot be rendered."""
         self.element = "image"
+        """Type of element, ``image``."""
         self.path = path
         self.width = width
         self.height = height
     def __add__(self, other):
+        """Addition of elements to image is not allowed.
+        
+        :raise NotImplemented: images cannot add or be added to other elements.
+        """
         return NotImplemented
         # raise NotImplementedError("Cannot add on image element.")
     def length(self):
+        """Return functional length of ``image_text``, 1.
+
+        :return: 1
+        :rtype: int
+        """
         return(1)
     def to_display(self):
         return("\U0001F158\n%s\n " % self.path)
@@ -179,15 +276,32 @@ class image_text(text_element):
         paragraph.addElement(image_frame)
 
 class text_field(text_element):
+    """Field element to use in editor.
+
+    :param name: name of field
+    :type name: str
+    :param user_dict: transcript field dict, uses default ``user_field_dict`` if not supplied
+    :type user_dict: dict
+    """
     def __init__(self, name = None, user_dict = user_field_dict, **kargs):
         super().__init__(**kargs)
         self.element = "field"
+        """Type of element, ``field``"""
         self.name = name
         self.user_dict = user_dict
     def __add__(self, other):
+        """No element can be added. Force use of ``__radd__``.
+
+        :raise NotImplemented: addition not allowed 
+        """
         return NotImplemented
         # raise NotImplementedError("Cannot add on text field element.")
     def length(self):
+        """Return functional length, 1
+
+        :return: 1
+        :rtype: int
+        """
         return(1)
     def to_json(self):
         new = {k: v for k, v in self.__dict__.items() if k != "user_dict"}
@@ -199,6 +313,11 @@ class text_field(text_element):
         self.update()
         return(self.data)
     def update(self):
+        """Update data for display. Check the ``user_dict`` and assigns value to ``data``, 
+        "updating" if the value in the dict for the ``name`` has been changed.
+        The ``user_field_dict`` by default uses the global `user_field_dict` object.
+        Need to specify if a different dict is to be used.
+        """
         if self.name in self.user_dict:
             self.data = self.user_dict[self.name]
         else:
@@ -229,22 +348,41 @@ class text_field(text_element):
         paragraph.addElement(user_field)
 
 class automatic_text(stroke_text):
-    """use for text such as Q\t, ie set directly for question style"""
+    """Automatic text element for editor, text added by editor, not user.
+    
+    Use for text such as Q\t, ie set directly for question style.
+    
+    :param prefix: text to appear before string
+    :type prefix: str
+    :param suffix: text to appear after string
+    :type suffix: str
+    """
     def __init__(self, prefix = "", suffix = "", **kargs):
         super().__init__(**kargs)
         self.element = "automatic"
+        """Type of element, ``automatic``"""
         self.prefix = prefix
         self.suffix = suffix
     def __add__(self, other):
+        """No element can be added. Force use of ``__radd__``.
+
+        :raise NotImplemented: addition not allowed.
+        """
         return NotImplemented
     # raise NotImplementedError("Cannot add on automatic text element.")
     def __radd__(self, other):
+        """No element can be added.
+
+        :raise NotImplemented: ``__radd__`` not allowed.
+        """
         return NotImplemented
     def __len__(self):
+        """Return length of prefix + text + suffix."""
         return(len(self.to_text()))
     def to_text(self):
         return(self.prefix + self.data + self.suffix)
     def length(self):
+        """Return length of data, compare to ``__len__()``."""
         return(len(self.data))
     def to_rtf(self):
         string = ""
@@ -258,29 +396,49 @@ class automatic_text(stroke_text):
         return(f"\U0001F162 \U0001F150\n{self.stroke}\n{self.to_text()}")
 
 class conflict_text(stroke_text):
+    """Not yet implemented"""
     # need for resolving with imports from rtf
     def __init__(self, choices = None, **kargs):
         super().__init__(**kargs)
         self.choices = choices
 
 class index_text(text_element):
-    """
-    text element that holds exhibit
+    """Index entry element for editor.
+
+    :param prefix: prefix to place before "number"
+    :type prefix: str
+    :param indexname: index that index entry belongs to
+    :type indexname: int
+    :param description: index entry description
+    :type description: str
+    :param hidden: whether description should be shown in editor or hidden
+    :type hidden: bool
     """
     def __init__(self, prefix = "Exhibit", indexname = 0, description = "", hidden = True, **kargs):
         super().__init__(**kargs)
         self.element = "index"
+        """Type of element, ``index``"""
         # indexname and data ("text") are identifiers, not allowed to change
         self.indexname = indexname
         self.prefix = prefix
         self.description = description
         self.hidden = hidden
     def __add__(self, other):
+        """No element can be added. Force use of ``__radd__``.
+
+        :raise NotImplemented: addition not allowed.
+        """        
         return NotImplemented
         # raise NotImplementedError("Cannot add on index text element.")
     def __len__(self):
+        """Return length of index entry text, may or may not include description."""
         return(len(self.to_text()))
     def length(self):
+        """Return functional length, 1
+
+        :return: 1
+        :rtype: int
+        """
         return(1)
     def to_text(self):
         if self.hidden:
@@ -310,6 +468,7 @@ class index_text(text_element):
         return(string)
 
 class redact_text(text_element):
+    """Not yet implemented"""
     def __init__(self, **kargs):
         super().__init__(**kargs)
         self.element = "redacted"
@@ -319,6 +478,18 @@ class redact_text(text_element):
         return("\u2588" * len(self.data))
 
 def translate_coords(len1, len2, pos):
+    """Translate position from one sequence of cumulative lengths to another.
+    
+    :param len1: cumulative text lengths of elements (ie in display of editor)
+    :type len1: list[int]
+    :param len2: cumulative functional lengths of elements, can be 1 or other int
+    :type len2: list[int]
+    :param pos: position from first sequence to translate
+    :type pos: int
+    
+    :return: position in second sequence
+    :rtype: int
+    """
     pos_index = bisect_left(len1, pos)
     if pos_index == 0:
         remainder = pos     
@@ -336,6 +507,21 @@ def translate_coords(len1, len2, pos):
     return(steno_pos) 
 
 def backtrack_coord(pos, backspace, text_len, func_len):
+    """Return position after backspace, accounting for functional length of elements.
+
+    :param pos: initial position in text
+    :type pos: int
+    :param backspace: hypothetical backspaces to mock
+    :type backspace: int
+    :param text_len: text lengths of elements
+    :type text_len: list[int]
+    :param func_len: functional lengths of elements
+    :type func_len: list[int]
+
+    :return: position after hypothetical backspaces, may be negative
+        if more ``backspaces`` than length
+    :rtype: int
+    """
     # guard against that edgecase
     if backspace == 0:
         return(pos)
@@ -369,7 +555,17 @@ def backtrack_coord(pos, backspace, text_len, func_len):
 # backtrack_coord(pos, backspace, text_len, func_len)
 
 class element_factory:
+    """Factory for creating elements from data dict"""
     def gen_element(self, element_dict, user_field_dict = user_field_dict):
+        """Return element based on type.
+        
+        :param element_dict: dict of element, likely from dict representation
+        :type element_dict: dict
+        :param user_field_dict: user field data
+        :type user_field_dict: dict
+        :return: element
+        :rtype: `text_element` or subclass
+        """
         # default is always a text element
         element = text_element()
         if element_dict["element"] == "stroke":
@@ -388,6 +584,7 @@ class element_factory:
         return(element)
 
 class element_collection(UserList):
+    """Container for holding elements in list."""
     def __init__(self, data = None):
         # force element into list if not list
         if isinstance(data, list):
@@ -397,18 +594,22 @@ class element_collection(UserList):
         else:
             super().__init__([data])
     def __str__(self):
-        # string representation of all elements in container
+        """Return string representation of all elements in container."""
         string = [i.to_text() for i in self.data]
         return("".join(string))
     def lengths(self):
+        """Return list of functional lengths for each element."""
         lengths = [i.length() for i in self.data]
         return(lengths)
     def lens(self):
+        """Return list of "text" lengths for each element."""
         lens = [len(i) for i in self.data]
         return(lens)
     def __len__(self):
+        """Returns sum of `len` for each element."""
         return(sum(self.lens()))
     def __getitem__(self, key):
+        """Return `element_collection` instance with copy of element(s) based on key."""
         if isinstance(key, slice):
             el_lengths = list(accumulate(self.lengths()))
             start = key.start
@@ -457,21 +658,34 @@ class element_collection(UserList):
             return(self.__class__(deepcopy(self.data[key])))
         # always return element collection, even when not a slice
     def element_count(self):
+        """Return number of elements in collection, ``len`` of a list."""
         return(len(self.data))
     def to_json(self):
+        """Return list of serialized ``dict`` objects."""
         return([i.to_json() for i in self.data])
     def to_text(self):
+        """Return text string combining all elements."""
         text = [i.to_text() for i in self.data]
         return("".join(text))
     def to_rtf(self):
+        """Return string containing RTF representations of elements."""
         col_string = "".join([i.to_rtf() for i in self.data])
         return(col_string)
     def to_odt(self, paragraph, document):
+        """Add each element to paragraph in ODF document"""
         for i in self.data:
             i.to_odt(paragraph, document)
     def to_display(self):
+        """Return list of display strings for elements"""
         return([el.to_display() for el in self.data])
     def remove(self, start, end):
+        """Remove elements based on specified functional position start/stop.
+
+        :param int start: start position for remove
+        :param int end: end position for remove
+        :return: removed elements
+        :rtype: ``element_collection``
+        """
         new_data = []
         first = self.__getitem__(slice(0, start)).data
         new_data.extend(first)
@@ -481,6 +695,11 @@ class element_collection(UserList):
         self.data = new_data
         return(del_data)
     def insert(self, i, item):
+        """Insert based on functional position.
+        :param int i: position
+        :param item: data to be inserted
+        :return: item
+        """
         new_data = []
         first = self.__getitem__(slice(0, i))
         second = self.__getitem__(slice(i, None))
@@ -493,6 +712,7 @@ class element_collection(UserList):
         self.data = new_data
         return(item)
     def stroke_pos_at_pos(self, pos):
+        """Returns tuple of text start, stop for element at text ``pos``."""
         lengths = self.lens()
         cum_len = list(accumulate(lengths))
         pos_index = bisect(cum_len, pos)
@@ -507,6 +727,7 @@ class element_collection(UserList):
             start_pos = cum_len[pos_index - 1]
         return((start_pos, cum_len[pos_index]))
     def element_pos(self, index):
+        """Returns tuple of text start, stop for element at ``index`` in collection."""
         lengths = self.lens()
         cum_len = list(accumulate(lengths))
         if index == 0:
@@ -518,6 +739,11 @@ class element_collection(UserList):
             start_pos = cum_len[index - 1]            
         return((start_pos, cum_len[index]))            
     def remove_steno(self, start, end):
+        """Removes elements from `start` to `end` (text) position.
+        
+        :return: element(s) removed
+        :rtype: ``element_collection``
+        """
         lens = self.lens()
         cum_len = list(accumulate(lens))
         cum_len.insert(0, 0)
@@ -530,6 +756,15 @@ class element_collection(UserList):
         res = self.remove(start_pos, end_pos)
         return(res)
     def extract_steno(self, start, end):
+        """Retrieve elements from ``start`` to ``end`` (text) position.
+
+        This does not modify original collection.
+
+        :param int start: starting text position
+        :param int end: ending text position
+        :return: element(s) between coordinates
+        :rtype: ``element_collection``
+        """
         lens = self.lens()
         cum_len = list(accumulate(lens))
         cum_len.insert(0, 0)
@@ -542,6 +777,14 @@ class element_collection(UserList):
         res = self[start_pos:end_pos]
         return(res)        
     def insert_steno(self, pos, item):
+        """Insert at text position.
+
+        This will split an element in collection if needed.
+
+        :param int pos: text position
+        :param item: ``element_collection`` or single element
+        :return: item
+        """
         lens = self.lens()
         cum_len = list(accumulate(lens))
         cum_len.insert(0, 0)
@@ -553,10 +796,30 @@ class element_collection(UserList):
         res = self.insert(steno_pos, item)
         return(res)
     def starts_with(self, char):
+        """Check if text starts with ``char``.
+
+        :param str char: text to check
+        :return: ``True`` if collection text does start with ``char``, 
+            ``False`` otherwise
+        :rtype: bool
+        """
         return(self.data[0].data.startswith(char))
     def ends_with(self, char):
+        """Check if text ends with ``char``
+
+        :param str char: text to check
+        :return: ``True if collection text ends with ``char``,
+            ``False`` otherwise
+        :rtype: bool
+        """
         return(self.data[-1].data.endswith(char))
     def starts_with_element(self, element_type):
+        """Check if first element is of type.
+        
+        :param str element_type: any of the types for ``text_element`` or subclasses
+        :return: ``True`` if first element type matches ``element_type``, ``False`` otherwise
+        :rtype: bool
+        """
         if not self.data:
             return False
         if self.data[0].element == element_type:
@@ -564,28 +827,58 @@ class element_collection(UserList):
         else:
             return False
     def ends_with_element(self, element_type):
+        """Check if last element is of type.
+        
+        :param str element_type: any of the types for ``text_element`` or subclasses
+        :return: ``True`` if last element type matches ``element_type``, ``False`` otherwise
+        :rtype: bool
+        """
         if self.data[-1].element == element_type:
             return True
         else:
             return False
     def remove_end(self, char = "\n"):
+        """Remove ``char`` end of text string for collection.
+
+        This will remove entire element if ``char`` is only text in element.
+
+        :param str char: string to remove, default ``\\n``
+        """
         if self.data[-1].data == char:
             del self.data[-1]
         elif self.data[-1].data.endswith(char):
             self.data[-1].data = self.data[-1].data.rstrip(char) 
     def remove_begin(self, char):
+        """Remove ``char`` from first element if text starts with ``char``.
+
+        :param str char: string to remove
+        """
         if self.data[0].data == char:
             del self.data[0]
         elif self.data[0].data.startswith(char):
             self.data[0].data = self.data[0].data.lstrip(char)
     def add_begin(self, char = " "):
+        """Add ``char`` to beginning of first element.
+        
+        :param str char: string to add, default one space character
+        """
         self.data[0].data = char + self.data[0].data
     def add_end(self, char = " "):
+        """Add ``char`` to end of last element.
+        
+        :param str char: string to add, default one space character
+        """
         self.data[-1].data = self.data[-1].data + char
     def stroke_count(self):
+        """Counts the number of strokes in collection."""
         # for RTF, maybe has uses elsewhere
         return(sum([el.stroke.count("/") + 1 for el in self.data if el.element == "stroke"]))
     def search_strokes(self, query):
+        """Return text positions for matches to underlying strokes.
+
+        :param str query: steno outline
+        :return: tuple of start and end positions, ``None`` if no match
+        """
         stroke_list = [el.stroke if el.element == "stroke" else " " for el in self.data]
         query = query.split("/")
         # must match across strokes, match whole element of stroke
@@ -601,19 +894,40 @@ class element_collection(UserList):
         end_pos = self.element_pos(i + len(query))[0]    
         return((start_pos, end_pos))
     def search_text(self, query):
+        """Return text positions for matches to text.
+
+        :param str query: search text
+        :return: results of ``re.finditer`` search
+        """        
         text = "".join([el.to_text() for el in self.data])
         res = re.finditer(re.escape(query), text)
         return(res)
     def collection_time(self, reverse = False):
+        """Return earliest/latest timestamp in collection.
+
+        :param bool reverse: ``True`` by default for earliest, 
+            ``False`` for latest
+        :return: formatted timestamp string
+        """
         times = [el.time for el in self.data]
         return(sorted(times, reverse = reverse)[0])
     def audio_time(self, reverse = False):
+        """Return earliest/latest audio timestamp in collection.
+
+        :param bool reverse: ``True`` by default for earliest, 
+            ``False`` for latest
+        :return: formatted timestamp string
+        """
         times = [el.audiotime for el in self.data if el.element == "stroke" and el.audiotime != ""]
         if times:
             return(sorted(times, reverse = reverse)[0])
         else:
             return None
     def replace_initial_tab(self, tab_replace = "    "):
+        """Replace initial tab in place within collection.
+
+        :param str tab_replace: string to replace tab character with, default four spaces
+        """
         track_len = 3
         for el in self.data:
             if "\t" in el.data[0:track_len]:
@@ -624,6 +938,8 @@ class element_collection(UserList):
             if track_len < 0:
                 break
     def merge_elements(self):
+        """Collapse collection elements using ``__add__`` method.
+        """
         new_ec = []
         last_el_type = ""
         for ind, el in enumerate(self.data):
@@ -669,6 +985,10 @@ class element_collection(UserList):
 # str(stroke_collection)
 
 class steno_wrapper(textwrap.TextWrapper):
+    """Wrap text, but adapted for elements in ``element_collection``.
+    
+    :return: a list of lists of elements, not ``element_collection``.
+    """
     def __init__(self, **kargs):
         super().__init__(**kargs)
 

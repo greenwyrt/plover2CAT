@@ -90,7 +90,7 @@ This menu contains items related to audiovisual files.
 
 This menu is for transcript dictionary management.
 
-- Add Custom Dict: Add a custom dictionary to the transcript. See  [transcript dictionaries](#transcript-dictionaries) for details.
+- Add Custom Dict: Add a custom dictionary to the transcript. See [transcript dictionaries](../howto/adddict.md) for details.
 - Remove Transcript Dictionary: Removes a loaded transcript dictionary. This will remove both from the Plover instance and the configuration file, but not delete the actual file.
 - Transcript Suggestions: analyze a transcript for common words and phrases to add to dictionary
 

@@ -21,3 +21,5 @@ You can open the `.odt` file with Libreoffice, Microsoft Office, or other word p
 ![Compare export format](images/compareexport.png)
 
 In comparison to the Plain ASCII file above, you can see that formatting has been preserved.
+
+Now you can close the transcript through **File > Close** or by pressing the red X button on the tab.

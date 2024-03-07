@@ -2,6 +2,18 @@
 
 The main challenge in creating a CAT editor is to keep track of the text and associated outlines that produced the text. Changes to the underlying steno data should be reflected in the visible, and also the other way around. If there was no need to keep the steno data and text connected, any normal word processor/text editor would work.
 
+## Custom text elements
+
+The out-of-the-box features in QTextEdit and QUndoStack are very good for basic rich-text, images, lists, and tables. The initial approach of keeping a list with userData with each paragraph text works very well when the transcript only contains text. However, custom functionality is needed when going beyond just pure text, such as images, "indexing", and "automatic text", so different text elements are implemented as custom classes, and can be held in a custom list class.
+
+For example, an image element can contain more data than just pure text, such as the image location, dimensions. If this is a figure reference, then there has to also be an identifier, optionally figure number and caption. One way would be to switch from lists to dictionaries directly but classes offer more benefits.
+
+These text elements are treated different in certain formats, ie images in ODF vs plain text. For a complete transcript, the image in the ODF should be embedded (since that functionality is available for ODF files) and use odfpy node elements. However, if the export is plain text, there shouldn't be an image included as it is not possible. The representation of the text element will differ depending on file format.
+
+Certain elements also have different lengths compared to what should be visualized, like a functional and a text display length. For example, while exhibit text can be something like `Exhibit 2`, which is 9 chars worth of horizontal space, it should be treated as one entity, for example, a backspace should remove the entire string, not just the tab character, and has a functional length of one.
+
+## Editing steno
+
 In Plover2CAT, text is displayed using a QTextEdit widget set to read-only, and the steno data for each paragraph is stored inside in the `userData` of the block. Whenever Plover2CAT is notified that Plover has received a stroke event, it checks whether the Plover engine has sent backspaces and text strings. Then Plover2CAT updates the steno data, storing the new stroke and corresponding text strings or trimming the previous string as necessary before updating the text display. The keypresses that Plover generates and uses to output are ignored by Plover2CAT. Using the two hooks and ignoring the Plover keypresses has the advantage of not losing data when paragraphs are deleted or created, as the steno data is modified before the text.
 
 An alternative approach instead of storing steno data within QTextEdit would have been to maintain a separate data structure. But using `userData` kept the text and data closely associated, and removal of data when a paragraph was deleted is automatic through QTextEdit. In addition, retrieval of `userData` is fast through using the Qt QTextEdit API.

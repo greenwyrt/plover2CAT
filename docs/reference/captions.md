@@ -16,11 +16,7 @@ The text is broken down into "words" and "spaces" and fed into `word_queue`, the
 
 `make_caps` formats everything in the `word_queue` based on parameters. Formatted caps are sent into the `cap_queue`
 
-## Time-controlled display
 
-There is a `QTimer` that triggers for sending a caption to display and an endpoint if specified. No matter how fast text is intaken or captions are formatted and added to queue, captions are only "released" when the timer goes off at the specified interval.
-
-`send_cap` will always send to display, and only one of the endpoints, one of `send_*`
 
 
 

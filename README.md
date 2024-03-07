@@ -1,10 +1,8 @@
+# plover2CAT
+
 Plover2CAT is a plugin for Plover, the open-source stenography engine. If the only user requirement is to write steno on the computer, this plugin is not needed as Plover is more than sufficient. Plover2CAT supplements Plover by providing some features of a computer-aided-transcription (CAT) program.
 
-# Status
-
-Version 2.3.1 is the current release. Version 3.0.0 is under planning and development.
-
-# Features Overview:
+## Features Overview
 
 - a rich text editor with steno hidden underneath:
   - paragraph "block" type formatting
@@ -52,6 +50,8 @@ Version 2.3.1 is the current release. Version 3.0.0 is under planning and develo
 
 This plugin is built on Plover and inspired by [plover_cat](https://github.com/LukeSilva/plover_cat). 
 
+New features are generally added over time when requested.
+
 
 ## Get Started
 
@@ -67,7 +67,7 @@ Then review the available [how to ____](docs/README.md) articles.
 
 ## Getting help
 
-Two ways: 1) Send a message over Discord. I am plants#4820 or 2) Open an issue on Github.
+Two ways: 1) Send a message over Discord. I am plants#4820 or 2) Open an issue on the [Github repository](https://github.com/greenwyrt/plover2CAT/issues).
 
 Helpful things to do: 
 - Go to `Help` --> `About` to view the version number.
@@ -94,7 +94,7 @@ Suggestions and bug reports are welcomed.
 
 Contributions to the tutorials and how-to documentation are especially welcomed.
 
-Contact me on the Plover discord as plants#4820  or open an issue on the repo. 
+Contact me on the Plover discord as plants#4820 or open an issue on the repo. 
 
 
 
