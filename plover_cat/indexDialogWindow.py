@@ -7,21 +7,20 @@ from plover_cat.steno_objects import index_text
 
 class indexDialogWindow(QDialog, Ui_indexDialog):
     """Create, save and edit index entries for editor.
+
     The index editor dialog is a non-modal dialog opened through the menu.
     Index entries are numbered, and have a description that can be hidden.
     Index entries have to belong to an index with a prefix string, and there 
     can be multiple indices.
+
+    :param index_dict: dict with {index_name: {prefix: str, hidden: bool, entries: {name: description, ...}}, ..}
+    :type index_dict: dict    
     """
     index_insert = pyqtSignal(object)
     """Signal emitted when user has selected an entry to insert into text"""
     updated_dict = pyqtSignal()
     """Signal emitted when the index dictionary has been updated"""
     def __init__(self, index_dict):
-        """Sets up connections between index dialog UI and functions
-
-        :param index_dict: dict with {index_name: {prefix: str, hidden: bool, entries: {name: description, ...}}, ..}
-        :type index_dict: dict
-        """
         super().__init__()
         self.setupUi(self)
         self.index_dict = index_dict
@@ -36,7 +35,7 @@ class indexDialogWindow(QDialog, Ui_indexDialog):
         self.addNewIndex.clicked.connect(self.new_index)
         self.entryAdd.clicked.connect(self.add_new_entry)
     def update_display(self, index):
-        """Display existing entries for selected index"""
+        """Display existing entries for selected index."""
         self.indexChoice.setCurrentIndex(index)
         self.indexPrefix.clear()
         if not self.hideDescript.isChecked():
@@ -58,7 +57,7 @@ class indexDialogWindow(QDialog, Ui_indexDialog):
             self.displayEntries.setItem(row, 0, key)
             self.displayEntries.setItem(row, 1, QTableWidgetItem(v))
     def save_index(self):
-        """Save selected index"""
+        """Save selected index."""
         index_name = self.indexChoice.currentText()
         prefix = self.indexPrefix.text()
         hidden = self.hideDescript.isChecked()
@@ -70,15 +69,16 @@ class indexDialogWindow(QDialog, Ui_indexDialog):
         self.index_dict[index_name] = {"prefix": prefix, "hidden": hidden, "entries": entry_dict}
         self.updated_dict.emit()
     def new_index(self):
-        """Create new index"""
+        """Create new index."""
         count = self.indexChoice.count()
         self.indexChoice.addItem(str(count))
         self.update_display(count)
     def enable_add(self, index):
-        """Allow new entry to be added if index is selected"""
+        """Allow new entry to be added if index is selected."""
         if index > -1:
             self.entryAdd.setEnabled(True)
     def add_new_entry(self):
+        """Add new entry to currently selected index."""
         index_name = self.indexChoice.currentText()
         new_entry = self.entryText.text()
         prefix = self.indexPrefix.text()
@@ -87,7 +87,7 @@ class indexDialogWindow(QDialog, Ui_indexDialog):
         self.index_dict[index_name]["entries"][new_entry] = ""
         self.update_display(self.indexChoice.currentIndex())
     def enable_insert(self):
-        """Allow insert into text if an entry is selected"""
+        """Allow insert into text if an entry is selected."""
         if self.displayEntries.currentRow() > -1:
             self.saveAndInsert.setEnabled(True)
     def insert_entry(self):

@@ -1,6 +1,6 @@
 # Dialogs
 
-Plover2CAT dialogs have their own UI and code files as they subclass `QDialog`. In general, these dialogs will receive a dict along with other parameters, and changes are made to the internal dict. After `accepted`, the dialog dict is then accessed from outside.
+These dialogs will only appear after the menu item has been clicked. Some are modal, meaning they block the editor, and others are not.
 
 ## Paragraph Affix Dialog
 
@@ -8,11 +8,15 @@ Used to add and set paragraph affixes. Takes a dict of affixes defined for style
 
 This dialog is modal.
 
+See [how to add automatic paragraph affixes](../howto/auto_affixes.md).
+
 ## Field Dialog
 
 Used to add and set fields. Takes a dict containing all field names and values for the document.
 
 This dialog is modal.
+
+See [how to define and insert a user field](../howto/userfield.md).
 
 ## Shortcut Editor Dialog
 
@@ -20,17 +24,31 @@ Used to set shortcuts for each menu item. Takes two lists, one of the text for e
 
 This dialog is modal.
 
+See [how to set custom shortcuts for menu items](../howto/setcustomshortcuts.md)
+
 ## Index Editing Dialog
 
 Used to create indexes, setting prefixes and visibility + add entries and descriptions for each index. Also adds 
 
 This dialog is non-modal.
 
+See [how to insert index entries](../howto/indices.md).
+
 ## Caption Dialog
 
 Used to set parameters for caption display and host endpoint for remote captions. 
 
 This dialog is modal.
+
+See [how to set up and display captions](../howto/captions.md)
+
+## Suggestion Dialog
+
+Used to analyze transcript for common phrases and words that can then be added to the transcript dictionary. 
+
+This dialog is non-modal.
+
+See [how to generate suggestions from transcript](../howto/transcriptsuggest.md).
 
 ## Audio Recording Settings Dialog
 
@@ -50,3 +68,5 @@ Used to set parameters for audio recording on computer.
   - Constant Bitrate: The recording will use the same bitrate throughout, but quality of the recording will vary.
 
 By default, the audio recording is saved into the `audio` folder. 
+
+See [how to set up and start audio recording](../howto/audiorecording.md), and relevant playback settings in [how to skip forward and back in an audiovisual file](../howto/audioseeking.md), [how to set up a time offset for syncing with writing](../howto/audiosync.md).

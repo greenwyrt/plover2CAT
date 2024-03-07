@@ -1,4 +1,4 @@
-# How to set up and start audio recording
+# Set up and start audio recording
 
 Plover2CAT can record audio through the computer's audio input if available. Video recording is not available.
 

@@ -125,3 +125,6 @@ def hide_file(filename):
     ret = ctypes.windll.kernel32.SetFileAttributesW(filename, FILE_ATTRIBUTE_HIDDEN)    
     if not ret:
         raise ctypes.WinError()    
+
+def extract_ngram(text, n = 2):
+    return zip(*[text.split()[i:] for i in range(n)])

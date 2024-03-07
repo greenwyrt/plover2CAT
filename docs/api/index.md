@@ -8,9 +8,12 @@ The GUI is built using the Qt Framework as a plugin to Plover. The primary inter
 
 Text is shown in a `QTextEdit` which holds all the data such as outlines and times. The custom objects stored in each `QTextBlock`'s `userData` are described in [Custom Elements](elements.md).
 
+As Qt uses camelCase and Python best practice is snake_case, the codebase keeps camelCase for GUI elements such as in UI files while using snake_case elsewhere.
+
 
 
 ```{toctree}
 :maxdepth: 1
 Custom Elements <elements.md>
+Editor Dialogs <dialog.md>
 ```

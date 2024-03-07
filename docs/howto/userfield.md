@@ -1,4 +1,4 @@
-# How to define and insert a user field
+# Define and insert a user field
 
 User fields are text elements that have a field name, and a text value defined by the user. All fields with the same name will show the same value, and change if the value changes.
 

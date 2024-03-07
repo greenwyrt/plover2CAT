@@ -5,7 +5,7 @@ from PyQt5.QtGui import QStandardItemModel, QKeySequence
 from plover_cat.shortcut_dialog_ui import Ui_shortcutDialog
 
 class shortcutDialogWindow(QDialog, Ui_shortcutDialog):
-    """Set shortcuts for menu items in editor through the modal dialog
+    """Set shortcuts for menu items in editor through the modal dialog.
 
     :param shortcut_dict: existing dict of shortcuts, {action: "str of keys"}
     :type shortcut_dict: dict

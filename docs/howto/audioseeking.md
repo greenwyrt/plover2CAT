@@ -1,4 +1,4 @@
-# How to skip forward and back in an audiovisual file
+# Skip forward and back in an audiovisual file
 
 **Skip Forward** and **Skip Back** are located under the **Audiovisual** menu. Use them to skip forward/back in the track by 5 seconds. These functions also have shortcuts so it is possible to control them from the keyboard.
 
