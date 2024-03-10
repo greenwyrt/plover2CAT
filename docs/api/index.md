@@ -16,4 +16,13 @@ As Qt uses camelCase and Python best practice is snake_case, the codebase keeps 
 :maxdepth: 1
 Custom Elements <elements.md>
 Editor Dialogs <dialog.md>
+helpers
+commands
 ```
+
+To document:
+
+Transcript
+Editor
+Caption Worker (take from reference)
+Document Worker (take from reference)

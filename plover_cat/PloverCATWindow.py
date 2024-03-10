@@ -1,12 +1,11 @@
-import os
 import subprocess
 import string
 import re
 import pathlib
 import json
-import textwrap
 from datetime import datetime, timezone
 import time
+from os import startfile
 from collections import Counter, deque
 from shutil import copyfile
 from copy import deepcopy, copy
@@ -21,10 +20,10 @@ from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QText
 QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, QTextBlockFormat, 
 QTextOption, QTextCharFormat, QKeySequence, QPalette, QDesktopServices)
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
-QStyle, QMessageBox, QDialog, QFontDialog, QColorDialog, QUndoStack, QLabel, QMenu,
+QStyle, QMessageBox, QDialog, QFontDialog, QColorDialog, QLabel, QMenu,
 QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar, QAction, QToolButton)
-from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaRecorder, 
-QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
+from PyQt5.QtMultimedia import (QMediaPlayer, QMediaRecorder, 
+QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtCore import Qt, QFile, QTextStream, QUrl, QTime, QDateTime, QSettings, QRegExp, QSize, QStringListModel, QSizeF, QTimer, QThread
 _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
@@ -615,7 +614,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         selected_folder = pathlib.Path(self.textEdit.file_name)
         self.display_message(f"User open file directory {str(selected_folder)}")
         if platform.startswith("win"):
-            os.startfile(selected_folder)
+            startfile(selected_folder)
         elif platform.startswith("linux"):
             subprocess.call(['xdg-open', selected_folder])
         elif platform.startswith("darwin"):
@@ -1365,10 +1364,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         selected_file = pathlib.Path(selected_file)
         self.display_message(f"Selected dictionary at {str(selected_file)} to add.")
         dict_dir_path = self.textEdit.file_name / "dict"
-        try:
-            os.mkdir(dict_dir_path)
-        except FileExistsError:
-            pass
+        dict_dir_path.mkdir(exist_ok = True)
         dict_dir_name = dict_dir_path / selected_file.name
         if selected_file != dict_dir_name:
             self.display_message(f"Copying dictionary at {str(selected_file)} to {str(dict_dir_name)}")
@@ -2195,10 +2191,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     audio_file_path = self.textEdit.file_name / "audio" / self.textEdit.file_name.stem
                 else:
                     audio_file_path = self.textEdit.file_name / "audio" / (self.textEdit.file_name.stem + "." + guessed_format[0])
-                try:
-                    os.mkdir(self.textEdit.file_name / "audio")
-                except FileExistsError:
-                    pass
+                self.textEdit.file_name.joinpath("audio").mkdir(exist_ok = True)
                 if audio_file_path.exists():
                     user_choice = QMessageBox.question(self, "Record", "Are you sure you want to replace existing audio?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                     if user_choice == QMessageBox.Yes:

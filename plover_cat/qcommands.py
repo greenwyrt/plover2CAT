@@ -10,7 +10,12 @@ from datetime import datetime, timezone
 from plover_cat.steno_objects import *
 
 class BlockUserData(QTextBlockUserData):
-    """Representation of the data for a block, from ninja-ide"""
+    """Representation of the data for a block.
+    
+    This was adapted from ninja-ide by using a default dict as ``attrs``
+    in the class. An empty ``element_collection`` is set in ``self.attr["strokes"]``
+    so every block will have an ``element_collection`` set.
+    """
     def __init__(self):
         QTextBlockUserData.__init__(self)
         self.attrs = collections.defaultdict(str)
@@ -27,15 +32,12 @@ class BlockUserData(QTextBlockUserData):
         return len(self.attrs)
 
 def update_user_data(block_dict, key, value = None):
-    """Update BlockUserData key with default value (time) if not provided
+    """Update BlockUserData key with default value (time) if not provided in a new instance.
 
-    Args:
-        block_dict: a BlockUserData from a QTextBlock.
-        key (str): key to be updated.
-        value (str): if None, automatically insert time.
-    
-    Returns:
-        BlockUserData
+    :param block_dict: a ``BlockUserData`` from a ``QTextBlock``
+    :param str key: attribute to be updated
+    :value str: value of attribute, automatically insert time if ``None``
+    :return: updated ``BlockUserData``
 
     """
     old_dict = block_dict.return_all()
@@ -48,16 +50,35 @@ def update_user_data(block_dict, key, value = None):
     return new_dict 
 
 class element_actions:
+    """QCommand factory for mass insertions.
+    
+    This is necessary because images are inserted differently than other "text" elements.
+
+    :param document: reference to ``QTextEdit`` instance
+    :param int block: block number
+    :param int position_in_block: position within block 
+    :param element: element to be inserted
+    :return: ``QUndoCommand`` that should be pushed into a ``QUndoStack``
+    """
     def make_action(self, document, block, position_in_block, element):
+        current_cursor = document.textCursor()
         if element.element == "image":
-            cmd = image_insert(document, block, position_in_block, element)
+            cmd = image_insert(current_cursor, document, block, position_in_block, element)
         else:
             # treat all "text" elements the same
-            cmd = steno_insert(document, block, position_in_block, element)
+            cmd = steno_insert(current_cursor, document, block, position_in_block, element)
         return(cmd)
 
 class steno_insert(QUndoCommand):
-    """Inserts text and steno data into textblock in textdocument"""
+    """Inserts text and steno data into editor.
+
+    :param cursor: a ``QTextCursor`` instance
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param int position_in_block: position in the block to act upon
+    :param steno: elements or ``element_collection`` to insert
+
+    """
     def __init__(self, cursor, document, block, position_in_block, steno):
         super().__init__()
         self.document = document        
@@ -104,7 +125,15 @@ class steno_insert(QUndoCommand):
         self.document.setTextCursor(current_cursor)
               
 class steno_remove(QUndoCommand):
-    """Removes text and steno data from textblock in textdocument"""
+    """Removes text and steno data from editor.
+
+    :param cursor: a ``QTextCursor`` instance
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param int position_in_block: position in the block to act upon
+    :param int length: number of characters to remove
+    :param steno: holder of removed data
+    """
     def __init__(self, cursor, document, block, position_in_block, length, steno = ""):
         super().__init__()
         self.document = document
@@ -149,7 +178,15 @@ class steno_remove(QUndoCommand):
         self.document.setTextCursor(current_cursor)
 
 class image_insert(QUndoCommand):
-    """Insert image into text block"""
+    """Insert image into editor.
+    
+    :param cursor: a ``QTextCursor`` instance
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param int position_in_block: position in the block to act upon
+    :param image_element: an ``image_text`` element to insert
+    
+    """
     def __init__(self, cursor, document, block, position_in_block, image_element):
         super().__init__()
         self.cursor = cursor
@@ -202,11 +239,21 @@ class image_insert(QUndoCommand):
         log.info(f"Insert image (undo): {log_dict}")        
         self.document.setTextCursor(current_cursor)
 
-# split_steno and merge_steno are using cursor movements repeatedly rather than insertText and removeSelectedText
-# otherwise image objects are replaced by OBJ chars
-
 class split_steno_par(QUndoCommand):
-    """ Splits paragraphs at position in block, and puts steno properly with new textblock """
+    """ Splits a paragraph at position in block, and puts steno properly with new paragraph.
+
+    .. warning::
+        Use cursor movements, and not insertText and removeSelectedText
+        as otherwise image elements are replaced by the text equivalent.
+
+    :param cursor: a ``QTextCursor`` instance
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param int position_in_block: position in the block to act upon
+    :param str space_placement: from Plover config, whether space is before/after output
+    :param new_line_stroke: a ``stroke_text`` element containing custom data to insert in the split
+    :param bool remove_space: trim space from start of new paragraph after split, default ``True``
+    """
     def __init__(self, cursor, document, block, position_in_block, space_placement, new_line_stroke, remove_space = True):
         super().__init__()
         self.block = block
@@ -295,7 +342,19 @@ class split_steno_par(QUndoCommand):
         self.document.setTextCursor(current_cursor)
 
 class merge_steno_par(QUndoCommand):
-    """Merge text and steno from two neighboring textblocks"""
+    """Combine two paragraphs into one in editor.
+
+    .. warning::
+        Use cursor movements, and not insertText and removeSelectedText
+        as otherwise image elements are replaced by the text equivalent.
+
+    :param cursor: a ``QTextCursor`` instance
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param int position_in_block: position in the block to act upon    
+    :param str space_placement: from Plover config, whether space is before/after output
+    :param bool add_space: whether to add space between the two paragraphs at merging
+    """
     def __init__(self, cursor, document, block, position_in_block, space_placement, add_space = True):
         super().__init__()
         self.block = block
@@ -379,9 +438,22 @@ class merge_steno_par(QUndoCommand):
         self.document.setTextCursor(current_cursor)
 
 class set_par_style(QUndoCommand):
-    """Set paragraph style"""
+    """Set paragraph style.
+
+    Character formats have to be applied through the iterator of ``QTextBlock``
+    on individual ``QTextFragment`` elements to avoid applying a format on an image,
+    over-riding its format, and causing it to revert to an object replacement charater.
+
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param str style: name of style to set
+    :param par_formats: ``dict`` containing block-level formats
+    :param txt_formats: ``dict`` containing char-level formats
+
+    """
     def __init__(self, document, block, style, par_formats, txt_formats):
         super().__init__()
+        self.cursor = cursor
         self.block = block
         self.style = style
         self.document = document
@@ -391,7 +463,7 @@ class set_par_style(QUndoCommand):
         self.block_state = 1
     def redo(self):
         current_block = self.document.document().findBlockByNumber(self.block)
-        current_cursor = self.document.textCursor()
+        current_cursor = self.cursor
         old_position = current_cursor.position()
         current_cursor.setPosition(current_block.position())
         block_data = current_block.userData()
@@ -451,6 +523,13 @@ class set_par_style(QUndoCommand):
             log.info(f"Style: {log_dict}")
 
 class set_par_property(QUndoCommand):
+    """Set a paragraph's property.
+
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param str prop: property key
+    :param value: value to set for property
+    """
     def __init__(self, document, block, prop, value):
         super().__init__()
         self.block = block
@@ -474,6 +553,14 @@ class set_par_property(QUndoCommand):
         log.info(f"Property undo: {log_dict}")
 
 class update_style(QUndoCommand):
+    """Update entire style.
+
+    :param document: a ``QTextDocument`` to act upon
+    :param styles: dict of styles
+    :param style_name: name of style to update
+    :param new_style_dict: dict of new style parameters
+
+    """
     def __init__(self, document, styles, style_name, new_style_dict):
         super().__init__()
         self.document = document
@@ -497,6 +584,13 @@ class update_style(QUndoCommand):
         self.document.gen_style_formats()
 
 class update_config_value(QUndoCommand):
+    """Update transcript config value.
+
+    :param str key: config key
+    :param str value: config value
+    :param dict config: transcript config
+
+    """
     def __init__(self, key, value, config):
         super().__init__()
         self.config_key = key
@@ -515,11 +609,31 @@ class update_config_value(QUndoCommand):
         log.info(f"Config (undo): {log_dict}")
 
 class update_field(QUndoCommand):
-    def __init__(self, cursor, document, block, position, old_dict, new_dict):
+    """Update transcript fields with new values.
+
+    When fields change values, the underlying ``text_field``
+    will be updated when called again, but the text
+    in the ``QTextEdit`` will not. This command updates 
+    the ``text_field`` element, then removes the old field value 
+    and inserts the new one into text. 
+
+    The original ``dict`` that has to be updated is outside 
+    the command and has to be passed in by reference. 
+    But a copy each of the old and the new dicts are needed
+    to perform redo/undos properly.
+
+    :param cursor: a ``QTextCursor`` instance
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param int position_in_block: position in the block to act upon
+    :param dict old_dict: dict with existing field values
+    :param new_dict: dict with new field values
+    """
+    def __init__(self, cursor, document, block, position_in_block, old_dict, new_dict):
         super().__init__()
         self.document = document
         self.block = block
-        self.position_in_block = position
+        self.position_in_block = position_in_block
         # first is the reference to dict to be updated
         self.user_field_dict = deepcopy(old_dict)
         self.new_dict = deepcopy(new_dict)
@@ -577,7 +691,16 @@ class update_field(QUndoCommand):
         log.info(f"Field: {log_dict}")        
 
 class update_entries(QUndoCommand):
-    def __init__(self, cursor, document, block, position, old_dict, new_dict):
+    """Update index entries with new values.
+
+    :param cursor: a ``QTextCursor`` instance
+    :param document: a ``QTextDocument`` to act upon
+    :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
+    :param int position_in_block: position in the block to act upon
+    :param dict old_dict: dict with existing index data
+    :param new_dict: dict with new index data    
+    """
+    def __init__(self, cursor, document, block, position_in_block, old_dict, new_dict):
         super().__init__()
         self.document = document
         self.block = block
