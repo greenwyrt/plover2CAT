@@ -9,6 +9,18 @@ from odf.style import (Style, TextProperties, ParagraphProperties, FontFace, Pag
 PageLayoutProperties, MasterPage, TabStops, TabStop, GraphicProperties, Header, Footer)
 
 def format_odf_text(block_data, style, chars_in_inch, page_width, line_num = 0):
+    """Format a string into wrapped lines for ODF.
+
+    This uses ``steno_wrap_ODF`` and does additional formatting to wrapped
+    lines by converting necessary styling parameters.
+
+    :param block_data: an ``element_collection``
+    :param dict style: styling parameters in dict
+    :param int chars_in_inch: approximate number of characters in inch for selected style font
+    :param page_width: page width of ODF document, in inches
+    :param int line_num: line number for starting line
+    :return: dict of dicts ``{line_number: {line_text, line_timestamp}}``
+    """
     # block is QTextBlock
     # max_char fed into function is converted from page width or user setting (line num digits and timestamp digits are "outside of page")
     text = block_data.to_text()
@@ -69,6 +81,18 @@ def format_odf_text(block_data, style, chars_in_inch, page_width, line_num = 0):
     return(par_text)
 
 def format_text(block_data, style, max_char = 80, line_num = 0):
+    """Format a string into wrapped lines for text.
+
+    This uses ``steno_wrap_plain`` and does additional formatting to wrapped
+    lines by converting styling parameters to padding space characters to make
+    formatted text lines.
+
+    :param block_data: an ``element_collection``
+    :param dict style: styling parameters in dict
+    :param int max_char: maximum characters in a line
+    :param int line_num: line number for starting line
+    :return: dict of dicts ``{line_number: {line_text, line_timestamp}}``
+    """
     # block is QTextBlock
     # max_char fed into function is converted from page width or user setting (line num digits and timestamp digits are "outside of page")
     text = block_data.to_text()
@@ -144,6 +168,14 @@ def format_text(block_data, style, max_char = 80, line_num = 0):
     return(par_text)
 
 def format_srt_text(block_data, line_num = 0, audiostarttime = "", audioendtime = ""):
+    """Wrap steno data for SRT.
+
+    :param block_data: an ``element_collection`` for a paragraph
+    :param int line_num: starting line number
+    :param audiostarttime: paragraph's ``audiostarttime``
+    :param audioendtime: paragraph's ``audioendtime``
+    :return: dict of dicts ``{line_number: {line_text, line_timestamp}}``
+    """
     par_text = steno_wrap_srt(block_data, max_char = 47, starting_line_num = line_num)
     # line_times = []
     # if audiostarttime and audioendtime:
@@ -160,7 +192,20 @@ def format_srt_text(block_data, line_num = 0, audiostarttime = "", audioendtime 
 
 def steno_wrap_plain(text, block_data, max_char = 80, tab_space = 4, first_line_indent = "", 
                         par_indent = "", starting_line_num = 0):
-    """returns dict of dicts, {line_number: {line_text, line_timestamp}}"""
+    """Wrap steno data properly for text.
+    
+    See code to compare for differences with ``steno_wrap_odf`` and ``steno_wrap_srt``.
+
+    :param str text: text to wrap
+    :param block_data: an ``element_collection`` for a paragraph
+    :param int max_char: maximum number of characters per line
+    :param int tab_space: how many spaces should a tab character be converted into
+    :param str first_line_indent: string to place at beginning of first line
+    :param str par_indent: string to place at beginning of every line except first
+    :param int starting_line_num: line number to add to beginning of each line
+    :return: dict of dicts ``{line_number: {line_text, line_timestamp}}``
+    
+    """
     # the -1 in max char is because the rounding is not perfect, might have some lines that just tip over
     # uses text string instead of block_data because text has pre-expanded tabs 
     wrapped = textwrap.wrap(text, width = max_char - 1, initial_indent= first_line_indent,
@@ -185,7 +230,19 @@ def steno_wrap_plain(text, block_data, max_char = 80, tab_space = 4, first_line_
 
 def steno_wrap_odf(block_data, max_char = 80, tab_space = 4, first_line_indent = "", 
                         par_indent = "", starting_line_num = 0):
-    """ returns dict of dicts {line_number: {line_text, line_timestamp}}"""
+    """Wrap steno data properly for ODF.
+
+    Compare with ``steno_wrap_plain``.
+    
+    :param block_data: an ``element_collection`` for a paragraph
+    :param int max_char: maximum number of characters per line
+    :param int tab_space: how many spaces should a tab character be converted into
+    :param str first_line_indent: string to place at beginning of first line
+    :param str par_indent: string to place at beginning of every line except first
+    :param int starting_line_num: line number to add to beginning of each line
+    :return: dict of dicts ``{line_number: {line_text, line_timestamp}}``
+    
+    """
     # the -1 in max char is because the rounding is not perfect, might have some lines that just tip over
     wrapper = steno_wrapper(width = max_char - 1, initial_indent= first_line_indent,
                 subsequent_indent= par_indent, expand_tabs = False, tabsize = tab_space, replace_whitespace=False)
@@ -199,6 +256,19 @@ def steno_wrap_odf(block_data, max_char = 80, tab_space = 4, first_line_indent =
 
 def steno_wrap_srt(block_data, max_char = 47, tab_space = 0, first_line_indent = "", 
                         par_indent = "", starting_line_num = 0):
+    """Wrap steno data properly, but with audio timestamps.
+
+    Compare to ``steno_wrap_odf``
+    
+    :param block_data: an ``element_collection`` for a paragraph
+    :param int max_char: maximum number of characters per line
+    :param int tab_space: how many spaces should a tab character be converted into
+    :param str first_line_indent: string to place at beginning of first line
+    :param str par_indent: string to place at beginning of every line except first
+    :param int starting_line_num: line number to add to beginning of each line
+    :return: dict of dicts ``{line_number: {line_text, starttime, endtime}}``
+    
+    """                        
     # change from other wrapper here, tabs are expanded into 0 spaces
     wrapper = steno_wrapper(width = max_char - 1, initial_indent= first_line_indent,
                 subsequent_indent= par_indent, expand_tabs = True, tabsize = tab_space, replace_whitespace=False)
@@ -213,7 +283,7 @@ def steno_wrap_srt(block_data, max_char = 47, tab_space = 0, first_line_indent =
     return(par_dict)
 
 def load_odf_styles(path):
-    """extract styles from ODT file and convert supported to par + text style dicts"""
+    """Extract styles from ODT file and convert supported parameters to par and text style dicts."""
     log.debug(f"Loading ODF style file from {str(path)}")
     style_text = load(path)
     json_styles = {}
@@ -243,7 +313,7 @@ def load_odf_styles(path):
     return(json_styles)
 
 def recursive_style_format(style_dict, style, prop = "paragraphproperties"):
-    """used to get full style par/text format dict if style inherits from another"""
+    """Get full style par/text format dict if style inherits from another."""
     if "parentstylename" in style_dict[style]:
         parentstyle = recursive_style_format(style_dict, style_dict[style]["parentstylename"], prop = prop)
         if prop in style_dict[style]:
@@ -256,7 +326,7 @@ def recursive_style_format(style_dict, style, prop = "paragraphproperties"):
             return({})
 
 def parprop_to_blockformat(par_dict):
-    """take dict of paragraph attributes, returns QTextBlockFormat obj"""
+    """Take dict of paragraph attributes, return ``QTextBlockFormat``."""
     par_format = QTextBlockFormat()
     if "textalign" in par_dict:
         if par_dict["textalign"] == "justify":
@@ -293,7 +363,7 @@ def parprop_to_blockformat(par_dict):
     return(par_format)
 
 def txtprop_to_textformat(txt_dict):
-    """takes dict of text attributes, returns QTextCharFormat obj"""
+    """Take dict of text attributes, return ``QTextCharFormat``."""
     txt_format = QTextCharFormat()
     if "fontfamily" in txt_dict:
         potential_font = QFont(txt_dict["fontfamily"])

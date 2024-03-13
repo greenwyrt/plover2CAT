@@ -9,30 +9,35 @@ import obsws_python as obs
 from obsws_python.error import OBSSDKRequestError
 
 class captionWorker(QObject):
+    """Generate captions based on user settings and endpoint parameters 
+    for caption display and to send to endpoints. 
+    
+    ``captionWorker`` is put into another thread and doesn't run on the main event thread.
+    Text gets ingested and then sent out as formatted caption lines.
+
+    :param max_length: maximum number of characters for each caption line, 
+        suggested value 32, default None
+    :type max_length: int, optional
+    :max_lines: maximum number of captions lines to display, 
+        suggested value 3, default None
+    :type max_lines: int, optional
+    :param remote: name of remote endpoint, can only be one of supported, default None
+    :type remote: str, optional
+    :param endpoint: URL or local port depending on what kind of remote, may be authentication token,
+        suggested localhost in the case of OBS, default None
+    :type endpoint: str, optional
+    :param port: port number to use with endpoint, suggested 4455 for OBS, default None
+    :type port: str, optional
+    :param password: password to use along with other fields above, default None
+    :type password: str, optional
+    """    
     capSend = pyqtSignal(str)
+    """Signal sent with formatted caption line."""
     finished = pyqtSignal()
+    """Signal sent when worker is done."""
     postMessage = pyqtSignal(str)
+    """Signal sent with message to display."""
     def __init__(self, max_length = None, max_lines = None, remote = None, endpoint = None, port = None, password = None):
-        """Generate captions based on user settings and endpoint parameters 
-        for caption display and to send to endpoints. ``captionWorker`` is 
-        put into another thread and doesn't run on the main event thread.
-        Text gets ingested and then sent out as formatted caption lines.
-        :param max_length: maximum number of characters for each caption line, 
-            suggested value 32, default None
-        :type max_length: int, optional
-        :max_lines: maximum number of captions lines to display, 
-            suggested value 3, default None
-        :type max_lines: int, optional
-        :param remote: name of remote endpoint, can only be one of supported, default None
-        :type remote: string, optional
-        :param endpoint: URL or local port depending on what kind of remote, may be authentication token,
-            suggested localhost in the case of OBS, default None
-        :type endpoint: string, optional
-        :param port: port number to use with endpoint, suggested 4455 for OBS, default None
-        :type port: string, optional
-        :param password: password to use along with other fields above, default None
-        :type password: string, optional
-        """
         QObject.__init__(self)
         self.max_length = max_length
         self.max_lines = max_lines

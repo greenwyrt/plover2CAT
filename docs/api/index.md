@@ -18,11 +18,10 @@ Custom Elements <elements.md>
 Editor Dialogs <dialog.md>
 helpers
 commands
+workers
 ```
 
 To document:
 
 Transcript
 Editor
-Caption Worker (take from reference)
-Document Worker (take from reference)

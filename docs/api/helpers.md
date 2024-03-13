@@ -8,3 +8,10 @@ The helper functions are mostly involved in converting units, file saving, or ha
     :show-inheritance:
     :member-order: bysource
 ```
+
+```{eval-rst}
+.. automodule:: export_helpers
+    :members:
+    :show-inheritance:
+    :member-order: bysource
+```

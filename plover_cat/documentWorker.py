@@ -21,29 +21,31 @@ from odf.teletype import addTextToElement
 from odf.draw import Frame, TextBox, Image
 
 class documentWorker(QObject):
-    """Create exported files in separate thread"""
+    """Create exported files.
+    
+    Worker to create export files, with
+    each ``save_*`` function creating one specific file format.
+    
+    :param dict document: transcript data of form ``{"par_number": {paragraph data}, ...}``
+    :param str path: path for export file
+    :param styles: dict of style parameters
+    :param config: transcript configuration
+    :param home_dir: transcript home directory
+    """
     progress = pyqtSignal(int)
-    """Signal sent progress based on export of paragraph"""
+    """Signal sent progress based on export of paragraph."""
     finished = pyqtSignal()
-    """Signal sent when export is finished"""
+    """Signal sent when export is finished."""
     def __init__(self, document, path, config, styles, user_field_dict, home_dir):
-        """Worker to create export files, each save_* function creates one
-        specific file format
-        """
         QObject.__init__(self)  
         self.document = document
-        """dict of form {"par_number": {paragraph data}, ...}"""
         self.path = path
-        """path for export file"""
         self.styles = styles
-        """dict of style parameters"""
         self.config = config
-        """dict of config parameters"""
         self.user_field_dict = user_field_dict
-        """dict of field values"""
         self.home_dir = home_dir
-        """path of transcript directory"""
     def save_ascii(self):
+        """Export to formatted ASCII."""
         ef = element_factory()
         doc_lines = {}
         line = -1
@@ -104,6 +106,7 @@ class documentWorker(QObject):
                     f.write(f"{footer_text}\n")  
         self.finished.emit()      
     def save_html(self):
+        """Export to formatted HTML."""
         ef = element_factory()
         doc_lines = {}
         line = -1
@@ -172,6 +175,7 @@ class documentWorker(QObject):
             f.write(html_string)
         self.finished.emit()
     def save_odf(self):
+        """Export to ODF Text Document."""
         ef = element_factory()
         set_styles = self.styles
         if self.config["style"].endswith(".json"):
@@ -356,6 +360,7 @@ class documentWorker(QObject):
         textdoc.save(self.path)
         self.finished.emit()
     def save_plain_ascii(self):
+        """Export to plain text."""
         ef = element_factory() 
         wrapped_text = []
         for block_num, block_data in self.document.items():
@@ -377,6 +382,7 @@ class documentWorker(QObject):
                 f.write(f"{line}\n") 
         self.finished.emit()       
     def save_rtf(self):
+        """Export to RTF file with RTF/CRE."""
         ef = element_factory()
         font_list = []
         for k, v in self.styles.items():
@@ -518,6 +524,7 @@ class documentWorker(QObject):
             f.write("".join(document_string))
         self.finished.emit()
     def save_srt(self):
+        """Export to SRT captions."""
         ef = element_factory()
         line_num = 1
         doc_lines = []

@@ -13,6 +13,5 @@ Transcript folder structure <folderstructure.md>
 Data formats <dataformat.md>
 Export formats <export.md>
 Supported RTF/CRE features <rtf_support.md>
-Captioning <captions.md>
 Dialogs <dialogs.md>
 ```
