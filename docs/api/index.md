@@ -19,9 +19,10 @@ Editor Dialogs <dialog.md>
 helpers
 commands
 workers
+transcripteditor
+editor
 ```
 
 To document:
 
-Transcript
 Editor

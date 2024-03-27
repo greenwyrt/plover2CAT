@@ -37,7 +37,7 @@ from plover.system.english_stenotype import DICTIONARIES_ROOT, ORTHOGRAPHY_WORDL
 from plover.system import _load_wordlist
 from plover import log
 
-from . __version__ import __version__
+from plover_cat.__version__ import __version__
 
 from plover_cat.plover_cat_ui import Ui_PloverCAT
 from plover_cat.TextEditor import PloverCATEditor
@@ -1623,6 +1623,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = self.textEdit.textCursor()
         current_block = current_cursor.block()
         current_block.setUserData(BlockUserData())
+        current_block.setUserState(1)
         current_cursor.select(QTextCursor.BlockUnderCursor)
         current_cursor.removeSelectedText()
 

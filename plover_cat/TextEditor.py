@@ -29,15 +29,50 @@ from plover_cat.export_helpers import load_odf_styles, recursive_style_format, p
 from plover_cat.helpers import ms_to_hours, save_json, backup_dictionary_stack, add_custom_dicts, load_dictionary_stack_from_backup, return_commits, hide_file
 from plover_cat.constants import default_styles, default_config, default_dict
 
-from . __version__ import __version__
-
 class PloverCATEditor(QTextEdit):
+    """Editor object for a transcript.
 
-    complete = pyqtSignal(QModelIndex)
+    The editor is separated from the window, containing all transcript data,
+    and settings that are unique to each transcript. No changes to the GUI,
+    except those to the `QTextEdit` itself should be made here.
+
+    :ivar engine: Plover existing engine instance
+    :ivar dict config: transcript configuration
+    :ivar file_name: transcript directory path
+    :ivar repo: ``dulwich`` repository instance
+    :ivar dict backup_document: original transcript data, ``paragraph number: block data``
+    :ivar str tape: transcript tape contents as a long string with new line separators
+    :ivar dict styles: transcript style parameters
+    :ivar dict txt_formats: ``QTextCharFormat`` objects for each style by name
+    :ivar dict par_formats: ``QTextBlockFormat`` objects for each style by name
+    :ivar dict user_field_dict: dict ref of ``self.config["user_field_dict"]``
+    :ivar dict auto_paragraph_affixes: dict ref of ``self.config["auto_paragraph_affixes"]``
+    :ivar int cursor_block: block that current cursor was in on last stroke
+    :ivar int cursor_block_position: position in ``cursor_block`` of current cursor on last stroke
+    :ivar str stroke_time: time of last stroke
+    :ivar str last_raw_steno: last stroke 
+    :ivar str last_string_sent: string sent by Plover on last stroke
+    :ivar int last_backspaces_sent: number of backspaces sent by Plover on last stroke
+    :ivar list track_lengths: ``deque`` of length 10 that tracks length of ``last_string_sent`` and ``last_backspaces_sent``
+    :ivar undo_stack: ``QUndoStack``
+    :ivar list spell_ignore: words to ignore in spellcheck, session only
+    :ivar dictionary: ``spylls`` dictionary 
+    :ivar dictionary_name: name of ``dictionary``, usually the language code
+    :ivar audio_file: path to file being played/recorded
+    :ivar player: ``QMediaPlayer``
+    :ivar recorder: ``QAudioRecorder``
+    :ivar int audio_position: current position of media being played
+    :ivar int audio_delay: offset to subtract from ``audio_position``
+
+    """
     send_message = pyqtSignal(str)
+    """Signal to send with message to display."""
     send_tape = pyqtSignal(str)
+    """Signal to send with tape contents."""
     audio_position_changed = pyqtSignal(int)
+    """Signal to send with new audio position."""
     audio_length_changed = pyqtSignal(int)
+    """Signal to send with new audio duration."""
     def __init__(self, widget):
         super().__init__(widget)
         # QTextEdit setup
@@ -56,8 +91,7 @@ class PloverCATEditor(QTextEdit):
         self.file_name = ""
         self.repo = None
         self.backup_document = {}
-        self.tape = ""
-        # self.styles_path = ""        
+        self.tape = ""       
         self.styles = {}
         self.txt_formats = {}
         self.par_formats = {}
@@ -70,22 +104,23 @@ class PloverCATEditor(QTextEdit):
         self.last_raw_steno = ""
         self.last_string_sent = ""
         self.last_backspaces_sent = 0
-        self.undo_stack = QUndoStack(self)
         self.track_lengths = deque(maxlen = 10)
+        self.undo_stack = QUndoStack(self)
         self.spell_ignore = []
         self.dictionary = Dictionary.from_files('en_US')
         self.dictionary_name = "en_US"
         self._completer = None
         # media
         self.audio_file = ""
-        self.audio_position = 0
         self.player = QMediaPlayer()
         self.player.durationChanged.connect(self.update_audio_duration)
         self.player.positionChanged.connect(self.update_audio_position)
         self.recorder = QAudioRecorder()
+        self.audio_position = 0
         self.audio_delay = 0
 
     def setCompleter(self, c):
+        """Set autocompletion for transcript."""
         if not c:
             self._completer = c
             return
@@ -98,14 +133,17 @@ class PloverCATEditor(QTextEdit):
         c.activated[QtCore.QModelIndex].connect(self.insert_autocomplete)
 
     def completer(self):
+        """Return completer."""
         return self._completer
 
     def textUnderCursor(self):
+        """Return work under cursor."""
         tc = self.textCursor()
         tc.select(QTextCursor.WordUnderCursor)
         return tc.selectedText()
 
     def showPossibilities(self):
+        """Show autocompletion possibilities."""
         completionPrefix = self.textUnderCursor()
         if not completionPrefix or not self._completer:
             return
@@ -118,6 +156,8 @@ class PloverCATEditor(QTextEdit):
         self._completer.complete(cr)
 
     def focusInEvent(self, e):
+        """Set completer when in focus."""
+        # autocomplete code mostly from https://stackoverflow.com/questions/60451045/
         if self._completer is not None:
             self._completer.setWidget(self)
         super(PloverCATEditor, self).focusInEvent(e)
@@ -134,6 +174,12 @@ class PloverCATEditor(QTextEdit):
             QTextEdit.keyPressEvent(self, event)
 
     def load(self, path, engine, load_transcript = True):
+        """Load transcript and associated data.
+        
+        :param path: path of transcript to load
+        :param engine: Plover engine instance
+        :param bool load_transcript: load transcript data, default ``True``
+        """
         self.send_message.emit("Loading data")
         self.file_name = pathlib.Path(path)
         self.file_name.mkdir(parents = True, exist_ok=True)
@@ -155,6 +201,10 @@ class PloverCATEditor(QTextEdit):
         self.engine = engine      
 
     def load_transcript(self, transcript):
+        """Load transcript steno data.
+
+        :param transcript: path to transcript file
+        """
         self.send_message.emit("Transcript file found, loading")
         with open(transcript, "r") as f:
             self.send_message.emit("Reading transcript data.")
@@ -246,14 +296,15 @@ class PloverCATEditor(QTextEdit):
         self.send_message.emit("Loaded transcript.")   
 
     def load_tape(self):
+        """Load tape data."""
         transcript_tape = self.file_name.joinpath(self.file_name.stem).with_suffix(".tape")
         if pathlib.Path(transcript_tape).is_file():
             self.send_message.emit("Tape file found, loading.")
             self.tape = transcript_tape.read_text()
             self.send_message.emit("Loaded tape.")
 
-    def save(self, path = None):
-        # todo: use path in future to save everywhere
+    def save(self):
+        """Save transcript."""
         selected_folder = pathlib.Path(self.file_name)
         self.save_config_file()
         transcript = selected_folder.joinpath(selected_folder.stem).with_suffix(".transcript")        
@@ -266,6 +317,10 @@ class PloverCATEditor(QTextEdit):
         self.send_message.emit("Saved project data")  
 
     def save_as(self, new_path):
+        """Save transcript to new location.
+
+        :param new_path: directory path
+        """
         transcript_dir = pathlib.Path(new_path)
         transcript_dir.mkdir()
         self.save_config_file(transcript_dir/ "config.CONFIG")
@@ -282,7 +337,11 @@ class PloverCATEditor(QTextEdit):
             asset_dir = transcript_dir / "assets"
             copytree(self.file_name.joinpath("assets"), asset_dir)
 
-    def save_transcript(self, path):      
+    def save_transcript(self, path): 
+        """Extract transcript steno data and save.
+
+        :param path: transcript file path
+        """     
         json_document = self.backup_document
         self.send_message.emit("Extracting block data for transcript save")
         QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -314,6 +373,7 @@ class PloverCATEditor(QTextEdit):
         return True
 
     def autosave(self):
+        """Save transcript data to backup file."""
         if self.undo_stack.isClean():
             return
         transcript_dir = pathlib.Path(self.file_name)
@@ -330,6 +390,7 @@ class PloverCATEditor(QTextEdit):
             self.send_message.emit("Autosave complete.")
          
     def close_transcript(self):
+        """Clean up transcript for close."""
         if not self.undo_stack.isClean():
             user_choice = QMessageBox.question(self, "Close", "Are you sure you want to close without saving changes?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if user_choice == QMessageBox.Yes:
@@ -344,6 +405,10 @@ class PloverCATEditor(QTextEdit):
         return True        
 
     def dulwich_save(self, message = "autosave"):
+        """Commit transcript files to ``dulwich`` repo.
+
+        :param str message: commit message
+        """
         transcript_dicts = self.file_name / "dict"
         available_dicts = [transcript_dicts / file for file in transcript_dicts.iterdir()]
         transcript = self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript")
@@ -353,10 +418,13 @@ class PloverCATEditor(QTextEdit):
         porcelain.commit(self.repo, message = message, author = "plover2CAT <fake_email@fakedomain.com>", committer= "plover2CAT <fake_email@fakedomain.com>")
 
     def get_dulwich_commits(self):
+        """Get most recent commits from ``dulwich`` repo."""
         commit_choices = return_commits(self.repo)
         return(commit_choices)
 
     def revert_transcript(self, commit_id):
+        """Revert transcript to previous commit based on commit id.
+        """
         transcript = str(self.file_name.stem) + (".transcript")
         porcelain.reset_file(self.repo, transcript, commit_id)
         new_commit_message = "revert to %s" % commit_id.decode("ascii")
@@ -370,6 +438,7 @@ class PloverCATEditor(QTextEdit):
         self.moveCursor(QTextCursor.End)
 
     def load_config_file(self, path, engine = None):
+        """Load transcript configuration."""
         config_path = pathlib.Path(path) / "config.CONFIG"
         if not config_path.exists():
             log.debug("No config file exists. Creating default config file.")
@@ -396,23 +465,39 @@ class PloverCATEditor(QTextEdit):
         self.auto_paragraph_affixes = self.config["auto_paragraph_affixes"]
 
     def save_config_file(self, config_path = None):
+        """Save configuration file.
+
+        :param config_path: path to save configuration
+        """
         if not config_path:
             config_path = self.file_name / "config.CONFIG"
         log.debug(f"Saving config to {str(config_path)}")
         save_json(self.config, config_path)
 
     def get_config_value(self, key):
+        """Get configuration value by key."""
         return(self.config[key])
 
     def set_config_value(self, key, value):
+        """Set configuration value by key."""
         cmd = update_config_value(key, value, self.config)
         self.undo_stack.push(cmd)
 
     def load_spellcheck_dict(self, dic_path = "en_US"):
+        """Load spellchecking dictionary for ``spylls``.
+        
+        :param str dic_path: language code or path to dic files
+        """
         self.dictionary = Dictionary.from_files(dic_path)
         self.dictionary_name = pathlib.Path(dic_path).stem
 
     def load_dicts(self, engine, dictionaries = None):
+        """Load dictionaries for transcript.
+
+        Note that loading dictionaries is not an undo-able action at this point.
+
+        :param list dictionaries: paths to dictionary files
+        """
         list_dicts = engine.config["dictionaries"]
         transcript_dir = self.file_name / "dict"
         transcript_dir.mkdir(parents = True, exist_ok = True)
@@ -433,6 +518,7 @@ class PloverCATEditor(QTextEdit):
             set_list_dicts = set(list_dicts)
             full_paths = list(set_full_paths.difference(set_list_dicts))
             dictionaries = [pathlib.Path(i).relative_to(self.file_name) for i in full_paths]
+        # add dicts that should load for all transcripts
         editor_dict_path = pathlib.Path(CONFIG_DIR) / "plover2cat" / "dict"
         if editor_dict_path.exists():
             available_dicts = [file for file in editor_dict_path.iterdir() if str(file).endswith("json")]
@@ -443,6 +529,10 @@ class PloverCATEditor(QTextEdit):
         self.config["dictionaries"] = list(set(self.config["dictionaries"] + dictionaries))
 
     def restore_dictionary_from_backup(self, engine):
+        """Restore dictionaries from backup file.
+
+        :param engine: Plover engine instance
+        """
         selected_folder = pathlib.Path(self.file_name)
         log.debug("Attempting to restore dictionaries configuration from backup.")
         backup_dictionary_location = selected_folder / "dict" / "dictionaries_backup"
@@ -453,6 +543,10 @@ class PloverCATEditor(QTextEdit):
             log.debug("Dictionaries restored from backup file.")
 
     def load_check_styles(self, path):
+        """Load a style JSON or ODF file.
+
+        :param path: path to style file.
+        """
         # path = self.file_name / path
         path = pathlib.Path(path)
         if not path.exists():
@@ -495,6 +589,8 @@ class PloverCATEditor(QTextEdit):
         self.gen_style_formats()
 
     def gen_style_formats(self):
+        """Generate ``QText*Format`` objects from style dictionary.
+        """
         styles_json = self.styles
         txt_formats = {}
         par_formats = {}
@@ -508,6 +604,14 @@ class PloverCATEditor(QTextEdit):
         self.par_formats = par_formats        
 
     def set_style_property(self, name, attribute, value, paragraph = False, text = False):
+        """Set a style attribute given name, and type of property.
+
+        :param str name: name of style
+        :param str attribute: attribute to set
+        :param str value: new value for attribute
+        :param bool paragraph: set attribute in "paragraphproperties"
+        :param bool text: set attribute in "textproperties"
+        """
         if paragraph:
             self.styles[name]["paragraphproperties"][attribute] = value
         elif text:
@@ -516,10 +620,21 @@ class PloverCATEditor(QTextEdit):
             self.styles[name][attribute] = value
 
     def set_style_properties(self, name, properties):
+        """Set all attributes for a style.
+
+        :param str name: name of style
+        :param dict properties: style attributes
+        """
         cmd = update_style(self, self.styles, name, properties)
         self.undo_stack.push(cmd)
 
     def get_style_property(self, name, attribute, paragraph = False, text = False):
+        """Get style attribute.
+        :param str name: style name
+        :param str attribute: style attribute
+        :param bool paragraph: obtain attribute from paragraphproperties
+        :param bool text: obtain attribute from textproperties 
+        """
         if paragraph:
             return(self.styles[name]["paragraphproperties"][attribute])
         elif text:
@@ -527,20 +642,37 @@ class PloverCATEditor(QTextEdit):
         else:
             return(self.styles[name][attribute])
 
-    def set_paragraph_style(self, style):
-        style_cmd = set_par_style(self, self.textCursor().blockNumber(), style, self.par_formats, self.txt_formats)
+    def set_paragraph_style(self, style, block = None):
+        """Set style of paragraph in transcript.
+
+        :param str style: name of style
+        :param int block: paragraph block number
+        """
+        if not block:
+            block = self.textCursor().blockNumber()
+        style_cmd = set_par_style(self, block, style, self.par_formats, self.txt_formats)
         self.undo_stack.push(style_cmd)
 
     def set_paragraph_property(self, paragraph, prop, value):
+        """Set a paragraph's property.
+
+        :param int paragraph: paragraph block number
+        :param str prop: property name
+        :param value: value
+        """
         prop_cmd = set_par_property(self, paragraph, prop, value)
         self.undo_stack.push(prop_cmd)
 
     def save_style_file(self):
+        """Save current styles to style file."""
         style_file_path = self.file_name / self.config["style"]
         log.debug(f"Saving styles to {str(style_file_path)}")
         save_json(self.styles, style_file_path)
 
     def to_next_style(self):
+        """Set current paragraph style based on previous style.
+        #todo change to using block number rather than taking cursor
+        """
         current_cursor = self.textCursor()
         current_block = current_cursor.block()
         if current_cursor.blockNumber() == 0:
@@ -560,7 +692,16 @@ class PloverCATEditor(QTextEdit):
         self.set_paragraph_style(new_style)
         
     def on_stroke(self, stroke_pressed, end = False):
+        """Write.
+
+        :param stroke_pressed: stroke sent to Plover
+        :param bool end: always append writing to end of transcript
+        """
         current_cursor = self.textCursor()
+        if end:
+            current_cursor.movePosition(QTextCursor.End)
+            self.setTextCursor(current_cursor)
+            current_cursor = self.textCursor()          
         current_block = current_cursor.block()        
         stroke_time = datetime.now().isoformat("T", "milliseconds")
         self.update_block_times(current_block, stroke_time)
@@ -653,6 +794,10 @@ class PloverCATEditor(QTextEdit):
         self.document().setModified(True)
 
     def log_to_tape(self, stroke):
+        """Log stroke to transcript tape.
+
+        :param stroke: stroke to log
+        """
         keys = set()
         for key in stroke.steno_keys:
             if key in self.numbers:
@@ -672,11 +817,15 @@ class PloverCATEditor(QTextEdit):
             f.write("\n")
 
     def update_block_times(self, block, edit_time):
+        """Update paragraph timestamps.
+
+        :param block: reference to a ``QTextBlock``
+        :param edit_time: 
+        """
         block_dict = block.userData()
-        if block_dict:
-            block_dict = update_user_data(block_dict, key = "edittime")
-        else:
-            block_dict = BlockUserData()        
+        if not block_dict:
+            block_dict = BlockUserData() 
+        block_dict = update_user_data(block_dict, key = "edittime", edit_time)     
         if not block_dict["creationtime"]:
             block_dict = update_user_data(block_dict, key = "creationtime")
         if not block_dict["audiostarttime"]:
@@ -686,6 +835,10 @@ class PloverCATEditor(QTextEdit):
         block.setUserData(block_dict)
  
     def merge_paragraphs(self, add_space = True):
+        """Merge two paragraphs.
+
+        :param bool add_space: add space between paragraph when merging
+        """
         current_document = self
         current_cursor = current_document.textCursor()
         self.cursor_block = current_cursor.blockNumber() - 1
@@ -694,6 +847,10 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.push(merge_cmd)
 
     def split_paragraph(self, remove_space = True):
+        """Split one paragraph into two.
+
+        :param bool remove_space: remove space from beginning of new second paragraph if exist
+        """
         current_document = self
         current_cursor = current_document.textCursor()
         self.cursor_block = current_cursor.blockNumber()
@@ -705,6 +862,11 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.push(split_cmd)
 
     def cut_steno(self, store = True, cut = True):
+        """Remove selected text and steno.
+
+        :param bool store: store removed data
+        :param bool cut: whether cut or paste action, for message display
+        """
         action = "Cut" if cut else "Copy"
         current_cursor = self.textCursor()
         if not current_cursor.hasSelection():
@@ -737,6 +899,11 @@ class PloverCATEditor(QTextEdit):
             return(result)
 
     def replace(self, steno = "", replace_term = None):
+        """Replace selected text with stroke element.
+
+        :param str steno: stroke for stroke element
+        :param str replace_term: text for stroke element, the replacement text
+        """
         log.debug("Replace %s with %s", self.textCursor().selectedText(), replace_term)
         self.undo_stack.beginMacro(f"Replace: {self.textCursor().selectedText()} with {replace_term}")
         current_cursor = self.textCursor()
@@ -751,6 +918,8 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.endMacro()        
 
     def mock_del(self): 
+        """Delete selection or one character after cursor.
+        """
         current_cursor = self.textCursor()
         if current_cursor.hasSelection():
             self.cut_steno(store = False)
@@ -767,6 +936,10 @@ class PloverCATEditor(QTextEdit):
                 self.cut_steno(store = False)  
 
     def insert_text(self, text = None):
+        """Insert text element at cursor.
+
+        :param str text: text for text element.
+        """
         current_cursor = self.textCursor()
         current_block_num = current_cursor.blockNumber()
         current_block = current_cursor.block()
@@ -778,6 +951,8 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.endMacro()   
 
     def insert_field(self, name):
+        """Insert field at cursor.
+        """
         el = text_field(name = name, user_dict = self.user_field_dict)
         current_cursor = self.textCursor()
         current_block = current_cursor.blockNumber()
@@ -786,6 +961,10 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.push(insert_cmd)
 
     def insert_image(self, img_path):
+        """Insert image at cursor.
+
+        :param img_path: path to image
+        """
         selected_file = pathlib.Path(img_path)
         im_element = image_text(path = selected_file.as_posix())
         insert_cmd = image_insert(self.textCursor(), self, self.textCursor().blockNumber(), 
@@ -793,11 +972,19 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.push(insert_cmd)
 
     def update_fields(self, new_field_dict):
+        """Update existing field elements with new values.
+
+        :param dict new_field_dict: updated field dict
+        """
         current_cursor = self.textCursor()
         update_cmd = update_field(current_cursor, self, current_cursor.blockNumber(), current_cursor.positionInBlock(), self.user_field_dict, new_field_dict)
         self.undo_stack.push(update_cmd) 
 
     def extract_indexes(self):
+        """Extract existing index entries from transcript.
+
+        :return: dictionary of indices with nested entries
+        """
         index_dict = {}
         current_cursor = self.textCursor()
         block = self.document().begin()
@@ -825,6 +1012,10 @@ class PloverCATEditor(QTextEdit):
         return(index_dict)       
 
     def insert_index_entry(self, el):
+        """Insert index entry at cursor.
+
+        :param el: index entry element
+        """
         current_cursor = self.textCursor()
         start_pos = current_cursor.positionInBlock()
         current_block = current_cursor.blockNumber()
@@ -842,6 +1033,11 @@ class PloverCATEditor(QTextEdit):
         self.send_message.emit("Index inserted.")
 
     def update_indices(self, old, new):
+        """Update all index entries.
+
+        :param dict old: existing indices data
+        :param dict new: new indices data
+        """
         current_cursor = self.textCursor()
         current_block = current_cursor.blockNumber()
         start_pos = current_cursor.positionInBlock()            
@@ -849,6 +1045,12 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.push(update_cmd)
 
     def add_begin_auto_affix(self, element, style):
+        """Add paragraph prefix based on style.
+
+        :param element: element to add affix to
+        :param style: style for paragraph element is from
+        :return: new element, now ``automatic``
+        """
         if style not in self.auto_paragraph_affixes:
             return(element)
         auto_el = automatic_text(prefix = self.auto_paragraph_affixes[style]["prefix"])  
@@ -857,6 +1059,12 @@ class PloverCATEditor(QTextEdit):
         return(auto_el)                    
 
     def add_end_auto_affix(self, element, style):
+        """Add paragraph suffix based on style.
+
+        :param element: element to add affix to
+        :param style: style for paragraph element is from
+        :return: new element, now ``automatic``
+        """
         if style not in self.auto_paragraph_affixes:
             return(element)
         auto_el = automatic_text(prefix = self.auto_paragraph_affixes[style]["suffix"])  
@@ -865,6 +1073,10 @@ class PloverCATEditor(QTextEdit):
         return(auto_el)    
 
     def insert_autocomplete(self, index):
+        """Insert selected autocomplete candidate.
+
+        :param int index: index of selection from pop-up widget
+        """
         if self._completer.widget() is not self:
             return
         steno = index.data(QtCore.Qt.UserRole)
@@ -898,12 +1110,18 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.endMacro()
 
     def mock_type(self, text):
+        """Mock typing from keyboard.
+
+        :param str text: text to insert
+        """
         if self.engine.output:
             return          
         if len(text) > 0:
             self.insert_text(text)        
 
     def mock_bks(self):
+        """Mock one backspace.
+        """
         if self.engine.output:
             return      
         current_cursor = self.textCursor()
@@ -914,6 +1132,10 @@ class PloverCATEditor(QTextEdit):
         self.mock_del()
 
     def navigate_to(self, block_number):
+        """Move cursor to beginning of a block by number.
+
+        :param int block_number: paragraph number to move to
+        """
         new_block = self.document().findBlockByNumber(block_number)
         current_cursor = self.textCursor()
         current_cursor.setPosition(new_block.position())
@@ -921,6 +1143,11 @@ class PloverCATEditor(QTextEdit):
         log.debug(f"Editor cursor set to start of block {block_number}.")
 
     def get_audio_time(self, convert = True):
+        """Get audio time from media.
+
+        :param bool convert: convert to str timestamp
+        :return: timestamp if ``convert = True``, or milliseconds if ``False``
+        """
         real_time = None
         if self.player.state() == QMediaPlayer.PlayingState or self.player.state() == QMediaPlayer.PausedState:
             real_time = self.player.position() - self.audio_delay
@@ -936,11 +1163,17 @@ class PloverCATEditor(QTextEdit):
             return(real_time)
     
     def load_audio(self, path):
+        """Load media file.
+
+        :param str path: path to media file
+        """
         self.audio_file = pathlib.Path(path)
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(str(self.audio_file))))
         self.send_message.emit(f"Player set to selected audio {str(path)}.")
 
     def play_pause_audio(self):
+        """Play or pause media.
+        """
         if self.recorder.state() == QMediaRecorder.StoppedState:
             pass
         else:
@@ -954,8 +1187,16 @@ class PloverCATEditor(QTextEdit):
             self.send_message.emit("Playing audio")
     
     def update_audio_duration(self, duration):
+        """Send new duration to GUI.
+        
+        :param int duration: media duration
+        """
         self.audio_length_changed.emit(duration)
     
     def update_audio_position(self, position):
+        """Send new position in media.
+
+        :param int position: media position
+        """
         self.audio_position = position
         self.audio_position_changed.emit(position)
