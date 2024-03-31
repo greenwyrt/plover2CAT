@@ -63,6 +63,41 @@ from plover_cat.captionWorker import captionWorker
 scowl = _load_wordlist(ORTHOGRAPHY_WORDLIST, DICTIONARIES_ROOT)
 
 class PloverCATWindow(QMainWindow, Ui_PloverCAT):
+    """Main window that can hold multiple transcripts.
+
+    This manages the main window, the dialog and global settings.
+    Connections should be made from this class to each transcript  ``PloverCATEditor``
+    which is displayed as a tab in center widget.
+
+    Generally, actions performed on the transcript should call a transcript method,
+    and the transcript should not be modified directly.
+
+    Any action that needs to be undo-able must use a transcript method.
+
+    The ``__init__`` method sets up the window, summarized.
+
+        - Access settings for window settings (dock, layout) from last time
+
+        - Connect menu items with methods but enable only needed
+
+        - Connect Plover engine hooks
+
+        - Create empty dialogs
+
+    :ivar engine: Plover engine instance
+    :ivar video: holds a ``QVideoWidget`` if one exists for media in transcript
+    :ivar textEdit: hold current transcript 
+    :ivar index_dialog: instance of ``indexDialogWindow``
+    :ivar caption_dialog: instance of ``captionDialogWindow``
+    :ivar suggest_dialog: instance of ``suggestDialogWindow``
+    :ivar cap_worker: instance of ``capWorker``
+    :ivar autosave_time: autosave timer as ``QTimer``
+    :ivar cutcopy_storage: deque, length 5, holding date for copy/pasting
+    :ivar thread: thread for non-main thread processing
+    :ivar progressBar: instance of ``QProgressBar`` for display
+    :ivar caption_cursor_pos: integer position of text last sent to display
+
+    """
     def __init__(self, engine):
         super().__init__()
         self.engine = engine
@@ -237,6 +272,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_message("Create New Transcript or Open Existing...")
 
     def set_shortcuts(self):
+        """Set shortcuts for menu items using keysequence strings.
+
+        JSON file should be called ``shortcuts.json`` under a ``plover2cat`` file in the Plover home directory
+        """
         shortcut_file = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "shortcuts.json"
         if not shortcut_file.exists():
             log.debug("No shortcut file exists, using default menu shortcuts.")
@@ -253,6 +292,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 pass  
 
     def edit_shortcuts(self):
+        """Edit menu shortcuts from dialog.
+
+        ``shortcuts.json`` will be created if it does not exist.
+        """
         shortcut_dict = {}
         menu_names = []
         action_names = []
@@ -276,11 +319,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.set_shortcuts()
 
     def about(self):
+        """Display version info in dialog.
+        """
         log.debug("User activated 'About' dialog.")
         QMessageBox.about(self, "About",
                 "This is Plover2CAT version %s, a computer aided transcription plugin for Plover." % __version__)
 
     def acknowledge(self):
+        """Display acknowledgements in dialog.
+        """
         log.debug("User activated 'Acknowledgements' dialog.")
         QMessageBox.about(self, "Acknowledgements",
                         "Plover2CAT is built on top of Plover, the open source stenotype engine. "
@@ -288,15 +335,23 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                         "PyQt5 and Plover are both licensed under the GPL. Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
 
     def open_help(self):
+        """Link to Github help pages.
+        """
         log.debug("User activated 'User Manual' link.")
         user_manual_link = QUrl("https://github.com/greenwyrt/plover2CAT/tree/main/docs")
         QtGui.QDesktopServices.openUrl(user_manual_link)
 
     def display_message(self, txt):
+        """Display message in status bar.
+
+        :param str txt: message to display
+        """
         self.statusBar.showMessage(txt)
         log.debug(txt)
 
     def update_gui(self):
+        """Wrapper for updating parts of GUI when cursor changes position.
+        """
         current_cursor = self.textEdit.textCursor()
         if current_cursor.block().userData():
             self.text_to_stroke_move()
@@ -305,12 +360,19 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.update_style_display(self.textEdit.textCursor().block().userData()["style"])        
 
     def update_tape(self, txt):
+        """Update tape with new stroke(s).
+        :param str txt: line(s) from tape
+        """
         # todo: if ever tape format changes, alter here
         lines = txt.splitlines()
         for line in lines:
             self.strokeList.appendPlainText(line)
 
     def display_block_steno(self, strokes):
+        """Update reveal steno dock with element data.
+
+        :param strokes: ``element_collection``
+        """
         # clear of last block data
         self.parSteno.clear()
         for ind, el in enumerate(strokes.data):
@@ -321,6 +383,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.parSteno.addItem(item)     
 
     def display_block_data(self):
+        """Display paragraph attributes and set style if necessary.
+        """
         current_cursor = self.textEdit.textCursor()
         block_number = current_cursor.blockNumber()
         block_data = current_cursor.block().userData()
@@ -350,12 +414,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.showPossibilities()
 
     def refresh_steno_display(self, cursor = None):
+        """Refresh steno display with data from cursor paragraph.
+
+        :param cursor: a ``QTextCursor``, default ``None`` for current cursor
+        """
         if not cursor:
             cursor = self.textEdit.textCursor()
         block_strokes = cursor.block().userData()["strokes"]
         self.display_block_steno(block_strokes)
 
     def refresh_editor_styles(self):
+        """Reapply styles to every paragraph.
+        """
         if self.textEdit.document().blockCount() > 200:
             user_choice = QMessageBox.question(self, "Refresh styles", f"There are {self.textEdit.document().blockCount()} paragraphs. Style refreshing may take some time. Continue?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if user_choice == QMessageBox.No:
@@ -394,6 +464,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.removeWidget(self.progressBar)
 
     def update_style_display(self, style):
+        """Update GUI display for style properties.
+
+        :param str style: name of style
+        """
         # log.debug(f"Updating style GUI for style {style}.")
         block_style = self.textEdit.par_formats[style]
         text_style = self.textEdit.txt_formats[style]
@@ -458,6 +532,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.blockNextStyle.setCurrentIndex(-1)
 
     def context_menu(self, pos):
+        """Create right-click menu at cursor click position.
+
+        :param pos: position to display menu
+        """
         log.debug("User activated context menu.")
         menu = QMenu()
         menu.addAction(self.actionRetroactiveDefine)
@@ -469,6 +547,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         menu.exec_(self.textEdit.viewport().mapToGlobal(pos))
 
     def menu_enabling(self, value = True):
+        """Disable (or enable) GUI options for transcript.
+
+        :param bool value: default ``True`` to disable all menus not needed when no transcript open
+        """
         log.debug("Menu (dis/en)abling.")
         self.menuEdit.setEnabled(not value)
         self.menuSteno_Actions.setEnabled(not value)
@@ -488,6 +570,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionClose.setEnabled(not value)
 
     def audio_menu_enabling(self, value = True):
+        """Disable (or enable) GUI options for when audio is loaded and make signal/slot connections.
+
+        :param bool value: default ``True`` for when audio is present and GUI should change
+        """
         self.actionOpenAudio.setEnabled(not value)
         self.actionPlayPause.setEnabled(value)
         self.actionStopAudio.setEnabled(value)
@@ -530,14 +616,24 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.audioDelay.setValue(0)
 
     def update_duration(self, duration):
+        """Update duration label in GUI with duration of media.
+
+        :param int duration: length in milliseconds
+        """
         self.audio_seeker.setMaximum(duration)
         self.audio_duration.setText(ms_to_hours(duration))
 
     def update_seeker_track(self, position):
+        """Update position on seeker and label to position of media.
+
+        :param int position: present position of media
+        """
         self.audio_seeker.setValue(position)
         self.audio_curr_pos.setText(ms_to_hours(position))
 
     def get_tapey_tape(self):
+        """Obtain suggestions from Tapey Tape file.
+        """
         ## from tapeytape default, maybe make selectable in future?
         config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
         tapey_tape_location = config_dir.joinpath('tapey_tape.txt')
@@ -565,7 +661,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.suggestTable.resizeColumnsToContents()
 
     def get_clippy(self):
-        '''Now parses default clippy output based on color codes.'''
+        """Obtain suggestions from plover-clippy-2 file by parsing 
+        default clippy output based on color codes.
+        """
         config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
         clippy_location = config_dir.joinpath('clippy_2.org')
         log.debug("Trying to load clippy from default location")
@@ -598,6 +696,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.suggestTable.resizeColumnsToContents()
 
     def get_suggestions(self):
+        """Wrapper to get suggestions from Tapey Tape or plover-clippy-2
+        """
         if not self.textEdit:
             return
         if self.suggest_source.currentText() == "tapey-tape":
@@ -608,9 +708,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug("Unknown suggestion source %s!" % self.suggest_source.currentText())
 
     def update_record_time(self):
+        """Display recording time in status bar.
+        """
         self.display_message(f"Recorded {ms_to_hours(self.textEdit.recorder.duration())}")
 
     def open_root(self):
+        """Open root directory of current transcript.
+        """
         selected_folder = pathlib.Path(self.textEdit.file_name)
         self.display_message(f"User open file directory {str(selected_folder)}")
         if platform.startswith("win"):
@@ -623,6 +727,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.display_message("Unknown operating system. Not opening file directory.")
 
     def recent_file_menu(self):
+        """Generate menu items for recent files.
+        """
         log.debug("Updating recent files menu.")
         self.menuRecentFiles.clear()
         self.clear_layout(self.recentfileflow)
@@ -649,6 +755,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.recentfileflow.addWidget(tb)
 
     def clear_layout(self, layout):
+        """Clear flow layout for recent files.
+        """
         if layout is not None:
             while layout.count():
                 item = layout.takeAt(0)
@@ -659,12 +767,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     self.clearLayout(item.layout())
 
     def change_window_font(self):
+        """Change window font.
+        """
         font, valid = QFontDialog.getFont()
         if valid:
             self.setFont(font)
             log.debug("User set window font.")   
 
     def change_backgrounds(self):
+        """Change window background color.
+        """
         palette = self.palette()
         old_color = palette.color(QPalette.Base)
         color = QColorDialog.getColor(old_color)
@@ -675,12 +787,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug("User set background color.")
 
     def change_tape_font(self):
+        """Change paper tape font.
+        """
         font, valid = QFontDialog.getFont()
         if valid:
             self.strokeList.setFont(font)
             log.debug("User set paper tape font.")
 
     def show_invisible_char(self):
+        """Show/hide invisible chars in current transcript.
+        """
         doc_options = self.textEdit.document().defaultTextOption()
         if self.actionShowAllCharacters.isChecked():
             self.display_message("User enabled show invisible characters.")      
@@ -691,6 +807,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.document().setDefaultTextOption(doc_options)
 
     def calculate_space_width(self, font):
+        """Calculate approximate width of a font character in inches and set in GUI.
+
+        :param font: ``QFont``
+        """
         new_font = font
         new_font.setPointSize(self.blockFontSize.value())
         metrics = QFontMetrics(new_font)
@@ -699,12 +819,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug("Update calculation of chararacter width for selected font.")
 
     def show_toolbox_pane(self, pane):
+        """Show a pane from toolbox if hidden.
+
+        :param pane: a ``QWidget`` in the Toolbox dock's ``QTabWidget``
+        """
         if not self.dockProp.isVisible():
             self.dockProp.setVisible(True)    
         self.tabWidget.setCurrentWidget(pane)
         log.debug(f"User set {pane.objectName()} pane.") 
 
     def show_find_replace(self):
+        """Show Find/Replace pane in toolbox, and fill search field with text if selection.
+        """
         if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
             self.search_term.setText(self.textEdit.textCursor().selectedText())
         if not self.dockProp.isVisible():
@@ -713,6 +839,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug("User set find pane visible.")
 
     def show_stenospell(self):
+        """Show Stenospell pane in toolbox, and fill search field with text if selection.
+        """
         current_cursor = self.textEdit.textCursor()
         if current_cursor.hasSelection():
             current_block = current_cursor.block()
@@ -729,6 +857,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug("User set steno spell pane visible.")
 
     def search_online(self, link):
+        """Search online with selected text using link source in default browser.
+
+        Listed sources: Wikipedia, Merriam-Webster, OED, Google, DuckDuckGo.
+
+        :param link: a URL string template for query search
+        """
         current_cursor = self.textEdit.textCursor()
         if not current_cursor.hasSelection():
             self.display_message("No text selected for online search.")
@@ -736,11 +870,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         QDesktopServices.openUrl(QUrl(link.format(current_cursor.selectedText())))
 
     def heading_navigation(self, item):
+        """Jump to paragraph from navigation dock.
+
+        :param item: ``QListWidgetItem``, should have par number in data
+        """
         block_number = item.data(Qt.UserRole)
         log.debug(f"User navigating to block {block_number}.")
         self.textEdit.navigate_to(block_number)
 
     def jump_par(self):
+        """Jump to paragraph based on user-input paragraph number.
+        """
         current_cursor = self.textEdit.textCursor()
         max_blocks = self.textEdit.document().blockCount()
         current_block_num = current_cursor.blockNumber()
@@ -750,12 +890,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.textEdit.navigate_to(block_num)
 
     def check_undo_stack(self, index):
+        """Refresh config and style GUI based on labels in ``QUndoStack``.
+        """
+        ## bit of hack because it depends on display text of a ``QUndoAction``
         if self.textEdit.undo_stack.undoText().startswith("Config") or self.textEdit.undo_stack.redoText().startswith("Config"):
             self.update_config_gui()
         if self.textEdit.undo_stack.undoText().startswith("Style:") or self.textEdit.undo_stack.redoText().startswith("Style:"):
             self.refresh_editor_styles()
 
     def update_config_gui(self):
+        """Update config GUI for parameters in current transcript.
+        """
         self.update_field_menu()
         config_contents = self.textEdit.config
         self.style_file_path.setText(pathlib.Path(config_contents["style"]).as_posix())
@@ -782,6 +927,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.setup_page()
 
     def setup_page(self):
+        """Set up line wrap and text width for ``QTextDocument`` based on config page size.
+        """
         doc = self.textEdit.document()
         width = float(self.textEdit.config["page_width"])
         height = float(self.textEdit.config["page_height"])
@@ -793,6 +940,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         doc.setPageSize(page_size.size(QPageSize.Point))
 
     def update_style_menu(self):
+        """Create menu items for each existing style, add shortcuts for first 10.
+        """
         # log.debug("Updating style sub-menu.")
         self.menuParagraphStyle.clear()
         for ind, name in enumerate(self.textEdit.styles.keys()):
@@ -804,6 +953,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.menuParagraphStyle.addAction(action)
 
     def update_field_menu(self):
+        """Create menu items for each existing field for insertion, add shortcuts for first 10.
+        """
         self.display_message("Updating field sub-menu.")
         self.menuField.clear()
         for ind, (k, v) in enumerate(self.textEdit.user_field_dict.items()):
@@ -815,6 +966,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.menuField.addAction(action)
 
     def update_index_menu(self, index_dict = None):
+        """Create menu items for index entries for insertion.
+        """
         if not index_dict:
             index_dict = self.textEdit.extract_indexes()
         self.display_message("Updating index entry insertion sub-menu.")
@@ -827,6 +980,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.menuIndexEntry.addAction(action)  
 
     def update_navigation(self):     
+        """Create ``QListWidgetItems`` to display headings in navigation dock.
+        """
         block = self.textEdit.document().begin()
         self.navigationList.clear()
         log.debug("Nagivation pane updated.")
@@ -845,6 +1000,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             block = block.next()   
 
     def stroke_to_text_move(self):
+        """Locate text in transcript based on selected line in tape.
+        """
         stroke_cursor = self.strokeList.textCursor()
         edit_cursor = self.textEdit.textCursor()
         self.textEdit.blockSignals(True)
@@ -866,6 +1023,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.blockSignals(False)
 
     def text_to_stroke_move(self):
+        """Locate stroke line in tape based on cursor position in transcript.
+        """
         stroke_cursor = self.strokeList.textCursor()
         edit_cursor = self.textEdit.textCursor()
         edit_block = edit_cursor.block()
@@ -899,6 +1058,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.strokeList.blockSignals(False)
 
     def update_spell_gui(self):
+        """List spellchecking dictionaries in GUI.
+        """
         self.dict_selection.clear()
         self.dict_selection.addItem("en_US", "en_US")
         default_spellcheck_path = pathlib.Path(self.textEdit.file_name) / "spellcheck"
@@ -909,6 +1070,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.dict_selection.setCurrentText(self.textEdit.dictionary_name)
 
     def clipboard_menu(self):
+        """Create menu items of data in storage for pasting.
+        """
         self.menuClipboard.clear()
         for ind, snippet in enumerate(self.cutcopy_storage):
             label = snippet.to_text()
@@ -918,6 +1081,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.menuClipboard.addAction(action)
 
     def set_autosave_time(self):
+        """Set autosave time interval that applies to all transcripts.
+        """
         log.debug("User set autosave time.")
         settings = QSettings("Plover2CAT", "OpenCAT")
         if settings.contains("autosaveinterval"):
@@ -932,6 +1097,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 self.autosave_setup(True)
 
     def autosave_setup(self, checked):
+        """Set up/stop timer for autosave.
+        """
         settings = QSettings("Plover2CAT", "OpenCAT")
         if settings.contains("autosaveinterval"):
             min_save = settings.value("autosaveinterval")
@@ -945,6 +1112,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.autosave_time.stop()
 
     def setup_completion(self, checked):
+        """Set/clean up autocompletion for transcript.
+        """
         log.debug("Setting up autocompletion.")
         if not checked:
             self.textEdit.setCompleter(None)
@@ -970,6 +1139,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_message("Autocompletion from wordlist.json enabled.")
 
     def model_from_file(self, fileName):
+        """Load candidates for autocompletion.
+
+        :param fileName: path to JSON file
+        """
         f = QFile(fileName)
         if not f.open(QFile.ReadOnly):
             return(QStringListModel(self.completer))
@@ -987,6 +1160,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         return(words)
 
     def create_new(self):
+        """Create new transcript.
+        """
         transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
         transcript_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
         default_path = transcript_dir / transcript_name
@@ -998,6 +1173,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.open_file(selected_name)
 
     def open_file(self, file_path = None):
+        """Open transcript.
+
+        :param str file_path: path to transcript directory
+        """
         if not file_path:
             name = "Config"
             extension = "config"
@@ -1036,9 +1215,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.mainTabs.currentChanged.connect(self.switch_restore)
 
     def recentfile_open(self, action):
+        """Handler to open a recent transcript.
+        """
         self.open_file(action.data())
 
     def recentfile_store(self, path):
+        """Store transcript path in settings to open.
+        """
         settings = QSettings("Plover2CAT", "OpenCAT")
         recent_file_paths = settings.value("recentfiles", [])
         try:
@@ -1057,6 +1240,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.recent_file_menu()
 
     def switch_restore(self, index):
+        """Facilitate switching between opened transcripts.
+
+        :param int index: index of tab to switch to
+        """
         if not index:
             index = self.mainTabs.currentIndex()
         if index == -1:
@@ -1076,6 +1263,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.textEdit = None
 
     def setup_connections(self):
+        """Set up necessary connections between GUI and transcript.
+        """
         self.actionUndo = self.textEdit.undo_stack.createUndoAction(self.menuEdit)
         undo_icon = QtGui.QIcon()
         undo_icon.addFile(":/arrow-curve-180.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -1156,6 +1345,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.set_up_video()
 
     def breakdown_connections(self):
+        """Disconnect GUI and transcript.
+        """
         if self.actionUndo:
             self.menuEdit.removeAction(self.actionUndo)
             self.actionUndo.deleteLater()
@@ -1218,9 +1409,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.video:
             self.videoLayout.removeWidget(self.video)
             self.video.deleteLater()
-        # todo: break all connections to textEdit subobjects
         
     def action_close(self):
+        """Close window after saving settings and checking for multiple transcripts.
+        """
         self.display_message("User selected quit.")
         settings = QSettings("Plover2CAT", "OpenCAT")
         settings.setValue("geometry", self.saveGeometry())
@@ -1240,6 +1432,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.parent().close()
 
     def close_file(self, tab_index = None):
+        """Close transcript tab, checking for changes.
+
+        :param int tab_index: index of tab to close
+        """
         if not tab_index:
             tab_index = self.mainTabs.currentIndex()
         if tab_index == -1:
@@ -1259,9 +1455,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         return True
 
     def save_file(self):
+        """Save current transcript.
+        """
         self.textEdit.save()
 
     def save_as_file(self):
+        """Save current transcript in new location.
+        """
         transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
         transcript_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
         default_path = transcript_dir / transcript_name
@@ -1277,11 +1477,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.open_file(str(selected_name))
 
     def autosave(self):
+        """Autosave current transcript.
+        """
         if not self.textEdit:
             return
         self.textEdit.autosave()
 
     def revert_file(self):
+        """Revert transcript to previous commit.
+        """
         if not self.textEdit.repo:
             return
         if not self.textEdit.undo_stack.isClean():
@@ -1297,6 +1501,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.textEdit.revert_transcript(commit_id)
 
     def import_rtf(self):
+        """Import RTF/CRE transcript file.
+
+        This will erase existing transcript data if to proceed.
+        Transcript will close and re-open.
+        """
         selected_folder = pathlib.Path(self.textEdit.file_name)
         selected_file = QFileDialog.getOpenFileName(
             self,
@@ -1354,7 +1563,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.open_file(str(transcript_dir))
 
     def add_dict(self):
-        ## select a dict from not file location to add to plover stack
+        """Add transcript dictionary.
+        """
+        ## todo: should be using transcript method
         selected_file = QFileDialog.getOpenFileName(
             self,
             _("Select Dictionary"),
@@ -1382,6 +1593,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_message(f"Add {str(dict_dir_name.relative_to(self.textEdit.file_name))} to config")
 
     def remove_dict(self):
+        """Remove transcript dictionary.
+        """
+        ## todo: should be using transcript method
         dict_dir_path = self.textEdit.file_name / "dict"
         selected_file = QFileDialog.getOpenFileName(
             self,
@@ -1404,6 +1618,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.display_message("Selected dictionary not a transcript dictionary, passing.")
 
     def select_style_file(self):
+        """Select a style file for the transcript.
+        """
         selected_file = QFileDialog.getOpenFileName(
             self,
             _("Select Style JSON or odt"),
@@ -1422,6 +1638,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.refresh_editor_styles()
 
     def style_from_template(self):
+        """Generate a style file from ODF or RTF/CRE file.
+
+        This does not set the new file as style.
+        """
         selected_file = QFileDialog.getOpenFileName(
             self,
             _("Select Style ODT or RTF/CRE file"),
@@ -1443,6 +1663,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         save_json(remove_empty_from_dict(json_styles), style_file_path)
 
     def style_edit(self):
+        """Gather attribute values from GUI to set/edit for a style.
+        """
         style_name = self.style_selector.currentText()
         log.debug(f"Editing style {style_name}.")
         new_style_dict = {"family": "paragraph"}
@@ -1502,6 +1724,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.set_style_properties(style_name, new_style_dict)
 
     def create_new_style(self):
+        """Create new style based on old.
+        """
         log.debug("User create new style")
         text, ok = QInputDialog().getText(self, "Create New Style", "Style Name (based on %s)" % self.style_selector.currentText(), inputMethodHints  = Qt.ImhLatinOnly)
         if not ok:
@@ -1517,6 +1741,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.update_style_menu()
 
     def update_paragraph_style(self, index = None, action = None):
+        """Set a paragraph's style.
+
+        Can be triggered from style selection dropdown, or style menu.
+
+        :param index: index of selected style from dropdown
+        :param action: ``QAction`` containing style name in data
+        """
         if not index:
             index = action.data()
         new_style = self.style_selector.itemText(index)
@@ -1524,6 +1755,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.update_gui()
 
     def transcript_suggest(self):
+        """Open suggestions dialog.
+        """
         self.display_message("Generate transcript suggestions.")
         if not self.suggest_dialog:
             self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
@@ -1532,27 +1765,37 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.suggest_dialog.activateWindow() 
 
     def log_to_tape(self, stroke):
-        # need file to output to
+        """Log stroke to tape.
+
+        This deals with managing capturing output and window focus.
+
+        :param stroke: stroke to log.
+        """
         if not self.textEdit:
             return
         if not self.engine.output and self.engine._machine_params.type == "Keyboard":
             return
         # if window inactive, and not capturing everything, and not enabled, don't do anything
-        # print(self.textEdit.isActiveWindow())
         if not self.textEdit.isActiveWindow() and not self.actionCaptureAllOutput.isChecked():
             return
-        ## copy from parts of plover paper tape and tapeytape
         self.textEdit.log_to_tape(stroke)             
 
     def on_send_string(self, string):
-        log.debug(f"Plover engine sent string: {string}")
+        """Set string sent by Plover in transcript.
+        """
         self.textEdit.last_string_sent = string
 
     def count_backspaces(self, backspace):
+        """Set number of backspaces sent by Plover in transcript.
+        """
         log.debug(f"Plover engine sent {backspace} backspace(s)")
         self.textEdit.last_backspaces_sent = backspace
 
     def on_stroke(self, stroke_pressed):
+        """Send stroke from Plover to transcript.
+
+        This will also trigger displaying captions, managing capturing output and window focus.
+        """
         if not self.textEdit:
             return
         if not self.engine.output:
@@ -1567,6 +1810,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.on_stroke(stroke_pressed, self.actionCursorAtEnd.isChecked())
 
     def tape_translate(self):
+        """Translate tape contents into transcript.
+        """
         if not self.engine.output:
             self.statusBar.showMessage("Plover is not enabled.")
             return
@@ -1614,6 +1859,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # todo, if format has time data, that should be inserted into stroke data of editor too
 
     def reset_paragraph(self):
+        """Remove all data from paragraph block, and erase action history.
+        """
         user_choice = QMessageBox.critical(self, "Reset Paragraph", "This will clear all data from this paragraph. This cannot be undone. You will lose all history. Are you sure?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if user_choice != QMessageBox.Yes:
             return
@@ -1628,11 +1875,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor.removeSelectedText()
 
     def cut_steno(self, cut = True):
+        """Cut/copy selection and generate menu item.
+        """
         res = self.textEdit.cut_steno(cut = cut)
         self.cutcopy_storage.appendleft(res)
         self.clipboard_menu()
 
     def paste_steno(self, action = None):
+        """Paste into transcript.
+
+        Each element in the content is individually inserted,
+        as images would not work otherwise.
+
+        :param action: a `QAction` containing data to be pasted
+        """
         log.debug("Performing pasting.")
         index = 0
         if action:
@@ -1658,6 +1914,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_message(f"Pasting to paragraph {current_block_num} at position {start_pos}.")  
 
     def define_retroactive(self):
+        """Define outline for selected text and update transcript.
+        """
         log.debug("Define retroactive.")
         current_cursor = self.textEdit.textCursor()
         current_block = current_cursor.block()
@@ -1702,11 +1960,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.textEdit.setTextCursor(current_cursor)
 
     def define_scan(self):
+        """Find last untranslated in transcript and define.
+        """
         log.debug("Scan to redefine.")
         search_result = self.untrans_search(-1)
         self.define_retroactive()
 
     def delete_scan(self):
+        """Find last untranslated and remove.
+        """
         log.debug("Scan to delete.")
         search_result = self.untrans_search(-1)
         if not search_result:
@@ -1722,6 +1984,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # self.undo_stack.push(remove_cmd)
 
     def add_autocomplete_item(self):
+        """Add autocomplete term to wordlist.
+        """
         log.debug("Add term to autocomplete.")
         current_cursor = self.textEdit.textCursor()
         if not current_cursor.hasSelection():
@@ -1751,10 +2015,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.setup_completion(self.actionAutocompletion.isChecked())
 
     def enable_affix(self, check):
+        """Toggle paragraph affixes.
+        """
         self.display_message("Toggle automatic paragraph affixes.")
         self.textEdit.set_config_value("enable_automatic_affix", check)
 
     def edit_auto_affixes(self):
+        """Open affix editor.
+        """
         if not self.auto_paragraph_affixes:
             self.display_message("No pre-existing affix dict.")
         self.affix_dialog = affixDialogWindow(self.auto_paragraph_affixes, [*self.styles])
@@ -1764,6 +2032,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.auto_paragraph_affixes = self.affix_dialog.affix_dict
 
     def insert_text(self, text = None):
+        """Insert text.
+
+        :param str text: text to insert, if ``None``, opens modal for input
+        """
+        ## todo: should be removed once output between keyboard and machine is figured out
         if not text:
             text, ok = QInputDialog().getText(self, "Insert Normal Text", "Text to insert")
             if not ok:
@@ -1772,6 +2045,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.insert_text(text)
 
     def insert_image(self):
+        """Insert image.
+        """
         selected_file = QFileDialog.getOpenFileName(self, _("Select Image"), str(self.textEdit.file_name), 
                             _("Image Files(*.png *.jpg *jpeg)"))[0]
         if not selected_file:
@@ -1781,17 +2056,25 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.insert_image(selected_file)
 
     def insert_field(self, action):
+        """Insert field.
+
+        :param action: ``QAction`` with field name data.
+        """
         name = action.data()
         self.display_message(f"Insert field {name}.")
         self.textEdit.insert_field(name)
 
     def edit_fields(self):
+        """Open fields editor.
+        """
         self.field_dialog = fieldDialogWindow(self.textEdit.user_field_dict)
         res = self.field_dialog.exec_()
         if res == QDialog.Accepted:
             self.textEdit.update_fields(self.field_dialog.user_field_dict)  
 
-    def edit_indices(self, show_dialog = True):
+    def edit_indices(self):
+        """Open index editor.
+        """
         if not self.index_dialog:
             self.index_dialog = indexDialogWindow({})
         present_index = self.textEdit.extract_indexes()
@@ -1803,6 +2086,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.index_dialog.activateWindow()   
 
     def insert_index_entry(self, el = None, action = None):
+        """Insert index entry.
+
+        One of ``el`` or ``action`` has to be specified.
+
+        :param el: ``index_text`` element
+        :param action: ``QAction`` with index entry data.
+        """
         current_cursor = self.textEdit.textCursor()
         if el is None:
             index_name = action.data()[0]
@@ -1824,6 +2114,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.index_dialog.update_dict(present_index)
 
     def update_indices(self):
+        """Have transcript update index entries and regenerate menu.
+        """
         present_index = self.textEdit.extract_indexes()
         new_index = self.index_dialog.index_dict
         if not present_index:
@@ -1832,6 +2124,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.update_index_menu(self.index_dialog.index_dict)
 
     def edit_paragraph_properties(self):
+        """Collect paragraph properties from GUI to set.
+        """
         block_number = int(self.editorParagraphLabel.text())
         self.textEdit.undo_stack.beginMacro("Update paragraph properties")
         self.textEdit.set_paragraph_property(block_number, "creationtime", self.editorCreationTime.dateTime().toString(Qt.ISODateWithMs))
@@ -1848,6 +2142,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.undo_stack.endMacro()
 
     def spell_steno(self):
+        """Search and display closest outlines.
+        """
         outline = self.steno_outline.text()
         pos = multi_gen_alternative(outline)
         res = get_sorted_suggestions(pos, self.engine)
@@ -1856,15 +2152,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.stenospell_res.addItem(candidate[0])
 
     def set_sp_dict(self, index):
+        """Load selected spellchecking dictionary.
+        """
         lang = self.dict_selection.itemText(index)
         log.debug("Selecting %s dictionary for spellcheck" % lang)
         dict_path = self.dict_selection.itemData(index)
         self.textEdit.load_spellcheck_dict(dict_path)
 
     def sp_check(self, word):
+        """Perform spellcheck for a word.
+        """
         return self.textEdit.dictionary.lookup(word)
 
     def spellcheck(self):
+        """Scan text word by word and spellcheck.
+        """
         log.debug("Perform spellcheck.")
         current_cursor = self.textEdit.textCursor()
         old_cursor_position = current_cursor.block().position()
@@ -1885,20 +2187,31 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             QMessageBox.information(self, "Spellcheck", "End of document.")
 
     def sp_ignore_all(self):
+        """Add word to be ignored by spellchecking.
+        """
         if self.spellcheck_result.text() != "":
             self.textEdit.spell_ignore.append(self.spellcheck_result.text())
             log.debug("Ignored spellcheck words: %s" % self.textEdit.spell_ignore)
         self.spellcheck()
 
     def sp_insert_suggest(self, item = None):
+        """Perform spellcheck replacement.
+
+        :param item: a ``QListItemWidget``, if ``None``, use selected from GUI
+        """
         if not item:
             item = self.spellcheck_suggestions.currentItem()
         log.debug("Spellcheck correction: %s" % item.text())
         self.textEdit.undo_stack.beginMacro("Spellcheck: correct to %s" % item.text())
-        self.replace(to_next= False, steno = "", replace_term= item.text())
+        self.replace(to_next = False, steno = "", replace_term= item.text())
         self.textEdit.undo_stack.endMacro()  
 
     def search(self, direction = 1):
+        """Search wrapper.
+
+        :param int direction: 1 to search forward, -1 to search back
+        :return: success of search
+        """
         if self.search_untrans.isChecked():
             search_status = self.untrans_search(direction)
         elif self.search_steno.isChecked():
@@ -1908,6 +2221,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         return(search_status)
 
     def text_search(self, direction = 1):
+        """Search text.
+
+        Uses the ``QTextDocument`` search functionalities.
+        """
         flags = QTextDocument.FindFlags()
         search = self.search_term.text()
         if self.search_case.isChecked():
@@ -1946,6 +2263,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return None
 
     def steno_wrapped_search(self, direction = 1):
+        """Wrapper for steno search.
+
+        :return: search status
+        """
         log.debug("Steno search.")
         found = self.steno_search(direction = direction)
         if not found and self.search_wrap.isChecked():
@@ -1962,6 +2283,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         return(found)
 
     def steno_search(self, direction = 1):
+        """Search steno underlying each paragraph.
+        """
         cursor = self.textEdit.textCursor()
         steno = self.search_term.text()
         log.debug("Searching for stroke %s in stroke data.", steno)
@@ -2032,6 +2355,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 return None
 
     def untrans_search(self, direction = 1):
+        """Search for untranslated steno.
+        """
         flags = QTextDocument.FindFlags()
         untrans_reg = QRegExp("(\\b|\\*)(?=[STKPWHRAO*EUFBLGDZ]{3,})S?T?K?P?W?H?R?A?O?\*?E?U?F?R?P?B?L?G?T?S?D?Z?\\b")
         if direction == -1:
@@ -2065,6 +2390,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return None     
 
     def search_text_options(self):
+        """Enable GUI options for text search.
+        """
         if self.search_text.isChecked():
             log.debug("Set options for text search.")
             self.search_case.setEnabled(True)
@@ -2073,6 +2400,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.search_whole.setEnabled(True)
 
     def search_steno_options(self):
+        """Enable GUI options for steno search.
+        """
         if self.search_steno.isChecked():
             log.debug("Set options for steno search.")
             self.search_case.setEnabled(False)
@@ -2081,6 +2410,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.search_whole.setEnabled(False)
 
     def search_untrans_options(self):
+        """Enable GUI options for untranslated steno search.
+        """
         if self.search_untrans.isChecked():
             log.debug("Set options for untrans search.")
             self.search_term.setEnabled(False)
@@ -2089,6 +2420,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.search_whole.setEnabled(False)  
 
     def replace(self, to_next = True, steno = "", replace_term = None):
+        """Perform replacement.
+
+        :param bool to_next: do search for next match
+        :param str steno: steno to put into replacement element
+        :param replace_term: text to put as replacement, or text from GUI
+        """
         log.debug("Perform replacement.")
         if not replace_term:
             replace_term = self.replace_term.text()
@@ -2105,6 +2442,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return(search_status)        
 
     def replace_everything(self, steno = ""):
+        """Replace all matches in transcript.
+
+        :param steno: the steno for the replacement element, default ``""``
+        """
         cursor = self.textEdit.textCursor()
         old_wrap_state = self.search_wrap.isChecked()
         if old_wrap_state:
@@ -2128,6 +2469,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.search_wrap.setChecked(old_wrap_state)
 
     def open_audio(self):
+        """Select media file for playing.
+        """
         if self.textEdit.recorder.state() == QMediaRecorder.StoppedState:
             pass
         else:
@@ -2139,9 +2482,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.audio_menu_enabling()
 
     def set_audio_delay(self, value):
+        """Set offset for media.
+        """
         self.textEdit.audio_delay = value
 
     def set_up_video(self, avail):
+        """Set up video for media.
+
+        :param bool avail: whether media has video or not
+        """
         if avail:
             self.display_message("Video available for file, displaying.")
             self.video = QVideoWidget()
@@ -2151,6 +2500,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.actionShowVideo.setEnabled(True)
 
     def show_hide_video(self):
+        """Hide video if shown.
+        """
         if self.video.isVisible():
             log.debug("Hide video.")
             self.video.hide()
@@ -2159,6 +2510,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.video.show()
 
     def record_or_pause(self):
+        """Toggle between play and pause for recorder.
+        """
         if self.textEdit.player.state() != QMediaPlayer.StoppedState:
             self.display_message("Playing in progress. Stop media first.")
             return
@@ -2213,12 +2566,19 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.display_message("Recording continued.")
             
     def stop_record(self):
+        """Stop recording.
+        """
         self.textEdit.recorder.stop()
         self.actionStopRecording.setEnabled(False)
         self.display_message("Recording stopped.")
         self.textEdit.recorder.durationChanged.disconnect()
 
     def setup_caption_window(self, display_font, max_blocks):
+        """Set a new window for displaying captions.
+
+        :param display_font: ``QFont``
+        :param max_blocks: maximum number of lines to display
+        """
         self.caption_window = QMainWindow(self)
         self.caption_window.setMinimumSize(50, 50)
         self.caption_window.setWindowFlags(self.caption_window.windowFlags() | Qt.WindowStaysOnTopHint)
@@ -2238,10 +2598,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.caption_window.show()
 
     def add_cap(self, cap):
+        """Display caption in caption window.
+        """
         self.caption_edit.setPlainText(cap)
         self.caption_edit.ensureCursorVisible()
 
     def setup_captions(self, checked):
+        """Set up or clean up caption worker and window.
+        """
         if checked:
             res = self.caption_dialog.exec_()
             # need to always keep cursor at end, so can undo from end, but never from middle
@@ -2271,6 +2635,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.caption_window.hide()
 
     def display_captions(self):
+        """Send captions for display if enabled.
+        """
         if not self.actionCaptioning.isChecked():
             return
         current_cursor = self.textEdit.textCursor()
@@ -2284,6 +2650,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.cap_worker.intake(new_text)
 
     def flush_caption(self):
+        """Send all remaining text up to cursor to caption display.
+        """
         old_pos = self.caption_cursor_pos
         current_cursor = self.textEdit.textCursor()
         current_cursor.setPosition(old_pos) 
@@ -2296,6 +2664,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
 
     def export_text(self):
+        """Export transcript to text file.
+        """
         selected_folder = pathlib.Path(self.textEdit.file_name)  / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
@@ -2316,6 +2686,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.statusBar.showMessage("Exported in plain text format")
 
     def export_tape(self):
+        """Export tape to text file.
+        """
         selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
@@ -2335,6 +2707,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 f.write(f"{line}\n")
 
     def export_ascii(self):
+        """Export transcript to formatted ASCII file.
+        """        
         selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
@@ -2366,6 +2740,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start() 
 
     def export_html(self):
+        """Export transcript to HTML file.
+        """        
         selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
@@ -2398,6 +2774,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start()          
 
     def export_plain_ascii(self):
+        """Export transcript to plain ASCII file.
+        """
         selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
@@ -2429,12 +2807,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start()        
 
     def export_srt(self):
-        """
-        srt format: line 1: block number
-                    line 2: timestamp from --> to (millisecond separator comma, not period)
-                    line 3: text
-                    line 4: empty
-                    line 7: textstart
+        """Export transcript to SRT formatted file.
         """
         selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
@@ -2466,6 +2839,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start()
         
     def export_odt(self):   
+        """Export transcript to ODF TextDocument.
+        """
         selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,
@@ -2498,6 +2873,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.thread.start()
 
     def export_rtf(self):
+        """Export transcript to RTF/CRE file.
+        """        
         selected_folder = pathlib.Path(self.textEdit.file_name) / "export"
         selected_file = QFileDialog.getSaveFileName(
             self,

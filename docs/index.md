@@ -65,6 +65,6 @@ Indices and tables
 
 * [](genindex)
 * [](modindex)
-* [](search)
+
 
 

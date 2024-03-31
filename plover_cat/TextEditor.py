@@ -175,6 +175,8 @@ class PloverCATEditor(QTextEdit):
 
     def load(self, path, engine, load_transcript = True):
         """Load transcript and associated data.
+
+        The associated ``load_*`` methods will create necessary files if none exist.
         
         :param path: path of transcript to load
         :param engine: Plover engine instance
@@ -825,7 +827,7 @@ class PloverCATEditor(QTextEdit):
         block_dict = block.userData()
         if not block_dict:
             block_dict = BlockUserData() 
-        block_dict = update_user_data(block_dict, key = "edittime", edit_time)     
+        block_dict = update_user_data(block_dict, "edittime", edit_time)     
         if not block_dict["creationtime"]:
             block_dict = update_user_data(block_dict, key = "creationtime")
         if not block_dict["audiostarttime"]:
