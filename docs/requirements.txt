@@ -1,3 +1,8 @@
 myst-parser
 sphinx-rtd-theme
 Sphinx
+spylls
+odfpy
+dulwich
+obsws-python
+pyparsing
