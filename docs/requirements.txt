@@ -2,6 +2,7 @@ myst-parser
 sphinx-rtd-theme
 Sphinx
 spylls
+plover
 odfpy
 dulwich
 obsws-python
