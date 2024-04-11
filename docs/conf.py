@@ -24,7 +24,7 @@ source_suffix = {
     '.md': 'markdown',
 }
 
-autodoc_mock_imports = ["plover", "PyQt5", "dulwich"]
+autodoc_mock_imports = ["plover", "PyQt5", "dulwich", "plover_cat.plover_cat_ui"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
