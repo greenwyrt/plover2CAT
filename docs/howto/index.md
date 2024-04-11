@@ -54,7 +54,7 @@ Insert images <insertimages.md>
 Deleting text <deletetext.md>
 Spellcheck <spellcheck.md>
 Add extra language dictionaries <addspelldict.md>
-Reset paragraph
+Reset paragraph <resetparagraph.md>
 Revert to previously saved version <revert.md>
 Navigate with headings <navigate.md>
 ```

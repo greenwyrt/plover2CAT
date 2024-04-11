@@ -1565,7 +1565,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def add_dict(self):
         """Add transcript dictionary.
         """
-        ## todo: should be using transcript method
+        ## todo: should be using transcript method, make undo-able
         selected_file = QFileDialog.getOpenFileName(
             self,
             _("Select Dictionary"),

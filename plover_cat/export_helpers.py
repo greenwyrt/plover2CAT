@@ -123,7 +123,6 @@ def format_text(block_data, style, max_char = 80, line_num = 0):
                 align = "left"
         if "textindent" in style["paragraphproperties"]:
             first_indent = inch_to_spaces(style["paragraphproperties"]["textindent"])
-        # todo: tabstop conversion
     # since plaintext, none of the textproperties apply
     max_char = max_char - l_marg - r_marg
     # this only deals with a tab at the start of the paragraph
