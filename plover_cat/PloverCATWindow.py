@@ -5,7 +5,6 @@ import pathlib
 import json
 from datetime import datetime, timezone
 import time
-from os import startfile
 from collections import Counter, deque
 from shutil import copyfile
 from copy import deepcopy, copy
@@ -61,6 +60,12 @@ from plover_cat.documentWorker import documentWorker
 from plover_cat.captionWorker import captionWorker
 
 scowl = _load_wordlist(ORTHOGRAPHY_WORDLIST, DICTIONARIES_ROOT)
+
+try:
+    from os import startfile
+except:
+    pass
+
 
 class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     """Main window that can hold multiple transcripts.
