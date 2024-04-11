@@ -32,6 +32,9 @@ This menu contains items related to transcript file management, import and expor
 - *Clipboard*: Last 5 snippets from cut/copy
 - Jump to Paragraph...: Activates a dialog window to select a paragraph to nagivate to.
 - Reset Paragraph: Removes all paragraph text and steno data from paragraph. Used as the last option when text and steno data go out of sync.
+- Autosave: Enable autosave to backup file at defined time intervals
+- Set Autosave Time: Set time intervals for autosave
+- Revert Transcript: Revert transcript to previously saved version
 
 ### The Steno Actions Menu
 
@@ -87,7 +90,7 @@ This menu contains items related to audiovisual files.
 
 This menu is for transcript dictionary management.
 
-- Add Custom Dict: Add a custom dictionary to the transcript. See  [transcript dictionaries](#transcript-dictionaries) for details.
+- Add Custom Dict: Add a custom dictionary to the transcript. See [transcript dictionaries](../howto/adddict.md) for details.
 - Remove Transcript Dictionary: Removes a loaded transcript dictionary. This will remove both from the Plover instance and the configuration file, but not delete the actual file.
 - Transcript Suggestions: analyze a transcript for common words and phrases to add to dictionary
 
@@ -154,6 +157,9 @@ This section documents each menu item under its menu section with the identifier
 | Jump to Paragraph... | `actionJumpToParagraph`  |              |
 | Insert Normal Text   | `actionInsertNormalText` | Insert       |
 | Reset Paragraph      | `actionClearParagraph`   |              |
+| Autosave             | `actionEnableAutosave`   |              |
+| Set Autosave Time    | `actionSetAutosaveTime`  |              |
+| Revert Transcript    | `actionRevertTranscript` |              |
 
 ### Steno Actions
 

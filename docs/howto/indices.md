@@ -1,4 +1,4 @@
-# How to insert index entries
+# Insert index entries
 
 Plover2CAT supports indexed text, multiple indexes, with hidden or visible descriptions.
 

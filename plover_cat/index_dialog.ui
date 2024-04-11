@@ -36,6 +36,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="addNewIndex">
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
            <property name="toolTip">
             <string>Add another index</string>
            </property>

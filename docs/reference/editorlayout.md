@@ -36,4 +36,4 @@ There are six docks, each of which can be detached to float or removed/shown in 
 - Audio Controls
 - Toolbox
 
-See the [docks](docs.md) page for descriptions of these docks.
+See the [docks](docks.md) page for descriptions of these docks.

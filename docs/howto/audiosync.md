@@ -1,4 +1,4 @@
-# How to set up a time offset for syncing with writing
+# Set up a time offset for syncing with writing
 
 Plover2CAT will keep track of the audio time in addition to the real time of a stroke when an audiovisual file is being played. Both times will show up in the paper tape.
 

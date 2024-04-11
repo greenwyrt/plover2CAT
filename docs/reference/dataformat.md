@@ -33,7 +33,7 @@ Possible key values are:
 - `user_field_dict`: dictionary containing default fields
 - `enable_automatic_affix`: boolean, whether to enable automatic affixes
 - `auto_paragraph_affixes`: dict containing affixes for styles, `{"style": {"prefix": "", "suffix": ""}}`
-
+- `highlighter_colors`: dict holding style names: hex color codes, highlighting not applied if not defined, text will just be style text color, otherwise, highlighting overrides style color
 For the header_* and footer_* keys, their text string values can contain a `%p` which will be replaced with the page number. 
 
 This is the default `config.CONFIG` file that is created when a new transcript is created.
@@ -88,7 +88,7 @@ The keys for the nested JSON object are:
 - `audiostarttime`: timestamp of audio when paragraph was created (if available)
 - `audioendtime`: timestamp of audio if audio was stopped when cursor was in paragraph (if available)
 - `style`: string stating the style of the paragraph (should be one of the keys in the style file)
-- `strokes`: array of serialized `text elements` (see [elements](elements.md))
+- `strokes`: array of serialized `text elements` (see [elements](../api/elements.md))
 - `notes`: string for any notes the user has added to the paragraph
 
 ### Format < 2.0.0

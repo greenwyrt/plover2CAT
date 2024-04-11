@@ -54,7 +54,7 @@ Plover2CAT implements the simple SubRip (`*.srt`) captioning file format for exp
 
 ### OpenDocument Text
 
-The Open Document Format (`ODF`) is an open source standard for documents based on XML. Plover2CAT will export `ODF` files which can be opened by most word processor software such as LibreOffice and Microsoft Word. `ODF` export is the most well-supported file type in terms of formatting, as Plover2CAT can [generate style templates](howto/generatestyletemplate.md) from `ODF` files and even use `ODF` files as [style templates](../howto/generatestyletemplate.md) for formatting that is unsupported in Plover2CAT.
+The Open Document Format (`ODF`) is an open source standard for documents based on XML. Plover2CAT will export `ODF` files which can be opened by most word processor software such as LibreOffice and Microsoft Word. `ODF` export is the most well-supported file type in terms of formatting, as Plover2CAT can [generate style templates](../howto/generatestyletemplate.md) from `ODF` files and even use `ODF` files as [style templates](../howto/generatestyletemplate.md) for formatting that is unsupported in Plover2CAT.
 
 ### RTF/CRE 
 
@@ -64,26 +64,3 @@ Plover2CAT offers exports to RTF/CRE, the commonly used data exchange format for
 
 This exports the transcript paper tape in Plover's paper tape format.
 
-## Export from editor
-
-The editor offloads exporting to another thread through `documentWorker`.
-
-`documentWorker` takes:
-
-- `document`: copy of transcript in dict form (save transcript automatically to update)
-- `path`: export file path
-- `config`: transcript config
-- `styles`: dict of styles for transcript
-- `user_field_dict`: dict of fields
-- `home_dir`: transcript dir path
-
-`documentWorker` has two signals:
-
-- `progress`: sent after generating a paragraph with paragraph number, updates progress bar in editor
-- `finished`: sent after export file is created
-
-Each export format has its own method called from editor.
-
-### Wrappers and helpers
-
-Wrapping of paragraphs is done with `steno_wrap_*` after appropriate formatting with `format_*_text`, resulting in a `dict` containing `{line_num: line_data_dict}`. 

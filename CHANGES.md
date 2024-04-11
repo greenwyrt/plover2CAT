@@ -1,5 +1,45 @@
 # CHANGES
 
+## Ver 3.0.0:
+
+This version is refactored to separate editor internals and the GUI to implement new features.
+
+New Features:
+
+- Each transcript is now a tab, and multiple tabs (transcripts) can be open at once
+- Copy and paste between different transcripts
+- Transcript names can be any text string accepted by operating system
+- Updates to a paragraph's properties such as creation time are now undo-able
+- Page format parameters (including header/footer) for config can be "undone" and "redone", and saved once cursor is moved away from box
+- Use Sphinx for documentation
+
+New GUI changes: 
+
+- Revert to previous versions moved to edit menu from History dock, uses dialog window instead
+- Audio controls are now disabled unless media is loaded
+- Video from media now appears in the `Audio Controls` dock rather than separate window
+- Millisecond adjustment for audio can now be set to negative values (previously lowest value was 0)
+- Audio recording settings removed from dock, now as a dialog from menu
+- Transcripts can be closed from File menu and also by button on tab
+- Changes to styling only allowed if JSON style file loaded
+
+
+Bugs:
+
+- Fix bug where video window did not close after editor did by moving video into dock
+- Warning if new created style has same name as an existing style, does not proceed to create style
+- steno_search name conflict fixed by renaming button
+- fixed problem when direction was foward and steno search would not detect next match in paragraph
+- Do not copy image with same name if one exists in `assets` already
+- image asset files are no longer absolute (causes problems when changing names / using save as)
+- fixed incorrects paths in docs
+
+Known Issues:
+
+- RTF imports do not work properly if no style in the form of `\sn` is defined for each paragraph
+- When inserting image, two image files cannot have same name (copying second will mean replacing first with another, possibly different, image)
+
+
 ## Ver 2.3.3:
 
 - Change: add default port 4455 for OBS

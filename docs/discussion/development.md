@@ -1,8 +1,32 @@
 # Development
 
-Plover2CAT at present, is one gigantic class, and with absolutely no tests.
+plover2CAT's development is built on top of the Qt Framework and the Plover engine hooks. The various pages discuss certain challenges and reasons for why plover2CAT has developed in certain directions.
 
-The sections below list things that could be part of future versions.
+```{toctree}
+:maxdepth: 1
+Challenges of a steno-aware editor <stenoeditor.md>
+Lossy steno data <lossysteno.md>
+Plover engine hooks <enginehooks.md>
+Transcript data formats <transcriptdata.md>
+```
+
+The sections below list things that could be part of future versions. They are not listed in order of priority.
+
+## Minor possible improvements
+
+- rename audiovisual to media in UI
+- add warning about fields in text if removed from dict
+- apply same style to multiple paragraphs (cursor highlighting multiple paragraphs)
+
+## Simultaneous editing and writing
+
+Right now, steno insertion is based on the cursor position unless it is locked at end. It is not possible to edit with a normal keyboard the same time a steno machine is writing. 
+
+Proposed solution: replace `engine._keyboard_emulation` on startup with your own subclass of `plover.output.Output` and implement send_backspaces, send_string, and send_key_combination as needed, at least until new version of Plover with output plugins
+
+## Element styling
+
+Color styling for different elements such as text vs index entry. This will require changing `QTextCharFormats` by setting Foreground. It may also impact editor speed depending on implementation.
 
 ## Parsable action logging
 
@@ -59,6 +83,8 @@ Tables are likely more difficult to implement and may require an editor widget.
 
 ## Refactoring editor
 
+*in-progress for ver 3*
+
 The editor should be refactor into a smaller class.
 
 Methods that exclusively work on the `QTextEdit` could possibly be extracted and refactored from the `PloverCATWindow` into the `PloverCATEditor` custom class.
@@ -72,3 +98,17 @@ The other processes that scan the whole document again and again are fields (on 
 Data retrieval and storage are likely as fast for the limitations, considering that text and steno data have to be linked, and custom data storage for paragraphs would mean cleanup of data that Qt does automatically. If loading from file, the original dict is kept in memory. Blocks that are modified are marked using `userState`. For saving, each paragraph's state is checked, and at the first block with `userState`, all subsequent paragraphs get data extracted and stored. 
 
 Some funtions are called upon every cursor change: updating the steno display, updating the navigation display, and moving the tape to the proper spot. Responsiveness will speed up if all three are inactivated at the cost of less information visible.
+
+## Editor memory
+
+While it has not yet occurred, it is very likely that at some time, memory could pose a big problem with very big transcripts, or just multiple transcripts open. A memory saving strategy would be to use slots for element objects.
+
+## `userState` in editor
+
+The `userState` for each `QTextEdit` block holds one integer. Right now, it holds a 1 if the paragraph has been modified since opening, and -1 (Qt default.) It may be possible to assign more states by using binary, similar to the Qt enums.
+
+## Transcript JSON format
+
+An alternative to the regular JSON format would be using JSONL, with each line per paragraph. This would facilitate reading subsets of a file, and reducing memory when loading a transcript. 
+
+Also, rather than keeping the backup document in memory, re-read the saved file until the first par with changed state, saving each line to new file, and then writing the new data before replacing old saved file with new one.

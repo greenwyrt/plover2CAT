@@ -7,6 +7,17 @@ from plover import log
 from dulwich.porcelain import open_repo_closing
 
 def write_command(control, text = None, value = None, visible = True, group = False):
+    """Create RTF-formatted string.
+    
+    :param str control: any RTF or RTF/CRE control word, required
+    :param str text: unformatted text, optional
+    :param int value: numeric value associated with control word, can be positive or negative
+    :param bool visible: signal that the group is set as ignored, default ``True``
+    :param bool group: whether this command should be a group, default ``False``
+
+    :return: RTF-formatted string
+    :rtype: str
+    """
     command = "\\" + control
     if value is not None:
         command = command + str(value)
@@ -19,7 +30,7 @@ def write_command(control, text = None, value = None, visible = True, group = Fa
     return(command)
 
 def return_commits(repo, max_entries = 100):
-    """ Adapted from dulwich, returns commit info"""
+    """Adapted from dulwich, returns commit info."""
     with open_repo_closing(repo) as r:
         walker = r.get_walker(max_entries = max_entries, paths=None, reverse=False)
         commit_strs = []
@@ -31,38 +42,42 @@ def return_commits(repo, max_entries = 100):
     return(commit_strs)
 
 def ms_to_hours(millis):
-    """Converts milliseconds to formatted hour:min:sec.milli"""
+    """Convert milliseconds to formatted hour:min:sec.milli."""
     seconds, milliseconds = divmod(millis, 1000)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     return ("%02d:%02d:%02d.%03d" % (hours, minutes, seconds, milliseconds))
 
 def hours_to_ms(hour_str):
-    """Converts formatted hour:min:sec.milli to milliseconds"""
+    """Convert formatted hour:min:sec.milli to milliseconds."""
     hours, minutes, sec_ms = hour_str.split(":")
     seconds, milliseconds = sec_md.split(".")
     total_ms = milliseconds + seconds * 1000 + minutes * 60000 + hours * 3600000
     return(total_ms)
 
 def in_to_pt(inch):
+    """Convert inch to point."""
     inch = float(inch)
     return(inch * 72)
 
 def pixel_to_in(pixel):
+    """Convert pixel to inch."""
     pixel = float(pixel)
     return(pixel / 96)
 
 def in_to_pixel(inch):
+    """Convert inch to pixel."""
     inch = float(inch)
     return(inch * 96)
 
 def inch_to_spaces(inch, chars_per_in = 10):
+    """Convert inch to approximate spaces for monospaced fonts."""
     if isinstance(inch, str):
         inch = float(inch.replace("in", ""))
     return round((inch * chars_per_in))
 
 def save_json(json_dict, file_path):
-    """Save dict to json file"""
+    """Save dict to json file."""
     file_path = pathlib.Path(file_path)
     if not file_path.parent.exists():
         file_path.parent.mkdir()
@@ -74,7 +89,7 @@ def save_json(json_dict, file_path):
         log.debug(f"Data saved in {str(file_path)}.")
 
 def add_custom_dicts(custom_dict_paths, dictionaries):
-    """Takes list of dictionary paths, returns Plover dict config"""
+    """Takes list of dictionary paths, returns Plover dict config."""
     dictionaries = dictionaries[:]
     custom_dicts = [DictionaryConfig(path, True) for path in custom_dict_paths]
     return custom_dicts + dictionaries
@@ -110,7 +125,7 @@ def backup_dictionary_stack(dictionaries, path):
             pass
 
 def remove_empty_from_dict(d):
-    """removes dict key:value if value is None-like"""
+    """Removes dict key:value if value is None-like recursively."""
     if type(d) is dict:
         return dict((k, remove_empty_from_dict(v)) for k, v in d.items() if v and remove_empty_from_dict(v))
     elif type(d) is list:
@@ -119,9 +134,13 @@ def remove_empty_from_dict(d):
         return d
 
 def hide_file(filename):
-    """helper for windows os to hide autosave file"""
+    """Helper for windows os to hide autosave file."""
     import ctypes
     FILE_ATTRIBUTE_HIDDEN = 0x02
     ret = ctypes.windll.kernel32.SetFileAttributesW(filename, FILE_ATTRIBUTE_HIDDEN)    
     if not ret:
         raise ctypes.WinError()    
+
+def extract_ngram(text, n = 2):
+    """Return n-gram iterator from string of text."""
+    return zip(*[text.split()[i:] for i in range(n)])
