@@ -340,10 +340,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                         "PyQt5 and Plover are both licensed under the GPL. Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
 
     def open_help(self):
-        """Link to Github help pages.
+        """Link to Readthedocs help pages.
         """
         log.debug("User activated 'User Manual' link.")
-        user_manual_link = QUrl("https://github.com/greenwyrt/plover2CAT/tree/main/docs")
+        user_manual_link = QUrl("https://plover2cat.readthedocs.io/en/latest/")
         QtGui.QDesktopServices.openUrl(user_manual_link)
 
     def display_message(self, txt):
