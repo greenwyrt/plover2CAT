@@ -55,6 +55,8 @@ New features are generally added over time when requested.
 
 ## Get Started
 
+Documentation is linked online [here](https://plover2cat.readthedocs.io/en/latest/)
+
 Start with #3 if you already have Plover installed and know how to install Plover2CAT from the command line.
 
 1. [Install Plover](docs/tutorials/install-plover.md)

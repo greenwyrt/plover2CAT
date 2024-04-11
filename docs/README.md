@@ -1,5 +1,7 @@
 # Documentation
 
+Documentation is linked online [here](https://plover2cat.readthedocs.io/en/latest/)
+
 To get started, go through the following tutorials that will go through installing, writing into the editor, adding formatting, and exporting the transcript.
 
 ## Get Started
