@@ -41,20 +41,20 @@ text_whitespace.set_name("text")
 
 # special chars that exist as control words, should be replaced by actual unicode equivalents, 
 tab_char = Literal("\\tab").set_parse_action(replace_with("\N{CHARACTER TABULATION}")) # "\t" or "\N{CHARACTER TABULATION}"
-emdash_char = Literal("\emdash").set_parse_action(replace_with("\N{EM DASH}")) # "\u2014" or "\N{EM DASH}"
-endash_char = Literal("\endash").set_parse_action(replace_with("\N{EN DASH}")) # "\u2013" or "\N{EN DASH}"
-emspace_char = Literal("\emspace").set_parse_action(replace_with("\N{EM SPACE}")) # "\u2003" or "\N{EM SPACE}"
-enspace_char = Literal("\enspace").set_parse_action(replace_with("\N{EN SPACE}")) # "\u2002" or "\N{EN SPACE}"
-nonbreaking_space = Literal("\~").set_parse_action(replace_with("\N{NO-BREAK SPACE}")) # "\u00A0" or "\N{NO-BREAK SPACE}"
-soft_hyphen = Literal("\-").set_parse_action(replace_with("\N{SOFT HYPHEN}")) # "\u00AD" or "\N{SOFT HYPHEN}"
-nonbreaking_hyphen = Literal("\_").set_parse_action(replace_with("\N{HYPHEN}")) # "\u2010" or "\N{HYPHEN}"
+emdash_char = Literal("\\emdash").set_parse_action(replace_with("\N{EM DASH}")) # "\u2014" or "\N{EM DASH}"
+endash_char = Literal("\\endash").set_parse_action(replace_with("\N{EN DASH}")) # "\u2013" or "\N{EN DASH}"
+emspace_char = Literal("\\emspace").set_parse_action(replace_with("\N{EM SPACE}")) # "\u2003" or "\N{EM SPACE}"
+enspace_char = Literal("\\enspace").set_parse_action(replace_with("\N{EN SPACE}")) # "\u2002" or "\N{EN SPACE}"
+nonbreaking_space = Literal("\\~").set_parse_action(replace_with("\N{NO-BREAK SPACE}")) # "\u00A0" or "\N{NO-BREAK SPACE}"
+soft_hyphen = Literal("\\-").set_parse_action(replace_with("\N{SOFT HYPHEN}")) # "\u00AD" or "\N{SOFT HYPHEN}"
+nonbreaking_hyphen = Literal("\\_").set_parse_action(replace_with("\N{HYPHEN}")) # "\u2010" or "\N{HYPHEN}"
 bullet_char = Literal("\\bullet").set_parse_action(replace_with("\N{BULLET}"))
-lquote_char = Literal("\lquote").set_parse_action(replace_with("\N{LEFT SINGLE QUOTATION MARK}"))
+lquote_char = Literal("\\lquote").set_parse_action(replace_with("\N{LEFT SINGLE QUOTATION MARK}"))
 rquote_char = Literal("\\rquote").set_parse_action(replace_with("\N{RIGHT SINGLE QUOTATION MARK}"))
-ldblquote_char = Literal("\ldblquote").set_parse_action(replace_with("\N{LEFT DOUBLE QUOTATION MARK}"))
+ldblquote_char = Literal("\\ldblquote").set_parse_action(replace_with("\N{LEFT DOUBLE QUOTATION MARK}"))
 rdblquote_char = Literal("\\rdblquote").set_parse_action(replace_with("\N{RIGHT DOUBLE QUOTATION MARK}"))
-open_brace = Literal("\{")
-close_brace = Literal("\}")
+open_brace = Literal("\\{")
+close_brace = Literal("\\}")
 
 def pa(s, l, t):
     hex_val = [int(tokn, 16) for tokn in t]
@@ -111,14 +111,14 @@ def control_parse_ignore(s, l, t):
     command_dict["ignore"] = True
     return(command_dict)
 
-ignore = Group(Literal("\*")("ignore") + control)
+ignore = Group(Literal("\\*")("ignore") + control)
 ignore.set_name("ignore")
 ignore.set_parse_action(control_parse_ignore)
 
 expr <<= OneOrMore(ignore("ignore*") | hex_char("hex_char*") | control("control*") | text_and_chars("text*") | Group(LBRACE + expr + RBRACE)("group*"))
 expr.set_name("RTF")
 
-style_string = Suppress(Literal("\par\pard")) + OneOrMore(control("control*"))
+style_string = Suppress(Literal("\\par\\pard")) + OneOrMore(control("control*"))
 
 def twip_to_in(twips):
     return(twips / 1440)
