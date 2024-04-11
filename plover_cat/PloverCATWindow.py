@@ -2363,7 +2363,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Search for untranslated steno.
         """
         flags = QTextDocument.FindFlags()
-        untrans_reg = QRegExp("(\\b|\\*)(?=[STKPWHRAO*EUFBLGDZ]{3,})S?T?K?P?W?H?R?A?O?\*?E?U?F?R?P?B?L?G?T?S?D?Z?\\b")
+        untrans_reg = QRegExp("(\\b|\\*)(?=[STKPWHRAO*EUFBLGDZ]{3,})S?T?K?P?W?H?R?A?O?\\*?E?U?F?R?P?B?L?G?T?S?D?Z?\\b")
         if direction == -1:
             flags |= QTextDocument.FindBackward
         cursor = self.textEdit.textCursor()

@@ -320,18 +320,18 @@ class rtf_steno:
                 self.scanned_styles[str(par_style_index)] = new_style_dict
                 par_style_index += 1
                 
-test_string = """
-{\\rtf1\\ansi\\deff1
-{\\fonttbl
-{\\f0\\fcharset1 Times New Roman;}
-{\\f1\\froman\\fcharset1 Times New Roman{\\*\\falt Base Font};}}
-{\\colortbl;\\red0\\green0\\blue0;\\red0\\green0\\blue255;\\red0\\green255\\blue255;\\red0\\green255\\blue0;}
-{\\xe{\\*\cxexnum 1}Exhibit 1:  A knife }} sss
-"""
-test_string = r"{\par\pard\s0\f0\fs24{\*\cxt 20:46:25:00}{\*\cxs WELG}Welcome{\*\cxt 20:46:26:00}{\*\cxs TOT} to the{\*\cxt 20:46:27:00}{\*\cxs SROEUS} Voice{\*\cxt 20:46:27:00}{\*\cxs -F} of{\*\cxt 20:46:27:00}{\*\cxs PHERBG} America{\xe{\*\cxexnum 1}Exhibit 1:  A knife }{\*\cxt 20:46:28:00}{\*\cxs AES}'s{\*\cxt 20:46:29:00}{\*\cxs TPHUS} News{\*\cxt 20:46:30:00}{\*\cxs WORDZ} Words{\*\cxt 20:46:30:00}{\*\cxs TP-PL}.}"
+# test_string = """
+# {\\rtf1\\ansi\\deff1
+# {\\fonttbl
+# {\\f0\\fcharset1 Times New Roman;}
+# {\\f1\\froman\\fcharset1 Times New Roman{\\*\\falt Base Font};}}
+# {\\colortbl;\\red0\\green0\\blue0;\\red0\\green0\\blue255;\\red0\\green255\\blue255;\\red0\\green255\\blue0;}
+# {\\xe{\\*\cxexnum 1}Exhibit 1:  A knife }} sss
+# """
+# test_string = r"{\par\pard\s0\f0\fs24{\*\cxt 20:46:25:00}{\*\cxs WELG}Welcome{\*\cxt 20:46:26:00}{\*\cxs TOT} to the{\*\cxt 20:46:27:00}{\*\cxs SROEUS} Voice{\*\cxt 20:46:27:00}{\*\cxs -F} of{\*\cxt 20:46:27:00}{\*\cxs PHERBG} America{\xe{\*\cxexnum 1}Exhibit 1:  A knife }{\*\cxt 20:46:28:00}{\*\cxs AES}'s{\*\cxt 20:46:29:00}{\*\cxs TPHUS} News{\*\cxt 20:46:30:00}{\*\cxs WORDZ} Words{\*\cxt 20:46:30:00}{\*\cxs TP-PL}.}"
 
 
-res = expr.parse_string(test_string)
+# res = expr.parse_string(test_string)
 # test_rtf = rtf_steno("plover_cat/test.rtf")
 # test_rtf.parse_document()
 # test_rtf.scan_par_styles()
