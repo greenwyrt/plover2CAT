@@ -1,5 +1,10 @@
 # CHANGES
 
+## Ver 3.1.0:
+
+- View Plover log from editor
+
+
 ## Ver 3.0.0:
 
 This version is refactored to separate editor internals and the GUI to implement new features.

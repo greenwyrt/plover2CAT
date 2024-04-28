@@ -112,3 +112,19 @@ The `userState` for each `QTextEdit` block holds one integer. Right now, it hold
 An alternative to the regular JSON format would be using JSONL, with each line per paragraph. This would facilitate reading subsets of a file, and reducing memory when loading a transcript. 
 
 Also, rather than keeping the backup document in memory, re-read the saved file until the first par with changed state, saving each line to new file, and then writing the new data before replacing old saved file with new one.
+
+## Unit tests 
+
+Tests should run from a dialog in editor using `unittest`. See this [link](https://stackoverflow.com/questions/20433333/can-python-unittest-return-the-single-tests-result-code) for returning a `TestResult`. Output should be redirected by specifying the `stream` argument for a `StringIO`.
+
+Category of tests:
+
+- Transcript creation
+- Default config/style/dict
+- Try writing
+- Transcript open
+- Load transcript, new and old format
+- Transcript close
+
+- Copy/paste between transcript
+- Switch between transcripts (use recent file tab)

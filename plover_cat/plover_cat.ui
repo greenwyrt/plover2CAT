@@ -291,9 +291,17 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
+    <widget class="QMenu" name="menuDiagnostics">
+     <property name="title">
+      <string>Diagnostics</string>
+     </property>
+     <addaction name="actionViewPloverLog"/>
+     <addaction name="actionRunTests"/>
+    </widget>
     <addaction name="actionAbout"/>
     <addaction name="actionUserManual"/>
     <addaction name="actionAcknowledgements"/>
+    <addaction name="menuDiagnostics"/>
    </widget>
    <widget class="QMenu" name="menuSteno_Actions">
     <property name="title">
@@ -812,7 +820,7 @@ position.</string>
         <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>3</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -850,7 +858,7 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-226</y>
+              <y>0</y>
               <width>351</width>
               <height>466</height>
              </rect>
@@ -1476,7 +1484,7 @@ position.</string>
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-146</y>
+              <y>0</y>
               <width>351</width>
               <height>386</height>
              </rect>
@@ -3673,6 +3681,16 @@ position.</string>
    </property>
    <property name="toolTip">
     <string>Revert transcript to previously saved version</string>
+   </property>
+  </action>
+  <action name="actionViewPloverLog">
+   <property name="text">
+    <string>View Plover Log</string>
+   </property>
+  </action>
+  <action name="actionRunTests">
+   <property name="text">
+    <string>Run Tests</string>
    </property>
   </action>
  </widget>

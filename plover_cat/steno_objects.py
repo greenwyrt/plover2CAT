@@ -289,6 +289,7 @@ class text_field(text_element):
         """Type of element, ``field``"""
         self.name = name
         self.user_dict = user_dict
+        self.update()
     def __add__(self, other):
         """No element can be added. Force use of ``__radd__``.
 

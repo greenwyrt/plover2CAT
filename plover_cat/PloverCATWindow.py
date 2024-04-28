@@ -47,6 +47,7 @@ from plover_cat.indexDialogWindow import indexDialogWindow
 from plover_cat.suggestDialogWindow import suggestDialogWindow
 from plover_cat.captionDialogWindow import captionDialogWindow
 from plover_cat.recorderDialogWindow import recorderDialogWindow
+from plover_cat.testDialogWindow import testDialogWindow
 
 from plover_cat.rtf_parsing import *
 from plover_cat.constants import *
@@ -145,6 +146,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if settings.contains("recentfiles"):
             self.recent_file_menu()
         self.textEdit = None
+        self.test_dialog = None
         self.index_dialog = indexDialogWindow({})
         self.caption_dialog = captionDialogWindow() 
         self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
@@ -270,6 +272,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionAbout.triggered.connect(lambda: self.about())
         self.actionAcknowledgements.triggered.connect(lambda: self.acknowledge())
         self.actionEditMenuShortcuts.triggered.connect(self.edit_shortcuts)
+        self.actionViewPloverLog.triggered.connect(self.view_log)
+        self.actionRunTests.triggered.connect(self.open_tester)
         # status bar
         self.cursor_status = QLabel("Par,Char: {line},{char}".format(line = 0, char = 0))
         self.cursor_status.setObjectName("cursor_status")
@@ -346,6 +350,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         user_manual_link = QUrl("https://plover2cat.readthedocs.io/en/latest/")
         QtGui.QDesktopServices.openUrl(user_manual_link)
 
+    def view_log(self):
+        self.open_tester()
+        self.test_dialog.display_log()
+
+    def open_tester(self):
+        if not self.test_dialog:
+            self.test_dialog = testDialogWindow(self)
+        self.test_dialog.show()
+        self.test_dialog.activateWindow()  
+                  
     def display_message(self, txt):
         """Display message in status bar.
 
