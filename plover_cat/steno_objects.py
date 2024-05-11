@@ -55,6 +55,10 @@ class text_element(UserString):
             new_element = self.__class__()
             new_element.from_dict(class_dict)
             return([new_element])            
+    def __iter__(self):
+        """Return element in list length one for iteration. 
+        """
+        return(iter([self]))
     def __add__(self, other):
         """Adds together text, and updates time from other.
         
@@ -594,6 +598,8 @@ class element_collection(UserList):
             super().__init__([])
         else:
             super().__init__([data])
+    def __iter__(self):
+        return(iter(self.data))
     def __str__(self):
         """Return string representation of all elements in container."""
         string = [i.to_text() for i in self.data]
@@ -998,7 +1004,7 @@ class steno_wrapper(textwrap.TextWrapper):
         text.remove_end()
         merged = text.merge_elements()
         chunks = []
-        for el in merged.data:
+        for el in merged:
             chunks.extend(el.split())
         return chunks
 

@@ -49,6 +49,28 @@
          <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Open</string>
+        </property>
+        <property name="checkState">
+         <enum>Checked</enum>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Close</string>
+        </property>
+        <property name="checkState">
+         <enum>Checked</enum>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsUserCheckable</set>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

@@ -17,7 +17,7 @@ from dulwich import porcelain
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
 QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, QTextBlockFormat, 
-QTextOption, QTextCharFormat, QKeySequence, QPalette, QDesktopServices)
+QTextOption, QTextCharFormat, QKeySequence, QPalette, QDesktopServices, QPixmap, QIcon)
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
 QStyle, QMessageBox, QDialog, QFontDialog, QColorDialog, QLabel, QMenu,
 QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar, QAction, QToolButton)
@@ -161,6 +161,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.menu_enabling()
         self.audio_menu_enabling(False)
         self.set_shortcuts()
+        self.update_highlight_color()
         # connections:
         ## engine connections
         engine.signal_connect("stroked", self.on_stroke) 
@@ -210,8 +211,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionEditIndices.triggered.connect(self.edit_indices)
         # self.actionRedact.triggered.connect(self.insert_redacted)     
         ## steno related edits
-        self.actionMergeParagraphs.triggered.connect(lambda: self.merge_paragraphs())
-        self.actionSplitParagraph.triggered.connect(lambda: self.split_paragraph())
+        self.actionMergeParagraphs.triggered.connect(lambda: self.textEdit.merge_paragraphs() if self.textEdit else None)
+        self.actionSplitParagraph.triggered.connect(lambda: self.textEdit.split_paragraph() if self.textEdit else None)
         self.actionRetroactiveDefine.triggered.connect(lambda: self.define_retroactive())
         self.actionDefineLast.triggered.connect(lambda: self.define_scan())
         self.actionDeleteLast.triggered.connect(lambda: self.delete_scan())
@@ -234,6 +235,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionBackgroundColor.triggered.connect(lambda: self.change_backgrounds())
         self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
         self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
+        self.menuHighlightColors.triggered.connect(self.change_highlight_colors)
         ## tools
         self.actionStyling.triggered.connect(lambda: self.show_toolbox_pane(self.styling_pane))
         self.actionPageFormat.triggered.connect(lambda: self.show_toolbox_pane(self.page_format_pane))
@@ -394,7 +396,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         # clear of last block data
         self.parSteno.clear()
-        for ind, el in enumerate(strokes.data):
+        for ind, el in enumerate(strokes):
             item = QListWidgetItem()
             item.setText(el.to_text())
             item.setData(Qt.ToolTipRole, el.to_display())
@@ -813,6 +815,31 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.strokeList.setFont(font)
             log.debug("User set paper tape font.")
 
+    def change_highlight_colors(self, action):
+        key = action.data()
+        el_color = QSettings("Plover2CAT", "OpenCAT").value(key, "black")
+        new_color = QColorDialog.getColor(QColor(el_color))
+        if new_color.isValid():
+            QSettings("Plover2CAT", "OpenCAT").setValue(key, new_color)
+        self.update_highlight_color()
+        if self.textEdit:
+            self.textEdit.get_highlight_colors()
+    
+    def update_highlight_color(self):
+        settings = QSettings("Plover2CAT", "OpenCAT")
+        el_names = ["stroke", "text", "automatic", "field", "index"]
+        self.menuHighlightColors.clear()
+        for el in el_names:
+            key = f"color{el.title()}"
+            el_color = settings.value(key, "black")
+            action = QAction(el.title(), self.menuHighlightColors)
+            action.setData(key)
+            pix = QPixmap(50, 50)
+            pix.fill(QColor(el_color))
+            ic = QIcon(pix)
+            action.setIcon(ic)
+            self.menuHighlightColors.addAction(action)
+            
     def show_invisible_char(self):
         """Show/hide invisible chars in current transcript.
         """
@@ -1923,7 +1950,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
         self.textEdit.undo_stack.beginMacro(f"Paste: {store_data.to_text()}")
         self.textEdit.blockSignals(True)
-        for el in store_data.data:
+        for el in store_data:
             current_block = self.textEdit.textCursor().blockNumber()
             current_pos = self.textEdit.textCursor().positionInBlock()
             cmd = ea.make_action(self.textEdit, current_block, current_pos, el)
@@ -1993,14 +2020,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not search_result:
             return
         self.textEdit.cut_steno(store = False)
-        # current_cursor = self.textEdit.textCursor()
-        # current_block = current_cursor.block()
-        # current_block_num = current_block.blockNumber()
-        # start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-        # stop_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-        # remove_cmd = steno_remove(self.textEdit, current_block_num, 
-        #                     start_pos, stop_pos - start_pos)  
-        # self.undo_stack.push(remove_cmd)
 
     def add_autocomplete_item(self):
         """Add autocomplete term to wordlist.

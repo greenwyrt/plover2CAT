@@ -14,9 +14,11 @@ The sections below list things that could be part of future versions. They are n
 
 ## Minor possible improvements
 
-- rename audiovisual to media in UI
-- add warning about fields in text if removed from dict
-- apply same style to multiple paragraphs (cursor highlighting multiple paragraphs)
+[ ] rename audiovisual to media in UI
+[ ] add warning about fields in text if removed from dict
+[ ] apply same style to multiple paragraphs (cursor highlighting multiple paragraphs)
+[ ] remove usage of `.data` in `element_collection`
+[ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
 
 ## Simultaneous editing and writing
 
@@ -119,12 +121,12 @@ Tests should run from a dialog in editor using `unittest`. See this [link](https
 
 Category of tests:
 
-- Transcript creation
+
 - Default config/style/dict
 - Try writing
 - Transcript open
 - Load transcript, new and old format
-- Transcript close
+
 
 - Copy/paste between transcript
 - Switch between transcripts (use recent file tab)

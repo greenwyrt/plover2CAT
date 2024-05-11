@@ -10,8 +10,8 @@ from dulwich import porcelain
 from spylls.hunspell import Dictionary
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument
-from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal, QUrl
+from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument, QColor
+from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal, QUrl, QSettings
 from PyQt5.QtWidgets import QPlainTextEdit, QCompleter, QTextEdit, QUndoStack, QMessageBox, QApplication
 from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaRecorder, 
 QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
@@ -45,6 +45,7 @@ class PloverCATEditor(QTextEdit):
     :ivar dict styles: transcript style parameters
     :ivar dict txt_formats: ``QTextCharFormat`` objects for each style by name
     :ivar dict par_formats: ``QTextBlockFormat`` objects for each style by name
+    :ivar dict highlight_colors: ``QColor`` objects for each element type
     :ivar dict user_field_dict: dict ref of ``self.config["user_field_dict"]``
     :ivar dict auto_paragraph_affixes: dict ref of ``self.config["auto_paragraph_affixes"]``
     :ivar int cursor_block: block that current cursor was in on last stroke
@@ -95,6 +96,7 @@ class PloverCATEditor(QTextEdit):
         self.styles = {}
         self.txt_formats = {}
         self.par_formats = {}
+        self.highlight_colors = {}
         self.user_field_dict = {}
         self.auto_paragraph_affixes = {}    
         self.numbers = {number: letter for letter, number in plover.system.NUMBERS.items()}
@@ -188,6 +190,7 @@ class PloverCATEditor(QTextEdit):
         self.load_config_file(self.file_name, engine)
         self.load_dicts(engine, self.config["dictionaries"])
         self.load_check_styles(self.file_name / self.config["style"])
+        self.get_highlight_colors()
         self.load_spellcheck_dict()
         export_path = self.file_name / "export"
         pathlib.Path(export_path).mkdir(parents = True, exist_ok=True)
@@ -544,6 +547,20 @@ class PloverCATEditor(QTextEdit):
             engine.config = {'dictionaries': restored_dicts}
             log.debug("Dictionaries restored from backup file.")
 
+    def get_highlight_colors(self):
+        """Obtain element highlight colors from saved settings.
+        """
+        self.highlight_colors = {}
+        settings = QSettings("Plover2CAT", "OpenCAT")
+        el_names = ["stroke", "text", "automatic", "field", "index"]
+        for el in el_names:
+            key = f"color{el.title()}"
+            if settings.contains(key):
+                el_color = settings.value(key)
+            else:
+                el_color = "black"
+            self.highlight_colors[el] = QColor(el_color)
+
     def load_check_styles(self, path):
         """Load a style JSON or ODF file.
 
@@ -652,7 +669,7 @@ class PloverCATEditor(QTextEdit):
         """
         if not block:
             block = self.textCursor().blockNumber()
-        style_cmd = set_par_style(self, block, style, self.par_formats, self.txt_formats)
+        style_cmd = set_par_style(self.textCursor(), self, block, style, self.par_formats, self.txt_formats)
         self.undo_stack.push(style_cmd)
 
     def set_paragraph_property(self, paragraph, prop, value):
@@ -996,7 +1013,7 @@ class PloverCATEditor(QTextEdit):
             # print(block.blockNumber())
             if block.userData():
                 block_strokes = block.userData()["strokes"]
-                for ind, el in enumerate(block_strokes.data):
+                for ind, el in enumerate(block_strokes):
                     # print(ind)
                     if el.element == "index":
                         if el.indexname not in index_dict:

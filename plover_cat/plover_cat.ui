@@ -266,9 +266,15 @@
      <addaction name="actionToolbox"/>
      <addaction name="actionNavigation"/>
     </widget>
+    <widget class="QMenu" name="menuHighlightColors">
+     <property name="title">
+      <string>Highlight Colors</string>
+     </property>
+    </widget>
     <addaction name="actionShowAllCharacters"/>
     <addaction name="actionWindowFont"/>
     <addaction name="actionBackgroundColor"/>
+    <addaction name="menuHighlightColors"/>
     <addaction name="actionPaperTapeFont"/>
     <addaction name="menuDocks"/>
     <addaction name="actionEditMenuShortcuts"/>
@@ -3691,6 +3697,31 @@ position.</string>
   <action name="actionRunTests">
    <property name="text">
     <string>Run Tests</string>
+   </property>
+  </action>
+  <action name="actionColorSteno">
+   <property name="text">
+    <string>Steno</string>
+   </property>
+  </action>
+  <action name="actionColorText">
+   <property name="text">
+    <string>Typed Text</string>
+   </property>
+  </action>
+  <action name="actionColorAutomatic">
+   <property name="text">
+    <string>Automatic</string>
+   </property>
+  </action>
+  <action name="actionColorField">
+   <property name="text">
+    <string>Field</string>
+   </property>
+  </action>
+  <action name="actionColorIndex">
+   <property name="text">
+    <string>Index</string>
    </property>
   </action>
  </widget>

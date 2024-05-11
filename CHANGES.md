@@ -3,7 +3,12 @@
 ## Ver 3.1.0:
 
 - View Plover log from editor
-
+- Unit tests for elements, also can be run in window
+- Added `__iter__` for `element_collection`
+  - Code that used to call on `.data` to iterate switched over
+  - Code within `element_collection` still call `.data`
+- Added `__iter__` for `text_element`, return as list
+- When splitting paragraphs, new second paragraph keeps same style as original
 
 ## Ver 3.0.0:
 

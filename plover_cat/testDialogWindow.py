@@ -1,15 +1,16 @@
 import unittest
 import pathlib
 from tempfile import mkdtemp
+from shutil import rmtree
 from io import StringIO
 from unittest import TextTestRunner
 
 from PyQt5.QtWidgets import QDialog
 from PyQt5.QtGui import QTextCursor
 from plover.oslayer.config import CONFIG_DIR
-
+from plover.steno import Stroke
 from plover_cat.steno_objects import *
-
+from plover_cat.TextEditor import PloverCATEditor
 from plover_cat.test_dialog_ui import Ui_testDialog
 
 class TestStenoData(unittest.TestCase):
@@ -114,6 +115,44 @@ class TestStenoData(unittest.TestCase):
         sc.insert_steno(4, element_collection(new_data))
         self.assertEqual(sc.to_text(), "ABC ABCD123was too ")
 
+class TestTextEdit(unittest.TestCase):
+    def __init__(self, testname, editor):
+        super(TestTextEdit, self).__init__(testname)
+        self.editor = editor
+        self.temp_dir = None
+    def setUp(self):
+        self.temp_dir = mkdtemp()
+    def tearDown(self):
+        self.editor.textEdit.undo_stack.setClean()
+        self.editor.close_file()
+        rmtree(self.temp_dir)
+    def testMonolithic(self):
+        for _s in ["step_Open", "step_ConfirmFiles", "step_Stroke"]:
+            try:
+                getattr(self, _s)()
+            except Exception as e:
+                self.fail('{} failed({})'.format(_s, e))   
+    def step_Open(self):
+        file_path = pathlib.Path(self.temp_dir) / "test"
+        self.editor.open_file(file_path)
+    def step_ConfirmFiles(self):
+        engine_dicts = self.editor.engine.config["dictionaries"]
+        default_dict_dir = self.editor.textEdit.file_name / "dict"
+        self.assertTrue(default_dict_dir.exists())
+        default_dict = default_dict_dir / "default.json"
+        self.assertTrue(default_dict.exists())
+        style_file = self.editor.textEdit.file_name / "styles" / "default.json"
+        self.assertTrue(style_file.exists())
+    def step_Stroke(self):
+        engine_state = self.editor.engine.output
+        self.editor.engine.set_output(True)
+        self.editor.engine.clear_translator_state()
+        self.editor.on_send_string("THE")
+        self.assertEqual(self.editor.textEdit.last_string_sent, "THE")
+        self.editor.textEdit.on_stroke(Stroke("-T"))
+        self.assertEqual(self.editor.textEdit.toPlainText(), "THE")
+        self.editor.engine.set_output(engine_state)
+
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
     """
@@ -132,6 +171,8 @@ class testDialogWindow(QDialog, Ui_testDialog):
         res_output = StringIO()
         suite_steno = unittest.TestLoader().loadTestsFromTestCase(TestStenoData)
         suite = unittest.TestSuite([suite_steno])
+        suite.addTest(TestTextEdit("testMonolithic", self.editor))
+        # suite.addTest(TestTextEdit("testConfirmFiles", self.editor))
         res = TextTestRunner(stream = res_output, verbosity=1).run(suite)
         self.output.clear()
         self.output.setPlainText(res_output.getvalue())

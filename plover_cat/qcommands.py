@@ -97,11 +97,17 @@ class steno_insert(QUndoCommand):
             block_data = current_block.userData()
         else:
             block_data = BlockUserData()
+        if not block_data["style"]:
+            block_data["style"] = next(iter(self.document.txt_formats))
         log.debug("Insert: Insert text at %s" % str(current_block.position() + self.position_in_block))
         block_data["strokes"].insert_steno(self.position_in_block, self.steno)
         block_data = update_user_data(block_data, "edittime")
         current_block.setUserData(block_data)
-        current_cursor.insertText(self.steno.to_text())
+        cursor_format = self.document.txt_formats[block_data["style"]]
+        for el in self.steno:
+            cursor_format.setForeground(self.document.highlight_colors[el.element])
+            current_cursor.setCharFormat(cursor_format)
+            current_cursor.insertText(el.to_text())
         current_block.setUserState(1)
         self.document.setTextCursor(current_cursor)
         log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.steno.to_json()}
@@ -172,7 +178,11 @@ class steno_remove(QUndoCommand):
         res = block_data["strokes"].insert_steno(self.position_in_block, self.steno)
         block_data = update_user_data(block_data, "edittime")
         current_block.setUserData(block_data)
-        current_cursor.insertText(self.steno.to_text())
+        cursor_format = self.document.txt_formats[block_data["style"]]
+        for el in self.steno:
+            cursor_format.setForeground(self.document.highlight_colors[el.element])
+            current_cursor.setCharFormat(cursor_format)
+            current_cursor.insertText(el.to_text())        
         log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.steno.to_json()}
         log.info(f"Remove (undo): {log_dict}")
         self.document.setTextCursor(current_cursor)
@@ -303,13 +313,14 @@ class split_steno_par(QUndoCommand):
         except:
             second_data = update_user_data(second_data, key = "creationtime")
         second_data["strokes"] = second_part
+        second_data["style"] = first_data["style"]
         # first_data["strokes"] = first_part
         # mimic auto text
         current_cursor.insertText(fake_newline_stroke.to_text().rstrip("\n"))
-        current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
-        current_cursor.removeSelectedText()
+        # current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+        # current_cursor.removeSelectedText()
         current_cursor.insertBlock()
-        current_cursor.insertText(second_part.to_text().rstrip("\n"))
+        # current_cursor.insertText(second_part.to_text().rstrip("\n"))
         new_block = current_block.next()
         current_block.setUserData(first_data)
         new_block.setUserData(second_data)
@@ -420,6 +431,9 @@ class merge_steno_par(QUndoCommand):
         first_block.setUserData(first_data)
         current_cursor.setPosition(first_block.position())
         if first_data["strokes"].ends_with_element("automatic"):
+            cursor_format = self.document.txt_formats[first_data["style"]]
+            cursor_format.setForeground(self.document.highlight_colors["automatic"])
+            current_cursor.setCharFormat(cursor_format)
             current_cursor.setPosition(first_block.position() + self.position_in_block - len(first_data["strokes"].data[-1].prefix))
             current_cursor.insertText(first_data["strokes"].data[-1].prefix)
         else:
@@ -443,7 +457,8 @@ class set_par_style(QUndoCommand):
     Character formats have to be applied through the iterator of ``QTextBlock``
     on individual ``QTextFragment`` elements to avoid applying a format on an image,
     over-riding its format, and causing it to revert to an object replacement charater.
-
+    
+    :param cursor: a ``QTextCursor`` instance
     :param document: a ``QTextDocument`` to act upon
     :param int block: ``blockNumber`` of the ``QTextDocument`` to act upon
     :param str style: name of style to set
@@ -451,7 +466,7 @@ class set_par_style(QUndoCommand):
     :param txt_formats: ``dict`` containing char-level formats
 
     """
-    def __init__(self, document, block, style, par_formats, txt_formats):
+    def __init__(self, cursor, document, block, style, par_formats, txt_formats):
         super().__init__()
         self.cursor = cursor
         self.block = block
@@ -506,7 +521,7 @@ class set_par_style(QUndoCommand):
             current_cursor.movePosition(QTextCursor.StartOfBlock)
             current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
             current_cursor.setBlockFormat(self.par_formats[self.old_style])
-            if any([el.element == "image" for el in block_data["strokes"].data]):
+            if any([el.element == "image" for el in block_data["strokes"]]):
                 it = current_block.begin()
                 while not it.atEnd():
                     frag = it.fragment()
@@ -647,9 +662,9 @@ class update_field(QUndoCommand):
         self.document.set_config_value("user_field_dict", self.new_dict)
         for i in range(self.document.document().blockCount()):     
             block_strokes = block.userData()["strokes"]
-            if any([el.element == "field" for el in block_strokes.data]):
+            if any([el.element == "field" for el in block_strokes]):
                 block.setUserState(1)
-                for ind, el in enumerate(block_strokes.data):
+                for ind, el in enumerate(block_strokes):
                     # print(ind)
                     if el.element == "field":
                         start_pos, end_pos = block_strokes.element_pos(ind)
@@ -673,7 +688,7 @@ class update_field(QUndoCommand):
         self.document.set_config_value("user_field_dict", self.store_dict)
         for i in range(self.document.document().blockCount()):   
             block_strokes = block.userData()["strokes"]
-            for ind, el in enumerate(block_strokes.data):
+            for ind, el in enumerate(block_strokes):
                 # print(ind)
                 if el.element == "field":
                     start_pos, end_pos = block_strokes.element_pos(ind)
@@ -715,9 +730,9 @@ class update_entries(QUndoCommand):
         block = self.document.document().begin()
         for i in range(self.document.document().blockCount()):    
             block_strokes = block.userData()["strokes"]
-            if any([el.element == "index" for el in block_strokes.data]):
+            if any([el.element == "index" for el in block_strokes]):
                 block.setUserState(1)
-                for ind, el in enumerate(block_strokes.data):
+                for ind, el in enumerate(block_strokes):
                     # print(ind)
                     if el.element == "index":
                         start_pos, end_pos = block_strokes.element_pos(ind)
@@ -741,7 +756,7 @@ class update_entries(QUndoCommand):
         block = self.document.document().begin()
         for i in range(self.document.document().blockCount()):    
             block_strokes = block.userData()["strokes"]
-            for ind, el in enumerate(block_strokes.data):
+            for ind, el in enumerate(block_strokes):
                 # print(ind)
                 if el.element == "index":
                     start_pos, end_pos = block_strokes.element_pos(ind)
