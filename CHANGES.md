@@ -1,14 +1,22 @@
 # CHANGES
 
-## Ver 3.1.0:
+## Ver 3.0.1:
+
+Bug fix for set styles.
+
+New Features
 
 - View Plover log from editor
-- Unit tests for elements, also can be run in window
 - Added `__iter__` for `element_collection`
   - Code that used to call on `.data` to iterate switched over
   - Code within `element_collection` still call `.data`
 - Added `__iter__` for `text_element`, return as list
 - When splitting paragraphs, new second paragraph keeps same style as original
+
+In progress:
+
+- Unit tests for elements, also can be run in window
+- Color highlighting to be implemented.
 
 ## Ver 3.0.0:
 

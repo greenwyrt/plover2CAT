@@ -1,6 +1,6 @@
 import unittest
 import pathlib
-from tempfile import mkdtemp
+from tempfile import mkdtemp, mkstemp
 from shutil import rmtree
 from io import StringIO
 from unittest import TextTestRunner
@@ -147,12 +147,33 @@ class TestTextEdit(unittest.TestCase):
         engine_state = self.editor.engine.output
         self.editor.engine.set_output(True)
         self.editor.engine.clear_translator_state()
+        # test append
         self.editor.on_send_string("THE")
         self.assertEqual(self.editor.textEdit.last_string_sent, "THE")
         self.editor.textEdit.on_stroke(Stroke("-T"))
-        self.assertEqual(self.editor.textEdit.toPlainText(), "THE")
+        self.assertEqual(self.editor.textEdit.toPlainText().strip(), "THE")
+        stroke_data = self.editor.textEdit.textCursor().block().userData()["strokes"]
+        self.assertEqual(stroke_data.element_count(), 1)
+        # test delete
+        self.editor.count_backspaces(3)
+        self.editor.textEdit.on_stroke(Stroke("*"))
+        self.assertEqual(self.editor.textEdit.toPlainText(), "")
+        self.assertEqual(stroke_data.element_count(), 0)
+        # test log
+        self.editor.textEdit.log_to_tape(Stroke("*"))
+        self.assertFalse(len(self.editor.strokeList.toPlainText()), 0)
         self.editor.engine.set_output(engine_state)
-
+    def step_AddDict(self):
+        new_dict = mkstemp()
+        new_dict_contents = {"-T": "Success"}
+        save_json(new_dict_contents, new_dict)
+        self.editor.add_dict(new_dict)
+        engine_state = self.editor.engine.output
+        self.editor.engine.set_output(True)
+        self.editor.engine.clear_translator_state()
+        self.editor.textEdit.on_stroke(Stroke("-T"))
+        self.assertEqual(self.editor.textEdit.toPlainText().strip(), "Success")
+        self.editor.engine.set_output(engine_state)
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
     """

@@ -1618,26 +1618,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             str(self.textEdit.file_name), _("Dict (*.json)"))[0]
         if not selected_file:
             return
-        selected_file = pathlib.Path(selected_file)
         self.display_message(f"Selected dictionary at {str(selected_file)} to add.")
-        dict_dir_path = self.textEdit.file_name / "dict"
-        dict_dir_path.mkdir(exist_ok = True)
-        dict_dir_name = dict_dir_path / selected_file.name
-        if selected_file != dict_dir_name:
-            self.display_message(f"Copying dictionary at {str(selected_file)} to {str(dict_dir_name)}")
-            copyfile(selected_file, dict_dir_name)
-        transcript_dicts = self.textEdit.get_config_value("dictionaries")
-        engine_dicts = self.engine.config["dictionaries"]
-        # do not add if already in dict
-        if str(selected_file) in engine_dicts:
-            self.display_message("Selected dictionary is already in loaded dictionaries, passing.")
-            return
-        new_dict_config = add_custom_dicts([str(selected_file)], engine_dicts)
-        self.engine.config = {'dictionaries': new_dict_config}
-        # update config
-        transcript_dicts.append(str(dict_dir_name.relative_to(self.textEdit.file_name)))
-        self.display_message(f"Add {str(dict_dir_name.relative_to(self.textEdit.file_name))} to config")
-
+        self.textEdit.add_dict(selected_file)
     def remove_dict(self):
         """Remove transcript dictionary.
         """

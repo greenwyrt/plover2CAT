@@ -124,7 +124,6 @@ Category of tests:
 
 - Default config/style/dict
 - Try writing
-- Transcript open
 - Load transcript, new and old format
 
 

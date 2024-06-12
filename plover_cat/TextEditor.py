@@ -409,6 +409,12 @@ class PloverCATEditor(QTextEdit):
             self.recorder.stop()
         return True        
 
+    def clear_transcript(self):
+        """Clears all transcript data.
+        """
+        self.clear()
+        self.backup_document = {}
+
     def dulwich_save(self, message = "autosave"):
         """Commit transcript files to ``dulwich`` repo.
 
@@ -533,6 +539,31 @@ class PloverCATEditor(QTextEdit):
         engine.config = {'dictionaries': new_dict_config}
         self.config["dictionaries"] = list(set(self.config["dictionaries"] + dictionaries))
 
+    def add_dict(self, dictionary):
+        """
+        Add dictionary to transcript.
+
+        :param dictionary: path string for dictionary to add
+        """
+
+        dictionary_path = pathlib.Path(dictionary)
+        new_dict_path = self.file_name / "dict" / dictionary_path.name
+        if new_dict_path != dictionary_path:
+            log.debug(f"Copying dictionary at {str(dictionary_path)} to {str(new_dict_path)}")
+            copyfile(dictionary_path, new_dict_path)
+        transcript_dicts = self.get_config_value("dictionaries")
+        engine_dicts = self.engine.config["dictionaries"]
+        if str(dictionary_path) in engine_dicts:
+            self.send_message.emit("Selected dictionary is already in loaded dictionaries, passing.")
+            return
+        new_dict_config = add_custom_dicts([str(new_dict_path)], engine_dicts) 
+        self.engine.config = {'dictionaries': new_dict_config} 
+        # relative_to will be removed version 3.14, change once plover drops support for before 3.10
+        # can use new_dict_path.parents[-1] / new_dict_path.name
+        transcript_dicts.append(str(new_dict_path.relative_to(self.file_name)))  
+
+    def remove_dict(self, dictionary):
+        pass
     def restore_dictionary_from_backup(self, engine):
         """Restore dictionaries from backup file.
 
