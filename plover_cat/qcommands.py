@@ -659,6 +659,7 @@ class update_field(QUndoCommand):
         current_cursor = self.cursor
         current_block = self.document.document().findBlockByNumber(self.block)
         block = self.document.document().begin()
+        self.document.user_field_dict = self.new_dict
         self.document.set_config_value("user_field_dict", self.new_dict)
         for i in range(self.document.document().blockCount()):     
             block_strokes = block.userData()["strokes"]
@@ -685,6 +686,7 @@ class update_field(QUndoCommand):
         current_cursor = self.document.textCursor()
         current_block = self.document.document().findBlockByNumber(self.block)
         block = self.document.document().begin()
+        self.document.user_field_dict = self.store_dict
         self.document.set_config_value("user_field_dict", self.store_dict)
         for i in range(self.document.document().blockCount()):   
             block_strokes = block.userData()["strokes"]

@@ -33,4 +33,6 @@ To remove a field completely, select the row in the table and click the `Remove 
 
 ## Insert a user field
 
-Defined fields are listed under `Insert > Field...` and can be inserted by clicking on the corresponding menu item. For the first 10 defined fields, they can be inserted with the shortcut `Ctrl + Shift + {0-9}`.
+Defined fields are listed under `Insert > Field...` and can be inserted by clicking on the corresponding menu item. For the first 10 defined fields, they can be inserted with the shortcut `Alt + {0-9}`.
+
+The dictionary outline would be `{#alt(0)}` for the first field, `{#alt(1)}` for the second and so on.

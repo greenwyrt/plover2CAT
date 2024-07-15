@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>881</width>
-    <height>687</height>
+    <height>689</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -148,7 +148,7 @@
      <x>0</x>
      <y>0</y>
      <width>881</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -629,7 +629,7 @@ position.</string>
   <widget class="QDockWidget" name="dockAudio">
    <property name="minimumSize">
     <size>
-     <width>260</width>
+     <width>261</width>
      <height>100</height>
     </size>
    </property>
@@ -826,7 +826,7 @@ position.</string>
         <enum>QTabWidget::East</enum>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -865,8 +865,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>351</width>
-              <height>466</height>
+              <width>340</width>
+              <height>456</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_26">
@@ -1491,8 +1491,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>351</width>
-              <height>386</height>
+              <width>329</width>
+              <height>379</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1879,8 +1879,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>368</width>
-              <height>240</height>
+              <width>342</width>
+              <height>239</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -2099,8 +2099,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>368</width>
-              <height>240</height>
+              <width>342</width>
+              <height>239</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -2297,8 +2297,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>368</width>
-              <height>240</height>
+              <width>342</width>
+              <height>239</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_36">
@@ -2428,8 +2428,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>368</width>
-              <height>240</height>
+              <width>342</width>
+              <height>239</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">

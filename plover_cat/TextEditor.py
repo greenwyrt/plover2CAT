@@ -468,9 +468,8 @@ class PloverCATEditor(QTextEdit):
         new_vals = {"page_line_numbering": False, "page_linenumbering_increment": 1, "page_timestamp": False, "page_max_char": 0, "page_max_line": 0, 
                     "header_left": "", "header_center": "", "header_right": "", 
                     "footer_left": "", "footer_center": "", "footer_right": "", "enable_automatic_affix": False,
-                    "user_field_dict": {}, "auto_paragraph_affixes": {}}
+                    "user_field_dict": user_field_dict, "auto_paragraph_affixes": {}}
         new_vals.update(config_contents)
-        log.debug(new_vals)
         self.config = new_vals
         self.user_field_dict = self.config["user_field_dict"]
         self.auto_paragraph_affixes = self.config["auto_paragraph_affixes"]
@@ -563,7 +562,19 @@ class PloverCATEditor(QTextEdit):
         transcript_dicts.append(str(new_dict_path.relative_to(self.file_name)))  
 
     def remove_dict(self, dictionary):
-        pass
+        dictionary_path = pathlib.Path(dictionary)
+        dictionary_list = self.get_config_value("dictionaries")
+        list_dicts = self.engine.config["dictionaries"]
+        list_dicts = [i.path for i in list_dicts if pathlib.Path(i.path) != dictionary_path]
+        new_dict_config = add_custom_dicts(list_dicts, [])
+        self.engine.config = {'dictionaries': new_dict_config}
+        if str(dictionary_path.relative_to(self.file_name)) in dictionary_list:
+            dictionary_list = [i for i in dictionary_list if i != str(dictionary_path.relative_to(self.file_name))]
+            self.send_message.emit(f"Remove {str(dictionary_path.relative_to(self.file_name))} from config")
+            self.config["dictionaries"] = dictionary_list
+        else:
+            self.send_message.emit("Selected dictionary not a transcript dictionary, passing.")
+
     def restore_dictionary_from_backup(self, engine):
         """Restore dictionaries from backup file.
 

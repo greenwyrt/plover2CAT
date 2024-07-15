@@ -943,7 +943,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.update_config_gui()
         if self.textEdit.undo_stack.undoText().startswith("Style:") or self.textEdit.undo_stack.redoText().startswith("Style:"):
             self.refresh_editor_styles()
-
+        if self.textEdit.undo_stack.undoText().startswith("Fields:") or self.textEdit.undo_stack.redoText().startswith("Fields:"):
+            self.update_config_gui()
     def update_config_gui(self):
         """Update config GUI for parameters in current transcript.
         """
@@ -1007,7 +1008,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             label = "{%s}: %s" % (k, v)
             action = QAction(label, self.menuField)
             if ind < 10:           
-                action.setShortcut("Ctrl+Shift+%d" % ind)
+                action.setShortcut("Alt+%d" % ind)
             action.setData(k)
             self.menuField.addAction(action)
 
@@ -1608,42 +1609,35 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if success:
             self.open_file(str(transcript_dir))
 
-    def add_dict(self):
+    def add_dict(self, dict_path):
         """Add transcript dictionary.
         """
-        ## todo: should be using transcript method, make undo-able
-        selected_file = QFileDialog.getOpenFileName(
-            self,
-            _("Select Dictionary"),
-            str(self.textEdit.file_name), _("Dict (*.json)"))[0]
-        if not selected_file:
-            return
-        self.display_message(f"Selected dictionary at {str(selected_file)} to add.")
+        if not dict_path:
+            selected_file = QFileDialog.getOpenFileName(
+                self,
+                _("Select Dictionary"),
+                str(self.textEdit.file_name), _("Dict (*.json)"))[0]
+            if not selected_file:
+                return
+            self.display_message(f"Selected dictionary at {str(selected_file)} to add.")
+        else:
+            selected_file = dict_path
         self.textEdit.add_dict(selected_file)
-    def remove_dict(self):
+
+    def remove_dict(self, dict_path):
         """Remove transcript dictionary.
         """
-        ## todo: should be using transcript method
-        dict_dir_path = self.textEdit.file_name / "dict"
-        selected_file = QFileDialog.getOpenFileName(
-            self,
-            _("Select Dictionary to remove"),
-            str(dict_dir_path), _("Dict (*.json)"))[0]
-        if not selected_file:
-            return
-        selected_file = pathlib.Path(selected_file)
-        self.display_message(f"Selected dictionary at {str(selected_file)} to remove.")
-        dictionary_list = self.textEdit.get_config_value("dictionaries")
-        list_dicts = self.engine.config["dictionaries"]
-        list_dicts = [i.path for i in list_dicts if pathlib.Path(i.path) != selected_file]
-        new_dict_config = add_custom_dicts(list_dicts, [])
-        self.engine.config = {'dictionaries': new_dict_config}
-        if str(selected_file.relative_to(self.textEdit.file_name)) in dictionary_list:
-            dictionary_list = [i for i in dictionary_list if i != str(selected_file.relative_to(self.textEdit.file_name))]
-            self.display_message(f"Remove {str(selected_file.relative_to(self.textEdit.file_name))} from config")
-            self.textEdit.set_config_value("dictionaries", dictionary_list)
+        if not dict_path:
+            dict_dir_path = self.textEdit.file_name / "dict"
+            selected_file = QFileDialog.getOpenFileName(
+                self,
+                _("Select Dictionary to remove"),
+                str(dict_dir_path), _("Dict (*.json)"))[0]
+            if not selected_file:
+                return
         else:
-            self.display_message("Selected dictionary not a transcript dictionary, passing.")
+            selected_file = dict_path
+        self.textEdit.remove_dict(selected_file)
 
     def select_style_file(self):
         """Select a style file for the transcript.

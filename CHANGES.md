@@ -1,5 +1,14 @@
 # CHANGES
 
+## Ver 3.0.2:
+
+- Field insertion now uses the shortcut `Alt + {0-9}`.
+
+- Fix for field menu not updating after changes
+
+- New unit tests for adding/removing dictionaries
+
+
 ## Ver 3.0.1:
 
 Bug fix for set styles.

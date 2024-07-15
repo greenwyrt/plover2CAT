@@ -1,5 +1,6 @@
 import unittest
 import pathlib
+import os
 from tempfile import mkdtemp, mkstemp
 from shutil import rmtree
 from io import StringIO
@@ -8,7 +9,8 @@ from unittest import TextTestRunner
 from PyQt5.QtWidgets import QDialog
 from PyQt5.QtGui import QTextCursor
 from plover.oslayer.config import CONFIG_DIR
-from plover.steno import Stroke
+from plover.steno import Stroke, normalize_steno
+from plover_cat.helpers import save_json
 from plover_cat.steno_objects import *
 from plover_cat.TextEditor import PloverCATEditor
 from plover_cat.test_dialog_ui import Ui_testDialog
@@ -127,7 +129,11 @@ class TestTextEdit(unittest.TestCase):
         self.editor.close_file()
         rmtree(self.temp_dir)
     def testMonolithic(self):
-        for _s in ["step_Open", "step_ConfirmFiles", "step_Stroke"]:
+        for _s in ["step_Open", 
+                    "step_ConfirmFiles", 
+                    "step_Stroke", 
+                    "step_AddRemoveDict",
+                    "step_writeTwoLine"]:
             try:
                 getattr(self, _s)()
             except Exception as e:
@@ -161,19 +167,46 @@ class TestTextEdit(unittest.TestCase):
         self.assertEqual(stroke_data.element_count(), 0)
         # test log
         self.editor.textEdit.log_to_tape(Stroke("*"))
-        self.assertFalse(len(self.editor.strokeList.toPlainText()), 0)
+        self.assertNotEqual(len(self.editor.strokeList.toPlainText()), 0)
         self.editor.engine.set_output(engine_state)
-    def step_AddDict(self):
-        new_dict = mkstemp()
-        new_dict_contents = {"-T": "Success"}
+        self.editor.textEdit.clear_transcript()
+    def step_writeTwoLine(self):
+        engine_state = self.editor.engine.output
+        capture_state = self.editor.actionCaptureAllOutput.isChecked()
+        self.editor.actionCaptureAllOutput.setChecked(True)
+        self.editor.engine.set_output(True)
+        self.editor.engine.clear_translator_state()               
+        self.editor.engine.add_translation(normalize_steno("S", strict = True), "ABC\\nDEF")
+        # todo: create mock tape to read
+        self.editor.engine.set_output(engine_state)
+        self.editor.actionCaptureAllOutput.setChecked(False)
+        self.editor.textEdit.clear_transcript()        
+    def step_AddRemoveDict(self):
+        dict_dir = self.editor.textEdit.file_name / "dict"
+        handle, new_dict = mkstemp(suffix = ".json")
+        new_dict_contents = {"S": "Success"}
         save_json(new_dict_contents, new_dict)
         self.editor.add_dict(new_dict)
-        engine_state = self.editor.engine.output
-        self.editor.engine.set_output(True)
-        self.editor.engine.clear_translator_state()
-        self.editor.textEdit.on_stroke(Stroke("-T"))
-        self.assertEqual(self.editor.textEdit.toPlainText().strip(), "Success")
-        self.editor.engine.set_output(engine_state)
+        self.assertEqual(len([p for p in dict_dir.iterdir() if p.suffix == ".json"]), 2)
+        self.assertEqual(self.editor.engine.lookup(tuple("S")), "Success")
+        new_dict_path = dict_dir / pathlib.Path(new_dict).name
+        self.editor.remove_dict(new_dict_path)
+        self.assertEqual(len([p for p in dict_dir.iterdir() if p.suffix == ".json"]), 2)
+        self.assertNotEqual(self.editor.engine.lookup(tuple("S")), "Success")
+        os.close(handle)
+        pathlib.Path(new_dict).unlink()
+    def step_SplitPar(self):
+        pass
+    def step_MergePar(self):
+        pass    
+    def step_CheckStyleAttr(self):
+        pass
+    def step_changeStyle(self):
+        pass
+    def step_loadNewStyle(self):
+        pass
+    def step_ColorHighlight(self):
+        pass        
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
     """
