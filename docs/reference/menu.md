@@ -118,6 +118,8 @@ This menu contains help:
 - About: Dialog displaying name and version number.
 - Online User Manual: Directs to the online user manual (this document).
 - Acknowledgements
+- View Plover Log: Show most recent messages from Plover log
+- Run Tests: Run unit tests 
 
 ## Identifiers
 
@@ -247,8 +249,10 @@ This section documents each menu item under its menu section with the identifier
 
 ### Help
 
-| Item                    | Action Identifier         | Shortcut |
-|-------------------------|---------------------------|----------|
-| About                   | `actionAbout`             |          |
-| Online User Manual      | `actionUserManual`        | F1       |
-| Acknowledgements        | `actionAcknowledgements`  |          |
+| Item                           | Action Identifier         | Shortcut |
+|--------------------------------|---------------------------|----------|
+| About                          | `actionAbout`             |          |
+| Online User Manual             | `actionUserManual`        | F1       |
+| Acknowledgements               | `actionAcknowledgements`  |          |
+| Diagnostics \> View Plover Log | `actionViewPloverLog`     |          |
+| Diagnostics \> Run Tests       | `actionRunTests`          |          |

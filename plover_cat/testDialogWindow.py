@@ -9,7 +9,7 @@ from unittest import TextTestRunner
 from PyQt5.QtWidgets import QDialog
 from PyQt5.QtGui import QTextCursor
 from plover.oslayer.config import CONFIG_DIR
-from plover.steno import Stroke, normalize_steno
+from plover.steno import Stroke, normalize_stroke, normalize_steno
 from plover_cat.helpers import save_json
 from plover_cat.steno_objects import *
 from plover_cat.TextEditor import PloverCATEditor
@@ -122,9 +122,17 @@ class TestTextEdit(unittest.TestCase):
         super(TestTextEdit, self).__init__(testname)
         self.editor = editor
         self.temp_dir = None
+        self.output_setting = False
+        self.space_setting = "Before Output"
     def setUp(self):
         self.temp_dir = mkdtemp()
+        self.output_setting = self.editor.engine.output
+        self.editor.engine.set_output(True)
+        self.space_setting = self.editor.engine.config["space_placement"]
+        self.editor.engine.config["space_placement"] = "Before Output"
     def tearDown(self):
+        self.editor.engine.set_output(self.output_setting)
+        self.editor.engine.config["space_placement"] = self.space_setting
         self.editor.textEdit.undo_stack.setClean()
         self.editor.close_file()
         rmtree(self.temp_dir)
@@ -133,7 +141,8 @@ class TestTextEdit(unittest.TestCase):
                     "step_ConfirmFiles", 
                     "step_Stroke", 
                     "step_AddRemoveDict",
-                    "step_writeTwoLine"]:
+                    "step_writeTwoLine",
+                    "step_SplitPar"]:
             try:
                 getattr(self, _s)()
             except Exception as e:
@@ -150,8 +159,6 @@ class TestTextEdit(unittest.TestCase):
         style_file = self.editor.textEdit.file_name / "styles" / "default.json"
         self.assertTrue(style_file.exists())
     def step_Stroke(self):
-        engine_state = self.editor.engine.output
-        self.editor.engine.set_output(True)
         self.editor.engine.clear_translator_state()
         # test append
         self.editor.on_send_string("THE")
@@ -168,18 +175,12 @@ class TestTextEdit(unittest.TestCase):
         # test log
         self.editor.textEdit.log_to_tape(Stroke("*"))
         self.assertNotEqual(len(self.editor.strokeList.toPlainText()), 0)
-        self.editor.engine.set_output(engine_state)
         self.editor.textEdit.clear_transcript()
     def step_writeTwoLine(self):
-        engine_state = self.editor.engine.output
-        capture_state = self.editor.actionCaptureAllOutput.isChecked()
-        self.editor.actionCaptureAllOutput.setChecked(True)
-        self.editor.engine.set_output(True)
-        self.editor.engine.clear_translator_state()               
-        self.editor.engine.add_translation(normalize_steno("S", strict = True), "ABC\\nDEF")
-        # todo: create mock tape to read
-        self.editor.engine.set_output(engine_state)
-        self.editor.actionCaptureAllOutput.setChecked(False)
+        # todo: create mock tape to read instead
+        self.editor.on_send_string("ABC\\nDEF")
+        self.editor.textEdit.on_stroke(Stroke("S"))
+        self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\\nDEF")
         self.editor.textEdit.clear_transcript()        
     def step_AddRemoveDict(self):
         dict_dir = self.editor.textEdit.file_name / "dict"
@@ -196,7 +197,17 @@ class TestTextEdit(unittest.TestCase):
         os.close(handle)
         pathlib.Path(new_dict).unlink()
     def step_SplitPar(self):
-        pass
+        one_text = {0: {"style": "Normal", "strokes": [{"data": "ABCDEF", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"}]}}
+        self.editor.textEdit.undo_stack.setClean()
+        save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
+        self.editor.close_file()
+        self.editor.open(pathlib.Path(self.temp_dir) / "test")
+        # do, and undo
+        cursor = self.editor.textEdit.textCursor()
+        cursor.setPosition(3)
+        self.editor.textEdit.setTextCursor(cursor)
+        self.editor.textEdit.split_paragraph()
+        print(self.editor.textEdit.toPlainText())
     def step_MergePar(self):
         pass    
     def step_CheckStyleAttr(self):
@@ -206,7 +217,9 @@ class TestTextEdit(unittest.TestCase):
     def step_loadNewStyle(self):
         pass
     def step_ColorHighlight(self):
-        pass        
+        # set color, close transcript, re-open, check color
+        # then insert text directly in transcript
+        self.editor.textEdit.clear_transcript()         
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
     """

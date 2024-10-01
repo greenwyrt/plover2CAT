@@ -125,7 +125,5 @@ Category of tests:
 - Default config/style/dict
 - Try writing
 - Load transcript, new and old format
-
-
 - Copy/paste between transcript
 - Switch between transcripts (use recent file tab)
