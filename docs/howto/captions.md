@@ -18,6 +18,8 @@ For example, if the value is 2 for a word buffer, and the text is `This is a fir
 
 For a time buffer, the setting is in milliseconds. The editor will send any text produced more than x milliseconds ago to captions. This will send all text up to the end if writing stops for longer than the time buffer setting.
 
+For both buffer types, the text in the buffer is only checked after *steno writing*. For example, if writing stops, and words are left in the buffer, they remain there until writing resumes. To send all text to captions, use `Flushing` as described below.
+
 
 ### `Maximum caption length`
 
