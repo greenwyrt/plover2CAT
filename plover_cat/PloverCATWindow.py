@@ -2654,7 +2654,34 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not self.actionCaptioning.isChecked():
             return
         current_cursor = self.textEdit.textCursor()
-        current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, self.caption_dialog.charOffset.value())
+        if self.caption_dialog.enableTimeBuffer.isChecked():
+            now_time = datetime.now()
+            buffer = datetime.timedelta(milliseconds = self.caption_dialog.timeOffset.value())
+            # time_limit = now_time - buffer
+            current_cursor.setPosition(self.caption_cursor_pos)
+            current_block = current_cursor.block()
+            stroke_data = current_block.userData()["strokes"]
+            track_pos = current_block.block().position()
+            while True:
+                # this loop can be slow if enormous paragraph
+                for el in stroke_data.data:
+                    el_time = datetime.strptime(el.time, "%Y-%m-%dT%H:%M:%S.%f")
+                    if el_time - now_time > buffer:
+                        track_pos =+ len(el)
+                    else:
+                        # break on first time encountering element younger
+                        break
+                current_block = current_block.next()
+                if not current_block:
+                    # break if reach end of document in worst case
+                    break
+                else:
+                    stroke_data = current_block.userData()["strokes"]
+                    track_pos = current_block.block().position()
+            current_cursor.setPosition(track_pos, QTextCursor.MoveAnchor)
+            # current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor)
+        else:
+            current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, self.caption_dialog.charOffset.value())
         new_pos = current_cursor.position()
         if self.caption_cursor_pos >= new_pos:
             return
