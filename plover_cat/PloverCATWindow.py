@@ -3,7 +3,7 @@ import string
 import re
 import pathlib
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import time
 from collections import Counter, deque
 from shutil import copyfile
@@ -945,6 +945,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.refresh_editor_styles()
         if self.textEdit.undo_stack.undoText().startswith("Fields:") or self.textEdit.undo_stack.redoText().startswith("Fields:"):
             self.update_config_gui()
+
     def update_config_gui(self):
         """Update config GUI for parameters in current transcript.
         """
@@ -2654,7 +2655,37 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not self.actionCaptioning.isChecked():
             return
         current_cursor = self.textEdit.textCursor()
-        current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, self.caption_dialog.charOffset.value())
+        if self.caption_dialog.enableTimeBuffer.isChecked():
+            now_time = datetime.now()
+            buffer = timedelta(milliseconds = self.caption_dialog.timeOffset.value())
+            # time_limit = now_time - buffer
+            current_cursor.setPosition(self.caption_cursor_pos)
+            current_block = current_cursor.block()
+            stroke_data = current_block.userData()["strokes"]
+            track_pos = current_block.position()
+            print(f"initial: {track_pos}")
+            while True:
+                # this loop can be slow if enormous paragraph
+                for el in stroke_data.data:
+                    el_time = datetime.strptime(el.time, "%Y-%m-%dT%H:%M:%S.%f")
+                    if now_time - el_time > buffer:
+                        track_pos += len(el)
+                    else:
+                        # break on first time encountering element younger
+                        break
+                current_block = current_block.next()
+                if not current_block.isValid():
+                    # break if reach end of document in worst case
+                    break
+                else:
+                    if not current_block.userData():
+                        break
+                    stroke_data = current_block.userData()["strokes"]
+                    track_pos = current_block.position()
+            current_cursor.setPosition(track_pos, QTextCursor.MoveAnchor)
+            # current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor)
+        else:
+            current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, self.caption_dialog.charOffset.value())
         new_pos = current_cursor.position()
         if self.caption_cursor_pos >= new_pos:
             return

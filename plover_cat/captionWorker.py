@@ -1,6 +1,6 @@
 from urllib import request, parse
 from urllib.error import HTTPError
-from PyQt5.QtCore import QObject, pyqtSignal, QTimer
+from PyQt5.QtCore import QObject, pyqtSignal
 from queue import Queue, Empty
 from collections import deque
 from plover_cat.steno_objects import wordsep_simple_re

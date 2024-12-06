@@ -21,6 +21,8 @@ class captionDialogWindow(QDialog, Ui_captionDialog):
         self.fontSelector.clicked.connect(self.set_font)
         self.fontSelector.setText(f"{self.font.family()} {self.font.pointSize()}")
         self.remoteCapHost.activated.connect(self.enable_host_ui)
+        self.charOffset.valueChanged.connect(self.enable_char_ui)
+        self.timeOffset.valueChanged.connect(self.enable_time_ui)
     def enable_host_ui(self, index):
         """Enable and disable related fields for endpoints.
 
@@ -46,6 +48,10 @@ class captionDialogWindow(QDialog, Ui_captionDialog):
             self.serverPort.setEnabled(False)
             self.serverPort.setPlaceholderText("")
             self.serverPassword.setEnabled(False)                       
+    def enable_char_ui(self):
+        self.enableWordBuffer.setChecked(True)
+    def enable_time_ui(self):
+        self.enableTimeBuffer.setChecked(True)
     def set_font(self):
         """Set font for display in caption window.
         """

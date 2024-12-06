@@ -8,7 +8,7 @@
 
 - New unit tests for adding/removing dictionaries
 
-
+- New time buffer setting for captions
 ## Ver 3.0.1:
 
 Bug fix for set styles.
