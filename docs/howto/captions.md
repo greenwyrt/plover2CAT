@@ -10,15 +10,15 @@ Click `Audiovisual > Captioning` to activate the captioning settings dialog, use
 
 ### Buffer Type
 
-The most important setting is to select either `Word Buffer` or `Time Buffer`. Only one buffer is enabled at a time. 
+The most important setting is to select either `Word Buffer` or `Time Buffer`. Only one buffer is enabled at a time. Note that if you change the setting for a buffer, the buffer type is automatically selected.
 
 A word buffer sets the minimum words behind Plover2CAT will send to be formatted into captions, a "buffer" for making changes.
 
 For example, if the value is 2 for a word buffer, and the text is `This is a first example`, after writing `example`, the text `This is a ` would have been sent to captions already. It is possible to undo or change the text `first example` but not the preceding text.
 
-For a time buffer, the setting is in milliseconds. The editor will send any text produced more than x milliseconds ago to captions. This will send all text up to the end if writing stops for longer than the time buffer setting.
+For a time buffer, the setting is in milliseconds. The editor will send any text produced more than x milliseconds ago to captions. 
 
-For both buffer types, the text in the buffer is only checked after *steno writing*. For example, if writing stops, and words are left in the buffer, they remain there until writing resumes. To send all text to captions, use `Flushing` as described below.
+For both buffer types, the text in the buffer is only checked after *steno writing*. To send all text to captions immediately, use `Flushing` as described below.
 
 
 ### `Maximum caption length`

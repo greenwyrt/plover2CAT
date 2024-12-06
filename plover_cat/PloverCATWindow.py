@@ -945,6 +945,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.refresh_editor_styles()
         if self.textEdit.undo_stack.undoText().startswith("Fields:") or self.textEdit.undo_stack.redoText().startswith("Fields:"):
             self.update_config_gui()
+
     def update_config_gui(self):
         """Update config GUI for parameters in current transcript.
         """
