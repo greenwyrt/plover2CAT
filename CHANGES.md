@@ -2,13 +2,26 @@
 
 ## Ver 3.0.2:
 
-- Field insertion now uses the shortcut `Alt + {0-9}`.
+- Change: Field insertion now uses the shortcut `Alt + {0-9}`
 
-- Fix for field menu not updating after changes
+- Change: Change default save location to user home (should not be using Plover config dir)
 
-- New unit tests for adding/removing dictionaries
+- New: Create New will open a transcript in the system temp, and a save is needed to save
 
-- New time buffer setting for captions
+- Change: Recent files will not store and show transcripts located in system temp directory
+
+- Bug Fix: field menu not updating after changes
+
+- Bug Fix: copy dictionaries to new location with `save_as`
+
+- New: unit tests for adding/removing dictionaries
+
+- Update: documentation
+
+- New: time buffer setting for captions
+
+- Bug: dictionary config not using relative path
+
 ## Ver 3.0.1:
 
 Bug fix for set styles.

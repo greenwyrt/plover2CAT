@@ -6,7 +6,7 @@ This tutorial covers writing in Plover2CAT, changing style properties and saving
 
 ## Writing
 
-Create a new transcript. You will know you are in a transcript when **File > New** or **File > Open** menu items are faded out (and so are their corresponding icons on the toolbar).
+Create a new transcript. You will know you are in a transcript when **File > New** or **File > Open** menu items are faded out (and so are their corresponding icons on the toolbar), and the tab has the transcript name.
 
 ![Within a new transcript](images/withintranscript.png)
 

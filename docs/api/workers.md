@@ -24,7 +24,13 @@ The text is broken down into "words" and "spaces" and fed into `word_queue`, the
     :member-order: bysource
 ```
 
+## Document Worker
 
+`documentWorker` is used to export the transcript in a separate thread. Each file format is called through `save_x`.
+
+During the export, as each paragraph is processed, a `progress` signal is emitted with the paragraph number. This is used for progress bars for long exports. After completing export, the `finished` signal is sent. 
+
+Any new `save_x` format needs to include code for emitting those two signals.
 
 ```{eval-rst}
 .. automodule:: documentWorker

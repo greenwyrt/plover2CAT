@@ -9,10 +9,12 @@ from collections import Counter, deque
 from shutil import copyfile
 from copy import deepcopy, copy
 from sys import platform
+from tempfile import gettempdir
 from spylls.hunspell import Dictionary
 from dulwich.repo import Repo
 from dulwich.errors import NotGitRepository
 from dulwich import porcelain
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
@@ -1211,14 +1213,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Create new transcript.
         """
         transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
-        transcript_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
+        transcript_dir = pathlib.Path(gettempdir())
         default_path = transcript_dir / transcript_name
         # newer creation wizard should be here to add additional dictionaries, spellcheck and other data
-        selected_name = QFileDialog.getSaveFileName(self, _("Transcript name and location"), str(default_path))[0]
-        if not selected_name:
-            return
-        self.display_message(f"Creating project files at {str(selected_name)}")
-        self.open_file(selected_name)
+        # selected_name = QFileDialog.getSaveFileName(self, _("Transcript name and location"), str(default_path))[0]
+        # if not selected_name:
+        #     return
+        self.display_message(f"Creating project files at {str(default_path)}")
+        self.open_file(default_path)
+        self.textEdit.new_open = True
 
     def open_file(self, file_path = None):
         """Open transcript.
@@ -1228,7 +1231,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not file_path:
             name = "Config"
             extension = "config"
-            selected_folder = QFileDialog.getOpenFileName( self, _("Open " + name), plover.oslayer.config.CONFIG_DIR, _(name + "(*." + extension + ")"))[0]
+            selected_folder = QFileDialog.getOpenFileName( self, _("Open " + name), str(pathlib.Path.home()), _(name + "(*." + extension + ")"))[0]
             if not selected_folder:
                 self.display_message("No config file was selected for loading.")
                 return
@@ -1280,6 +1283,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         deleted = []
         for dir_path in recent_file_paths:
             if not pathlib.Path(dir_path).exists():
+                deleted.append(dir_path)
+            if pathlib.Path(gettempdir()) in dir_path.parents:
                 deleted.append(dir_path)
         for remove_path in deleted:
             recent_file_paths.remove(remove_path)
@@ -1505,13 +1510,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def save_file(self):
         """Save current transcript.
         """
-        self.textEdit.save()
+        if self.textEdit.new_open:
+            self.save_as_file()
+        else:
+            self.textEdit.save()
 
     def save_as_file(self):
         """Save current transcript in new location.
         """
         transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
-        transcript_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
+        transcript_dir = pathlib.Path.home()
         default_path = transcript_dir / transcript_name
         # newer creation wizard should be here to add additional dictionaries, spellcheck and other data
         selected_name = QFileDialog.getSaveFileName(self, _("Transcript name and location"), str(default_path))[0]
