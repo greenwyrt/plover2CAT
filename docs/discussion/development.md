@@ -23,7 +23,7 @@ The sections below list things that could be part of future versions. They are n
 - [ ] replace punctuation as needed, include "--" and "..."
 - [ ] diff compare versions
 - [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
-- [ ] downgrade element, use el.__class__.__mro__[1]() which returns new instance, construct element from dict, only do if el.__class__.__name__ is not "text_element"
+- [ ] downgrade element, use `el.__class__.__mro__[1]()` which returns new instance, construct element from dict, only do if `el.__class__.__name__` is not "text_element"
 - [ ] other things to add to insert menu, checkable for export in supported format (table of contents, table of figures/exhibits), number ranges for autonumbering, special characters (more dialog)
 - [ ] text to speech
 - [ ] different time code formats
