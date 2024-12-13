@@ -980,7 +980,7 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.beginMacro(f"Replace: {self.textCursor().selectedText()} with {replace_term}")
         current_cursor = self.textCursor()
         current_block = current_cursor.block()
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         fake_steno = stroke_text(stroke = steno, text = replace_term)
         remove_cmd = steno_remove(current_cursor, self, current_cursor.blockNumber(), start_pos, 
                         len(self.textCursor().selectedText()))

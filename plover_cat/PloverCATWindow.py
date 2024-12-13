@@ -892,8 +892,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = self.textEdit.textCursor()
         if current_cursor.hasSelection():
             current_block = current_cursor.block()
-            start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-            end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+            start_pos = current_cursor.selectionStart() - current_block.position()
+            end_pos = current_cursor.selectionEnd() - current_block.position()
             start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
             end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
             underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
@@ -1932,7 +1932,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = self.textEdit.textCursor()
         current_block_num = current_cursor.blockNumber()
         current_block = self.textEdit.document().findBlockByNumber(current_block_num)
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         self.textEdit.undo_stack.beginMacro(f"Paste: {store_data.to_text()}")
         self.textEdit.blockSignals(True)
         for el in store_data:
@@ -1954,9 +1954,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug("No text selected, skipping")
             self.statusBar.showMessage("Selection needed for define.")
             return
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         # end_pos is in prep for future multi-stroke untrans
-        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        end_pos = current_cursor.selectionEnd() - current_block.position()
         start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
         end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
         current_cursor.setPosition(current_block.position() + start_stroke_pos[0])
@@ -2016,9 +2016,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         current_block = current_cursor.block()
         selected_text = current_cursor.selectedText()        
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         # end_pos has a one char deletion since otherwise it will include unwanted next stroke
-        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position() - 1
+        end_pos = current_cursor.selectionEnd() - current_block.position() - 1
         start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
         end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
         underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
@@ -2220,7 +2220,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def sp_insert_suggest(self, item = None):
         """Perform spellcheck replacement.
 
-        :param item: a ``QListItemWidget``, if ``None``, use selected from GUI
+        :param item: a ``QListWidgetItem``, if ``None``, use selected from GUI
         """
         if not item:
             item = self.spellcheck_suggestions.currentItem()
@@ -2314,7 +2314,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if direction == -1:
             current_block = cursor.block()
             if cursor.hasSelection():
-                start_pos = min(cursor.position(), cursor.anchor())
+                start_pos = cursor.selectionStart()
                 cursor.setPosition(start_pos)
             cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.MoveAnchor)
             self.textEdit.setTextCursor(cursor)
@@ -2345,7 +2345,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             current_block = cursor.block()
             if cursor.hasSelection():
-                start_pos = max(cursor.position(), cursor.anchor())
+                start_pos = cursor.selectionEnd()
                 cursor.setPosition(start_pos + 1)
             cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.MoveAnchor)
             self.textEdit.setTextCursor(cursor)
@@ -2714,8 +2714,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.cap_worker.intake("\n" + "\u2029")
         else:
             self.cap_worker.intake(new_text)
-        self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
-
+        self.caption_cursor_pos = current_cursor.selectionEnd()
+        
     def export_text(self):
         """Export transcript to text file.
         """
