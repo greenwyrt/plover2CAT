@@ -2,7 +2,7 @@
 
 ## Paper Tape
 
-This dock shows the contents of the `transcript-{timestamp}.tape` file, an alternative version of the Plover Paper Tape in a QPlainTextEdit as plain text.
+This dock shows the contents of the `{transcript_name}.tape` file, an alternative version of the Plover Paper Tape in a QPlainTextEdit as plain text.
 
 The paper tape is linked to the text and will scroll to the corresponding stroke when the cursor in the editor moves.
 

@@ -9,10 +9,12 @@ from collections import Counter, deque
 from shutil import copyfile
 from copy import deepcopy, copy
 from sys import platform
+from tempfile import gettempdir
 from spylls.hunspell import Dictionary
 from dulwich.repo import Repo
 from dulwich.errors import NotGitRepository
 from dulwich import porcelain
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
@@ -252,6 +254,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.search_text.toggled.connect(lambda: self.search_text_options())
         self.search_steno.toggled.connect(lambda: self.search_steno_options())
         self.search_untrans.toggled.connect(lambda: self.search_untrans_options())
+        self.searchResults.itemDoubleClicked.connect(self.search_navigation)
         ## spellcheck
         ## steno search
         self.steno_spellcheck.clicked.connect(lambda: self.spell_steno())
@@ -890,8 +893,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = self.textEdit.textCursor()
         if current_cursor.hasSelection():
             current_block = current_cursor.block()
-            start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
-            end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+            start_pos = current_cursor.selectionStart() - current_block.position()
+            end_pos = current_cursor.selectionEnd() - current_block.position()
             start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
             end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
             underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
@@ -1128,6 +1131,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             action.setData(ind)
             self.menuClipboard.addAction(action)
 
+    def display_unsave(self, clean):
+        current_tab_index = self.mainTabs.currentIndex()
+        if clean:
+            self.mainTabs.setTabText(current_tab_index, self.textEdit.file_name.name)
+        else:
+            self.mainTabs.setTabText(current_tab_index, f"*{self.textEdit.file_name.name}")
+
     def set_autosave_time(self):
         """Set autosave time interval that applies to all transcripts.
         """
@@ -1211,14 +1221,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Create new transcript.
         """
         transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
-        transcript_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
+        transcript_dir = pathlib.Path(gettempdir())
         default_path = transcript_dir / transcript_name
         # newer creation wizard should be here to add additional dictionaries, spellcheck and other data
-        selected_name = QFileDialog.getSaveFileName(self, _("Transcript name and location"), str(default_path))[0]
-        if not selected_name:
-            return
-        self.display_message(f"Creating project files at {str(selected_name)}")
-        self.open_file(selected_name)
+        # selected_name = QFileDialog.getSaveFileName(self, _("Transcript name and location"), str(default_path))[0]
+        # if not selected_name:
+        #     return
+        self.display_message(f"Creating project files at {str(default_path)}")
+        self.open_file(default_path)
+        self.textEdit.new_open = True
 
     def open_file(self, file_path = None):
         """Open transcript.
@@ -1228,7 +1239,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not file_path:
             name = "Config"
             extension = "config"
-            selected_folder = QFileDialog.getOpenFileName( self, _("Open " + name), plover.oslayer.config.CONFIG_DIR, _(name + "(*." + extension + ")"))[0]
+            selected_folder = QFileDialog.getOpenFileName( self, _("Open " + name), str(pathlib.Path.home()), _(name + "(*." + extension + ")"))[0]
             if not selected_folder:
                 self.display_message("No config file was selected for loading.")
                 return
@@ -1280,6 +1291,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         deleted = []
         for dir_path in recent_file_paths:
             if not pathlib.Path(dir_path).exists():
+                deleted.append(dir_path)
+            if pathlib.Path(gettempdir()) in dir_path.parents:
                 deleted.append(dir_path)
         for remove_path in deleted:
             recent_file_paths.remove(remove_path)
@@ -1378,9 +1391,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.submitEdited.clicked.connect(self.edit_paragraph_properties)
         self.search_forward.clicked.connect(lambda: self.search())
         self.search_backward.clicked.connect(lambda: self.search(-1))
+        self.find_all.clicked.connect(lambda: self.search_all())
         self.replace_selected.clicked.connect(lambda: self.replace())
         self.replace_all.clicked.connect(lambda: self.replace_everything())        
         self.textEdit.undo_stack.indexChanged.connect(self.check_undo_stack)
+        self.textEdit.undo_stack.cleanChanged.connect(self.display_unsave)
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.textEdit.send_message.connect(self.display_message)
         self.textEdit.send_tape.connect(self.update_tape)
@@ -1437,10 +1452,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.style_selector.clear()
         self.style_selector.activated.disconnect()
         self.textEdit.undo_stack.indexChanged.disconnect(self.check_undo_stack)
+        self.textEdit.undo_stack.cleanChanged.disconnect()
         self.textEdit.document().blockCountChanged.disconnect()
         self.submitEdited.clicked.disconnect()
         self.submitEdited.setEnabled(False)
         self.search_forward.clicked.disconnect()
+        self.find_all.clicked.disconnect()
         self.replace_selected.clicked.disconnect()
         self.replace_all.clicked.disconnect()
         self.menuParagraphStyle.clear()
@@ -1505,13 +1522,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def save_file(self):
         """Save current transcript.
         """
-        self.textEdit.save()
+        if self.textEdit.new_open:
+            self.save_as_file()
+        else:
+            self.textEdit.save()
 
     def save_as_file(self):
         """Save current transcript in new location.
         """
         transcript_name = "transcript-" + datetime.now().strftime("%Y-%m-%dT%H%M%S")
-        transcript_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
+        transcript_dir = pathlib.Path.home()
         default_path = transcript_dir / transcript_name
         # newer creation wizard should be here to add additional dictionaries, spellcheck and other data
         selected_name = QFileDialog.getSaveFileName(self, _("Transcript name and location"), str(default_path))[0]
@@ -1924,7 +1944,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = self.textEdit.textCursor()
         current_block_num = current_cursor.blockNumber()
         current_block = self.textEdit.document().findBlockByNumber(current_block_num)
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         self.textEdit.undo_stack.beginMacro(f"Paste: {store_data.to_text()}")
         self.textEdit.blockSignals(True)
         for el in store_data:
@@ -1946,9 +1966,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug("No text selected, skipping")
             self.statusBar.showMessage("Selection needed for define.")
             return
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         # end_pos is in prep for future multi-stroke untrans
-        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        end_pos = current_cursor.selectionEnd() - current_block.position()
         start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
         end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
         current_cursor.setPosition(current_block.position() + start_stroke_pos[0])
@@ -2008,9 +2028,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         current_block = current_cursor.block()
         selected_text = current_cursor.selectedText()        
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         # end_pos has a one char deletion since otherwise it will include unwanted next stroke
-        end_pos = max(current_cursor.position(), current_cursor.anchor()) - current_block.position() - 1
+        end_pos = current_cursor.selectionEnd() - current_block.position() - 1
         start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
         end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
         underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
@@ -2212,7 +2232,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def sp_insert_suggest(self, item = None):
         """Perform spellcheck replacement.
 
-        :param item: a ``QListItemWidget``, if ``None``, use selected from GUI
+        :param item: a ``QListWidgetItem``, if ``None``, use selected from GUI
         """
         if not item:
             item = self.spellcheck_suggestions.currentItem()
@@ -2234,6 +2254,53 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             search_status = self.text_search(direction)
         return(search_status)
+
+    def search_all(self):
+        """Find all matches and display in pane.
+        """
+        cursor = self.textEdit.textCursor()
+        old_wrap_state = self.search_wrap.isChecked()
+        if old_wrap_state:
+            self.search_wrap.setChecked(False)
+        old_cursor_position = cursor.block().position()        
+        cursor.movePosition(QTextCursor.Start)
+        search_status = True
+        log.debug("Search all, starting from beginning.")
+        while search_status:
+            search_status = self.search()
+            if search_status is None:
+                break
+            match_start = self.textEdit.textCursor().selectionStart()
+            match_end = self.textEdit.textCursor().selectionEnd()
+            item = QListWidgetItem()
+            current_cursor = self.textEdit.textCursor()
+            current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, 2)
+            while current_cursor.selectionEnd() < match_end:
+                current_cursor.movePosition(QTextCursor.NextWord, QTextCursor.KeepAnchor, 2)
+            match_text = current_cursor.selectedText()
+            item.setText(match_text)
+            item.setData(Qt.UserRole, (match_start, match_end))
+            self.searchResults.addItem(item)
+        log.debug("Attempting to set cursor back to original position after search all.")
+        cursor.setPosition(old_cursor_position)
+        self.textEdit.setTextCursor(cursor)
+        self.search_wrap.setChecked(old_wrap_state)
+        # store search options
+        # then set wrapped false
+        # move cursor to top of document
+        # loop search
+        # for each match, append existing cursor with selection to qtextedit.extraSelections
+        # at end of document, stop
+        # for each selection, reverse 2 words
+        # add as item to qlistview, elide right 
+
+    def search_navigation(self, item):
+        start_pos, end_pos = item.data(Qt.UserRole)
+        log.debug("Navigating to selected search match.")
+        current_cursor = self.textEdit.textCursor()
+        current_cursor.setPosition(start_pos)
+        current_cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
+        self.textEdit.setTextCursor(current_cursor)
 
     def text_search(self, direction = 1):
         """Search text.
@@ -2306,7 +2373,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if direction == -1:
             current_block = cursor.block()
             if cursor.hasSelection():
-                start_pos = min(cursor.position(), cursor.anchor())
+                start_pos = cursor.selectionStart()
                 cursor.setPosition(start_pos)
             cursor.movePosition(QTextCursor.PreviousCharacter, QTextCursor.MoveAnchor)
             self.textEdit.setTextCursor(cursor)
@@ -2337,7 +2404,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             current_block = cursor.block()
             if cursor.hasSelection():
-                start_pos = max(cursor.position(), cursor.anchor())
+                start_pos = cursor.selectionEnd()
                 cursor.setPosition(start_pos + 1)
             cursor.movePosition(QTextCursor.NextCharacter, QTextCursor.MoveAnchor)
             self.textEdit.setTextCursor(cursor)
@@ -2706,7 +2773,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.cap_worker.intake("\n" + "\u2029")
         else:
             self.cap_worker.intake(new_text)
-        self.caption_cursor_pos = max(current_cursor.position(), current_cursor.anchor())
+        self.caption_cursor_pos = current_cursor.selectionEnd()
 
     def export_text(self):
         """Export transcript to text file.

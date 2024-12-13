@@ -36,6 +36,7 @@ class PloverCATEditor(QTextEdit):
     and settings that are unique to each transcript. No changes to the GUI,
     except those to the `QTextEdit` itself should be made here.
 
+    :ivar new_open: ``True`` if transcript in temporary directory
     :ivar engine: Plover existing engine instance
     :ivar dict config: transcript configuration
     :ivar file_name: transcript directory path
@@ -87,6 +88,7 @@ class PloverCATEditor(QTextEdit):
         self.setCursorWidth(5)
         self.setTextInteractionFlags(Qt.TextSelectableByKeyboard | Qt.TextSelectableByMouse)
         # transcript attributes
+        self.new_open = False
         self.engine = None
         self.config = {}
         self.file_name = ""
@@ -199,6 +201,7 @@ class PloverCATEditor(QTextEdit):
             self.dulwich_save()
         except NotGitRepository:
             self.repo = Repo.init(self.file_name)
+            self.dulwich_save()
         transcript = self.file_name.joinpath(self.file_name.stem).with_suffix(".transcript")
         if load_transcript and transcript.is_file():
             self.load_transcript(transcript)
@@ -330,10 +333,12 @@ class PloverCATEditor(QTextEdit):
         transcript_dir.mkdir()
         self.save_config_file(transcript_dir/ "config.CONFIG")
         transcript_name = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".transcript")        
-        self.save_transcript(transcript_name)
+        if transcript_name.exists():
+            self.save_transcript(transcript_name)
         transcript_tape = self.file_name.joinpath(self.file_name.stem).with_suffix(".tape")
-        new_tape = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".tape")
-        copyfile(transcript_tape, new_tape)
+        if transcript_tape.exists():
+            new_tape = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".tape")
+            copyfile(transcript_tape, new_tape)
         transcript_style = self.file_name / self.config["style"]
         transcript_dir.joinpath("styles").mkdir()
         new_style = transcript_dir / self.config["style"]
@@ -341,6 +346,9 @@ class PloverCATEditor(QTextEdit):
         if self.file_name.joinpath("assets").exists():
             asset_dir = transcript_dir / "assets"
             copytree(self.file_name.joinpath("assets"), asset_dir)
+        if self.file_name.joinpath("dict").exists():
+            dict_dir = transcript_dir / "dict"
+            copytree(self.file_name.joinpath("dict"), dict_dir)
 
     def save_transcript(self, path): 
         """Extract transcript steno data and save.
@@ -516,10 +524,10 @@ class PloverCATEditor(QTextEdit):
         if not default_dict_name.exists() and not has_next:
             log.debug(f"Creating default dictionary in {str(default_dict_name)}")
             save_json(default_dict, default_dict_name)
-            self.config["dictionaries"].append(str(default_dict_name))
+            dictionaries.append(str(pathlib.Path("dict/default.json")))
         backup_dict_path = self.file_name / "dict" / "dictionaries_backup"
         backup_dictionary_stack(list_dicts, backup_dict_path)
-        full_paths = [str(self.file_name / pathlib.Path(i)) for i in self.config["dictionaries"]]
+        full_paths = [str(self.file_name / pathlib.Path(i)) for i in dictionaries]
         log.debug("Trying to load dictionaries at %s", full_paths)
         if any(new_dict in list_dicts for new_dict in full_paths):
             log.debug("Checking for duplicate dictionaries with loaded dictionaries.")
@@ -711,6 +719,9 @@ class PloverCATEditor(QTextEdit):
         """
         if not block:
             block = self.textCursor().blockNumber()
+        if self.textCursor.hasSelection():
+            start_pos = self.textCursor().selectionStart()
+            end_pos = self.textCursor().selectionEnd()
         style_cmd = set_par_style(self.textCursor(), self, block, style, self.par_formats, self.txt_formats)
         self.undo_stack.push(style_cmd)
 
@@ -969,7 +980,7 @@ class PloverCATEditor(QTextEdit):
         self.undo_stack.beginMacro(f"Replace: {self.textCursor().selectedText()} with {replace_term}")
         current_cursor = self.textCursor()
         current_block = current_cursor.block()
-        start_pos = min(current_cursor.position(), current_cursor.anchor()) - current_block.position()
+        start_pos = current_cursor.selectionStart() - current_block.position()
         fake_steno = stroke_text(stroke = steno, text = replace_term)
         remove_cmd = steno_remove(current_cursor, self, current_cursor.blockNumber(), start_pos, 
                         len(self.textCursor().selectedText()))

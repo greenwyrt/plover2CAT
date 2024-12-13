@@ -12,6 +12,6 @@ The default autosave interval is 5 minutes. Click on `Edit` menu and then `Set A
 
 ## Accessing backup
 
-The backup file uses the same same name as the transcript data file except with a period in front, resulting in `.transcript-{timestamp}.transcript`. This file will be set as hidden. Depending on the operating system and settings, the file may or may not be visible.
+The backup file uses the same same name as the transcript data file except with a period in front, resulting in `{transcript_name}.transcript`. This file will be set as hidden. Depending on the operating system and settings, the file may or may not be visible.
 
 Open the file with any text editor and copy the contents, or rename the file to the transcript data file to use it.

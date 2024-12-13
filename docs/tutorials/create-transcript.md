@@ -12,21 +12,17 @@ Open Plover and then open **Plover2CAT** from the **Tools** menu.
 
 The editor window will open.
 
-![Plover2CAT editor](images/editor.png)
-
-You will notice that even if you put the cursor into the editor area and enable Plover, nothing is written. A transcript folder has to be created first before writing.
-
 ## Create transcript folder
 
 Click on **File > New** in the menu.
 
 ![Plover2CAT File Menu](images/editornew.png)
 
-## Select location for transcript
+An empty transcript will appear in the center editor, with a tab name of  `transcript-TIMESTAMP`. It is now possible to write into this editor. 
 
-A file dialog will appear. You will be allowed to select an existing folder from your filesystem or you can create a new folder.
+## Save transcript
 
-## Make transcript name
+To save the transcript, use **File > Save** or `Ctrl + S`  to save. 
 
 The default name for the transcript uses the format `transcript-TIMESTAMP`. It is possible to change the default name to any that the file system will accept (those without forbidden characters such as `"` in Windows).
 

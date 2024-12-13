@@ -12,13 +12,25 @@ Transcript data formats <transcriptdata.md>
 
 The sections below list things that could be part of future versions. They are not listed in order of priority.
 
-## Minor possible improvements
+## Possible improvements
 
-[ ] rename audiovisual to media in UI
-[ ] add warning about fields in text if removed from dict
-[ ] apply same style to multiple paragraphs (cursor highlighting multiple paragraphs)
-[ ] remove usage of `.data` in `element_collection`
-[ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
+- [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
+- [ ] sequentially process tape to translation
+- [ ] rename audiovisual to media in UI and beyond
+- [ ] apply same style to multiple paragraphs (cursor highlighting multiple paragraphs)
+- [ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
+- [ ] a/an search
+- [ ] replace punctuation as needed, include "--" and "..."
+- [ ] diff compare versions
+- [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
+- [ ] downgrade element, use el.__class__.__mro__[1]() which returns new instance, construct element from dict, only do if el.__class__.__name__ is not "text_element"
+- [ ] other things to add to insert menu, checkable for export in supported format (table of contents, table of figures/exhibits), number ranges for autonumbering, special characters (more dialog)
+- [ ] text to speech
+- [ ] different time code formats
+- [ ] control line numbering position
+- [ ] control timestamp position
+- [ ] switch between plain text and wysiwyg editors
+- [ ] custom scripts for keyboard editing shortcuts
 
 ## Simultaneous editing and writing
 
@@ -68,13 +80,9 @@ Epub: More of a reading format
 
 Steno-Annotated ODF: Plover2CAT should produce an annotated document, putting raw steno in the `ruby` element to annotate the corresponding words. This takes advantage of the annotations which are originally for Asian language pronunciation.
 
-## Preview of search and replace
-
-Search and replace is done "blindly" in the case of replace all, and also more timeconsuming if done one by one. A preview might allow for a quick check, summarizing the number and showing the context.
-
 ## Style highlighting
 
-Paragraphs with certain styles could get a highlight color.
+Paragraphs with certain styles could get a highlight color, would conflict with element styling (ie two font colors)
 
 
 ## Richtext Features for indexes and tables
@@ -116,6 +124,8 @@ An alternative to the regular JSON format would be using JSONL, with each line p
 Also, rather than keeping the backup document in memory, re-read the saved file until the first par with changed state, saving each line to new file, and then writing the new data before replacing old saved file with new one.
 
 ## Unit tests 
+
+*In progress*
 
 Tests should run from a dialog in editor using `unittest`. See this [link](https://stackoverflow.com/questions/20433333/can-python-unittest-return-the-single-tests-result-code) for returning a `TestResult`. Output should be redirected by specifying the `stream` argument for a `StringIO`.
 

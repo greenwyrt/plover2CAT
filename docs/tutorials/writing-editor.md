@@ -6,7 +6,7 @@ This tutorial covers writing in Plover2CAT, changing style properties and saving
 
 ## Writing
 
-Create a new transcript. You will know you are in a transcript when **File > New** or **File > Open** menu items are faded out (and so are their corresponding icons on the toolbar).
+Create a new transcript. You will know you are in a transcript when **File > New** or **File > Open** menu items are faded out (and so are their corresponding icons on the toolbar), and the tab has the transcript name.
 
 ![Within a new transcript](images/withintranscript.png)
 
@@ -14,9 +14,11 @@ In addition, when Plover2CAT holds an open transcript, the transcript dictionary
 
 ![Plover dictionary pane](images/loadtranscriptdict.png)
 
-Enable Plover output and click the editor. A cursor should appear. Write as normal. 
+Enable Plover output and click the editor. A cursor should appear. Write as normal. The words will appear in the center editor pane. 
 
-The words will appear in the center editor pane. Click on the Paper Tape tab on the left. A paper tape similar to the one that Plover has is there. However, this tape includes the date and time each stroke was made, as well as the position of the cursor at the moment.
+As the transcript now has unsaved changes, an `*` has been placed in front of the transcript tab name.
+
+Click on the Paper Tape tab on the left. A paper tape similar to the one that Plover has is there. However, this tape includes the date and time each stroke was made, as well as the position of the cursor at the moment.
 
 ![Writing first line](images/initialwriting.png)
 
@@ -53,6 +55,8 @@ Changes to properties of a style are applied document-wide. For example, you can
  ##  Save and Versioning
 
 To save the transcript, use **File > Save** or `Ctrl + S`  to save. 
+
+
 Click to the History tab. You will see that under version history at the bottom, it shows the time of your last save.
 
 Now you can close the transcript by **File > Close**.  **DO NOT** use the `Alt+ F4` or `ESC` as that causes an instant exit without saving.

@@ -2,13 +2,30 @@
 
 ## Ver 3.0.2:
 
-- Field insertion now uses the shortcut `Alt + {0-9}`.
+New Features
 
-- Fix for field menu not updating after changes
+- Time buffer setting for captions
+- Display results for find all with navigation
+- Create New will open a transcript in the system temp, and a save is needed to save
+- Unit tests for adding/removing dictionaries
 
-- New unit tests for adding/removing dictionaries
+Documentation updated for new features
 
-- New time buffer setting for captions
+Changes
+
+- Transcripts with unsaved changes will have `*` indicator at beginning of tab
+- Field insertion now uses the shortcut `Alt + {0-9}`
+- Default save location to user home (should not be using Plover config dir)
+- Recent files will not store and show transcripts located in system temp directory
+- UI changed for find/replace to accomodate Find All, search options moved before replace
+
+Bug Fixes
+
+- Field menu not updating after changes
+- Copy dictionaries to new location with `save_as`
+- Dictionary config not using relative path
+- Use `selectionStart` and `selectionEnd` methods for `QTextCursor` rather than `min` and `max` with anchor
+
 ## Ver 3.0.1:
 
 Bug fix for set styles.

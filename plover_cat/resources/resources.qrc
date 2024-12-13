@@ -1,5 +1,7 @@
 <RCC>
   <qresource>
+    <file>arrow-skip.png</file>
+    <file>arrow-skip-180.png</file>
     <file>spell-check-error.png</file>
     <file>card--pencil.png</file>
     <file>document-text.png</file>
