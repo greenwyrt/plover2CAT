@@ -254,6 +254,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.search_text.toggled.connect(lambda: self.search_text_options())
         self.search_steno.toggled.connect(lambda: self.search_steno_options())
         self.search_untrans.toggled.connect(lambda: self.search_untrans_options())
+        self.searchResults.itemDoubleClicked.connect(self.search_navigation)
         ## spellcheck
         ## steno search
         self.steno_spellcheck.clicked.connect(lambda: self.spell_steno())
@@ -1130,6 +1131,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             action.setData(ind)
             self.menuClipboard.addAction(action)
 
+    def display_unsave(self, clean):
+        current_tab_index = self.mainTabs.currentIndex()
+        if clean:
+            self.mainTabs.setTabText(current_tab_index, self.textEdit.file_name.name)
+        else:
+            self.mainTabs.setTabText(current_tab_index, f"*{self.textEdit.file_name.name}")
+
     def set_autosave_time(self):
         """Set autosave time interval that applies to all transcripts.
         """
@@ -1383,9 +1391,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.submitEdited.clicked.connect(self.edit_paragraph_properties)
         self.search_forward.clicked.connect(lambda: self.search())
         self.search_backward.clicked.connect(lambda: self.search(-1))
+        self.find_all.clicked.connect(lambda: self.search_all())
         self.replace_selected.clicked.connect(lambda: self.replace())
         self.replace_all.clicked.connect(lambda: self.replace_everything())        
         self.textEdit.undo_stack.indexChanged.connect(self.check_undo_stack)
+        self.textEdit.undo_stack.cleanChanged.connect(self.display_unsave)
         self.textEdit.customContextMenuRequested.connect(self.context_menu)
         self.textEdit.send_message.connect(self.display_message)
         self.textEdit.send_tape.connect(self.update_tape)
@@ -1442,10 +1452,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.style_selector.clear()
         self.style_selector.activated.disconnect()
         self.textEdit.undo_stack.indexChanged.disconnect(self.check_undo_stack)
+        self.textEdit.undo_stack.cleanChanged.disconnect()
         self.textEdit.document().blockCountChanged.disconnect()
         self.submitEdited.clicked.disconnect()
         self.submitEdited.setEnabled(False)
         self.search_forward.clicked.disconnect()
+        self.find_all.clicked.disconnect()
         self.replace_selected.clicked.disconnect()
         self.replace_all.clicked.disconnect()
         self.menuParagraphStyle.clear()
@@ -2243,6 +2255,53 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             search_status = self.text_search(direction)
         return(search_status)
 
+    def search_all(self):
+        """Find all matches and display in pane.
+        """
+        cursor = self.textEdit.textCursor()
+        old_wrap_state = self.search_wrap.isChecked()
+        if old_wrap_state:
+            self.search_wrap.setChecked(False)
+        old_cursor_position = cursor.block().position()        
+        cursor.movePosition(QTextCursor.Start)
+        search_status = True
+        log.debug("Search all, starting from beginning.")
+        while search_status:
+            search_status = self.search()
+            if search_status is None:
+                break
+            match_start = self.textEdit.textCursor().selectionStart()
+            match_end = self.textEdit.textCursor().selectionEnd()
+            item = QListWidgetItem()
+            current_cursor = self.textEdit.textCursor()
+            current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, 2)
+            while current_cursor.selectionEnd() < match_end:
+                current_cursor.movePosition(QTextCursor.NextWord, QTextCursor.KeepAnchor, 2)
+            match_text = current_cursor.selectedText()
+            item.setText(match_text)
+            item.setData(Qt.UserRole, (match_start, match_end))
+            self.searchResults.addItem(item)
+        log.debug("Attempting to set cursor back to original position after search all.")
+        cursor.setPosition(old_cursor_position)
+        self.textEdit.setTextCursor(cursor)
+        self.search_wrap.setChecked(old_wrap_state)
+        # store search options
+        # then set wrapped false
+        # move cursor to top of document
+        # loop search
+        # for each match, append existing cursor with selection to qtextedit.extraSelections
+        # at end of document, stop
+        # for each selection, reverse 2 words
+        # add as item to qlistview, elide right 
+
+    def search_navigation(self, item):
+        start_pos, end_pos = item.data(Qt.UserRole)
+        log.debug("Navigating to selected search match.")
+        current_cursor = self.textEdit.textCursor()
+        current_cursor.setPosition(start_pos)
+        current_cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
+        self.textEdit.setTextCursor(current_cursor)
+
     def text_search(self, direction = 1):
         """Search text.
 
@@ -2715,7 +2774,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             self.cap_worker.intake(new_text)
         self.caption_cursor_pos = current_cursor.selectionEnd()
-        
+
     def export_text(self):
         """Export transcript to text file.
         """

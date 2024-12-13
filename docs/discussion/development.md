@@ -14,7 +14,7 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
-
+- [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
 - [ ] sequentially process tape to translation
 - [ ] rename audiovisual to media in UI and beyond
 - [ ] apply same style to multiple paragraphs (cursor highlighting multiple paragraphs)

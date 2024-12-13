@@ -27,9 +27,16 @@ This will search for any text that appears to be an untranslated steno stroke wi
 
 This search will find any untrans that match.
 
+
 ## Replace
 
 If any of the three find methods has a match, it will be highlighted in the editor. The text in the "Replace" input box will replace the translated text. The underlying stroke data will not be changed.
+
+## Find All and navigate to result
+
+This button can be used to display all the matches from a search. Double click on a result to navigate to it in the editor. 
+
+Note that if the document was modified after searching with `Find All`, navigation may not be correct to the selected result.
 
 ## Replace All
 

@@ -1879,8 +1879,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>342</width>
-              <height>239</height>
+              <width>329</width>
+              <height>252</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -1889,7 +1889,7 @@ position.</string>
                <property name="title">
                 <string>Search Types</string>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_14">
+               <layout class="QHBoxLayout" name="horizontalLayout">
                 <item>
                  <widget class="QRadioButton" name="search_text">
                   <property name="focusPolicy">
@@ -1907,19 +1907,6 @@ position.</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QRadioButton" name="search_steno">
-                  <property name="focusPolicy">
-                   <enum>Qt::NoFocus</enum>
-                  </property>
-                  <property name="toolTip">
-                   <string>Search strokes, find text has to match stroke completely</string>
-                  </property>
-                  <property name="text">
-                   <string>Underlying Steno</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QRadioButton" name="search_untrans">
                   <property name="focusPolicy">
                    <enum>Qt::NoFocus</enum>
@@ -1929,6 +1916,19 @@ position.</string>
                   </property>
                   <property name="text">
                    <string>Untrans</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="search_steno">
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Search strokes, find text has to match stroke completely</string>
+                  </property>
+                  <property name="text">
+                   <string>Underlying Steno</string>
                   </property>
                  </widget>
                 </item>
@@ -1947,69 +1947,54 @@ position.</string>
                  </property>
                 </widget>
                </item>
-               <item>
-                <widget class="QPushButton" name="search_forward">
-                 <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
-                 </property>
-                 <property name="toolTip">
-                  <string>Perform selected search forwards</string>
-                 </property>
-                 <property name="text">
-                  <string>Next</string>
-                 </property>
-                </widget>
-               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_13">
                <item>
                 <widget class="QPushButton" name="search_backward">
                  <property name="focusPolicy">
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="toolTip">
-                  <string>Perform selected search backwards</string>
+                  <string>Search backwards</string>
                  </property>
                  <property name="text">
                   <string>Previous</string>
                  </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
-               <item>
-                <widget class="QLineEdit" name="replace_term">
-                 <property name="toolTip">
-                  <string>The text to replace the match found in search</string>
-                 </property>
-                 <property name="placeholderText">
-                  <string>Replace</string>
+                 <property name="icon">
+                  <iconset resource="resources/resources.qrc">
+                   <normaloff>:/arrow-skip-180.png</normaloff>:/arrow-skip-180.png</iconset>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="replace_selected">
+                <widget class="QPushButton" name="search_forward">
                  <property name="focusPolicy">
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="toolTip">
-                  <string>Replace the found match with the text in the replace textbox</string>
+                  <string>Search forward</string>
                  </property>
                  <property name="text">
-                  <string>Once</string>
+                  <string>Next</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="resources/resources.qrc">
+                   <normaloff>:/arrow-skip.png</normaloff>:/arrow-skip.png</iconset>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="replace_all">
+                <widget class="QPushButton" name="find_all">
                  <property name="focusPolicy">
                   <enum>Qt::NoFocus</enum>
                  </property>
                  <property name="toolTip">
-                  <string>Replace all matches with text in replace textbox</string>
+                  <string>Find all matches</string>
                  </property>
                  <property name="text">
-                  <string>All</string>
+                  <string>Find All</string>
                  </property>
                 </widget>
                </item>
@@ -2059,17 +2044,51 @@ position.</string>
               </layout>
              </item>
              <item>
-              <spacer name="verticalSpacer">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QLineEdit" name="replace_term">
+                 <property name="toolTip">
+                  <string>The text to replace the match found in search</string>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Replace</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="replace_selected">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Replace the found match with the text in the replace textbox</string>
+                 </property>
+                 <property name="text">
+                  <string>Once</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="replace_all">
+                 <property name="focusPolicy">
+                  <enum>Qt::NoFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>Replace all matches with text in replace textbox</string>
+                 </property>
+                 <property name="text">
+                  <string>All</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QListWidget" name="searchResults">
+               <property name="toolTip">
+                <string>Displays search results</string>
                </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
+              </widget>
              </item>
             </layout>
            </widget>
