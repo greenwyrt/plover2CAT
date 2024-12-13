@@ -80,10 +80,6 @@ Epub: More of a reading format
 
 Steno-Annotated ODF: Plover2CAT should produce an annotated document, putting raw steno in the `ruby` element to annotate the corresponding words. This takes advantage of the annotations which are originally for Asian language pronunciation.
 
-## Preview of search and replace
-
-Search and replace is done "blindly" in the case of replace all, and also more timeconsuming if done one by one. A preview might allow for a quick check, summarizing the number and showing the context.
-
 ## Style highlighting
 
 Paragraphs with certain styles could get a highlight color, would conflict with element styling (ie two font colors)

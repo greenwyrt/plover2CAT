@@ -26,17 +26,6 @@ Bug Fixes
 - Dictionary config not using relative path
 - Use `selectionStart` and `selectionEnd` methods for `QTextCursor` rather than `min` and `max` with anchor
 
-
-
-
-
-
-
-
-
-
-
-
 ## Ver 3.0.1:
 
 Bug fix for set styles.

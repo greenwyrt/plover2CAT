@@ -57,7 +57,7 @@ Users should not have to edit the config file by hand as almost all values can b
 
 ## Tape file
 
-The tape file (named `transcript-{timestamp}.tape`) is located in the root directory. It is saved at every stroke.
+The tape file (named `{transcript_name}.tape`) is located in the root directory. It is saved at every stroke.
 
 There are four fields separated by the `|` character:
 
@@ -76,7 +76,7 @@ An example tape file would look like this if there is no audio time:
 
 ## Transcript file
 
-The transcript file (named `transcript-{timestamp}.transcript`) is located in the root directory.
+The transcript file (named `t{transcript_name}.transcript`) is located in the root directory.
 
 The transcript file is in reality a JSON file. Each paragraph in the transcript is a key:value pair, with the paragraph number being the first level key, and a nested JSON object the value.
 

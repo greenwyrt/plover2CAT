@@ -88,7 +88,7 @@ Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0
 
 # Development
 
-Plover2CAT at present, is one gigantic class, and with absolutely no tests. See the docs for details of the implementation, and wished-for features.
+See the docs for details of the implementation, and wished-for features. Much of Plover2CAT does not have unit tests.
 
 # Contribute
 
