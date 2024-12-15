@@ -1,5 +1,11 @@
 # CHANGES
 
+## Ver 3.0.3:
+
+Bug fix: transcript did not save in new location after `create new`
+
+Bug fix: speed up tape translate by blocking signals
+
 ## Ver 3.0.2:
 
 New Features

@@ -1873,7 +1873,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         selected_file = pathlib.Path(selected_file)   
         paper_format, ok = QInputDialog.getItem(self, "Translate Tape", "Format of tape file:", ["Plover2CAT", "Plover (raw)", "Plover (paper)"], editable = False)
-        log.debug(f"Translating tape from {selected_file} with {paper_format} format.") 
+        log.debug(f"Translating tape from {selected_file} with {paper_format} format.")
+        self.mainTabs.hide()
+        self.textEdit.blockSignals(True)
         if paper_format == "Plover (raw)":
             with open(selected_file) as f:
                 for line in f:
@@ -1899,6 +1901,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                             keys.append(plover.system.KEYS[i])
                     self.engine._translator.translate(Stroke(keys))
                     self.engine._trigger_hook('stroked', Stroke(keys))
+        self.textEdit.blockSignals(False)
+        self.mainTabs.show()
         # todo, if format has time data, that should be inserted into stroke data of editor too
 
     def reset_paragraph(self):

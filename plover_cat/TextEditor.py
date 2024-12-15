@@ -333,8 +333,7 @@ class PloverCATEditor(QTextEdit):
         transcript_dir.mkdir()
         self.save_config_file(transcript_dir/ "config.CONFIG")
         transcript_name = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".transcript")        
-        if transcript_name.exists():
-            self.save_transcript(transcript_name)
+        self.save_transcript(transcript_name)
         transcript_tape = self.file_name.joinpath(self.file_name.stem).with_suffix(".tape")
         if transcript_tape.exists():
             new_tape = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".tape")
@@ -367,8 +366,8 @@ class PloverCATEditor(QTextEdit):
             if status == 1:
                 if block.userData():
                     block_dict = deepcopy(block.userData().return_all())
-                else:
-                    return False
+                # else:
+                #     return False
                 block_num = block.blockNumber()
                 block_dict["strokes"] = block_dict["strokes"].to_json()
                 json_document[str(block_num)] = block_dict
