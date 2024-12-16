@@ -336,14 +336,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Display version info in dialog.
         """
         log.debug("User activated 'About' dialog.")
-        QMessageBox.about(self, "About",
+        QMessageBox.about(self, "Plover2CAT",
                 "This is Plover2CAT version %s, a computer aided transcription plugin for Plover." % __version__)
 
     def acknowledge(self):
         """Display acknowledgements in dialog.
         """
         log.debug("User activated 'Acknowledgements' dialog.")
-        QMessageBox.about(self, "Acknowledgements",
+        QMessageBox.about(self, "Plover2CAT",
                         "Plover2CAT is built on top of Plover, the open source stenotype engine. "
                         "It owes its development to the members of the Plover discord group who provided suggestions and bug finding. "
                         "PyQt5 and Plover are both licensed under the GPL. Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
@@ -451,7 +451,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Reapply styles to every paragraph.
         """
         if self.textEdit.document().blockCount() > 200:
-            user_choice = QMessageBox.question(self, "Refresh styles", f"There are {self.textEdit.document().blockCount()} paragraphs. Style refreshing may take some time. Continue?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            user_choice = QMessageBox.question(self, "Plover2CAT", f"There are {self.textEdit.document().blockCount()} paragraphs. Style refreshing may take some time. Continue?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if user_choice == QMessageBox.No:
                 return
         self.textEdit.gen_style_formats()
@@ -1180,13 +1180,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         wordlist_path = self.textEdit.file_name / "sources" / "wordlist.json"
         if not wordlist_path.exists():
             log.warning("Wordlist does not exist.")
-            QMessageBox.warning(self, "Autocompletion", "The required file wordlist.json is not available in the sources folder. See user manual for format.")
+            QMessageBox.warning(self, "Plover2CAT", "The required file wordlist.json is not available in the sources folder. See user manual for format.")
             self.display_message("Wordlist.json for autocomplete does not exist in sources directory. Passing.")
             return
         check_return = self.engine.reverse_lookup("{#Return}")
         if not check_return:
             log.warning("Active dictionaries missing a {#Return} stroke")
-            QMessageBox.warning(self, "Autocompletion", "No active dictionaries have an outline for {#Return}. One is recommended for autocompletion. See user manual.")
+            QMessageBox.warning(self, "Plover2CAT", "No active dictionaries have an outline for {#Return}. One is recommended for autocompletion. See user manual.")
             self.actionAutocompletion.setChecked(False)
             return
         self.completer.setModel(self.model_from_file(str(wordlist_path)))
@@ -1489,7 +1489,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_message("Saved window settings")
         textEdit = self.mainTabs.findChildren(QTextEdit)
         if len(textEdit) > 1:
-            QMessageBox.information(self, "Close", "Multiple transcripts open. Close each in order to exit.")
+            QMessageBox.information(self, "Plover2CAT", "Multiple transcripts open. Close each in order to exit.")
             return
         else:
             self.close_file()
@@ -1585,7 +1585,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         log.debug(f"Import RTF {selected_file[0]}.")            
         if not self.textEdit.document().isEmpty():
-            user_choice = QMessageBox.question(self, "Import RTF", "Are you sure you want to import? This erases the present transcript.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            user_choice = QMessageBox.question(self, "Plover2CAT", "Are you sure you want to import? This erases the present transcript.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if user_choice == QMessageBox.Yes:
                 log.debug("User choice to import and erase present document.")
                 pass
@@ -1716,7 +1716,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if self.blockParentStyle.currentText() != style_name:
                 new_style_dict["parentstylename"] = self.blockParentStyle.currentText()
             else:
-                QMessageBox.warning(self, "Edit style", "Style cannot be parent of itself.")
+                QMessageBox.warning(self, "Plover2CAT", "Style cannot be parent of itself.")
                 return
         if self.blockNextStyle.currentIndex() != -1:
             new_style_dict["nextstylename"] = self.blockNextStyle.currentText()
@@ -1776,7 +1776,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         log.debug(f"Creating new style with name {text.strip()}")
         if text in self.textEdit.styles:
-            QMessageBox.critical(self, "Create New Style", "New style cannot have same name as existing style.")
+            QMessageBox.critical(self, "Plover2CAT", "New style cannot have same name as existing style.")
             return
         self.textEdit.set_style_properties(text, {"family": "paragraph", "parentstylename": self.style_selector.currentText()})
         self.style_selector.clear()
@@ -1856,8 +1856,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Translate tape contents into transcript.
         """
         if not self.engine.output:
-            self.statusBar.showMessage("Plover is not enabled.")
-            return
+            choice = QMessageBox.warning(self, "Plover2CAT", "Plover is not enabled.Enable output?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if choice == QMessageBox.Yes:
+                self.engine.set_output(True)
+            else:
+                return
         # do not erase any content before, case of too many asterisks for example
         self.engine.clear_translator_state()
         # bit of a hack since triggering stroked hook through code
@@ -1908,7 +1911,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def reset_paragraph(self):
         """Remove all data from paragraph block, and erase action history.
         """
-        user_choice = QMessageBox.critical(self, "Reset Paragraph", "This will clear all data from this paragraph. This cannot be undone. You will lose all history. Are you sure?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        user_choice = QMessageBox.critical(self, "Plover2CAT", "A reset will clear all data from this paragraph. This cannot be undone. You will lose all history. Are you sure?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if user_choice != QMessageBox.Yes:
             return
         log.debug("User trigger paragraph reset.")
@@ -2223,7 +2226,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 self.spellcheck_suggestions.addItems(suggestions)
                 break
         if current_cursor.atEnd():
-            QMessageBox.information(self, "Spellcheck", "End of document.")
+            QMessageBox.information(self, "Plover2CAT", "End of document.")
 
     def sp_ignore_all(self):
         """Add word to be ignored by spellchecking.
@@ -2560,7 +2563,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.textEdit.recorder.state() == QMediaRecorder.StoppedState:
             pass
         else:
-            QMessageBox.information(self, "Opening Media", "Recording in progress. Stop recording before loading media file.")
+            QMessageBox.information(self, "Plover2CAT", "Recording in progress. Stop recording before loading media file.")
             return
         audio_file = QFileDialog.getOpenFileName(self, _("Select Media File"), str(self.textEdit.file_name), "Media Files (*.mp3 *.ogg *.wav *.mp4 *.mov *.wmv *.avi)")
         if audio_file[0]:
@@ -2792,7 +2795,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not selected_file[0]:
             return
         if self.thread and self.thread.isRunning():
-            QMessageBox.warning(self, "Export", "Another export is in process.")
+            QMessageBox.warning(self, "Plover2CAT", "Another export is in process.")
             return
         contents = self.textEdit.document().toPlainText()
         file_path = pathlib.Path(selected_file[0])
@@ -2835,7 +2838,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not selected_file[0]:
             return
         if self.thread and self.thread.isRunning():
-            QMessageBox.warning(self, "Export", "Another export is in process.")
+            QMessageBox.warning(self, "Plover2CAT", "Another export is in process.")
             return        
         self.save_file()
         log.debug(f"Exporting in ASCII to {selected_file[0]}")
@@ -2869,7 +2872,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         block = self.textEdit.document().begin()
         if self.thread and self.thread.isRunning():
-            QMessageBox.warning(self, "Export", "Another export is in process.")
+            QMessageBox.warning(self, "Plover2CAT", "Another export is in process.")
             return        
         self.save_file()
         log.debug(f"Exporting in HTML to {selected_file[0]}")
@@ -2903,7 +2906,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         log.debug(f"Exporting in plain ASCII to {selected_file[0]}")
         if self.thread and self.thread.isRunning():
-            QMessageBox.warning(self, "Export", "Another export is in process.")
+            QMessageBox.warning(self, "Plover2CAT", "Another export is in process.")
             return        
         self.save_file()        
         self.thread = QThread()
@@ -2935,7 +2938,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not selected_file[0]:
             return
         if self.thread and self.thread.isRunning():
-            QMessageBox.warning(self, "Export", "Another export is in process.")
+            QMessageBox.warning(self, "Plover2CAT", "Another export is in process.")
             return        
         self.save_file()
         self.thread = QThread()
@@ -2969,7 +2972,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(f"Exporting in ODF to {selected_file[0]}")
         # automatically update config and save in case changes were not saved before
         if self.thread and self.thread.isRunning():
-            QMessageBox.warning(self, "Export", "Another export is in process.")
+            QMessageBox.warning(self, "Plover2CAT", "Another export is in process.")
             return        
         self.save_file()
         self.thread = QThread()
@@ -3003,7 +3006,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(f"Exporting in RTF to {selected_file[0]}")            
         # automatically update config and save in case changes were not saved before
         if self.thread and self.thread.isRunning():
-            QMessageBox.warning(self, "Export", "Another export is in process.")
+            QMessageBox.warning(self, "Plover2CAT", "Another export is in process.")
             return        
         self.save_file()
         self.thread = QThread()

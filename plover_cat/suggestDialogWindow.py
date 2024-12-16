@@ -112,11 +112,11 @@ class suggestDialogWindow(QDialog, Ui_suggestDialog):
         """Add selected outline to dictionary."""
         selected_row = self.displaySuggest.currentRow()
         if selected_row == -1:
-            QMessageBox.warning(self, "Add to dictionary", "No row selected.")
+            QMessageBox.warning(self, "Plover2CAT", "No row selected for adding to dictionary.")
             return
         word = self.displaySuggest.item(selected_row, 0).text()
         stroke = self.displaySuggest.item(selected_row, 1).text()
         if len(stroke) == 0:
-            QMessageBox.warning(self, "Add to dictionary", "Missing translation outline.")    
+            QMessageBox.warning(self, "Plover2CAT", "Missing translation outline to add to dictionary.")    
             return
         self.engine.add_translation(normalize_steno(stroke, strict = True), word.strip())

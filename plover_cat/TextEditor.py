@@ -366,8 +366,8 @@ class PloverCATEditor(QTextEdit):
             if status == 1:
                 if block.userData():
                     block_dict = deepcopy(block.userData().return_all())
-                # else:
-                #     return False
+                else:
+                    continue
                 block_num = block.blockNumber()
                 block_dict["strokes"] = block_dict["strokes"].to_json()
                 json_document[str(block_num)] = block_dict
@@ -404,7 +404,7 @@ class PloverCATEditor(QTextEdit):
     def close_transcript(self):
         """Clean up transcript for close."""
         if not self.undo_stack.isClean():
-            user_choice = QMessageBox.question(self, "Close", "Are you sure you want to close without saving changes?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            user_choice = QMessageBox.question(self, "Plover2CAT", "Are you sure you want to close without saving changes?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if user_choice == QMessageBox.Yes:
                 log.debug("User choice to close without saving")
                 pass

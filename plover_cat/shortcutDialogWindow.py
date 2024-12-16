@@ -42,10 +42,10 @@ class shortcutDialogWindow(QDialog, Ui_shortcutDialog):
             return
         keys = self.shortcut.keySequence().toString()
         if keys in self.shortcut_dict.values():
-            QMessageBox.warning(self, "Set Shortcuts", "This shortcut is already in use. Choose another one.")
+            QMessageBox.warning(self, "Plover2CAT", "This shortcut is already in use. Choose another one.")
             return
         reserved_keys = [f"Ctrl+{i}" for i in range(0,10)] + [f"Ctrl+Shift+{i}" for i in range(0,10)] 
         if keys in reserved_keys:
-            QMessageBox.warning(self, "Set Shortcuts", "This shortcut is a reserved shortcut. Choose another one.")
+            QMessageBox.warning(self, "Plover2CAT", "This shortcut is a reserved shortcut. Choose another one.")
             return
         self.shortcut_dict[action] = keys
