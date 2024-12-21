@@ -14,10 +14,10 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
+- [ ] formatting after merge par is not consistent with styling
 - [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
 - [ ] sequentially process tape to translation
 - [ ] rename audiovisual to media in UI and beyond
-- [ ] apply same style to multiple paragraphs (cursor highlighting multiple paragraphs)
 - [ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
 - [ ] a/an search
 - [ ] replace punctuation as needed, include "--" and "..."

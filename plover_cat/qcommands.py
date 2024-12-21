@@ -89,7 +89,10 @@ class steno_insert(QUndoCommand):
         self.cursor = cursor
     def redo(self):
         current_cursor = self.cursor
-        current_block = self.document.document().findBlockByNumber(self.block)
+        if current_cursor.blockNumber() == self.block:
+            current_block = current_cursor.block()
+        else:
+            current_block = self.document.document().findBlockByNumber(self.block)
         current_cursor.setPosition(current_block.position() + self.position_in_block)
         self.block_state = current_block.userState()
         self.document.setTextCursor(current_cursor)
@@ -263,13 +266,13 @@ class split_steno_par(QUndoCommand):
     :param str space_placement: from Plover config, whether space is before/after output
     :param new_line_stroke: a ``stroke_text`` element containing custom data to insert in the split
     :param bool remove_space: trim space from start of new paragraph after split, default ``True``
+    :param bool space_removed: tracks whether a space was removed from start of new paragraph
     """
     def __init__(self, cursor, document, block, position_in_block, space_placement, new_line_stroke, remove_space = True):
         super().__init__()
         self.block = block
         self.position_in_block = position_in_block
         self.document = document
-        self.strokes = []
         self.remove_space = remove_space
         self.space_placement = space_placement
         self.new_line_stroke = automatic_text()
@@ -278,6 +281,7 @@ class split_steno_par(QUndoCommand):
         self.block_data = ""
         self.block_state = 1
         self.cursor = cursor
+        self.space_removed = False
     def redo(self):
         current_cursor = self.cursor
         current_block = self.document.document().findBlockByNumber(self.block)
@@ -295,6 +299,8 @@ class split_steno_par(QUndoCommand):
             if second_part.starts_with(" "):
                 log.debug("Split: Stripping space from beginning of second piece")
                 second_part.remove_begin(" ")
+                current_cursor.deleteChar()
+                self.space_removed = True
         log.debug("Split: Appending new line stroke to end of second piece")
         fake_newline_stroke = self.new_line_stroke
         current_block.userData()["strokes"].append(deepcopy(fake_newline_stroke))
@@ -317,10 +323,7 @@ class split_steno_par(QUndoCommand):
         # first_data["strokes"] = first_part
         # mimic auto text
         current_cursor.insertText(fake_newline_stroke.to_text().rstrip("\n"))
-        # current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
-        # current_cursor.removeSelectedText()
         current_cursor.insertBlock()
-        # current_cursor.insertText(second_part.to_text().rstrip("\n"))
         new_block = current_block.next()
         current_block.setUserData(first_data)
         new_block.setUserData(second_data)
@@ -342,7 +345,7 @@ class split_steno_par(QUndoCommand):
         for char in self.new_line_stroke.to_text().rstrip("\n"):
             current_cursor.deletePreviousChar()
         # remove the starting space that was removed
-        if self.remove_space and self.space_placement == "Before Output":
+        if self.space_removed:
             current_cursor.insertText(" ")
         restore_data = BlockUserData()
         for key, item in self.block_data.items():
@@ -381,8 +384,11 @@ class merge_steno_par(QUndoCommand):
         current_cursor = self.cursor
         first_block_num = self.block
         second_block_num = self.block + 1
-        first_block = self.document.document().findBlockByNumber(first_block_num)
-        second_block = self.document.document().findBlockByNumber(second_block_num)
+        if current_cursor.block().blockNumber() == self.block:
+            first_block = current_cursor.block()
+        else:
+            first_block = self.document.document().findBlockByNumber(first_block_num)
+        second_block = first_block.next()
         first_data = first_block.userData()
         second_data = second_block.userData()
         self.second_data_dict = deepcopy(second_data.return_all())
@@ -699,6 +705,9 @@ class update_field(QUndoCommand):
                     current_cursor.setPosition(block.position() + end_pos, QTextCursor.KeepAnchor)
                     current_cursor.removeSelectedText()
                     el.user_dict = self.user_field_dict
+                    cursor_format = self.document.txt_formats[block.userData()["style"]]
+                    cursor_format.setForeground(self.document.highlight_colors["index"])
+                    current_cursor.setCharFormat(cursor_format)  
                     current_cursor.insertText(el.to_text())
             if block == self.document.document().lastBlock():
                 break
@@ -744,6 +753,9 @@ class update_entries(QUndoCommand):
                         el.prefix = self.new_dict[el.indexname]["prefix"]
                         el.hidden = self.new_dict[el.indexname]["hidden"]
                         el.description = self.new_dict[el.indexname]["entries"][el.data]
+                        cursor_format = self.document.txt_formats[block.userData()["style"]]
+                        cursor_format.setForeground(self.document.highlight_colors["index"])
+                        current_cursor.setCharFormat(cursor_format)                        
                         current_cursor.insertText(el.to_text())
             if block == self.document.document().lastBlock():
                 break

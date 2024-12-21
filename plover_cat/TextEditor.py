@@ -244,8 +244,9 @@ class PloverCATEditor(QTextEdit):
                     block_data[k] = v
                 block_data["strokes"] = element_collection(el_list)
                 document_cursor.setBlockFormat(self.par_formats[block_data["style"]])
-                document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                   
-                # print(block_data.return_all())
+                current_format = self.txt_formats[block_data["style"]]
+                current_format.setForeground(self.highlight_colors["stroke"])            
+                document_cursor.setCharFormat(current_format)
                 document_cursor.insertText(value["text"])
                 document_cursor.block().setUserData(block_data)
                 document_cursor.block().setUserState(1)
@@ -273,32 +274,36 @@ class PloverCATEditor(QTextEdit):
                     block_data["style"] = next(iter(self.par_formats))
                 document_cursor.setBlockFormat(self.par_formats[block_data["style"]])
                 document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
-                if any([el.element == "image" for el in el_list]):
-                    for el in el_list:
-                        if el.element == "image":
-                            i_path = self.file_name / pathlib.Path(el.path)
-                            imageUri = QUrl(i_path.as_uri())
-                            el.path = i_path.as_posix()
-                            image = QImage(QImageReader(el.path).read())
-                            self.document().addResource(
-                                QTextDocument.ImageResource,
-                                imageUri,
-                                QVariant(image)
-                            )
-                            imageFormat = QTextImageFormat()
-                            imageFormat.setWidth(image.width())
-                            imageFormat.setHeight(image.height())
-                            imageFormat.setName(imageUri.toString())
-                            document_cursor.insertImage(imageFormat)
-                            document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
-                        else:
-                            document_cursor.insertText(el.to_text())
-                else:
-                    document_cursor.insertText(block_data["strokes"].to_text())
+                # if any([el.element == "image" for el in el_list]):
+                for el in el_list:
+                    if el.element == "image":
+                        i_path = self.file_name / pathlib.Path(el.path)
+                        imageUri = QUrl(i_path.as_uri())
+                        el.path = i_path.as_posix()
+                        image = QImage(QImageReader(el.path).read())
+                        self.document().addResource(
+                            QTextDocument.ImageResource,
+                            imageUri,
+                            QVariant(image)
+                        )
+                        imageFormat = QTextImageFormat()
+                        imageFormat.setWidth(image.width())
+                        imageFormat.setHeight(image.height())
+                        imageFormat.setName(imageUri.toString())
+                        document_cursor.insertImage(imageFormat)
+                        document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
+                    else:
+                        current_format = self.txt_formats[block_data["style"]]
+                        current_format.setForeground(self.highlight_colors[el.element])            
+                        document_cursor.setCharFormat(current_format)
+                        document_cursor.insertText(el.to_text())
+                # else:
+                #     document_cursor.insertText(block_data["strokes"].to_text())
                 self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
                 QApplication.processEvents()
         if document_cursor.block().userData() == None:
             document_cursor.block().setUserData(BlockUserData())
+            self.to_next_style()
         # todo: set textcursor paragraph and text properties
         self.undo_stack.clear()
         self.send_message.emit("Loaded transcript.")   
@@ -319,7 +324,6 @@ class PloverCATEditor(QTextEdit):
         self.save_transcript(transcript)
         if str(self.config["style"]).endswith(".json"):
             self.save_style_file()
-        self.document().setModified(False)
         self.undo_stack.setClean()
         self.dulwich_save(message = "user save")
         self.send_message.emit("Saved project data")  
@@ -718,11 +722,22 @@ class PloverCATEditor(QTextEdit):
         """
         if not block:
             block = self.textCursor().blockNumber()
-        if self.textCursor.hasSelection():
-            start_pos = self.textCursor().selectionStart()
-            end_pos = self.textCursor().selectionEnd()
-        style_cmd = set_par_style(self.textCursor(), self, block, style, self.par_formats, self.txt_formats)
-        self.undo_stack.push(style_cmd)
+        if self.textCursor().hasSelection():
+            current_cursor = self.textCursor()
+            start_pos = current_cursor.selectionStart()
+            end_pos = current_cursor.selectionEnd()
+            current_cursor.setPosition(start_pos)
+            begin_block = current_cursor.blockNumber()
+            current_cursor.setPosition(end_pos)
+            end_block = current_cursor.blockNumber()
+            self.undo_stack.beginMacro(f"Styling paragraphs {begin_block}-{end_block}.")
+            for block in range(begin_block, end_block):
+                style_cmd = set_par_style(self.textCursor(), self, block, style, self.par_formats, self.txt_formats)
+                self.undo_stack.push(style_cmd)
+            self.undo_stack.endMacro()
+        else:
+            style_cmd = set_par_style(self.textCursor(), self, block, style, self.par_formats, self.txt_formats)
+            self.undo_stack.push(style_cmd)
 
     def set_paragraph_property(self, paragraph, prop, value):
         """Set a paragraph's property.
@@ -862,7 +877,6 @@ class PloverCATEditor(QTextEdit):
                 insert_cmd = steno_insert(current_cursor, self, current_block.blockNumber(), current_cursor.positionInBlock(), stroke)
                 self.undo_stack.push(insert_cmd)
             self.last_string_sent = ""
-        self.document().setModified(True)
 
     def log_to_tape(self, stroke):
         """Log stroke to transcript tape.
@@ -912,8 +926,12 @@ class PloverCATEditor(QTextEdit):
         """
         current_document = self
         current_cursor = current_document.textCursor()
-        self.cursor_block = current_cursor.blockNumber() - 1
+        if current_cursor.blockNumber() == 0:
+            return
+        current_cursor.movePosition(QTextCursor.PreviousBlock)
+        self.cursor_block = current_cursor.blockNumber()
         self.cursor_block_position = current_cursor.positionInBlock()
+        self.setTextCursor(current_cursor)
         merge_cmd = merge_steno_par(current_cursor, self, self.cursor_block, self.cursor_block_position, self.config["space_placement"], add_space = add_space)
         self.undo_stack.push(merge_cmd)
 

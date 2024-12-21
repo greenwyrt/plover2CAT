@@ -142,7 +142,11 @@ class TestTextEdit(unittest.TestCase):
                     "step_Stroke", 
                     "step_AddRemoveDict",
                     "step_writeTwoLine",
-                    "step_SplitPar"]:
+                    "step_SplitPar",
+                    "step_SplitParSpace",
+                    "step_MergePar",
+                    "step_CheckStyleAttr",
+                    "step_changeStyle"]:
             try:
                 getattr(self, _s)()
             except Exception as e:
@@ -201,19 +205,81 @@ class TestTextEdit(unittest.TestCase):
         self.editor.textEdit.undo_stack.setClean()
         save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
         self.editor.close_file()
-        self.editor.open(pathlib.Path(self.temp_dir) / "test")
-        # do, and undo
+        self.editor.open_file(pathlib.Path(self.temp_dir) / "test")
         cursor = self.editor.textEdit.textCursor()
         cursor.setPosition(3)
         self.editor.textEdit.setTextCursor(cursor)
         self.editor.textEdit.split_paragraph()
-        print(self.editor.textEdit.toPlainText())
+        self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\nDEF")
+        self.editor.textEdit.undo_stack.undo()
+        self.assertEqual(self.editor.textEdit.toPlainText(), "ABCDEF")
+        stroke_data = self.editor.textEdit.textCursor().block().userData()["strokes"]
+        self.assertEqual(len(stroke_data.data), 1)
+    def step_SplitParSpace(self):
+        one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC DEF", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"}]}}
+        self.editor.textEdit.undo_stack.setClean()
+        save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
+        self.editor.close_file()
+        self.editor.open_file(pathlib.Path(self.temp_dir) / "test")
+        cursor = self.editor.textEdit.textCursor()
+        cursor.setPosition(3)
+        self.editor.textEdit.setTextCursor(cursor)
+        self.editor.textEdit.split_paragraph()
+        self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\nDEF")
+        self.editor.textEdit.undo_stack.undo()
+        cursor.setPosition(3)
+        self.editor.textEdit.setTextCursor(cursor)
+        self.editor.textEdit.split_paragraph(remove_space = False)
+        self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\n DEF")
     def step_MergePar(self):
-        pass    
+        one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
+                                                         {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
+                    1: {"style": "Normal", "strokes": [{"data": "DEF", "element": "stroke", "stroke": "-T", "time": "2000-01-01T00:00:00.002"}]}}
+        self.editor.textEdit.undo_stack.setClean()
+        save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
+        self.editor.close_file()
+        self.editor.open_file(pathlib.Path(self.temp_dir) / "test")  
+        cursor = self.editor.textEdit.textCursor()
+        cursor.setPosition(3)
+        self.editor.textEdit.setTextCursor(cursor)
+        self.editor.textEdit.merge_paragraphs()   
+        self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\nDEF")
+        cursor.setPosition(5) 
+        self.editor.textEdit.setTextCursor(cursor)
+        self.editor.textEdit.merge_paragraphs()
+        self.assertEqual(self.editor.textEdit.toPlainText(), "ABC DEF")
+        self.editor.textEdit.undo_stack.undo()
+        self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\nDEF")
     def step_CheckStyleAttr(self):
-        pass
+        one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
+                                                         {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
+                    1: {"style": "Question", "strokes": [{"data": "DEF", "element": "stroke", "stroke": "-T", "time": "2000-01-01T00:00:00.002"}]}}
+        self.editor.textEdit.undo_stack.setClean()
+        save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
+        self.editor.close_file()
+        self.editor.open_file(pathlib.Path(self.temp_dir) / "test")  
+        cursor = self.editor.textEdit.textCursor()
+        cursor.setPosition(2)
+        self.assertEqual(cursor.block().userData()["style"], "Normal")
+        cursor.setPosition(5)
+        self.assertEqual(cursor.block().userData()["style"], "Question")
     def step_changeStyle(self):
-        pass
+        one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
+                                                         {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
+                    1: {"style": "Question", "strokes": [{"data": "DEF", "element": "stroke", "stroke": "-T", "time": "2000-01-01T00:00:00.002"}]}}
+        self.editor.textEdit.undo_stack.setClean()
+        save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
+        self.editor.close_file()
+        self.editor.open_file(pathlib.Path(self.temp_dir) / "test")  
+        cursor = self.editor.textEdit.textCursor()
+        cursor.movePosition(5)
+        self.editor.textEdit.setTextCursor(cursor)
+        self.editor.textEdit.set_paragraph_style("Normal")
+        self.assertEqual(cursor.block().blockFormat().textIndent(), 0)
+        self.editor.textEdit.set_paragraph_style("Question")
+        self.assertEqual(cursor.block().blockFormat().textIndent(), 0.5 * 96)
+        tabs = [tab.position for tab in cursor.block().blockFormat().tabPositions()]
+        self.assertEqual(96 in tabs, True)
     def step_loadNewStyle(self):
         pass
     def step_ColorHighlight(self):

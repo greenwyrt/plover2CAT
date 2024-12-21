@@ -450,7 +450,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def refresh_editor_styles(self):
         """Reapply styles to every paragraph.
         """
-        if self.textEdit.document().blockCount() > 200:
+        if self.textEdit.document().blockCount() > 1000:
             user_choice = QMessageBox.question(self, "Plover2CAT", f"There are {self.textEdit.document().blockCount()} paragraphs. Style refreshing may take some time. Continue?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if user_choice == QMessageBox.No:
                 return
@@ -1723,8 +1723,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.blockHeadingLevel.currentText() != "":
             new_style_dict["defaultoutlinelevel"] = self.blockHeadingLevel.currentText()
         # compare par and text properties to recursive original format
-        original_style_par = recursive_style_format(self.styles, style_name, prop = "paragraphproperties")
-        original_style_txt = recursive_style_format(self.styles, style_name, prop = "textproperties")
+        original_style_par = recursive_style_format(self.textEdit.styles, style_name, prop = "paragraphproperties")
+        original_style_txt = recursive_style_format(self.textEdit.styles, style_name, prop = "textproperties")
         log.debug("Old paragraph properties: %s" % original_style_par)
         log.debug("Old text properties: %s" % original_style_txt)
         new_txt_dict = {"fontname": self.blockFont.currentFont().family(), "fontfamily": self.blockFont.currentFont().family(), 
@@ -1856,7 +1856,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Translate tape contents into transcript.
         """
         if not self.engine.output:
-            choice = QMessageBox.warning(self, "Plover2CAT", "Plover is not enabled.Enable output?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            choice = QMessageBox.warning(self, "Plover2CAT", "Plover is not enabled. Enable output?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if choice == QMessageBox.Yes:
                 self.engine.set_output(True)
             else:
@@ -1879,6 +1879,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(f"Translating tape from {selected_file} with {paper_format} format.")
         self.mainTabs.hide()
         self.textEdit.blockSignals(True)
+        self.textEdit.document().blockSignals(True)
         if paper_format == "Plover (raw)":
             with open(selected_file) as f:
                 for line in f:
@@ -1904,6 +1905,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                             keys.append(plover.system.KEYS[i])
                     self.engine._translator.translate(Stroke(keys))
                     self.engine._trigger_hook('stroked', Stroke(keys))
+        self.textEdit.document().blockSignals(False)
         self.textEdit.blockSignals(False)
         self.mainTabs.show()
         # todo, if format has time data, that should be inserted into stroke data of editor too
@@ -1950,14 +1952,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         ea = element_actions()
         current_cursor = self.textEdit.textCursor()
         current_block_num = current_cursor.blockNumber()
-        current_block = self.textEdit.document().findBlockByNumber(current_block_num)
+        # current_block = self.textEdit.document().findBlockByNumber(current_block_num)
         start_pos = current_cursor.selectionStart() - current_block.position()
         self.textEdit.undo_stack.beginMacro(f"Paste: {store_data.to_text()}")
         self.textEdit.blockSignals(True)
         for el in store_data:
             current_block = self.textEdit.textCursor().blockNumber()
             current_pos = self.textEdit.textCursor().positionInBlock()
-            cmd = ea.make_action(self.textEdit, current_block, current_pos, el)
+            cmd = ea.make_action(self.textEdit, current_block_num, current_pos, el)
             self.textEdit.undo_stack.push(cmd)
         self.textEdit.blockSignals(False)
         self.textEdit.undo_stack.endMacro()

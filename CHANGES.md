@@ -2,7 +2,24 @@
 
 ## Ver 3.0.4 (Pre-release):
 
-Change: Message boxes use `Plover2CAT` as title, as best practice.
+New: Apply style to multiple paragraphs together, updated documentation
+
+Change: Message boxes use `Plover2CAT` as title, as best practice
+
+Change: Increased limit on paragraphs from 200 to 1000 before warning for refreshing styles
+
+Bug fix: Set style of empty paragraph created in `load_transcript` when last paragraph has trailing `\n`
+
+Bug fix: fixed `split_steno_par` where preceding space in text would not be removed
+
+Bug fix: wrong reference to styles in editor
+
+New: tests for splitting a paragraph
+
+Bug fix: minor changes in attempt to speed up `tape_translate`
+
+In progress:
+- add highlight styling to load transcript
 
 ## Ver 3.0.3:
 
