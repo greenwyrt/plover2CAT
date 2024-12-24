@@ -462,29 +462,38 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.progressBar.setFormat("Re-style paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
-        for i in range(self.textEdit.document().blockCount()):
-            try:
-                block_style = block.userData()["style"]
-            except TypeError:
-                # block_style = ""
-                continue                          
+        while True:
+            block_data = block.userData["strokes"]
             current_cursor.setPosition(block.position())
-            current_cursor.movePosition(QTextCursor.StartOfBlock)
-            current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
-            current_cursor.setBlockFormat(self.textEdit.par_formats[block_style])
-            it = block.begin()
-            while not it.atEnd():
-                frag = it.fragment()
-                if frag.isValid() and not frag.charFormat().isImageFormat():
-                    current_cursor.setPosition(frag.position())
-                    current_cursor.setPosition(frag.position() + frag.length(), QTextCursor.KeepAnchor)
-                    current_cursor.setCharFormat(self.textEdit.txt_formats[block_style])
-                it += 1
-            self.progressBar.setValue(block.blockNumber())
-            QApplication.processEvents()
-            if block == self.textEdit.document().lastBlock():
+            for el in block_data:
+                current_cursor.movePosition()
+
+            if block == self.textEdit.end():
                 break
             block = block.next()
+        # for i in range(self.textEdit.document().blockCount()):
+        #     try:
+        #         block_style = block.userData()["style"]
+        #     except TypeError:
+        #         # block_style = ""
+        #         continue                          
+        #     current_cursor.setPosition(block.position())
+        #     current_cursor.movePosition(QTextCursor.StartOfBlock)
+        #     current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+        #     current_cursor.setBlockFormat(self.textEdit.par_formats[block_style])
+        #     it = block.begin()
+        #     while not it.atEnd():
+        #         frag = it.fragment()
+        #         if frag.isValid() and not frag.charFormat().isImageFormat():
+        #             current_cursor.setPosition(frag.position())
+        #             current_cursor.setPosition(frag.position() + frag.length(), QTextCursor.KeepAnchor)
+        #             current_cursor.setCharFormat(self.textEdit.txt_formats[block_style])
+        #         it += 1
+        #     self.progressBar.setValue(block.blockNumber())
+        #     QApplication.processEvents()
+        #     if block == self.textEdit.document().lastBlock():
+        #         break
+        #     block = block.next()
         self.statusBar.removeWidget(self.progressBar)
 
     def update_style_display(self, style):
@@ -1880,6 +1889,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.mainTabs.hide()
         self.textEdit.blockSignals(True)
         self.textEdit.document().blockSignals(True)
+        self.kc = self.engine._keyboard_emulation
+        self.engine._keyboard_emulation = mock_output()        
         if paper_format == "Plover (raw)":
             with open(selected_file) as f:
                 for line in f:
@@ -1908,6 +1919,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.document().blockSignals(False)
         self.textEdit.blockSignals(False)
         self.mainTabs.show()
+        self.engine._keyboard_emulation = self.kc
         # todo, if format has time data, that should be inserted into stroke data of editor too
 
     def reset_paragraph(self):

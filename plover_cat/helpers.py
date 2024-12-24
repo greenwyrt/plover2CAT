@@ -3,8 +3,19 @@ import json
 import os
 import time
 from plover.config import Config, DictionaryConfig
+from plover.oslayer.keyboardcontrol import KeyboardEmulation
 from plover import log
 from dulwich.porcelain import open_repo_closing
+
+
+class mock_output(KeyboardEmulation):
+    def __init__(self):
+        super().__init__()
+    def send_backspaces(self, count):
+        pass
+    def send_string(self, string):
+        pass
+
 
 def write_command(control, text = None, value = None, visible = True, group = False):
     """Create RTF-formatted string.
