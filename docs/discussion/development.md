@@ -14,7 +14,6 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
-- [ ] formatting after merge par is not consistent with styling
 - [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
 - [ ] sequentially process tape to translation
 - [ ] rename audiovisual to media in UI and beyond
@@ -37,10 +36,6 @@ The sections below list things that could be part of future versions. They are n
 Right now, steno insertion is based on the cursor position unless it is locked at end. It is not possible to edit with a normal keyboard the same time a steno machine is writing. 
 
 Proposed solution: replace `engine._keyboard_emulation` on startup with your own subclass of `plover.output.Output` and implement send_backspaces, send_string, and send_key_combination as needed, at least until new version of Plover with output plugins
-
-## Element styling
-
-Color styling for different elements such as text vs index entry. This will require changing `QTextCharFormats` by setting Foreground. It may also impact editor speed depending on implementation.
 
 ## Parsable action logging
 

@@ -463,37 +463,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
         while True:
-            block_data = block.userData["strokes"]
-            current_cursor.setPosition(block.position())
-            for el in block_data:
-                current_cursor.movePosition()
-
-            if block == self.textEdit.end():
+            block_data = block.userData()["strokes"]
+            try:
+                block_style = block.userData()["style"]
+            except TypeError:
+                # block_style = ""
+                continue  
+            self.textEdit.refresh_par_style(block)                        
+            self.progressBar.setValue(block.blockNumber())
+            QApplication.processEvents()
+            if block == self.textEdit.document().lastBlock():
                 break
             block = block.next()
-        # for i in range(self.textEdit.document().blockCount()):
-        #     try:
-        #         block_style = block.userData()["style"]
-        #     except TypeError:
-        #         # block_style = ""
-        #         continue                          
-        #     current_cursor.setPosition(block.position())
-        #     current_cursor.movePosition(QTextCursor.StartOfBlock)
-        #     current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
-        #     current_cursor.setBlockFormat(self.textEdit.par_formats[block_style])
-        #     it = block.begin()
-        #     while not it.atEnd():
-        #         frag = it.fragment()
-        #         if frag.isValid() and not frag.charFormat().isImageFormat():
-        #             current_cursor.setPosition(frag.position())
-        #             current_cursor.setPosition(frag.position() + frag.length(), QTextCursor.KeepAnchor)
-        #             current_cursor.setCharFormat(self.textEdit.txt_formats[block_style])
-        #         it += 1
-        #     self.progressBar.setValue(block.blockNumber())
-        #     QApplication.processEvents()
-        #     if block == self.textEdit.document().lastBlock():
-        #         break
-        #     block = block.next()
         self.statusBar.removeWidget(self.progressBar)
 
     def update_style_display(self, style):
@@ -1759,13 +1740,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             # do not set if tabstop = 0, weird things might happen
             if tab_pos:
                 new_par_dict["tabstop"] = "%.2fin" % tab_pos
-        min_txt_style = {}
+        min_txt_style = deepcopy(self.textEdit.get_style_property(style_name, "textproperties"))
         for k, v in new_txt_dict.items():
             if k in original_style_txt and v == original_style_txt[k]:
                 continue
             else:
                 min_txt_style[k] = v
-        min_par_style = {}
+        min_par_style = deepcopy(self.textEdit.get_style_property(style_name, "paragraphproperties"))
         for k, v in new_par_dict.items():
             if k in original_style_par and v == original_style_par[k]:
                 continue

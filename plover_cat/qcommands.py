@@ -425,6 +425,7 @@ class merge_steno_par(QUndoCommand):
         log_dict = {"action": "merge", "block": self.block}
         log.info(f"Merge: {log_dict}")
         self.document.setTextCursor(current_cursor)
+        self.document.refresh_par_style(first_block)
         self.setText("Merge: paragraphs %d & %d" % (first_block_num, second_block_num))
     def undo(self):
         current_cursor = self.document.textCursor()
@@ -456,6 +457,7 @@ class merge_steno_par(QUndoCommand):
         log_dict = {"action": "split", "block": self.block, "position_in_block": self.position_in_block}
         log.info(f"Merge (undo): {log_dict}")        
         self.document.setTextCursor(current_cursor)
+        self.document.refresh_par_style(second_block)
 
 class set_par_style(QUndoCommand):
     """Set paragraph style.
@@ -484,9 +486,6 @@ class set_par_style(QUndoCommand):
         self.block_state = 1
     def redo(self):
         current_block = self.document.document().findBlockByNumber(self.block)
-        current_cursor = self.cursor
-        old_position = current_cursor.position()
-        current_cursor.setPosition(current_block.position())
         block_data = current_block.userData()
         if not block_data:
             block_data = BlockUserData()
@@ -498,48 +497,18 @@ class set_par_style(QUndoCommand):
         block_data = update_user_data(block_data, "style", self.style)
         current_block.setUserData(block_data)
         self.setText(f"Format: set paragraph {self.block} style to {self.style}")
-        current_cursor.movePosition(QTextCursor.StartOfBlock)
-        current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
-        current_cursor.setBlockFormat(self.par_formats[self.style])
-        it = current_block.begin()
-        while not it.atEnd():
-            frag = it.fragment()
-            if frag.isValid() and not frag.charFormat().isImageFormat():
-                current_cursor.setPosition(frag.position())
-                current_cursor.setPosition(frag.position() + frag.length(), QTextCursor.KeepAnchor)
-                current_cursor.setCharFormat(self.txt_formats[self.style])
-            it += 1
-        current_cursor.setPosition(old_position)
+        self.document.refresh_par_style(current_block)
         self.block_state = current_block.userState()
         current_block.setUserState(1)
-        self.document.setTextCursor(current_cursor)
         log_dict = {"action": "set_style", "block": self.block, "style": self.style}
         log.info(f"Style: {log_dict}")
     def undo(self):
         if self.old_style:
             current_block = self.document.document().findBlockByNumber(self.block)
-            current_cursor = self.document.textCursor()
-            old_position = current_cursor.position()
-            current_cursor.setPosition(current_block.position())
             block_data = current_block.userData()
             block_data = update_user_data(block_data, "style", self.old_style)
             current_block.setUserData(block_data)
-            current_cursor.movePosition(QTextCursor.StartOfBlock)
-            current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
-            current_cursor.setBlockFormat(self.par_formats[self.old_style])
-            if any([el.element == "image" for el in block_data["strokes"]]):
-                it = current_block.begin()
-                while not it.atEnd():
-                    frag = it.fragment()
-                    if frag.isValid() and not frag.charFormat().isImageFormat():
-                        current_cursor.setPosition(frag.position())
-                        current_cursor.setPosition(frag.position() + frag.length(), QTextCursor.KeepAnchor)
-                        current_cursor.setCharFormat(self.txt_formats[self.old_style])
-                    it += 1
-            else:
-                current_cursor.setCharFormat(self.txt_formats[self.style])       
-            current_cursor.setPosition(old_position)
-            self.document.setTextCursor(current_cursor)
+            self.document.refresh_par_style(current_block)      
             log_dict = {"action": "set_style", "block": self.block, "style": self.old_style}
             log.info(f"Style: {log_dict}")
 
@@ -598,8 +567,7 @@ class update_style(QUndoCommand):
         self.setText(f"Style: update style attributes for style {self.style_name}")
         self.document.gen_style_formats()
     def undo(self):
-        if self.old_style_dict:
-            self.styles[self.style_name] = self.old_style_dict
+        self.styles[self.style_name] = self.old_style_dict
         log_dict = {"action": "edit_style", "style_dict": self.old_style_dict}
         log.info(f"Style undo: {log_dict}")
         self.document.gen_style_formats()

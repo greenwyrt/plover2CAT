@@ -261,7 +261,6 @@ class PloverCATEditor(QTextEdit):
                 # skip if key is not a digit
                 if not key.isdigit():
                     continue
-                # document_cursor.insertText(value["text"])
                 block_data = BlockUserData()
                 el_list = [ef.gen_element(element_dict = i, user_field_dict = self.user_field_dict) for i in value["strokes"]]
                 # document_cursor.movePosition(QTextCursor.Start)
@@ -298,14 +297,11 @@ class PloverCATEditor(QTextEdit):
                         current_format.setForeground(self.highlight_colors[el.element])            
                         document_cursor.setCharFormat(current_format)
                         document_cursor.insertText(el.to_text())
-                # else:
-                #     document_cursor.insertText(block_data["strokes"].to_text())
                 self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
                 QApplication.processEvents()
         if document_cursor.block().userData() == None:
             document_cursor.block().setUserData(BlockUserData())
             self.to_next_style()
-        # todo: set textcursor paragraph and text properties
         self.undo_stack.clear()
         self.send_message.emit("Loaded transcript.")   
 
@@ -749,6 +745,29 @@ class PloverCATEditor(QTextEdit):
         """
         prop_cmd = set_par_property(self, paragraph, prop, value)
         self.undo_stack.push(prop_cmd)
+
+    def refresh_par_style(self, block = None):
+        """Update a paragraph's display styling.
+
+        :param block:  ``QTextBlock`` instance
+        """
+        if not block:
+            block = self.textCursor().block()
+        block_data = block.userData()["strokes"]
+        block_style = block.userData()["style"]
+        current_cursor = self.textCursor()          
+        current_cursor.setPosition(block.position())
+        current_cursor.movePosition(QTextCursor.StartOfBlock)
+        current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
+        current_cursor.setBlockFormat(self.par_formats[block_style])
+        current_cursor.movePosition(QTextCursor.StartOfBlock)
+        for el in block_data:
+            current_cursor.setPosition(current_cursor.position() + len(el), QTextCursor.KeepAnchor)
+            temp_format = self.txt_formats[block_style]
+            if el.element != "image":
+                temp_format.setForeground(self.highlight_colors[el.element])
+                current_cursor.setCharFormat(temp_format)
+                current_cursor.clearSelection()
 
     def save_style_file(self):
         """Save current styles to style file."""

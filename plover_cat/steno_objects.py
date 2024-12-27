@@ -575,8 +575,8 @@ class element_factory:
         element = text_element()
         if element_dict["element"] == "stroke":
             element = stroke_text()
-        elif element_dict["element"] == "dummy":
-            element = dummy_element()
+        # elif element_dict["element"] == "dummy":
+        #     element = dummy_element()
         elif element_dict["element"] == "image":
             element = image_text()
         elif element_dict["element"] == "field":

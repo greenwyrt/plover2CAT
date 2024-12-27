@@ -4,6 +4,10 @@
 
 New: Apply style to multiple paragraphs together, updated documentation
 
+New: Highlight styling
+
+Change: consolidate styling refresh across code (editor, commands) to one function, `refresh_par_style` in `TextEditor`
+
 Change: Message boxes use `Plover2CAT` as title, as best practice
 
 Change: Increased limit on paragraphs from 200 to 1000 before warning for refreshing styles
@@ -12,14 +16,17 @@ Bug fix: Set style of empty paragraph created in `load_transcript` when last par
 
 Bug fix: fixed `split_steno_par` where preceding space in text would not be removed
 
+Bug fix: fixed `merge_steno_par` where merged paragraph would retain original text formatting where it should take on formatting of merged paragraph
+
 Bug fix: wrong reference to styles in editor
 
 New: tests for splitting a paragraph
 
 Bug fix: minor changes in attempt to speed up `tape_translate`
 
+
 In progress:
-- add highlight styling to load transcript
+- custom plover `output` subclass to speed up `tape_translate` by "passing" in the `send_*` methods rather than mimic keyboard output with delays
 
 ## Ver 3.0.3:
 
