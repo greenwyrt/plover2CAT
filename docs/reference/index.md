@@ -1,6 +1,6 @@
 # Editor Reference 
 
-The reference sections are mainly focused on *textual* descriptions of the editor's user interface, not code documentation, which is the other section.
+The reference sections are mainly focused on *textual* descriptions of the editor's user interface, not code documentation, which is the API section.
 
 As new features are added, the relevant sections will change. 
 

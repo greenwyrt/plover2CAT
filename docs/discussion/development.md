@@ -14,14 +14,15 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
-- [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
-- [ ] sequentially process tape to translation
 - [ ] rename audiovisual to media in UI and beyond
+- [ ] sequentially process tape to translation
+- [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
+- [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
 - [ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
 - [ ] a/an search
+- [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
 - [ ] replace punctuation as needed, include "--" and "..."
 - [ ] diff compare versions
-- [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
 - [ ] downgrade element, use `el.__class__.__mro__[1]()` which returns new instance, construct element from dict, only do if `el.__class__.__name__` is not "text_element"
 - [ ] other things to add to insert menu, checkable for export in supported format (table of contents, table of figures/exhibits), number ranges for autonumbering, special characters (more dialog)
 - [ ] text to speech
@@ -35,7 +36,13 @@ The sections below list things that could be part of future versions. They are n
 
 Right now, steno insertion is based on the cursor position unless it is locked at end. It is not possible to edit with a normal keyboard the same time a steno machine is writing. 
 
-Proposed solution: replace `engine._keyboard_emulation` on startup with your own subclass of `plover.output.Output` and implement send_backspaces, send_string, and send_key_combination as needed, at least until new version of Plover with output plugins
+Proposed solution: replace `engine._keyboard_emulation` on startup with your own subclass of `plover.output.Output` and implement send_backspaces, send_string, and send_key_combination as needed, at least until new version of Plover with output plugins.
+
+Status: somewhat implemented, as `output` subclass works with `tape_translate`, but input/output selection/always at end options need to be thought out
+
+## Optimizing `get_suggestions`
+
+For both tapey-tape and clippy, the file is read from the start repeatedly. It may be better to store lines in memory and only ingest new lines (keep track of position with tell and then seek). The drawback is increased memory. Also, there are repeated lookups with Plover's engine, which may also be reduced with a local dict.
 
 ## Parsable action logging
 
@@ -64,7 +71,6 @@ Possible new search types:
 - exact, starts with, ends with, contains, partial stroke
 - filters for # of strokes, includes numbers/punctuation etc 
 
-
 ## Alternative formats
 
 HTML: The present HTML format is just the ASCII text in a code block wrappd up with html tags. HTML can be much more flexible (ie table of contents, search, images, embedded audio etc), even if the plain text structure has to be kept.
@@ -77,8 +83,11 @@ Steno-Annotated ODF: Plover2CAT should produce an annotated document, putting ra
 
 ## Style highlighting
 
-Paragraphs with certain styles could get a highlight color, would conflict with element styling (ie two font colors)
+Paragraphs with certain styles could get a highlight color, would conflict with element styling (ie two font colors).
 
+## Optimize editor styling refresh
+
+Styling refresh iterates over all paragraphs after properties of a style has changed. However, only some paragraph need to be updated. The simplest way of only styling paragaphs with the changed style does not work as styles can depend on other styles. Some way of tracking dependencies is needed to optimize.
 
 ## Richtext Features for indexes and tables
 
@@ -102,7 +111,11 @@ The other processes that scan the whole document again and again are fields (on 
 
 Data retrieval and storage are likely as fast for the limitations, considering that text and steno data have to be linked, and custom data storage for paragraphs would mean cleanup of data that Qt does automatically. If loading from file, the original dict is kept in memory. Blocks that are modified are marked using `userState`. For saving, each paragraph's state is checked, and at the first block with `userState`, all subsequent paragraphs get data extracted and stored. 
 
-Some funtions are called upon every cursor change: updating the steno display, updating the navigation display, and moving the tape to the proper spot. Responsiveness will speed up if all three are inactivated at the cost of less information visible.
+Some funtions are called upon every cursor change: updating the steno and style display, updating the block data display, and moving the tape to the proper spot.
+Responsiveness will speed up if all three are inactivated (set disabled) at the cost of less information visible.
+This could be set as a "writing mode" with all docks hidden vs editing mode with docks set visible.
+
+Some more intensive tasks are getting suggestions and looping over document for navigation headings, which should be offloaded to a worker.
 
 ## Editor memory
 
@@ -125,7 +138,6 @@ Also, rather than keeping the backup document in memory, re-read the saved file 
 Tests should run from a dialog in editor using `unittest`. See this [link](https://stackoverflow.com/questions/20433333/can-python-unittest-return-the-single-tests-result-code) for returning a `TestResult`. Output should be redirected by specifying the `stream` argument for a `StringIO`.
 
 Category of tests:
-
 
 - Default config/style/dict
 - Try writing

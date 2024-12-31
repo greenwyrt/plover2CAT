@@ -462,6 +462,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.progressBar.setFormat("Re-style paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
+        self.textEdit.blockSignals(True)
         while True:
             block_data = block.userData()["strokes"]
             try:
@@ -475,6 +476,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if block == self.textEdit.document().lastBlock():
                 break
             block = block.next()
+        self.textEdit.blockSignals(False)
         self.statusBar.removeWidget(self.progressBar)
 
     def update_style_display(self, style):
@@ -2706,7 +2708,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 self.thread.started.connect(self.cap_worker.make_caps)
                 self.cap_worker.finished.connect(self.thread.quit)
                 self.cap_worker.finished.connect(self.cap_worker.deleteLater)
-                # self.thread.finished.connect(self.thread.deleteLater)
                 self.cap_worker.capSend.connect(self.add_cap)
                 self.cap_worker.postMessage.connect(self.statusBar.showMessage)
                 self.thread.start()
@@ -2850,7 +2851,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in ASCII format."))
-        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start() 
 
     def export_html(self):
@@ -2884,7 +2884,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in HTML format."))
-        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()          
 
     def export_plain_ascii(self):
@@ -2917,7 +2916,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in plain ASCII format."))
-        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()        
 
     def export_srt(self):
@@ -2949,7 +2947,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in srt format."))
-        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
         
     def export_odt(self):   
@@ -2983,7 +2980,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in Open Document Format."))
-        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
 
     def export_rtf(self):
@@ -3017,5 +3013,4 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(lambda: self.statusBar.showMessage("Exported in RTF/CRE format."))
-        # self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()

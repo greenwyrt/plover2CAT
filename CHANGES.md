@@ -1,10 +1,10 @@
 # CHANGES
 
-## Ver 3.0.4 (Pre-release):
+## Ver 3.1.0 (Pre-release):
 
 New: Apply style to multiple paragraphs together, updated documentation
 
-New: Highlight styling
+New: Highlight styling and documentation
 
 Change: consolidate styling refresh across code (editor, commands) to one function, `refresh_par_style` in `TextEditor`
 
@@ -24,9 +24,7 @@ New: tests for splitting a paragraph
 
 Bug fix: minor changes in attempt to speed up `tape_translate`
 
-
-In progress:
-- custom plover `output` subclass to speed up `tape_translate` by "passing" in the `send_*` methods rather than mimic keyboard output with delays
+Change: custom plover `output` subclass to speed up `tape_translate` by "passing" in the `send_*` methods rather than mimic keyboard output with artificial delays
 
 ## Ver 3.0.3:
 
