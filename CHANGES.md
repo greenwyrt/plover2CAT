@@ -2,29 +2,29 @@
 
 ## Ver 3.1.0 (Pre-release):
 
-New: Apply style to multiple paragraphs together, updated documentation
+New:
 
-New: Highlight styling and documentation
+- Apply style to multiple paragraphs together, updated documentation
+- Highlight styling for different elements like automatic text, and documentation
 
-Change: consolidate styling refresh across code (editor, commands) to one function, `refresh_par_style` in `TextEditor`
+Changes: 
 
-Change: Message boxes use `Plover2CAT` as title, as best practice
+- Message boxes use `Plover2CAT` as title, as best practice
+- Increased limit on paragraphs from 200 to 1000 before warning for refreshing styles
+- Tests now selectable, and testDialog UI changed for select all/deselect all
 
-Change: Increased limit on paragraphs from 200 to 1000 before warning for refreshing styles
+Bug fixes:
+- Set style of empty paragraph created in `load_transcript` when last paragraph has trailing `\n`
+- Fixed `split_steno_par` where preceding space in text would not be removed
+- Fixed `merge_steno_par` where merged paragraph would retain original text formatting where it should take on formatting of merged paragraph
+- Fixed wrong reference to styles in editor
+- Minor changes in attempt to speed up `tape_translate`
 
-Bug fix: Set style of empty paragraph created in `load_transcript` when last paragraph has trailing `\n`
 
-Bug fix: fixed `split_steno_par` where preceding space in text would not be removed
-
-Bug fix: fixed `merge_steno_par` where merged paragraph would retain original text formatting where it should take on formatting of merged paragraph
-
-Bug fix: wrong reference to styles in editor
-
-New: tests for splitting a paragraph
-
-Bug fix: minor changes in attempt to speed up `tape_translate`
-
-Change: custom plover `output` subclass to speed up `tape_translate` by "passing" in the `send_*` methods rather than mimic keyboard output with artificial delays
+Internal Changes:
+- Tests for splitting a paragraph
+- Consolidate styling refresh across code (editor, commands) to one function, `refresh_par_style` in `TextEditor`
+- Custom plover `output` subclass to speed up `tape_translate` by "passing" in the `send_*` methods rather than mimic keyboard output with artificial delays
 
 ## Ver 3.0.3:
 

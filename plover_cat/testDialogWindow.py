@@ -6,8 +6,9 @@ from shutil import rmtree
 from io import StringIO
 from unittest import TextTestRunner
 
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QListWidgetItem
 from PyQt5.QtGui import QTextCursor
+from PyQt5.QtCore import Qt
 from plover.oslayer.config import CONFIG_DIR
 from plover.steno import Stroke, normalize_stroke, normalize_steno
 from plover_cat.helpers import save_json
@@ -118,18 +119,20 @@ class TestStenoData(unittest.TestCase):
         self.assertEqual(sc.to_text(), "ABC ABCD123was too ")
 
 class TestTextEdit(unittest.TestCase):
-    def __init__(self, testname, editor):
+    def __init__(self, testname, editor, selection):
         super(TestTextEdit, self).__init__(testname)
         self.editor = editor
         self.temp_dir = None
         self.output_setting = False
         self.space_setting = "Before Output"
+        self.selection = selection
     def setUp(self):
         self.temp_dir = mkdtemp()
         self.output_setting = self.editor.engine.output
         self.editor.engine.set_output(True)
         self.space_setting = self.editor.engine.config["space_placement"]
         self.editor.engine.config["space_placement"] = "Before Output"
+        self.step_Open()
     def tearDown(self):
         self.editor.engine.set_output(self.output_setting)
         self.editor.engine.config["space_placement"] = self.space_setting
@@ -137,16 +140,7 @@ class TestTextEdit(unittest.TestCase):
         self.editor.close_file()
         rmtree(self.temp_dir)
     def testMonolithic(self):
-        for _s in ["step_Open", 
-                    "step_ConfirmFiles", 
-                    "step_Stroke", 
-                    "step_AddRemoveDict",
-                    "step_writeTwoLine",
-                    "step_SplitPar",
-                    "step_SplitParSpace",
-                    "step_MergePar",
-                    "step_CheckStyleAttr",
-                    "step_changeStyle"]:
+        for _s in self.selection:
             try:
                 getattr(self, _s)()
             except Exception as e:
@@ -180,7 +174,7 @@ class TestTextEdit(unittest.TestCase):
         self.editor.textEdit.log_to_tape(Stroke("*"))
         self.assertNotEqual(len(self.editor.strokeList.toPlainText()), 0)
         self.editor.textEdit.clear_transcript()
-    def step_writeTwoLine(self):
+    def step_WriteTwoLine(self):
         # todo: create mock tape to read instead
         self.editor.on_send_string("ABC\\nDEF")
         self.editor.textEdit.on_stroke(Stroke("S"))
@@ -263,7 +257,7 @@ class TestTextEdit(unittest.TestCase):
         self.assertEqual(cursor.block().userData()["style"], "Normal")
         cursor.setPosition(5)
         self.assertEqual(cursor.block().userData()["style"], "Question")
-    def step_changeStyle(self):
+    def step_ChangeStyle(self):
         one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
                                                          {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
                     1: {"style": "Question", "strokes": [{"data": "DEF", "element": "stroke", "stroke": "-T", "time": "2000-01-01T00:00:00.002"}]}}
@@ -286,6 +280,7 @@ class TestTextEdit(unittest.TestCase):
         # set color, close transcript, re-open, check color
         # then insert text directly in transcript
         self.editor.textEdit.clear_transcript()         
+
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
     """
@@ -294,6 +289,35 @@ class testDialogWindow(QDialog, Ui_testDialog):
         self.setupUi(self)
         self.editor = editor
         self.runTest.clicked.connect(self.run_tests)
+        self.selectAll.clicked.connect(self.select_all)
+        self.unselectAll.clicked.connect(self.unselect_all)
+        self.selection = ["step_ConfirmFiles", 
+                    "step_Stroke", 
+                    "step_AddRemoveDict",
+                    "step_WriteTwoLine",
+                    "step_SplitPar",
+                    "step_SplitParSpace",
+                    "step_MergePar",
+                    "step_CheckStyleAttr",
+                    "step_ChangeStyle"]
+        last = len(self.selection)
+        counter = 0
+        for i in self.selection:
+            item = QListWidgetItem()
+            item.setText(i)
+            item.setCheckState(Qt.Unchecked)
+            counter += 1
+            if counter == last:
+                item.setCheckState(Qt.Checked)
+            self.listSelection.addItem(item)
+    def select_all(self):
+        for index in range(0, self.listSelection.count()):
+            item = self.listSelection.item(index)
+            item.setCheckState(Qt.Checked)
+    def unselect_all(self):
+        for index in range(0, self.listSelection.count()):
+            item = self.listSelection.item(index)
+            item.setCheckState(Qt.Unchecked)        
     def display_log(self):
         log_path = pathlib.Path(CONFIG_DIR) / "plover.log"
         log_contents = log_path.read_text()
@@ -304,7 +328,12 @@ class testDialogWindow(QDialog, Ui_testDialog):
         res_output = StringIO()
         suite_steno = unittest.TestLoader().loadTestsFromTestCase(TestStenoData)
         suite = unittest.TestSuite([suite_steno])
-        suite.addTest(TestTextEdit("testMonolithic", self.editor))
+        selection = []
+        for index in range(0, self.listSelection.count()):
+            item = self.listSelection.item(index)
+            if item.checkState() == Qt.Checked:
+                selection.append(item.text())
+        suite.addTest(TestTextEdit("testMonolithic", self.editor, selection))
         # suite.addTest(TestTextEdit("testConfirmFiles", self.editor))
         res = TextTestRunner(stream = res_output, verbosity=1).run(suite)
         self.output.clear()

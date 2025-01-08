@@ -14,6 +14,9 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
+- [ ] write descriptions for tests
+- [ ] merge/split tests with new style
+- [ ] Add navigation back, every cursor change
 - [ ] rename audiovisual to media in UI and beyond
 - [ ] sequentially process tape to translation
 - [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
@@ -84,6 +87,7 @@ Steno-Annotated ODF: Plover2CAT should produce an annotated document, putting ra
 ## Style highlighting
 
 Paragraphs with certain styles could get a highlight color, would conflict with element styling (ie two font colors).
+Solution: QColors can be blended by addition.
 
 ## Optimize editor styling refresh
 
