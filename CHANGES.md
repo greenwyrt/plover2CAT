@@ -18,13 +18,18 @@ Bug fixes:
 - Fixed `split_steno_par` where preceding space in text would not be removed
 - Fixed `merge_steno_par` where merged paragraph would retain original text formatting where it should take on formatting of merged paragraph
 - Fixed wrong reference to styles in editor
-- Minor changes in attempt to speed up `tape_translate`
+- `tape_translate` should be much much faster through blocking signals, cleaning undo stack etc
 
 
 Internal Changes:
 - Tests for splitting a paragraph
 - Consolidate styling refresh across code (editor, commands) to one function, `refresh_par_style` in `TextEditor`
 - Custom plover `output` subclass to speed up `tape_translate` by "passing" in the `send_*` methods rather than mimic keyboard output with artificial delays
+- Avoid calling setCharFormat twice when doing `insertText`
+
+
+Known problem:
+- Navigation does not refresh or display
 
 ## Ver 3.0.3:
 

@@ -78,6 +78,7 @@ class PloverCATEditor(QTextEdit):
     def __init__(self, widget):
         super().__init__(widget)
         # QTextEdit setup
+        self.setUndoRedoEnabled(False)
         font = QtGui.QFont()
         font.setFamily("Courier New")
         font.setPointSize(12)
@@ -247,8 +248,8 @@ class PloverCATEditor(QTextEdit):
                 document_cursor.setBlockFormat(self.par_formats[block_data["style"]])
                 current_format = self.txt_formats[block_data["style"]]
                 current_format.setForeground(self.highlight_colors["stroke"])            
-                document_cursor.setCharFormat(current_format)
-                document_cursor.insertText(value["text"])
+                # document_cursor.setCharFormat(current_format)
+                document_cursor.insertText(value["text"], current_format)
                 document_cursor.block().setUserData(block_data)
                 document_cursor.block().setUserState(1)
                 if len(block_data["strokes"]) > 0 and block_data["strokes"].ends_with("\n"):
@@ -295,8 +296,8 @@ class PloverCATEditor(QTextEdit):
                     else:
                         current_format = self.txt_formats[block_data["style"]]
                         current_format.setForeground(self.highlight_colors[el.element])            
-                        document_cursor.setCharFormat(current_format)
-                        document_cursor.insertText(el.to_text())
+                        # document_cursor.setCharFormat(current_format)
+                        document_cursor.insertText(el.to_text(), current_format)
                 self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
                 QApplication.processEvents()
         if document_cursor.block().userData() == None:

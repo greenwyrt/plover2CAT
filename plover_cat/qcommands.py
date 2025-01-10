@@ -109,8 +109,8 @@ class steno_insert(QUndoCommand):
         cursor_format = self.document.txt_formats[block_data["style"]]
         for el in self.steno:
             cursor_format.setForeground(self.document.highlight_colors[el.element])
-            current_cursor.setCharFormat(cursor_format)
-            current_cursor.insertText(el.to_text())
+            # current_cursor.setCharFormat(cursor_format)
+            current_cursor.insertText(el.to_text(), cursor_format)
         current_block.setUserState(1)
         self.document.setTextCursor(current_cursor)
         log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.steno.to_json()}
@@ -184,8 +184,8 @@ class steno_remove(QUndoCommand):
         cursor_format = self.document.txt_formats[block_data["style"]]
         for el in self.steno:
             cursor_format.setForeground(self.document.highlight_colors[el.element])
-            current_cursor.setCharFormat(cursor_format)
-            current_cursor.insertText(el.to_text())        
+            # current_cursor.setCharFormat(cursor_format)
+            current_cursor.insertText(el.to_text(), cursor_format)        
         log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.steno.to_json()}
         log.info(f"Remove (undo): {log_dict}")
         self.document.setTextCursor(current_cursor)
@@ -440,9 +440,9 @@ class merge_steno_par(QUndoCommand):
         if first_data["strokes"].ends_with_element("automatic"):
             cursor_format = self.document.txt_formats[first_data["style"]]
             cursor_format.setForeground(self.document.highlight_colors["automatic"])
-            current_cursor.setCharFormat(cursor_format)
+            # current_cursor.setCharFormat(cursor_format)
             current_cursor.setPosition(first_block.position() + self.position_in_block - len(first_data["strokes"].data[-1].prefix))
-            current_cursor.insertText(first_data["strokes"].data[-1].prefix)
+            current_cursor.insertText(first_data["strokes"].data[-1].prefix, cursor_format)
         else:
             current_cursor.setPosition(first_block.position() + self.position_in_block)
         current_cursor.insertText("\n")
@@ -648,7 +648,9 @@ class update_field(QUndoCommand):
                         current_cursor.setPosition(block.position() + end_pos, QTextCursor.KeepAnchor)
                         current_cursor.removeSelectedText()
                         el.user_dict = self.new_dict
-                        current_cursor.insertText(el.to_text())
+                        cursor_format = self.document.txt_formats[block.userData()["style"]]
+                        cursor_format.setForeground(self.document.highlight_colors["index"])
+                        current_cursor.insertText(el.to_text(), cursor_format)
             if block == self.document.document().lastBlock():
                 break
             block = block.next()
@@ -675,8 +677,8 @@ class update_field(QUndoCommand):
                     el.user_dict = self.user_field_dict
                     cursor_format = self.document.txt_formats[block.userData()["style"]]
                     cursor_format.setForeground(self.document.highlight_colors["index"])
-                    current_cursor.setCharFormat(cursor_format)  
-                    current_cursor.insertText(el.to_text())
+                    # current_cursor.setCharFormat(cursor_format)  
+                    current_cursor.insertText(el.to_text(), cursor_format)
             if block == self.document.document().lastBlock():
                 break
             block = block.next()
@@ -723,8 +725,8 @@ class update_entries(QUndoCommand):
                         el.description = self.new_dict[el.indexname]["entries"][el.data]
                         cursor_format = self.document.txt_formats[block.userData()["style"]]
                         cursor_format.setForeground(self.document.highlight_colors["index"])
-                        current_cursor.setCharFormat(cursor_format)                        
-                        current_cursor.insertText(el.to_text())
+                        # current_cursor.setCharFormat(cursor_format)                        
+                        current_cursor.insertText(el.to_text(), cursor_format)
             if block == self.document.document().lastBlock():
                 break
             block = block.next()
@@ -748,7 +750,9 @@ class update_entries(QUndoCommand):
                     el.prefix = self.store_dict[el.indexname]["prefix"]
                     el.hidden = self.store_dict[el.indexname]["hidden"]
                     el.description = self.store_dict[el.indexname]["entries"][el.data]
-                    current_cursor.insertText(el.to_text())
+                    cursor_format = self.document.txt_formats[block.userData()["style"]]
+                    cursor_format.setForeground(self.document.highlight_colors["index"])
+                    current_cursor.insertText(el.to_text(), cursor_format)
             if block == self.document.document().lastBlock():
                 break
             block = block.next()

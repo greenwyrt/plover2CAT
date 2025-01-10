@@ -14,7 +14,7 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
-- [ ] write descriptions for tests
+- [ ] refresh styles now extremely slow with highlighting
 - [ ] merge/split tests with new style
 - [ ] Add navigation back, every cursor change
 - [ ] rename audiovisual to media in UI and beyond
@@ -42,10 +42,13 @@ Right now, steno insertion is based on the cursor position unless it is locked a
 Proposed solution: replace `engine._keyboard_emulation` on startup with your own subclass of `plover.output.Output` and implement send_backspaces, send_string, and send_key_combination as needed, at least until new version of Plover with output plugins.
 
 Status: somewhat implemented, as `output` subclass works with `tape_translate`, but input/output selection/always at end options need to be thought out
+Drawback: cannot write in any other windows
 
 ## Optimizing `get_suggestions`
 
 For both tapey-tape and clippy, the file is read from the start repeatedly. It may be better to store lines in memory and only ingest new lines (keep track of position with tell and then seek). The drawback is increased memory. Also, there are repeated lookups with Plover's engine, which may also be reduced with a local dict.
+
+Alternatively, set up separate threads to digest and report back the counter dict
 
 ## Parsable action logging
 

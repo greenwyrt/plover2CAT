@@ -291,20 +291,21 @@ class testDialogWindow(QDialog, Ui_testDialog):
         self.runTest.clicked.connect(self.run_tests)
         self.selectAll.clicked.connect(self.select_all)
         self.unselectAll.clicked.connect(self.unselect_all)
-        self.selection = ["step_ConfirmFiles", 
-                    "step_Stroke", 
-                    "step_AddRemoveDict",
-                    "step_WriteTwoLine",
-                    "step_SplitPar",
-                    "step_SplitParSpace",
-                    "step_MergePar",
-                    "step_CheckStyleAttr",
-                    "step_ChangeStyle"]
+        self.selection = {"step_ConfirmFiles": "Setup files are present", 
+                    "step_Stroke": "Strokes create output and are logged", 
+                    "step_AddRemoveDict": "Add and remove new dict",
+                    "step_WriteTwoLine": "Write correctly with new line in translation",
+                    "step_SplitPar": "Split paragraph and undo",
+                    "step_SplitParSpace": "Split paragraph with space involved and undo",
+                    "step_MergePar": "Merge paragraph, space involved, and undo",
+                    "step_CheckStyleAttr": "Text properly styled when loaded",
+                    "step_ChangeStyle": "Text properly styled when style changed manually"}
         last = len(self.selection)
         counter = 0
-        for i in self.selection:
+        for i, des in self.selection.items():
             item = QListWidgetItem()
-            item.setText(i)
+            item.setText(des)
+            item.setData(Qt.UserRole, i)
             item.setCheckState(Qt.Unchecked)
             counter += 1
             if counter == last:
@@ -332,7 +333,7 @@ class testDialogWindow(QDialog, Ui_testDialog):
         for index in range(0, self.listSelection.count()):
             item = self.listSelection.item(index)
             if item.checkState() == Qt.Checked:
-                selection.append(item.text())
+                selection.append(item.data(Qt.UserRole))
         suite.addTest(TestTextEdit("testMonolithic", self.editor, selection))
         # suite.addTest(TestTextEdit("testConfirmFiles", self.editor))
         res = TextTestRunner(stream = res_output, verbosity=1).run(suite)

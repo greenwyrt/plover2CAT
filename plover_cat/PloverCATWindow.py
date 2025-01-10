@@ -462,6 +462,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.progressBar.setFormat("Re-style paragraph %v")
         self.statusBar.addWidget(self.progressBar)
         self.progressBar.show()
+        self.mainTabs.hide()
+        self.textEdit.setUpdatesEnabled(False)
+        self.textEdit.document().blockSignals(True)
         self.textEdit.blockSignals(True)
         while True:
             block_data = block.userData()["strokes"]
@@ -476,8 +479,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if block == self.textEdit.document().lastBlock():
                 break
             block = block.next()
+        self.textEdit.setUpdatesEnabled(True)
+        self.textEdit.document().blockSignals(False)
         self.textEdit.blockSignals(False)
         self.statusBar.removeWidget(self.progressBar)
+        self.mainTabs.show()
 
     def update_style_display(self, style):
         """Update GUI display for style properties.
@@ -1874,12 +1880,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.document().blockSignals(True)
         self.kc = self.engine._keyboard_emulation
         self.engine._keyboard_emulation = mock_output()        
+        count = 0
         if paper_format == "Plover (raw)":
             with open(selected_file) as f:
                 for line in f:
                     stroke = Stroke(normalize_stroke(line.strip().replace(" ", "")))
                     self.engine._translator.translate(stroke)
                     self.engine._trigger_hook('stroked', stroke)
+                    count += 1
+                    if count > 100:
+                        self.textEdit.undo_stack.clear()
+                        count = 0
         elif paper_format == "Plover2CAT":
             with open(selected_file) as f:
                 for line in f:
@@ -1890,6 +1901,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                             keys.append(plover.system.KEYS[i])                    
                     self.engine._translator.translate(Stroke(keys))
                     self.engine._trigger_hook('stroked', Stroke(keys))
+                    count += 1
+                    if count > 100:
+                        self.textEdit.undo_stack.clear()
+                        count = 0
         elif paper_format == "Plover (paper)":
             with open(selected_file) as f:
                 for line in f:
@@ -1899,6 +1914,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                             keys.append(plover.system.KEYS[i])
                     self.engine._translator.translate(Stroke(keys))
                     self.engine._trigger_hook('stroked', Stroke(keys))
+                    count += 1
+                    if count > 100:
+                        self.textEdit.undo_stack.clear()
+                        count = 0
+        self.textEdit.undo_stack.clear()
         self.textEdit.document().blockSignals(False)
         self.textEdit.blockSignals(False)
         self.mainTabs.show()
