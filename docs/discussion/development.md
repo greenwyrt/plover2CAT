@@ -14,9 +14,9 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
-- [ ] refresh styles now extremely slow with highlighting
+- [ ] load_transcript should have the two methods factored out and return same type dictionary (like parse rtf) for one method to load a transcript dict
+    - [ ] then can fix refresh styles now extremely slow with highlighting
 - [ ] merge/split tests with new style
-- [ ] Add navigation back, every cursor change
 - [ ] rename audiovisual to media in UI and beyond
 - [ ] sequentially process tape to translation
 - [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)

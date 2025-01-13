@@ -381,7 +381,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.text_to_stroke_move()
             self.refresh_steno_display(current_cursor)
             self.display_block_data()
-            self.update_style_display(self.textEdit.textCursor().block().userData()["style"])        
+            self.update_style_display(self.textEdit.textCursor().block().userData()["style"])
+            self.update_navigation()    
 
     def update_tape(self, txt):
         """Update tape with new stroke(s).
@@ -722,6 +723,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         if not self.textEdit:
             return
+        if not self.dockSuggest.isVisible():
+            return
         if self.suggest_source.currentText() == "tapey-tape":
             self.get_tapey_tape()
         elif self.suggest_source.currentText() == "clippy_2":
@@ -1031,6 +1034,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def update_navigation(self):     
         """Create ``QListWidgetItems`` to display headings in navigation dock.
         """
+        if not self.dockNavigation.isVisible():
+            return
         block = self.textEdit.document().begin()
         self.navigationList.clear()
         log.debug("Nagivation pane updated.")

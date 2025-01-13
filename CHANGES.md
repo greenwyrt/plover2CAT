@@ -26,6 +26,7 @@ Internal Changes:
 - Consolidate styling refresh across code (editor, commands) to one function, `refresh_par_style` in `TextEditor`
 - Custom plover `output` subclass to speed up `tape_translate` by "passing" in the `send_*` methods rather than mimic keyboard output with artificial delays
 - Avoid calling setCharFormat twice when doing `insertText`
+- Avoid updating suggestions or navigation when respective docks are hidden
 
 
 Known problem:
