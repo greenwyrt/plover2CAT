@@ -685,6 +685,10 @@ class element_collection(UserList):
     def to_display(self):
         """Return list of display strings for elements"""
         return([el.to_display() for el in self.data])
+    def to_strokes(self):
+        """Return strin with all strokes"""
+        el_strokes = [el.stroke for el in self.data if el.element == "stroke"]
+        return("/".join(el_strokes))
     def remove(self, start, end):
         """Remove elements based on specified functional position start/stop.
 

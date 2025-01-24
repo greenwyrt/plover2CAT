@@ -899,7 +899,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
             end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
             underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
-            underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])        
+            underlying_steno = underlying_strokes.to_strokes()
             self.steno_outline.setText(underlying_steno)
         if not self.dockProp.isVisible():
             self.dockProp.setVisible(True) 
@@ -2004,7 +2004,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor.setPosition(current_block.position() + end_stroke_pos[1], QTextCursor.KeepAnchor)
         self.textEdit.setTextCursor(current_cursor)
         underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
-        underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])
+        underlying_steno = underlying_strokes.to_strokes()
         selected_untrans = current_cursor.selectedText()
         text, ok = QInputDialog().getText(self, "Retroactive Define", "Stroke: %s \nTranslation:" % underlying_steno)
         if self.textEdit.config["space_placement"] == "Before Output":
@@ -2063,7 +2063,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
         end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
         underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
-        underlying_steno = "/".join([element.data[0].stroke for element in underlying_strokes if element.data[0].element == "stroke"])
+        underlying_steno = underlying_strokes.to_strokes()
         text, ok = QInputDialog().getText(self, "Add Autocomplete Term", "Text: %s \nSteno:" % selected_text, text = underlying_steno)
         if not ok:
             return

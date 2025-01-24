@@ -19,6 +19,7 @@ Bug fixes:
 - Fixed `merge_steno_par` where merged paragraph would retain original text formatting where it should take on formatting of merged paragraph
 - Fixed wrong reference to styles in editor
 - `tape_translate` should be much much faster through blocking signals, cleaning undo stack etc
+- Fix accessing strokes for retroactive define
 
 
 Internal Changes:
