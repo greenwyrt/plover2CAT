@@ -29,6 +29,7 @@ from pyparsing import (
 from plover import log
 
 from plover_cat.steno_objects import *
+
 # control chars \ { }
 
 
@@ -479,3 +480,27 @@ def load_rtf_styles(parse_results):
         renamed_indiv_style.append(new_style_name)
     return(style_dict, renamed_indiv_style)    
 
+def import_version_one(json_document):
+    """Formats JSON file with older transcript format into standard transcript dict form"""
+    transcript_dict = {}
+    for key, value in json_document.items():
+        if not key.isdigit():
+            continue
+        el_list = []
+        for el in value["data"]["strokes"]:
+            el_dict = {"time": el[0], "stroke": el[1], "data": el[2]}
+            if len(el) == 4:
+                el_dict["audiotime"] = el[4]
+            new_stroke = stroke_text()
+            new_stroke.from_dict(el_dict)
+            el_list.append(new_stroke)
+        block_data = {}
+        for k, v in value["data"].items():
+            block_data[k] = v
+        block_data["strokes"] = element_collection(el_list).to_json()
+        transcript_dict[str(key)] = block_data
+    return(transcript_dict)
+
+def import_version_two(json_document):
+    """Formats JSON file with newer transcript format into standard transcript dict form"""
+    return(json_document)

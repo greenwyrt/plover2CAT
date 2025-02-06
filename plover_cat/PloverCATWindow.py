@@ -9,7 +9,7 @@ from collections import Counter, deque
 from shutil import copyfile
 from copy import deepcopy, copy
 from sys import platform
-from tempfile import gettempdir
+from tempfile import gettempdir, TemporaryDirectory
 from spylls.hunspell import Dictionary
 from dulwich.repo import Repo
 from dulwich.errors import NotGitRepository
@@ -456,30 +456,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if user_choice == QMessageBox.No:
                 return
         self.textEdit.gen_style_formats()
-        block = self.textEdit.document().begin()
-        current_cursor = self.textEdit.textCursor()
-        self.progressBar = QProgressBar(self)
-        self.progressBar.setMaximum(self.textEdit.document().blockCount())
-        self.progressBar.setFormat("Re-style paragraph %v")
-        self.statusBar.addWidget(self.progressBar)
-        self.progressBar.show()
+        # self.progressBar = QProgressBar(self)
+        # self.progressBar.setMaximum(self.textEdit.document().blockCount())
+        # self.progressBar.setFormat("Re-style paragraph %v")
+        # self.statusBar.addWidget(self.progressBar)
+        # self.progressBar.show()
         self.mainTabs.hide()
         self.textEdit.setUpdatesEnabled(False)
         self.textEdit.document().blockSignals(True)
         self.textEdit.blockSignals(True)
-        while True:
-            block_data = block.userData()["strokes"]
-            try:
-                block_style = block.userData()["style"]
-            except TypeError:
-                # block_style = ""
-                continue  
-            self.textEdit.refresh_par_style(block)                        
-            self.progressBar.setValue(block.blockNumber())
-            QApplication.processEvents()
-            if block == self.textEdit.document().lastBlock():
-                break
-            block = block.next()
+        # todo: make tempfile, use with, then autosave to tempfile, then reload from tempfile with load_transcript
+        with TemporaryDirectory() as f:
+            temp_path = pathlib.Path(f, "temp.transcript")
+            self.textEdit.save_transcript(temp_path)
+            self.textEdit.load_transcript(temp_path)
         self.textEdit.setUpdatesEnabled(True)
         self.textEdit.document().blockSignals(False)
         self.textEdit.blockSignals(False)
@@ -828,6 +818,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.update_highlight_color()
         if self.textEdit:
             self.textEdit.get_highlight_colors()
+            self.refresh_editor_styles()
     
     def update_highlight_color(self):
         settings = QSettings("Plover2CAT", "OpenCAT")

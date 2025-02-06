@@ -94,7 +94,9 @@ Solution: QColors can be blended by addition.
 
 ## Optimize editor styling refresh
 
-Styling refresh iterates over all paragraphs after properties of a style has changed. However, only some paragraph need to be updated. The simplest way of only styling paragaphs with the changed style does not work as styles can depend on other styles. Some way of tracking dependencies is needed to optimize.
+Styling refresh iterates over all paragraphs after properties of a style has changed. However, only some paragraph need to be updated. The simplest way of only styling paragaphs with the changed style does not work as styles can depend on other styles. 
+
+`Chainmap` might be a possible solution for changing dependencies
 
 ## Richtext Features for indexes and tables
 

@@ -21,7 +21,6 @@ Bug fixes:
 - `tape_translate` should be much much faster through blocking signals, cleaning undo stack etc
 - Fix accessing strokes for retroactive define
 
-
 Internal Changes:
 - Tests for splitting a paragraph
 - Consolidate styling refresh across code (editor, commands) to one function, `refresh_par_style` in `TextEditor`
