@@ -177,7 +177,7 @@ class PloverCATEditor(QTextEdit):
             if event.key() != Qt.Key_Return:
                 if event.modifiers() in [Qt.NoModifier, Qt.ShiftModifier]:
                     self.mock_type(event.text())
-            print(event.key())
+            # print(event.key())
             QTextEdit.keyPressEvent(self, event)
 
     def load(self, path, engine, load_transcript = True):
