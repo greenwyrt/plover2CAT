@@ -14,8 +14,6 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
-- [ ] load_transcript should have the two methods factored out and return same type dictionary (like parse rtf) for one method to load a transcript dict
-    - [ ] then can fix refresh styles now extremely slow with highlighting
 - [ ] merge/split tests with new style
 - [ ] rename audiovisual to media in UI and beyond
 - [ ] sequentially process tape to translation
@@ -92,23 +90,11 @@ Steno-Annotated ODF: Plover2CAT should produce an annotated document, putting ra
 Paragraphs with certain styles could get a highlight color, would conflict with element styling (ie two font colors).
 Solution: QColors can be blended by addition.
 
-## Optimize editor styling refresh
-
-Styling refresh iterates over all paragraphs after properties of a style has changed. However, only some paragraph need to be updated. The simplest way of only styling paragaphs with the changed style does not work as styles can depend on other styles. Some way of tracking dependencies is needed to optimize.
-
 ## Richtext Features for indexes and tables
 
 While richtext editing has been enabled, some common features of word processors and professional CAT software are missing. Primary ones are 1) embedding images (implemented), 2) table of contents/index and 3) tables.
 
 Tables are likely more difficult to implement and may require an editor widget.
-
-## Refactoring editor
-
-*in-progress for ver 3*
-
-The editor should be refactor into a smaller class.
-
-Methods that exclusively work on the `QTextEdit` could possibly be extracted and refactored from the `PloverCATWindow` into the `PloverCATEditor` custom class.
 
 ## Editor speed
 
@@ -118,11 +104,9 @@ The other processes that scan the whole document again and again are fields (on 
 
 Data retrieval and storage are likely as fast for the limitations, considering that text and steno data have to be linked, and custom data storage for paragraphs would mean cleanup of data that Qt does automatically. If loading from file, the original dict is kept in memory. Blocks that are modified are marked using `userState`. For saving, each paragraph's state is checked, and at the first block with `userState`, all subsequent paragraphs get data extracted and stored. 
 
-Some funtions are called upon every cursor change: updating the steno and style display, updating the block data display, and moving the tape to the proper spot.
-Responsiveness will speed up if all three are inactivated (set disabled) at the cost of less information visible.
-This could be set as a "writing mode" with all docks hidden vs editing mode with docks set visible.
+~~Some funtions are called upon every cursor change: updating the steno and style display, updating the block data display, and moving the tape to the proper spot. Responsiveness will speed up if all three are inactivated (set disabled) at the cost of less information visible.~~
 
-Some more intensive tasks are getting suggestions and looping over document for navigation headings, which should be offloaded to a worker.
+Docks nwo do not update unless they are open and visible. Closing all docks could be set as a "writing mode" with all docks hidden vs editing mode with docks set visible.
 
 ## Editor memory
 

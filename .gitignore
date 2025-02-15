@@ -4,3 +4,4 @@ plover_cat/*_ui.py
 plover_cat/resources_rc.py
 docs/_build/*
 .vscode/settings.json
+dist/*

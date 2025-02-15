@@ -12,9 +12,9 @@ from spylls.hunspell import Dictionary
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument, QColor
 from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal, QUrl, QSettings
-from PyQt5.QtWidgets import QPlainTextEdit, QCompleter, QTextEdit, QUndoStack, QMessageBox, QApplication
+from PyQt5.QtWidgets import QCompleter, QTextEdit, QUndoStack, QMessageBox, QApplication
 from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaRecorder, 
-QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
+QAudioRecorder)
 
 _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 
@@ -25,6 +25,7 @@ from plover import log
 
 from plover_cat.qcommands import *
 from plover_cat.steno_objects import *
+from plover_cat.rtf_parsing import *
 from plover_cat.export_helpers import load_odf_styles, recursive_style_format, parprop_to_blockformat, txtprop_to_textformat
 from plover_cat.helpers import ms_to_hours, save_json, backup_dictionary_stack, add_custom_dicts, load_dictionary_stack_from_backup, return_commits, hide_file
 from plover_cat.constants import default_styles, default_config, default_dict
@@ -176,7 +177,7 @@ class PloverCATEditor(QTextEdit):
             if event.key() != Qt.Key_Return:
                 if event.modifiers() in [Qt.NoModifier, Qt.ShiftModifier]:
                     self.mock_type(event.text())
-            print(event.key())
+            # print(event.key())
             QTextEdit.keyPressEvent(self, event)
 
     def load(self, path, engine, load_transcript = True):
@@ -220,86 +221,55 @@ class PloverCATEditor(QTextEdit):
             self.send_message.emit("Reading transcript data.")
             json_document = json.loads(f.read())
         self.backup_document = deepcopy(json_document)
-        self.moveCursor(QTextCursor.Start)
-        self.clear()
-        document_cursor = self.textCursor()
         self.send_message.emit("Loading transcript data.")
-        ef = element_factory()
-        ea = element_actions()
-        self.clear()
         # check if json document is older format
         if "data" in json_document[next(iter(json_document))]:
-            # old format json
-            for key, value in json_document.items():
-                if not key.isdigit():
-                    continue
-                block_data = BlockUserData()
-                el_list = []
-                for el in value["data"]["strokes"]:
-                    el_dict = {"time": el[0], "stroke": el[1], "data": el[2]}
-                    if len(el) == 4:
-                        el_dict["audiotime"] = el[4]
-                    new_stroke = stroke_text()
-                    new_stroke.from_dict(el_dict)
-                    el_list.append(new_stroke)
-                for k, v in value["data"].items():
-                    block_data[k] = v
-                block_data["strokes"] = element_collection(el_list)
-                document_cursor.setBlockFormat(self.par_formats[block_data["style"]])
-                current_format = self.txt_formats[block_data["style"]]
-                current_format.setForeground(self.highlight_colors["stroke"])            
-                # document_cursor.setCharFormat(current_format)
-                document_cursor.insertText(value["text"], current_format)
-                document_cursor.block().setUserData(block_data)
-                document_cursor.block().setUserState(1)
-                if len(block_data["strokes"]) > 0 and block_data["strokes"].ends_with("\n"):
-                    document_cursor.insertText("\n")
-                self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
-                QApplication.processEvents()
-        else:        
-            # new format json  
-            for key, value in json_document.items():
-                # skip if key is not a digit
-                if not key.isdigit():
-                    continue
-                block_data = BlockUserData()
-                el_list = [ef.gen_element(element_dict = i, user_field_dict = self.user_field_dict) for i in value["strokes"]]
-                # document_cursor.movePosition(QTextCursor.Start)
-                self.setTextCursor(document_cursor)
-                for k, v in value.items():
-                    block_data[k] = v
-                block_data["strokes"] = element_collection()
-                document_cursor.block().setUserData(block_data)
-                block_data["strokes"] = element_collection(el_list)
-                if block_data["style"] not in self.par_formats:
-                    block_data["style"] = next(iter(self.par_formats))
-                document_cursor.setBlockFormat(self.par_formats[block_data["style"]])
-                document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
-                # if any([el.element == "image" for el in el_list]):
-                for el in el_list:
-                    if el.element == "image":
-                        i_path = self.file_name / pathlib.Path(el.path)
-                        imageUri = QUrl(i_path.as_uri())
-                        el.path = i_path.as_posix()
-                        image = QImage(QImageReader(el.path).read())
-                        self.document().addResource(
-                            QTextDocument.ImageResource,
-                            imageUri,
-                            QVariant(image)
-                        )
-                        imageFormat = QTextImageFormat()
-                        imageFormat.setWidth(image.width())
-                        imageFormat.setHeight(image.height())
-                        imageFormat.setName(imageUri.toString())
-                        document_cursor.insertImage(imageFormat)
-                        document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
-                    else:
-                        current_format = self.txt_formats[block_data["style"]]
-                        current_format.setForeground(self.highlight_colors[el.element])            
-                        # document_cursor.setCharFormat(current_format)
-                        document_cursor.insertText(el.to_text(), current_format)
-                self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
-                QApplication.processEvents()
+            self.backup_document = import_version_one(json_document)
+        else:
+            self.backup_document = import_version_two(json_document)
+        self.clear()
+        self.moveCursor(QTextCursor.Start)
+        document_cursor = self.textCursor()
+        ef = element_factory()
+        for key, value in self.backup_document.items():
+            # skip if key is not a digit
+            if not key.isdigit():
+                continue
+            block_data = BlockUserData()
+            el_list = [ef.gen_element(element_dict = i, user_field_dict = self.user_field_dict) for i in value["strokes"]]
+            self.setTextCursor(document_cursor)
+            for k, v in value.items():
+                block_data[k] = v
+            block_data["strokes"] = element_collection()
+            document_cursor.block().setUserData(block_data)
+            block_data["strokes"] = element_collection(el_list)
+            if block_data["style"] not in self.par_formats:
+                block_data["style"] = next(iter(self.par_formats))
+            document_cursor.setBlockFormat(self.par_formats[block_data["style"]])
+            document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
+            for el in el_list:
+                if el.element == "image":
+                    i_path = self.file_name / pathlib.Path(el.path)
+                    imageUri = QUrl(i_path.as_uri())
+                    el.path = i_path.as_posix()
+                    image = QImage(QImageReader(el.path).read())
+                    self.document().addResource(
+                        QTextDocument.ImageResource,
+                        imageUri,
+                        QVariant(image)
+                    )
+                    imageFormat = QTextImageFormat()
+                    imageFormat.setWidth(image.width())
+                    imageFormat.setHeight(image.height())
+                    imageFormat.setName(imageUri.toString())
+                    document_cursor.insertImage(imageFormat)
+                    document_cursor.setCharFormat(self.txt_formats[block_data["style"]])                
+                else:
+                    current_format = self.txt_formats[block_data["style"]]
+                    current_format.setForeground(self.highlight_colors[el.element])            
+                    document_cursor.insertText(el.to_text(), current_format)
+            self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
+            QApplication.processEvents()
         if document_cursor.block().userData() == None:
             document_cursor.block().setUserData(BlockUserData())
             self.to_next_style()

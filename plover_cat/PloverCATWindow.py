@@ -3,17 +3,12 @@ import string
 import re
 import pathlib
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 import time
 from collections import Counter, deque
-from shutil import copyfile
-from copy import deepcopy, copy
+from copy import deepcopy
 from sys import platform
-from tempfile import gettempdir
-from spylls.hunspell import Dictionary
-from dulwich.repo import Repo
-from dulwich.errors import NotGitRepository
-from dulwich import porcelain
+from tempfile import gettempdir, TemporaryDirectory
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -22,7 +17,7 @@ QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, 
 QTextOption, QTextCharFormat, QKeySequence, QPalette, QDesktopServices, QPixmap, QIcon)
 from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
 QStyle, QMessageBox, QDialog, QFontDialog, QColorDialog, QLabel, QMenu,
-QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar, QAction, QToolButton)
+QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar, QAction, QToolButton, QDockWidget)
 from PyQt5.QtMultimedia import (QMediaPlayer, QMediaRecorder, 
 QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -117,6 +112,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.flowparent.addLayout(self.recentfileflow)
         self.flowparent.addStretch()
         self.video = None
+        self.dock_status = {}
+        for doc in self.findChildren(QDockWidget):
+            self.dock_status[doc.objectName()] = False
+            doc.visibilityChanged.connect(lambda status, dock = doc.objectName(): self.dock_handler(status, dock))
+            doc.visibilityChanged.connect(lambda status: self.update_gui())
         # vars for startup
         ## on very first startup, set tabs up
         ## later configs will use window settings
@@ -373,9 +373,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.showMessage(txt)
         log.debug(txt)
 
+    def dock_handler(self, status, name):
+        """Update dock visibility status"""
+        self.dock_status[name] = status
+
     def update_gui(self):
         """Wrapper for updating parts of GUI when cursor changes position.
         """
+        if not self.textEdit:
+            return
         current_cursor = self.textEdit.textCursor()
         if current_cursor.block().userData():
             self.text_to_stroke_move()
@@ -443,6 +449,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
         :param cursor: a ``QTextCursor``, default ``None`` for current cursor
         """
+        if not self.textEdit:
+            return
+        if not self.dock_status["dockStenoData"]:
+            return
         if not cursor:
             cursor = self.textEdit.textCursor()
         block_strokes = cursor.block().userData()["strokes"]
@@ -456,30 +466,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if user_choice == QMessageBox.No:
                 return
         self.textEdit.gen_style_formats()
-        block = self.textEdit.document().begin()
-        current_cursor = self.textEdit.textCursor()
-        self.progressBar = QProgressBar(self)
-        self.progressBar.setMaximum(self.textEdit.document().blockCount())
-        self.progressBar.setFormat("Re-style paragraph %v")
-        self.statusBar.addWidget(self.progressBar)
-        self.progressBar.show()
+        # self.progressBar = QProgressBar(self)
+        # self.progressBar.setMaximum(self.textEdit.document().blockCount())
+        # self.progressBar.setFormat("Re-style paragraph %v")
+        # self.statusBar.addWidget(self.progressBar)
+        # self.progressBar.show()
         self.mainTabs.hide()
         self.textEdit.setUpdatesEnabled(False)
         self.textEdit.document().blockSignals(True)
         self.textEdit.blockSignals(True)
-        while True:
-            block_data = block.userData()["strokes"]
-            try:
-                block_style = block.userData()["style"]
-            except TypeError:
-                # block_style = ""
-                continue  
-            self.textEdit.refresh_par_style(block)                        
-            self.progressBar.setValue(block.blockNumber())
-            QApplication.processEvents()
-            if block == self.textEdit.document().lastBlock():
-                break
-            block = block.next()
+        # todo: make tempfile, use with, then autosave to tempfile, then reload from tempfile with load_transcript
+        with TemporaryDirectory() as f:
+            temp_path = pathlib.Path(f, "temp.transcript")
+            self.textEdit.save_transcript(temp_path)
+            self.textEdit.load_transcript(temp_path)
         self.textEdit.setUpdatesEnabled(True)
         self.textEdit.document().blockSignals(False)
         self.textEdit.blockSignals(False)
@@ -723,7 +723,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         if not self.textEdit:
             return
-        if not self.dockSuggest.isVisible():
+        if not self.dock_status["dockSuggest"]:
             return
         if self.suggest_source.currentText() == "tapey-tape":
             self.get_tapey_tape()
@@ -828,6 +828,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.update_highlight_color()
         if self.textEdit:
             self.textEdit.get_highlight_colors()
+            self.refresh_editor_styles()
     
     def update_highlight_color(self):
         settings = QSettings("Plover2CAT", "OpenCAT")
@@ -873,7 +874,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
         :param pane: a ``QWidget`` in the Toolbox dock's ``QTabWidget``
         """
-        if not self.dockProp.isVisible():
+        if not self.dock_status["dockProp"]:
             self.dockProp.setVisible(True)    
         self.tabWidget.setCurrentWidget(pane)
         log.debug(f"User set {pane.objectName()} pane.") 
@@ -883,7 +884,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
             self.search_term.setText(self.textEdit.textCursor().selectedText())
-        if not self.dockProp.isVisible():
+        if not self.dock_status["dockProp"]:
             self.dockProp.setVisible(True)
         self.tabWidget.setCurrentWidget(self.find_replace_pane)
         log.debug("User set find pane visible.")
@@ -901,7 +902,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
             underlying_steno = underlying_strokes.to_strokes()
             self.steno_outline.setText(underlying_steno)
-        if not self.dockProp.isVisible():
+        if not self.dock_status["dockProp"]:
             self.dockProp.setVisible(True) 
         self.tabWidget.setCurrentWidget(self.stenospell_pane)  
         log.debug("User set steno spell pane visible.")
@@ -1034,11 +1035,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def update_navigation(self):     
         """Create ``QListWidgetItems`` to display headings in navigation dock.
         """
-        if not self.dockNavigation.isVisible():
+        self.navigationList.clear()
+        if not self.dock_status["dockNavigation"]:
+            return
+        if not self.textEdit:
             return
         block = self.textEdit.document().begin()
-        self.navigationList.clear()
-        log.debug("Nagivation pane updated.")
         for i in range(self.textEdit.document().blockCount()):
             block_data = block.userData()
             if not block_data: continue
@@ -1052,6 +1054,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if block == self.textEdit.document().lastBlock():
                 break
             block = block.next()   
+        log.debug("Nagivation pane updated.")
 
     def stroke_to_text_move(self):
         """Locate text in transcript based on selected line in tape.
@@ -1079,6 +1082,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def text_to_stroke_move(self):
         """Locate stroke line in tape based on cursor position in transcript.
         """
+        if not self.dock_status["dockPaper"]:
+            return
+        if not self.textEdit:
+            return
         stroke_cursor = self.strokeList.textCursor()
         edit_cursor = self.textEdit.textCursor()
         edit_block = edit_cursor.block()
@@ -2758,7 +2765,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             current_block = current_cursor.block()
             stroke_data = current_block.userData()["strokes"]
             track_pos = current_block.position()
-            print(f"initial: {track_pos}")
+            # print(f"initial: {track_pos}")
             while True:
                 # this loop can be slow if enormous paragraph
                 for el in stroke_data.data:
