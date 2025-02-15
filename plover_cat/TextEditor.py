@@ -12,9 +12,9 @@ from spylls.hunspell import Dictionary
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument, QColor
 from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal, QUrl, QSettings
-from PyQt5.QtWidgets import QPlainTextEdit, QCompleter, QTextEdit, QUndoStack, QMessageBox, QApplication
+from PyQt5.QtWidgets import QCompleter, QTextEdit, QUndoStack, QMessageBox, QApplication
 from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaRecorder, 
-QAudioRecorder, QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
+QAudioRecorder)
 
 _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 

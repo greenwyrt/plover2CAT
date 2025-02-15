@@ -27,6 +27,8 @@ Internal Changes:
 - Custom plover `output` subclass to speed up `tape_translate` by "passing" in the `send_*` methods rather than mimic keyboard output with artificial delays
 - Avoid calling setCharFormat twice when doing `insertText`
 - Avoid updating any dock contents when respective docks are hidden and trigger refresh when visibility status of one changes
+- Factor out load transcript methods
+- Speed improvement by reloading transcript on style change vs looping through
 
 
 ## Ver 3.0.3:

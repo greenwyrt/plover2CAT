@@ -3,17 +3,12 @@ import string
 import re
 import pathlib
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 import time
 from collections import Counter, deque
-from shutil import copyfile
-from copy import deepcopy, copy
+from copy import deepcopy
 from sys import platform
 from tempfile import gettempdir, TemporaryDirectory
-from spylls.hunspell import Dictionary
-from dulwich.repo import Repo
-from dulwich.errors import NotGitRepository
-from dulwich import porcelain
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
