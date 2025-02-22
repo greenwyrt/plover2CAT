@@ -1,6 +1,6 @@
 # CHANGES
 
-## Ver 3.1.0 (Pre-release):
+## Ver 3.1.0:
 
 New:
 
