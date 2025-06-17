@@ -6,9 +6,9 @@ from shutil import rmtree
 from io import StringIO
 from unittest import TextTestRunner
 
-from PyQt5.QtWidgets import QDialog, QListWidgetItem
-from PyQt5.QtGui import QTextCursor
-from PyQt5.QtCore import Qt
+from PySide6.QtWidgets import QDialog, QListWidgetItem
+from PySide6.QtGui import QTextCursor
+from PySide6.QtCore import Qt
 from plover.oslayer.config import CONFIG_DIR
 from plover.steno import Stroke, normalize_stroke, normalize_steno
 from plover_cat.helpers import save_json

@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QDialog, QFontDialog
-from PyQt5.QtGui import QFont
+from PySide6.QtWidgets import QDialog, QFontDialog
+from PySide6.QtGui import QFont
 
 from plover_cat.caption_dialog_ui import Ui_captionDialog
 

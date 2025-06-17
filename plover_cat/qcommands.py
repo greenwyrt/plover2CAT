@@ -3,9 +3,8 @@ import time
 import pathlib
 from shutil import copyfile
 from plover import log
-from PyQt5.QtGui import QTextBlockUserData, QTextDocument, QTextCursor, QTextBlock, QImage, QImageReader, QTextImageFormat
-from PyQt5.QtCore import QUrl, QVariant
-from PyQt5.QtWidgets import QUndoCommand
+from PySide6.QtGui import QTextBlockUserData, QTextDocument, QTextCursor, QTextBlock, QImage, QImageReader, QTextImageFormat,QUndoCommand
+from PySide6.QtCore import QUrl
 from datetime import datetime, timezone
 from plover_cat.steno_objects import *
 
@@ -222,7 +221,7 @@ class image_insert(QUndoCommand):
         self.document.document().addResource(
             QTextDocument.ImageResource,
             imageUri,
-            QVariant(image)
+            image
         )
         imageFormat = QTextImageFormat()
         imageFormat.setWidth(image.width())
@@ -758,4 +757,4 @@ class update_entries(QUndoCommand):
             block = block.next()
         current_cursor.setPosition(current_block.position() + self.position_in_block)
         log_dict = {"action": "index", "index": self.store_dict}
-        log.info(f"Index: {log_dict}")  
+        log.info(f"Index: {log_dict}")

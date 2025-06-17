@@ -1,6 +1,6 @@
 from urllib import request, parse
 from urllib.error import HTTPError
-from PyQt5.QtCore import QObject, pyqtSignal
+from PySide6.QtCore import QObject, Signal
 from queue import Queue, Empty
 from collections import deque
 from plover_cat.steno_objects import wordsep_simple_re
@@ -31,11 +31,11 @@ class captionWorker(QObject):
     :param password: password to use along with other fields above, default None
     :type password: str, optional
     """    
-    capSend = pyqtSignal(str)
+    capSend = Signal(str)
     """Signal sent with formatted caption line."""
-    finished = pyqtSignal()
+    finished = Signal()
     """Signal sent when worker is done."""
-    postMessage = pyqtSignal(str)
+    postMessage = Signal(str)
     """Signal sent with message to display."""
     def __init__(self, max_length = None, max_lines = None, remote = None, endpoint = None, port = None, password = None):
         QObject.__init__(self)

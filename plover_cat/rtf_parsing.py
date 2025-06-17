@@ -1,8 +1,8 @@
 import codecs
 import struct
 import re
-from PyQt5.QtGui import QFont, QFontDatabase
-from PyQt5.QtWidgets import QProgressBar, QApplication
+from PySide6.QtGui import QFont, QFontDatabase
+from PySide6.QtWidgets import QProgressBar, QApplication
 from copy import deepcopy
 from datetime import datetime
 from pyparsing import (

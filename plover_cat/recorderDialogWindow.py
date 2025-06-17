@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog
 
 from plover_cat.recorder_dialog_ui import Ui_recorderDialog
 
@@ -26,6 +26,5 @@ class recorderDialogWindow(QDialog, Ui_recorderDialog):
         self.audio_bitrate.addItem("32000", 32000)
         self.audio_bitrate.addItem("64000", 64000)
         self.audio_bitrate.addItem("96000", 96000)
-        self.audio_bitrate.addItem("128000", 128000)        
-    
-        
+        self.audio_bitrate.addItem("128000", 128000)
+

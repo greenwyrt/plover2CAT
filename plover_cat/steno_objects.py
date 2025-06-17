@@ -7,8 +7,8 @@ from itertools import accumulate
 from bisect import bisect_left, bisect
 from plover_cat.helpers import pixel_to_in, write_command
 from plover_cat.constants import user_field_dict
-from PyQt5.QtCore import QByteArray, QBuffer, QIODevice
-from PyQt5.QtGui import QImage, QImageReader
+from PySide6.QtCore import QByteArray, QBuffer, QIODevice
+from PySide6.QtGui import QImage, QImageReader
 from odf.teletype import addTextToElement
 from odf.text import P, UserFieldDecls, UserFieldDecl, UserFieldGet, UserIndexMarkStart, UserIndexMarkEnd
 from odf.draw import Frame, TextBox, Image

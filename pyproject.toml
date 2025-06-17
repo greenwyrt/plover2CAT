@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-	"plover[gui_qt]>=4.0.0.dev10",
+	"plover[gui_qt]>=5.0.0.dev2",
 	"setuptools>=38.2.4",
 	"wheel",
 ]

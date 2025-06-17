@@ -1,8 +1,8 @@
 from copy import deepcopy
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QTableWidgetItem
-from PyQt5.QtWidgets import QDialog
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QTableWidgetItem
+from PySide6.QtWidgets import QDialog
 from plover_cat.field_dialog_ui import Ui_fieldDialog
 
 class fieldDialogWindow(QDialog, Ui_fieldDialog):

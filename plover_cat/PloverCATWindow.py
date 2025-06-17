@@ -11,17 +11,16 @@ from sys import platform
 from tempfile import gettempdir, TemporaryDirectory
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
 QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, QTextBlockFormat, 
-QTextOption, QTextCharFormat, QKeySequence, QPalette, QDesktopServices, QPixmap, QIcon)
-from PyQt5.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
-QStyle, QMessageBox, QDialog, QFontDialog, QColorDialog, QLabel, QMenu,
-QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar, QAction, QToolButton, QDockWidget)
-from PyQt5.QtMultimedia import (QMediaPlayer, QMediaRecorder, 
-QMultimedia, QVideoEncoderSettings, QAudioEncoderSettings)
-from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtCore import Qt, QFile, QTextStream, QUrl, QTime, QDateTime, QSettings, QRegExp, QSize, QStringListModel, QSizeF, QTimer, QThread
+QTextOption, QTextCharFormat, QKeySequence, QPalette, QDesktopServices, QPixmap, QAction, QIcon)
+from PySide6.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
+QStyle, QMessageBox, QDialog, QFontDialog, QColorDialog, QLabel, QMenu, 
+QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar,  QToolButton, QDockWidget)
+from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder, QMediaFormat)
+from PySide6.QtMultimediaWidgets import QVideoWidget
+from PySide6.QtCore import Qt, QFile, QTextStream, QUrl, QTime, QDateTime, QSettings, QRegularExpression, QSize, QStringListModel, QSizeF, QTimer, QThread
 _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 
 import plover
@@ -346,7 +345,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         QMessageBox.about(self, "Plover2CAT",
                         "Plover2CAT is built on top of Plover, the open source stenotype engine. "
                         "It owes its development to the members of the Plover discord group who provided suggestions and bug finding. "
-                        "PyQt5 and Plover are both licensed under the GPL. Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
+                        "PySide6 is licensed under the LGPL and Plover is licensed under the GPL. "
+                        "Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
 
     def open_help(self):
         """Link to Readthedocs help pages.
@@ -770,7 +770,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.menuRecentFiles.addAction(action)
             tb = QToolButton()
             icon = QtGui.QIcon()
-            icon.addFile(":/document-text-large.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addFile(":/resources/document-text-large.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             tb.setDefaultAction(action)
             tb.setIcon(icon)
             tb.setIconSize(QSize(32, 32))
@@ -1338,7 +1338,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         self.actionUndo = self.textEdit.undo_stack.createUndoAction(self.menuEdit)
         undo_icon = QtGui.QIcon()
-        undo_icon.addFile(":/arrow-curve-180.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        undo_icon.addFile(":/resources/arrow-curve-180.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionUndo.setIcon(undo_icon)
         self.actionUndo.setShortcutContext(QtCore.Qt.WindowShortcut)
         self.actionUndo.setToolTip("Undo writing or other action")
@@ -1346,7 +1346,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionUndo.setObjectName("actionUndo")
         self.actionRedo = self.textEdit.undo_stack.createRedoAction(self.menuEdit)
         redo_icon = QtGui.QIcon()
-        redo_icon.addFile(":/arrow-curve.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        redo_icon.addFile(":/resources/arrow-curve.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRedo.setIcon(redo_icon)
         self.actionRedo.setShortcutContext(QtCore.Qt.WindowShortcut)
         self.actionRedo.setToolTip("Redo writing or other action")
@@ -1411,10 +1411,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.send_tape.connect(self.update_tape)
         self.textEdit.document().blockCountChanged.connect(lambda: self.get_suggestions())
         self.textEdit.cursorPositionChanged.connect(self.update_gui)
-        self.textEdit.player.videoAvailableChanged.connect(self.set_up_video)
-        if self.textEdit.player.isAudioAvailable():
+        self.textEdit.player.hasVideoChanged.connect(self.set_up_video)
+
+        # Qt 6 no longer provides isAudioAvailable()/isVideoAvailable().
+        # Use presence of an attached audio file and hasVideo() instead.
+        if getattr(self.textEdit, "audio_file", None):
             self.audio_menu_enabling()
-        if self.textEdit.player.isVideoAvailable():
+
+        if self.textEdit.player.hasVideo():
             self.set_up_video()
 
     def breakdown_connections(self):
@@ -1478,7 +1482,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.menuField.clear() # clear field submenu
         self.menuIndexEntry.clear() # clear index submenu
         self.parSteno.clear()
-        if self.textEdit.player.isAudioAvailable(): # clear audio connections if transcript has them
+        if getattr(self.textEdit, "audio_file", None):
             self.textEdit.player.stop()
             self.audio_menu_enabling(False)
         if self.video:
@@ -2476,7 +2480,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Search for untranslated steno.
         """
         flags = QTextDocument.FindFlags()
-        untrans_reg = QRegExp("(\\b|\\*)(?=[STKPWHRAO*EUFBLGDZ]{3,})S?T?K?P?W?H?R?A?O?\\*?E?U?F?R?P?B?L?G?T?S?D?Z?\\b")
+        untrans_reg = QRegularExpression("(\\b|\\*)(?=[STKPWHRAO*EUFBLGDZ]{3,})S?T?K?P?W?H?R?A?O?\\*?E?U?F?R?P?B?L?G?T?S?D?Z?\\b")
         if direction == -1:
             flags |= QTextDocument.FindBackward
         cursor = self.textEdit.textCursor()
@@ -2589,7 +2593,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def open_audio(self):
         """Select media file for playing.
         """
-        if self.textEdit.recorder.state() == QMediaRecorder.StoppedState:
+        if self.textEdit.recorder.recorderState() == QMediaRecorder.StoppedState:
             pass
         else:
             QMessageBox.information(self, "Plover2CAT", "Recording in progress. Stop recording before loading media file.")
@@ -2628,57 +2632,108 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.video.show()
 
     def record_or_pause(self):
-        """Toggle between play and pause for recorder.
-        """
-        if self.textEdit.player.state() != QMediaPlayer.StoppedState:
-            self.display_message("Playing in progress. Stop media first.")
+        """Toggle between record / pause for the audio recorder."""
+        # 1) refuse to record while playback is running
+        if self.textEdit.player.playbackState() != QMediaPlayer.StoppedState:
+            self.display_message("Playback is in progress. Stop the media first.")
             return
-        else:
-            pass
-        if self.textEdit.recorder.state() == QMediaRecorder.StoppedState:
+
+        # ------------------------------------------------------------------
+        # RECORD: recorder currently stopped
+        # ------------------------------------------------------------------
+        if self.textEdit.recorder.recorderState() == QMediaRecorder.StoppedState:
+            # show settings dialog
             self.recorder_settings = recorderDialogWindow(self.textEdit.recorder)
-            res = self.recorder_settings.exec_()
-            if res == QDialog.Accepted:
-                self.actionStopRecording.setEnabled(True)
-                settings = QAudioEncoderSettings()
-                audio_input = self.recorder_settings.audio_device.itemText(self.recorder_settings.audio_device.currentIndex())
-                audio_codec = self.recorder_settings.audio_device.itemText(self.recorder_settings.audio_codec.currentIndex())
-                audio_container = self.recorder_settings.audio_container.itemText(self.recorder_settings.audio_container.currentIndex())
-                audio_sample_rate = int(self.recorder_settings.audio_sample_rate.itemText(self.recorder_settings.audio_sample_rate.currentIndex()))
-                audio_channels = self.recorder_settings.audio_channels.itemData(self.recorder_settings.audio_channels.currentIndex())
-                audio_bitrate = self.recorder_settings.audio_bitrate.itemData(self.recorder_settings.audio_bitrate.currentIndex())
-                audio_encoding = QMultimedia.ConstantQualityEncoding if self.recorder_settings.constant_quality.isChecked() else QMultimedia.ConstantBitRateEncoding
-                self.textEdit.recorder.setAudioInput(audio_input)
-                settings.setCodec(audio_codec)
-                settings.setSampleRate(audio_sample_rate)
-                settings.setBitRate(audio_bitrate)
-                settings.setChannelCount(audio_channels)
-                settings.setQuality(QMultimedia.EncodingQuality(self.recorder_settings.quality_slider.value()))
-                settings.setEncodingMode(audio_encoding)
-                self.textEdit.recorder.setEncodingSettings(settings, QVideoEncoderSettings(), audio_container)                
-                self.display_message(f"Audio settings:\nAudio Input: {audio_input}\nCodec: {audio_codec}\nMIME Type: {audio_container}\nSample Rate: {audio_sample_rate}\nChannels: {audio_channels}\nQuality: {audio_channels}\nBitrate: {str(QMultimedia.EncodingQuality(self.recorder_settings.quality_slider.value()))}\nEncoding:{audio_encoding}")
-                common_file_formats = ["aac", "amr", "flac", "gsm", "m4a", "mp3", "mpc", "ogg", "opus", "raw", "wav"]
-                guessed_format = [ext for ext in common_file_formats if ext in audio_container]
-                if len(guessed_format) == 0:
-                    audio_file_path = self.textEdit.file_name / "audio" / self.textEdit.file_name.stem
-                else:
-                    audio_file_path = self.textEdit.file_name / "audio" / (self.textEdit.file_name.stem + "." + guessed_format[0])
-                self.textEdit.file_name.joinpath("audio").mkdir(exist_ok = True)
-                if audio_file_path.exists():
-                    user_choice = QMessageBox.question(self, "Record", "Are you sure you want to replace existing audio?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-                    if user_choice == QMessageBox.Yes:
-                        self.display_message("Overwriting existing audio file.")
-                        pass
-                    else:
-                        self.display_message("Abort recording attempt due to pre-existing audio file.")
-                        return
-                self.textEdit.recorder.setOutputLocation(QUrl.fromLocalFile(str(audio_file_path)))
-                self.textEdit.recorder.record()
-                self.display_message("Recording started.")
-                self.textEdit.recorder.durationChanged.connect(self.update_record_time)
-        elif self.textEdit.recorder.state() == QMediaRecorder.RecordingState:
+            if self.recorder_settings.exec_() != QDialog.Accepted:
+                return  # user cancelled
+
+            self.actionStopRecording.setEnabled(True)
+
+            # --- collect the user’s choices --------------------------------
+            audio_input   = self.recorder_settings.audio_device.currentText()
+            audio_codec   = self.recorder_settings.audio_codec.currentText()
+            container     = self.recorder_settings.audio_container.currentText()
+            sample_rate   = int(self.recorder_settings.audio_sample_rate.currentText())
+            channels      = self.recorder_settings.audio_channels.currentData()
+            bitrate       = self.recorder_settings.audio_bitrate.currentData()
+            encoding_mode = (
+                QMediaRecorder.ConstantQualityEncoding
+                if self.recorder_settings.constant_quality.isChecked()
+                else QMediaRecorder.ConstantBitRateEncoding
+            )
+            quality_enum  = QMediaRecorder.Quality(self.recorder_settings.quality_slider.value())
+
+            # --- build QMediaFormat (Qt 6 replacement for *EncoderSettings) -
+            fmt = QMediaFormat()
+
+            # codec ----------------------------------------------------------
+            # QMediaFormat expects an enum; map the user string if possible,
+            # otherwise leave codec unset and rely on container/extension.
+            codec_map = {
+                "audio/mpeg": QMediaFormat.AudioCodec.MP3,
+                "audio/aac":  QMediaFormat.AudioCodec.AAC,
+                "audio/flac": QMediaFormat.AudioCodec.FLAC,
+                "audio/opus": QMediaFormat.AudioCodec.Opus,
+                "audio/wav":  QMediaFormat.AudioCodec.Wave
+            }
+            if audio_codec in codec_map:
+                fmt.setAudioCodec(codec_map[audio_codec])
+
+            # container ------------------------------------------------------
+            container_map = {
+                "audio/mpeg": QMediaFormat.Mpeg,
+                "audio/aac":  QMediaFormat.Mpeg4Audio,
+                "audio/flac": QMediaFormat.Flac,
+                "audio/ogg":  QMediaFormat.Ogg,
+                "audio/wav":  QMediaFormat.Wave
+            }
+            if container in container_map:
+                fmt.setFileFormat(container_map[container])
+
+            # ----------------------------------------------------------------
+            self.textEdit.recorder.setAudioInput(audio_input)
+            self.textEdit.recorder.setMediaFormat(fmt)
+            self.textEdit.recorder.setAudioSampleRate(sample_rate)
+            self.textEdit.recorder.setAudioChannelCount(channels)
+            self.textEdit.recorder.setAudioBitRate(bitrate)
+            self.textEdit.recorder.setEncodingMode(encoding_mode)
+            self.textEdit.recorder.setQuality(quality_enum)
+
+            # choose an output file name -------------------------------------
+            common_ext = ["aac", "amr", "flac", "gsm", "m4a", "mp3", "ogg",
+                          "opus", "raw", "wav"]
+            guessed = [ext for ext in common_ext if ext in container]
+            out_path = (
+                self.textEdit.file_name / "audio" /
+                (self.textEdit.file_name.stem + (("." + guessed[0]) if guessed else ""))
+            )
+            out_path.parent.mkdir(exist_ok=True)
+            if out_path.exists():
+                if QMessageBox.question(
+                        self, "Record",
+                        "File exists. Overwrite?",
+                        QMessageBox.Yes | QMessageBox.No,
+                        QMessageBox.No) != QMessageBox.Yes:
+                    self.display_message("Recording cancelled by user.")
+                    return
+
+            self.textEdit.recorder.setOutputLocation(QUrl.fromLocalFile(str(out_path)))
+
+            # start recording ------------------------------------------------
+            self.textEdit.recorder.record()
+            self.textEdit.recorder.durationChanged.connect(self.update_record_time)
+            self.display_message("Recording started.")
+
+        # ------------------------------------------------------------------
+        # PAUSE
+        # ------------------------------------------------------------------
+        elif self.textEdit.recorder.recorderState() == QMediaRecorder.RecordingState:
             self.textEdit.recorder.pause()
             self.display_message("Recording paused.")
+
+        # ------------------------------------------------------------------
+        # CONTINUE
+        # ------------------------------------------------------------------
         else:
             self.textEdit.recorder.record()
             self.display_message("Recording continued.")
@@ -2785,7 +2840,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     stroke_data = current_block.userData()["strokes"]
                     track_pos = current_block.position()
             current_cursor.setPosition(track_pos, QTextCursor.MoveAnchor)
-            # current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor)
+            # current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, 2)
         else:
             current_cursor.movePosition(QTextCursor.PreviousWord, QTextCursor.MoveAnchor, self.caption_dialog.charOffset.value())
         new_pos = current_cursor.position()

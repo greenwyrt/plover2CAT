@@ -845,8 +845,8 @@ position.</string>
        </property>
        <widget class="QWidget" name="styling_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/edit-style.png</normaloff>:/edit-style.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/edit-style.png</normaloff>:/resources/edit-style.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Style</string>
@@ -947,8 +947,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-bold.png</normaloff>:/edit-bold.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-bold.png</normaloff>:/resources/edit-bold.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -967,8 +967,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-italic.png</normaloff>:/edit-italic.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-italic.png</normaloff>:/resources/edit-italic.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -987,8 +987,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-underline.png</normaloff>:/edit-underline.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-underline.png</normaloff>:/resources/edit-underline.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1007,8 +1007,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-alignment.png</normaloff>:/edit-alignment.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-alignment.png</normaloff>:/resources/edit-alignment.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1033,8 +1033,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-alignment-center.png</normaloff>:/edit-alignment-center.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-alignment-center.png</normaloff>:/resources/edit-alignment-center.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1056,8 +1056,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-alignment-right.png</normaloff>:/edit-alignment-right.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-alignment-right.png</normaloff>:/resources/edit-alignment-right.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1079,8 +1079,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-alignment-justify-distribute.png</normaloff>:/edit-alignment-justify-distribute.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-alignment-justify-distribute.png</normaloff>:/resources/edit-alignment-justify-distribute.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1471,8 +1471,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="page_format_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/document-resize-actual.png</normaloff>:/document-resize-actual.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/document-resize-actual.png</normaloff>:/resources/document-resize-actual.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Page Format</string>
@@ -1859,8 +1859,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="find_replace_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/magnifier.png</normaloff>:/magnifier.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/magnifier.png</normaloff>:/resources/magnifier.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Find and Replace</string>
@@ -1963,8 +1963,8 @@ position.</string>
                   <string>Previous</string>
                  </property>
                  <property name="icon">
-                  <iconset resource="resources/resources.qrc">
-                   <normaloff>:/arrow-skip-180.png</normaloff>:/arrow-skip-180.png</iconset>
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/resources/arrow-skip-180.png</normaloff>:/resources/arrow-skip-180.png</iconset>
                  </property>
                 </widget>
                </item>
@@ -1980,8 +1980,8 @@ position.</string>
                   <string>Next</string>
                  </property>
                  <property name="icon">
-                  <iconset resource="resources/resources.qrc">
-                   <normaloff>:/arrow-skip.png</normaloff>:/arrow-skip.png</iconset>
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/resources/arrow-skip.png</normaloff>:/resources/arrow-skip.png</iconset>
                  </property>
                 </widget>
                </item>
@@ -2098,8 +2098,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="paragraph_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/edit-pilcrow.png</normaloff>:/resources/edit-pilcrow.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Paragraph</string>
@@ -2296,8 +2296,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="spellcheck_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/spell-check.png</normaloff>:/spell-check.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/spell-check.png</normaloff>:/resources/spell-check.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Spellcheck</string>
@@ -2430,8 +2430,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="stenospell_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/spell-check-error.png</normaloff>:/spell-check-error.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/spell-check-error.png</normaloff>:/resources/spell-check-error.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Steno Search</string>
@@ -2632,8 +2632,8 @@ position.</string>
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="resources/resources.qrc">
-           <normaloff>:/arrow-270-medium.png</normaloff>:/arrow-270-medium.png</iconset>
+          <iconset resource="resources.qrc">
+           <normaloff>:/resources/arrow-270-medium.png</normaloff>:/resources/arrow-270-medium.png</iconset>
          </property>
         </widget>
        </item>
@@ -2649,8 +2649,8 @@ position.</string>
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="resources/resources.qrc">
-           <normaloff>:/arrow-circle-double-135.png</normaloff>:/arrow-circle-double-135.png</iconset>
+          <iconset resource="resources.qrc">
+           <normaloff>:/resources/arrow-circle-double-135.png</normaloff>:/resources/arrow-circle-double-135.png</iconset>
          </property>
         </widget>
        </item>
@@ -2710,8 +2710,8 @@ position.</string>
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/folder-open-document-text.png</normaloff>:/folder-open-document-text.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/folder-open-document-text.png</normaloff>:/resources/folder-open-document-text.png</iconset>
    </property>
    <property name="text">
     <string>Open...</string>
@@ -2733,8 +2733,8 @@ position.</string>
   </action>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/document.png</normaloff>:/document.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/document.png</normaloff>:/resources/document.png</iconset>
    </property>
    <property name="text">
     <string>New</string>
@@ -2748,8 +2748,8 @@ position.</string>
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/disk-black.png</normaloff>:/disk-black.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/disk-black.png</normaloff>:/resources/disk-black.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -2782,8 +2782,8 @@ position.</string>
   </action>
   <action name="actionAddCustomDict">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/plus-button.png</normaloff>:/plus-button.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/plus-button.png</normaloff>:/resources/plus-button.png</iconset>
    </property>
    <property name="text">
     <string>Add Custom Dict</string>
@@ -2818,8 +2818,8 @@ position.</string>
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/scissors-blue.png</normaloff>:/scissors-blue.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/scissors-blue.png</normaloff>:/resources/scissors-blue.png</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -2833,8 +2833,8 @@ position.</string>
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/clipboard--plus.png</normaloff>:/clipboard--plus.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/clipboard--plus.png</normaloff>:/resources/clipboard--plus.png</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -2848,8 +2848,8 @@ position.</string>
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/clipboard-paste-document-text.png</normaloff>:/clipboard-paste-document-text.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/clipboard-paste-document-text.png</normaloff>:/resources/clipboard-paste-document-text.png</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -2863,8 +2863,8 @@ position.</string>
   </action>
   <action name="actionOpenAudio">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/folder-open-document-music.png</normaloff>:/folder-open-document-music.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/folder-open-document-music.png</normaloff>:/resources/folder-open-document-music.png</iconset>
    </property>
    <property name="text">
     <string>Open Audiovisual</string>
@@ -2881,8 +2881,8 @@ position.</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-skip-180.png</normaloff>:/control-skip-180.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-skip-180.png</normaloff>:/resources/control-skip-180.png</iconset>
    </property>
    <property name="text">
     <string>Skip Back</string>
@@ -2899,8 +2899,8 @@ position.</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-skip.png</normaloff>:/control-skip.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-skip.png</normaloff>:/resources/control-skip.png</iconset>
    </property>
    <property name="text">
     <string>Skip Forward</string>
@@ -2917,8 +2917,8 @@ position.</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-stop-square.png</normaloff>:/control-stop-square.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-stop-square.png</normaloff>:/resources/control-stop-square.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -2963,8 +2963,8 @@ position.</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-stop.png</normaloff>:/control-stop.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-stop.png</normaloff>:/resources/control-stop.png</iconset>
    </property>
    <property name="text">
     <string>Play/Pause</string>
@@ -2978,8 +2978,8 @@ position.</string>
   </action>
   <action name="actionMergeParagraphs">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/arrow-join.png</normaloff>:/arrow-join.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/arrow-join.png</normaloff>:/resources/arrow-join.png</iconset>
    </property>
    <property name="text">
     <string>Merge Paragraphs</string>
@@ -2990,8 +2990,8 @@ position.</string>
   </action>
   <action name="actionSplitParagraph">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/arrow-split.png</normaloff>:/arrow-split.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/arrow-split.png</normaloff>:/resources/arrow-split.png</iconset>
    </property>
    <property name="text">
     <string>Split Paragraph</string>
@@ -3002,8 +3002,8 @@ position.</string>
   </action>
   <action name="actionWindowFont">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/edit.png</normaloff>:/resources/edit.png</iconset>
    </property>
    <property name="text">
     <string>Window Font</string>
@@ -3022,8 +3022,8 @@ position.</string>
   </action>
   <action name="actionNormalCopy">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/clipboard.png</normaloff>:/clipboard.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/clipboard.png</normaloff>:/resources/clipboard.png</iconset>
    </property>
    <property name="text">
     <string>Normal Copy</string>
@@ -3037,8 +3037,8 @@ position.</string>
   </action>
   <action name="actionFindReplacePane">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/magnifier.png</normaloff>:/magnifier.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/magnifier.png</normaloff>:/resources/magnifier.png</iconset>
    </property>
    <property name="text">
     <string>Find/Replace</string>
@@ -3063,8 +3063,8 @@ position.</string>
   </action>
   <action name="actionRecordPause">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/microphone.png</normaloff>:/resources/microphone.png</iconset>
    </property>
    <property name="text">
     <string>Record/Pause</string>
@@ -3100,8 +3100,8 @@ position.</string>
   </action>
   <action name="actionRemoveTranscriptDict">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/minus-button.png</normaloff>:/minus-button.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/minus-button.png</normaloff>:/resources/minus-button.png</iconset>
    </property>
    <property name="text">
     <string>Remove Transcript Dict</string>
@@ -3123,8 +3123,8 @@ position.</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/lock.png</normaloff>:/lock.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/lock.png</normaloff>:/resources/lock.png</iconset>
    </property>
    <property name="text">
     <string>Lock Cursor At End</string>
@@ -3146,8 +3146,8 @@ position.</string>
   </action>
   <action name="actionUserManual">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/book-question.png</normaloff>:/book-question.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/book-question.png</normaloff>:/resources/book-question.png</iconset>
    </property>
    <property name="text">
     <string>Online User Manual</string>
@@ -3232,8 +3232,8 @@ position.</string>
   </action>
   <action name="actionClearParagraph">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/cross.png</normaloff>:/cross.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/cross.png</normaloff>:/resources/cross.png</iconset>
    </property>
    <property name="text">
     <string>Reset Paragraph</string>
@@ -3244,8 +3244,8 @@ position.</string>
   </action>
   <action name="actionRetroactiveDefine">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/card--plus.png</normaloff>:/card--plus.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/card--plus.png</normaloff>:/resources/card--plus.png</iconset>
    </property>
    <property name="text">
     <string>Retroactive Define</string>
@@ -3259,8 +3259,8 @@ position.</string>
   </action>
   <action name="actionDefineLast">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/arrow-stop-180.png</normaloff>:/arrow-stop-180.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/arrow-stop-180.png</normaloff>:/resources/arrow-stop-180.png</iconset>
    </property>
    <property name="text">
     <string>Define Last Untrans</string>
@@ -3274,8 +3274,8 @@ position.</string>
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/information.png</normaloff>:/information.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/information.png</normaloff>:/resources/information.png</iconset>
    </property>
    <property name="text">
     <string>About</string>
@@ -3292,8 +3292,8 @@ position.</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/wand.png</normaloff>:/wand.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/wand.png</normaloff>:/resources/wand.png</iconset>
    </property>
    <property name="text">
     <string>Autocompletion</string>
@@ -3353,8 +3353,8 @@ position.</string>
   </action>
   <action name="actionInsertNormalText">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-cursor.png</normaloff>:/control-cursor.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-cursor.png</normaloff>:/resources/control-cursor.png</iconset>
    </property>
    <property name="text">
     <string>Normal Text</string>
@@ -3371,8 +3371,8 @@ position.</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/edit-pilcrow.png</normaloff>:/resources/edit-pilcrow.png</iconset>
    </property>
    <property name="text">
     <string>Show All Characters</string>
@@ -3399,8 +3399,8 @@ position.</string>
   </action>
   <action name="actionAddAutocompletionTerm">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/lightning.png</normaloff>:/lightning.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/lightning.png</normaloff>:/resources/lightning.png</iconset>
    </property>
    <property name="text">
     <string>Add Autocompletion Term</string>
@@ -3435,8 +3435,8 @@ position.</string>
   </action>
   <action name="actionInsertImage">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/image--plus.png</normaloff>:/image--plus.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/image--plus.png</normaloff>:/resources/image--plus.png</iconset>
    </property>
    <property name="text">
     <string>Image</string>
@@ -3447,8 +3447,8 @@ position.</string>
   </action>
   <action name="actionBackgroundColor">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/palette.png</normaloff>:/palette.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/palette.png</normaloff>:/resources/palette.png</iconset>
    </property>
    <property name="text">
     <string>Background Color</string>
@@ -3602,8 +3602,8 @@ position.</string>
   </action>
   <action name="actionSpellcheck">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/spell-check.png</normaloff>:/spell-check.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/spell-check.png</normaloff>:/resources/spell-check.png</iconset>
    </property>
    <property name="text">
     <string>Spellcheck</string>
@@ -3614,8 +3614,8 @@ position.</string>
   </action>
   <action name="actionStenoSearch">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/spell-check-error.png</normaloff>:/spell-check-error.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/spell-check-error.png</normaloff>:/resources/spell-check-error.png</iconset>
    </property>
    <property name="text">
     <string>Steno Search</string>
@@ -3626,8 +3626,8 @@ position.</string>
   </action>
   <action name="actionStyling">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/edit-style.png</normaloff>:/edit-style.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/edit-style.png</normaloff>:/resources/edit-style.png</iconset>
    </property>
    <property name="text">
     <string>Styling</string>
@@ -3638,8 +3638,8 @@ position.</string>
   </action>
   <action name="actionPageFormat">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/document-resize-actual.png</normaloff>:/document-resize-actual.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/document-resize-actual.png</normaloff>:/resources/document-resize-actual.png</iconset>
    </property>
    <property name="text">
     <string>Page Format</string>
@@ -3650,8 +3650,8 @@ position.</string>
   </action>
   <action name="actionParagraph">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/edit-pilcrow.png</normaloff>:/resources/edit-pilcrow.png</iconset>
    </property>
    <property name="text">
     <string>Paragraph</string>
@@ -3745,7 +3745,7 @@ position.</string>
   </action>
  </widget>
  <resources>
-  <include location="resources/resources.qrc"/>
+  <include location="resources.qrc"/>
  </resources>
  <connections>
   <connection>
