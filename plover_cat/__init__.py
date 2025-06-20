@@ -1,8 +1,9 @@
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import  QHBoxLayout
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtWidgets import QMainWindow, QHBoxLayout
 
 from plover.gui_qt.tool import Tool
 
+from plover_cat.plover_cat_ui import Ui_PloverCAT
 
 from plover_cat.PloverCATWindow import PloverCATWindow
 
