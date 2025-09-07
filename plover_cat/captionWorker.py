@@ -15,6 +15,7 @@ class captionWorker(QObject):
     
     ``captionWorker`` is put into another thread and doesn't run on the main event thread.
     Text gets ingested and then sent out as formatted caption lines.
+    
     :param roll_caps: boolean, whether to use incremental captions or transcript-like
     :param max_length: maximum number of characters for each caption line, 
         suggested value 32, default None
@@ -56,17 +57,14 @@ class captionWorker(QObject):
             self.obs_queue = deque(maxlen = self.max_lines)
         if self.remote == "Zoom":
             self.zoom_seq = 1
-            try:
-                zoom_url = urlparse(self.endpoint)
-                zoom_params = zoom_url._replace(path="/closedcaption/seq")
-                seq_url = urlunparse(zoom_params)
-                req = request.Request(seq_url, method = "GET")
-                r = request.urlopen(req)   
-                if r.status == 200:
-                    string_seq = r.read()
-                    self.zoom_seq = int(string_seq.decode()) + 1
-            except:
-                print(self.zoom_seq)
+            zoom_url = urlparse(self.endpoint)
+            zoom_params = zoom_url._replace(path="/closedcaption/seq")
+            seq_url = urlunparse(zoom_params)
+            req = request.Request(seq_url, method = "GET")
+            r = request.urlopen(req)   
+            if r.status == 200:
+                string_seq = r.read()
+                self.zoom_seq = int(string_seq.decode()) + 1
         self.word_queue = Queue()
         """Queue containing text split into word chunks."""
         if not self.roll_caps:
@@ -78,6 +76,7 @@ class captionWorker(QObject):
         """Line number for caption, required for Zoom captions."""
         self.cap_line = ""
         """Buffer for holding caption, when non-rolling"""
+        
     def intake(self, text):
         """Receive text from main editor and create work chunks for captions
         :param text: text written into editor
