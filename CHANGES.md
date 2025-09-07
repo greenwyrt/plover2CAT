@@ -1,5 +1,14 @@
 # CHANGES
 
+
+## Ver 3.1.0:
+
+Changes:
+- restored non-rolling captions as an option (uncheck the "Rolling" option in captions dialog)
+
+Bug Fix:
+- Zoom captions always started from `seq=1` if the worker had been destroyed, leading to `403` errors. Now will query API for last successful `seq` value
+
 ## Ver 3.1.0:
 
 New:
