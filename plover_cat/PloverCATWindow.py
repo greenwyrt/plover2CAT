@@ -2779,11 +2779,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         for engine in QTextToSpeech.availableEngines():
             if engine != "mock":
                 self.tts_engine.addItem(engine)
-        self.tts_engine.setCurentIndex(0)
+        self.tts_engine.setCurrentIndex(0)
         self.tts_instance.setEngine(self.tts_engine.currentText())
         self.tts_pitch.valueChanged.connect(self.tts_set_pitch)
         self.tts_volume.valueChanged.connect(self.tts_set_volume)
-        self.tts_rate.valueChanged.connect(self.set_rate)
+        self.tts_rate.valueChanged.connect(self.tts_set_rate)
         self.tts_locale.currentIndexChanged.connect(self.tts_set_locale)
         self.tts_voice.currentIndexChanged.connect(self.tts_set_voice)
         self.tts_engine.currentIndexChanged.connect(self.tts_set_engine)
