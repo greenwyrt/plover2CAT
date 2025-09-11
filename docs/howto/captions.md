@@ -20,6 +20,21 @@ For a time buffer, the setting is in milliseconds. The editor will send any text
 
 For both buffer types, the text in the buffer is only checked after *steno writing*. To send all text to captions immediately, use `Flushing` as described below.
 
+### Rolling
+
+Rolling, or more accurately, incremental captions, are the default type. New content appear attached to previous content such as:
+
+```
+This 
+This is an
+This is an example
+This is an example of a rolling
+This is an example of a rolling caption.
+```
+
+This has been the default behaviour since version 2.3.0.
+
+If the rolling option is not checked, captions are sent line by line. A caption line is only sent if the existing caption line in buffer exceeds the maximum caption length, or there has been a flush. (see below for flushing). Note this buffer is separate from the word buffer above.
 
 ### `Maximum caption length`
 
@@ -102,3 +117,6 @@ Now the streamer should be able to start their Twitch stream like they normally 
 
 If Plover2CAT receives a failed response code, the code will appear in the status bar at the bottom.
 
+### Zoom details
+
+Because Zoom uses a caption box, it may be more desirable to not use rolling captions. 

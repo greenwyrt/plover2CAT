@@ -1,4 +1,5 @@
-from urllib import request, parse
+from urllib import request
+from urllib.parse import urlunparse, urlparse
 from urllib.error import HTTPError
 from PySide6.QtCore import QObject, Signal
 from queue import Queue, Empty
@@ -14,7 +15,8 @@ class captionWorker(QObject):
     
     ``captionWorker`` is put into another thread and doesn't run on the main event thread.
     Text gets ingested and then sent out as formatted caption lines.
-
+    
+    :param roll_caps: boolean, whether to use incremental captions or transcript-like
     :param max_length: maximum number of characters for each caption line, 
         suggested value 32, default None
     :type max_length: int, optional
@@ -37,8 +39,9 @@ class captionWorker(QObject):
     """Signal sent when worker is done."""
     postMessage = Signal(str)
     """Signal sent with message to display."""
-    def __init__(self, max_length = None, max_lines = None, remote = None, endpoint = None, port = None, password = None):
+    def __init__(self, roll_caps = True, max_length = None, max_lines = None, remote = None, endpoint = None, port = None, password = None):
         QObject.__init__(self)
+        self.roll_caps = roll_caps
         self.max_length = max_length
         self.max_lines = max_lines
         self.remote = remote
@@ -52,13 +55,28 @@ class captionWorker(QObject):
                 self.endpoint = "localhost"
             self.obs = obs.ReqClient(host=self.endpoint, port=self.port, password=self.password, timeout=3) 
             self.obs_queue = deque(maxlen = self.max_lines)
+        if self.remote == "Zoom":
+            self.zoom_seq = 1
+            zoom_url = urlparse(self.endpoint)
+            zoom_params = zoom_url._replace(path="/closedcaption/seq")
+            seq_url = urlunparse(zoom_params)
+            req = request.Request(seq_url, method = "GET")
+            r = request.urlopen(req)   
+            if r.status == 200:
+                string_seq = r.read()
+                self.zoom_seq = int(string_seq.decode()) + 1
         self.word_queue = Queue()
         """Queue containing text split into word chunks."""
-        self.cap_queue = deque(maxlen = max_lines)
+        if not self.roll_caps:
+            self.cap_queue = Queue()
+        else:
+            self.cap_queue = deque(maxlen = max_lines)
         """Queue containing formatted caption lines ready for display."""
         self.next_word = "" 
-        self.zoom_seq = 1
         """Line number for caption, required for Zoom captions."""
+        self.cap_line = ""
+        """Buffer for holding caption, when non-rolling"""
+        
     def intake(self, text):
         """Receive text from main editor and create work chunks for captions
         :param text: text written into editor
@@ -69,8 +87,26 @@ class captionWorker(QObject):
         for i in chunks:
             # tuple, first text, then time
             self.word_queue.put((i, text_time))
-        self.make_caps()
+        if not self.roll_caps:
+            self.make_caps()
+        else:
+            self.make_roll_caps()
     def make_caps(self):
+        while not self.word_queue.empty():
+            self.next_word, text_time = self.word_queue.get()
+            if self.max_length != 0 and (len(self.cap_line) + len(self.next_word)) > self.max_length:
+                self.cap_queue.put((self.cap_line, text_time))
+                self.cap_line = self.next_word
+                # self.send_cap()
+            elif "\u2029" in self.next_word:
+                self.cap_line += self.next_word.replace("\u2029", "")
+                self.cap_queue.put((self.cap_line, text_time))
+                self.cap_line = ""
+                # self.send_cap()
+            else:
+                self.cap_line += self.next_word       
+            self.send_cap()  
+    def make_roll_caps(self):
         """Ingest word chunks from queue and put lines into caption queue.
         """
         while not self.word_queue.empty():
@@ -92,8 +128,11 @@ class captionWorker(QObject):
         """Take caption from queue and send to display, and also if endpoint is defined.
         """
         try:
-            last_caps = list(self.cap_queue)
-            cap = "\n".join(c[0].lstrip(" ") for c in last_caps if c[0].lstrip(" "))
+            if not self.roll_caps:
+                cap, time = self.cap_queue.get_nowait()
+            else:
+                last_caps = list(self.cap_queue)
+                cap = "\n".join(c[0].lstrip(" ") for c in last_caps if c[0].lstrip(" "))
             self.capSend.emit(cap)
             if self.endpoint:
                 if self.remote == "Microsoft Teams":
