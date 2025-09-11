@@ -7,8 +7,8 @@ from io import StringIO
 from unittest import TextTestRunner
 
 from PySide6.QtWidgets import QDialog, QListWidgetItem
-from PySide6.QtGui import QTextCursor
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QTextCursor, QColor
+from PySide6.QtCore import Qt, QSettings
 from plover.oslayer.config import CONFIG_DIR
 from plover.steno import Stroke, normalize_stroke, normalize_steno
 from plover_cat.helpers import save_json
@@ -266,7 +266,7 @@ class TestTextEdit(unittest.TestCase):
         self.editor.close_file()
         self.editor.open_file(pathlib.Path(self.temp_dir) / "test")  
         cursor = self.editor.textEdit.textCursor()
-        cursor.movePosition(5)
+        cursor.setPosition(5)
         self.editor.textEdit.setTextCursor(cursor)
         self.editor.textEdit.set_paragraph_style("Normal")
         self.assertEqual(cursor.block().blockFormat().textIndent(), 0)
@@ -274,12 +274,65 @@ class TestTextEdit(unittest.TestCase):
         self.assertEqual(cursor.block().blockFormat().textIndent(), 0.5 * 96)
         tabs = [tab.position for tab in cursor.block().blockFormat().tabPositions()]
         self.assertEqual(96 in tabs, True)
-    def step_loadNewStyle(self):
-        pass
     def step_ColorHighlight(self):
-        # set color, close transcript, re-open, check color
-        # then insert text directly in transcript
-        self.editor.textEdit.clear_transcript()         
+        one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
+                                                         {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
+                    1: {"style": "Question", "strokes": [{"data": "DEF", "element": "text", "time": "2000-01-01T00:00:00.002"}]}}
+        self.editor.textEdit.undo_stack.setClean()
+        save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
+        self.editor.close_file()        
+        settings = QSettings("Plover2CAT-4", "OpenCAT")
+        old_color = settings.value("stroke", "black")
+        new_color = QColor("blue")
+        QSettings("Plover2CAT-4", "OpenCAT").setValue("colorStroke", new_color)
+        self.editor.open_file(pathlib.Path(self.temp_dir) / "test")
+        self.editor.update_highlight_color()
+        self.editor.textEdit.get_highlight_colors()
+        self.editor.refresh_editor_styles()
+        cursor = self.editor.textEdit.textCursor()   
+        cursor.setPosition(1)
+        self.assertEqual(cursor.charFormat().foreground().color(), new_color)
+        settings.setValue("stroke", old_color) 
+    def step_loadNewStyle(self):
+        pass      
+    def step_SwitchTranscriptsPage(self):
+        #change style param
+        self.editor.page_max_lines.setValue(20)
+        self.editor.textEdit.set_config_value("page_max_line", 20)
+        config = self.editor.textEdit.config  
+        self.assertEqual(config["page_max_line"], 20)        
+        # open second transcript, make sure style param is default
+        sec = pathlib.Path(self.temp_dir) / "style_default"
+        self.editor.open_file(sec) 
+        self.assertNotEqual(self.editor.page_max_lines.value(), 20)
+        current_index_tab = self.editor.mainTabs.currentIndex()
+        self.editor.switch_restore(current_index_tab - 1)
+        config = self.editor.textEdit.config  
+        self.assertEqual(config["page_max_line"], 20)                    
+        self.assertEqual(self.editor.page_max_lines.value(), 20)
+        self.editor.textEdit.undo_stack.setClean()
+        self.editor.close_file()     
+    def step_SwitchTranscripts(self):
+        #change style param and mock click to set 
+        self.editor.blockFontUnderline.setChecked(True)
+        self.editor.style_edit()
+        print(self.editor.textEdit.styles)      
+        # open second transcript, make sure style param is default
+        sec = pathlib.Path(self.temp_dir) / "style_default"
+        self.editor.open_file(sec)
+        self.editor.update_gui()
+        print(self.editor.textEdit.styles)
+        cursor = self.editor.textEdit.textCursor() 
+        cursor.insertText("user action")  
+        cursor.setPosition(0)        
+        self.assertEqual(self.editor.blockFontUnderline.isChecked(), False)
+        # # switch to first transcript, make sure style param is back to changed
+        current_index_tab = self.editor.mainTabs.currentIndex()
+        self.editor.switch_restore(current_index_tab - 1)
+        cursor = self.editor.textEdit.textCursor()   
+        cursor.setPosition(0)        
+        self.assertTrue(self.editor.blockFontUnderline.isChecked())
+        # not working
 
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
@@ -299,7 +352,9 @@ class testDialogWindow(QDialog, Ui_testDialog):
                     "step_SplitParSpace": "Split paragraph with space involved and undo",
                     "step_MergePar": "Merge paragraph, space involved, and undo",
                     "step_CheckStyleAttr": "Text properly styled when loaded",
-                    "step_ChangeStyle": "Text properly styled when style changed manually"}
+                    "step_ChangeStyle": "Text properly styled when style changed manually",
+                    "step_ColorHighlight": "Change highlight color",
+                    "step_SwitchTranscriptsPage": "Change page param with transcript switch"}
         last = len(self.selection)
         counter = 0
         for i, des in self.selection.items():

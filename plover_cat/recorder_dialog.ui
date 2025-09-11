@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>261</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,28 +23,28 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="label_17">
        <property name="text">
         <string>Audio Codec:</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QComboBox" name="audio_codec">
        <property name="toolTip">
         <string>Select the audio codec to record with, depends on system codecs</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="1" column="0">
       <widget class="QLabel" name="label_18">
        <property name="text">
         <string>File Container:</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="1" column="1">
       <widget class="QComboBox" name="audio_container">
        <property name="toolTip">
         <string>Select audio file type, depends on system</string>
@@ -54,7 +54,7 @@
      <item row="3" column="0">
       <widget class="QLabel" name="label_19">
        <property name="text">
-        <string>Sample Rate</string>
+        <string>Sample Rate:</string>
        </property>
       </widget>
      </item>
@@ -64,14 +64,14 @@
         <string>Select the sample rate for the recorded audio</string>
        </property>
        <property name="insertPolicy">
-        <enum>QComboBox::InsertAtTop</enum>
+        <enum>QComboBox::InsertPolicy::InsertAtTop</enum>
        </property>
       </widget>
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="label_20">
        <property name="text">
-        <string>Channels</string>
+        <string>Channels:</string>
        </property>
       </widget>
      </item>
@@ -89,83 +89,62 @@
        </property>
       </widget>
      </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Encoding:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QComboBox" name="audio_encoding"/>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Quality:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QSlider" name="quality_slider">
+       <property name="toolTip">
+        <string>Quality of audio recording, from very bad to very good</string>
+       </property>
+       <property name="maximum">
+        <number>4</number>
+       </property>
+       <property name="value">
+        <number>2</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Bitrate:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QComboBox" name="audio_bitrate">
+       <property name="toolTip">
+        <string>Select bitrate for recording</string>
+       </property>
+      </widget>
+     </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Encoding Mode</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_16">
-      <item>
-       <widget class="QRadioButton" name="constant_quality">
-        <property name="toolTip">
-         <string>Constant quality means varying bitrate for audio file</string>
-        </property>
-        <property name="text">
-         <string>Constant Quality</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="quality_slider">
-        <property name="toolTip">
-         <string>Quality of audio recording, from very bad to very good</string>
-        </property>
-        <property name="maximum">
-         <number>4</number>
-        </property>
-        <property name="value">
-         <number>2</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="constant_bitrate">
-        <property name="toolTip">
-         <string>Constant bitrate means quality will vary</string>
-        </property>
-        <property name="text">
-         <string>Constant Bitrate</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="audio_bitrate">
-        <property name="toolTip">
-         <string>Select bitrate for recording</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_8">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>

@@ -12,4 +12,6 @@ To stop recording, press **Audiovisual > Stop Recording** menu.
 
 Once audio recording has started, the settings cannot be changed. For example, if audio recording is paused, no settings can be changed. Pressing **Stop Recording** will end all recording, and then the settings can be changed.
 
-Plover2CAT only allows one audio file per transcript. Trying to record again will result in the previous file being over-written. 
+Plover2CAT only allows one audio file type per transcript. Trying to record again will result in the previous file being over-written. For example, it is possible to have one `WAV` file and one `MP3` file, but not two `WAV` files.
+
+The resulting recording is found in the `audio` folder within the transcript folder. Listening to the recording will depend on the codecs installed on the computer but VLC media player should play most formats.

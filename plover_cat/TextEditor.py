@@ -13,7 +13,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument, QColor, QUndoStack
 from PySide6.QtCore import QFile, QStringListModel, Qt, QModelIndex, Signal, QUrl, QSettings
 from PySide6.QtWidgets import QCompleter, QTextEdit,  QMessageBox, QApplication
-from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder)
+from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder, QMediaDevices, QMediaCaptureSession, QMediaFormat, QAudioOutput)
 
 _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 
@@ -62,7 +62,8 @@ class PloverCATEditor(QTextEdit):
     :ivar dictionary_name: name of ``dictionary``, usually the language code
     :ivar audio_file: path to file being played/recorded
     :ivar player: ``QMediaPlayer``
-    :ivar recorder: ``QMediaRecorder``
+    :ivar media_recorder: ``QMediaCaptureSession`` that manages audio input for recording
+    :ivar recorder: ``QMediaCaptureSession`` attached to ``media_recorder``
     :ivar int audio_position: current position of media being played
     :ivar int audio_delay: offset to subtract from ``audio_position``
 
@@ -118,9 +119,15 @@ class PloverCATEditor(QTextEdit):
         # media
         self.audio_file = ""
         self.player = QMediaPlayer()
+        output = QAudioOutput(self.player)
+        self.player.setAudioOutput(output)
         self.player.durationChanged.connect(self.update_audio_duration)
         self.player.positionChanged.connect(self.update_audio_position)
+        self.media_recorder = QMediaCaptureSession()
         self.recorder = QMediaRecorder()
+        self.media_recorder.setRecorder(self.recorder)
+        self.recorder.errorOccurred.connect(self.recorder_error)
+        self.recorder.recorderStateChanged.connect(log.debug)
         self.audio_position = 0
         self.audio_delay = 0
 
@@ -178,6 +185,8 @@ class PloverCATEditor(QTextEdit):
                     self.mock_type(event.text())
             # print(event.key())
             QTextEdit.keyPressEvent(self, event)
+    def recorder_error(self, error, message):
+        log.debug(f"{error}: {message}")
 
     def load(self, path, engine, load_transcript = True):
         """Load transcript and associated data.
@@ -222,6 +231,8 @@ class PloverCATEditor(QTextEdit):
         self.backup_document = deepcopy(json_document)
         self.send_message.emit("Loading transcript data.")
         # check if json document is older format
+        if not json_document:
+            return
         if "data" in json_document[next(iter(json_document))]:
             self.backup_document = import_version_one(json_document)
         else:
@@ -319,6 +330,9 @@ class PloverCATEditor(QTextEdit):
         if self.file_name.joinpath("dict").exists():
             dict_dir = transcript_dir / "dict"
             copytree(self.file_name.joinpath("dict"), dict_dir)
+        if self.file_name.joinpath("audio").exists():
+            audio_dir = transcript_dir / "audio"
+            copytree(self.file_name.joinpath("audio"), audio_dir)            
 
     def save_transcript(self, path): 
         """Extract transcript steno data and save.
@@ -351,6 +365,8 @@ class PloverCATEditor(QTextEdit):
             for num in range(self.document().blockCount(), len(json_document)):
                 self.send_message.emit(f"Extra paragraphs in backup document. Removing {num}.")
                 json_document.pop(str(num), None)
+        if not json_document:
+            json_document = {}
         save_json(json_document, path)
         QApplication.restoreOverrideCursor()
         return True
@@ -571,7 +587,7 @@ class PloverCATEditor(QTextEdit):
         """Obtain element highlight colors from saved settings.
         """
         self.highlight_colors = {}
-        settings = QSettings("Plover2CAT", "OpenCAT")
+        settings = QSettings("Plover2CAT-4", "OpenCAT")
         el_names = ["stroke", "text", "automatic", "field", "index"]
         for el in el_names:
             key = f"color{el.title()}"
@@ -674,10 +690,14 @@ class PloverCATEditor(QTextEdit):
         :param bool paragraph: obtain attribute from paragraphproperties
         :param bool text: obtain attribute from textproperties 
         """
+        styles_json = self.styles
+        for k, v in styles_json.items():
+            style_par = recursive_style_format(styles_json, k, prop = "paragraphproperties")
+            style_txt = recursive_style_format(styles_json, k, prop = "textproperties")        
         if paragraph:
-            return(self.styles[name]["paragraphproperties"][attribute])
+            return(style_par[name][attribute])
         elif text:
-            return(self.styles[name]["textproperties"][attribute])
+            return(style_txt[name][attribute])
         else:
             return(self.styles[name][attribute])
 
