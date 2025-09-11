@@ -14,19 +14,18 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
+- [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
+- [ ] text to speech
 - [ ] merge/split tests with new style
-- [ ] rename audiovisual to media in UI and beyond
 - [ ] sequentially process tape to translation
 - [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
 - [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
 - [ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
 - [ ] a/an search
-- [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
 - [ ] replace punctuation as needed, include "--" and "..."
 - [ ] diff compare versions
 - [ ] downgrade element, use `el.__class__.__mro__[1]()` which returns new instance, construct element from dict, only do if `el.__class__.__name__` is not "text_element"
 - [ ] other things to add to insert menu, checkable for export in supported format (table of contents, table of figures/exhibits), number ranges for autonumbering, special characters (more dialog)
-- [ ] text to speech
 - [ ] different time code formats
 - [ ] control line numbering position
 - [ ] control timestamp position

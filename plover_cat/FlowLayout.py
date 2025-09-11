@@ -1,6 +1,6 @@
 # copied from https://stackoverflow.com/questions/41621354/
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 class FlowLayout(QtWidgets.QLayout):
     def __init__(self, parent=None, margin=-1, hspacing=-1, vspacing=-1):

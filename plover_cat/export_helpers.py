@@ -1,7 +1,7 @@
 import bisect
 import re 
-from PyQt5.QtGui import QTextBlockFormat, QFont, QTextCharFormat, QTextOption
-from PyQt5.QtCore import Qt
+from PySide6.QtGui import QTextBlockFormat, QFont, QTextCharFormat, QTextOption
+from PySide6.QtCore import Qt
 from plover_cat.steno_objects import *
 from plover_cat.helpers import *
 from copy import deepcopy
@@ -348,7 +348,7 @@ def parprop_to_blockformat(par_dict):
     if "linespacing" in par_dict:
         par_format.setLineHeight(
             float(par_dict["linespacing"].replace("%", "")),
-            QTextBlockFormat.ProportionalHeight
+            QTextBlockFormat.ProportionalHeight.value
         )
     if "tabstop" in par_dict:
         tab_list = par_dict["tabstop"]

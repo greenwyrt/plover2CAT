@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>881</width>
-    <height>689</height>
+    <height>705</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -75,13 +75,13 @@
     <item>
      <widget class="QTabWidget" name="mainTabs">
       <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
+       <enum>Qt::FocusPolicy::NoFocus</enum>
       </property>
       <property name="tabPosition">
-       <enum>QTabWidget::North</enum>
+       <enum>QTabWidget::TabPosition::North</enum>
       </property>
       <property name="tabShape">
-       <enum>QTabWidget::Rounded</enum>
+       <enum>QTabWidget::TabShape::Rounded</enum>
       </property>
       <property name="currentIndex">
        <number>0</number>
@@ -120,7 +120,7 @@
              <string>Welcome to Plover2CAT. Create a new transcript or select a recent transcript below.</string>
             </property>
             <property name="textFormat">
-             <enum>Qt::PlainText</enum>
+             <enum>Qt::TextFormat::PlainText</enum>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -130,7 +130,7 @@
           <item>
            <layout class="QHBoxLayout" name="recentfileflow">
             <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
+             <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
             </property>
            </layout>
           </item>
@@ -148,7 +148,7 @@
      <x>0</x>
      <y>0</y>
      <width>881</width>
-     <height>21</height>
+     <height>33</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -223,7 +223,7 @@
    </widget>
    <widget class="QMenu" name="menuAudio">
     <property name="title">
-     <string>Audiovisual</string>
+     <string>Media</string>
     </property>
     <property name="toolTipsVisible">
      <bool>true</bool>
@@ -474,16 +474,16 @@ position.</string>
         </font>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
        </property>
        <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
+        <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
        </property>
        <property name="undoRedoEnabled">
         <bool>false</bool>
        </property>
        <property name="lineWrapMode">
-        <enum>QPlainTextEdit::NoWrap</enum>
+        <enum>QPlainTextEdit::LineWrapMode::NoWrap</enum>
        </property>
        <property name="readOnly">
         <bool>true</bool>
@@ -495,7 +495,7 @@ position.</string>
         <double>50.000000000000000</double>
        </property>
        <property name="textInteractionFlags">
-        <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+        <set>Qt::TextInteractionFlag::TextSelectableByKeyboard|Qt::TextInteractionFlag::TextSelectableByMouse</set>
        </property>
       </widget>
      </item>
@@ -504,10 +504,10 @@ position.</string>
        <item>
         <widget class="QPushButton" name="strokeLocate">
          <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
+          <enum>Qt::FocusPolicy::NoFocus</enum>
          </property>
          <property name="contextMenuPolicy">
-          <enum>Qt::NoContextMenu</enum>
+          <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
          </property>
          <property name="toolTip">
           <string>Select stroke and locate in editor text</string>
@@ -525,7 +525,7 @@ position.</string>
   <widget class="QDockWidget" name="dockSuggest">
    <property name="minimumSize">
     <size>
-     <width>185</width>
+     <width>187</width>
      <height>139</height>
     </size>
    </property>
@@ -577,7 +577,7 @@ position.</string>
        <item>
         <widget class="QRadioButton" name="suggest_sort">
          <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
+          <enum>Qt::FocusPolicy::NoFocus</enum>
          </property>
          <property name="toolTip">
           <string>Enable to sort by most recent</string>
@@ -604,10 +604,10 @@ position.</string>
         </font>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
        </property>
        <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
+        <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
        </property>
        <property name="rowCount">
         <number>0</number>
@@ -629,18 +629,15 @@ position.</string>
   <widget class="QDockWidget" name="dockAudio">
    <property name="minimumSize">
     <size>
-     <width>261</width>
-     <height>100</height>
+     <width>324</width>
+     <height>124</height>
     </size>
    </property>
    <property name="contextMenuPolicy">
-    <enum>Qt::NoContextMenu</enum>
+    <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
    </property>
    <property name="toolTip">
     <string>Audio seeker and other controls</string>
-   </property>
-   <property name="features">
-    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
     <string>Audio Controls</string>
@@ -677,7 +674,7 @@ position.</string>
           </size>
          </property>
          <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
+          <enum>Qt::FocusPolicy::NoFocus</enum>
          </property>
          <property name="toolTip">
           <string>Playback rate</string>
@@ -705,7 +702,7 @@ position.</string>
           <bool>false</bool>
          </property>
          <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
+          <enum>Qt::FocusPolicy::NoFocus</enum>
          </property>
          <property name="toolTip">
           <string>Millisecond adjustment between actual timestamp and audio and steno timestamps.</string>
@@ -740,13 +737,13 @@ position.</string>
           <bool>false</bool>
          </property>
          <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
+          <enum>Qt::FocusPolicy::NoFocus</enum>
          </property>
          <property name="toolTip">
           <string>Track for media presently playing</string>
          </property>
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Orientation::Horizontal</enum>
          </property>
         </widget>
        </item>
@@ -763,9 +760,19 @@ position.</string>
       </layout>
      </item>
      <item>
+      <widget class="QComboBox" name="audio_output">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Select output device</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer_6">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -787,21 +794,18 @@ position.</string>
    </property>
    <property name="minimumSize">
     <size>
-     <width>137</width>
-     <height>165</height>
+     <width>386</width>
+     <height>309</height>
     </size>
    </property>
    <property name="contextMenuPolicy">
-    <enum>Qt::NoContextMenu</enum>
+    <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
    </property>
    <property name="toolTip">
     <string>Contains various controls</string>
    </property>
    <property name="floating">
     <bool>false</bool>
-   </property>
-   <property name="features">
-    <set>QDockWidget::AllDockWidgetFeatures</set>
    </property>
    <property name="windowTitle">
     <string>Toolbox</string>
@@ -813,6 +817,9 @@ position.</string>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QTabWidget" name="tabWidget">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -820,16 +827,16 @@ position.</string>
         </sizepolicy>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
        </property>
        <property name="tabPosition">
-        <enum>QTabWidget::East</enum>
+        <enum>QTabWidget::TabPosition::East</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>5</number>
        </property>
        <property name="elideMode">
-        <enum>Qt::ElideNone</enum>
+        <enum>Qt::TextElideMode::ElideNone</enum>
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
@@ -845,8 +852,8 @@ position.</string>
        </property>
        <widget class="QWidget" name="styling_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/edit-style.png</normaloff>:/edit-style.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/edit-style.png</normaloff>:/resources/edit-style.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Style</string>
@@ -865,8 +872,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>340</width>
-              <height>456</height>
+              <width>351</width>
+              <height>472</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_26">
@@ -890,7 +897,7 @@ position.</string>
              <item>
               <widget class="QComboBox" name="style_selector">
                <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
+                <enum>Qt::FocusPolicy::NoFocus</enum>
                </property>
               </widget>
              </item>
@@ -908,7 +915,7 @@ position.</string>
                   <item>
                    <widget class="QFontComboBox" name="blockFont">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="currentFont">
                      <font>
@@ -921,7 +928,7 @@ position.</string>
                   <item>
                    <widget class="QSpinBox" name="blockFontSize">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="suffix">
                      <string>pt</string>
@@ -938,7 +945,7 @@ position.</string>
                   <item>
                    <widget class="QPushButton" name="blockFontBold">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Set text italic for style</string>
@@ -947,8 +954,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-bold.png</normaloff>:/edit-bold.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-bold.png</normaloff>:/resources/edit-bold.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -958,7 +965,7 @@ position.</string>
                   <item>
                    <widget class="QPushButton" name="blockFontItalic">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Set text italicized for style</string>
@@ -967,8 +974,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-italic.png</normaloff>:/edit-italic.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-italic.png</normaloff>:/resources/edit-italic.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -978,7 +985,7 @@ position.</string>
                   <item>
                    <widget class="QPushButton" name="blockFontUnderline">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Set text underlined for style</string>
@@ -987,8 +994,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-underline.png</normaloff>:/edit-underline.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-underline.png</normaloff>:/resources/edit-underline.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -998,7 +1005,7 @@ position.</string>
                   <item>
                    <widget class="QPushButton" name="blockLeftAlign">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Set alignment left for style</string>
@@ -1007,8 +1014,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-alignment.png</normaloff>:/edit-alignment.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-alignment.png</normaloff>:/resources/edit-alignment.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1024,7 +1031,7 @@ position.</string>
                   <item>
                    <widget class="QPushButton" name="blockCenterAlign">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Set alignment center for style</string>
@@ -1033,8 +1040,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-alignment-center.png</normaloff>:/edit-alignment-center.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-alignment-center.png</normaloff>:/resources/edit-alignment-center.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1047,7 +1054,7 @@ position.</string>
                   <item>
                    <widget class="QPushButton" name="blockRightAlign">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Set alignment right for style</string>
@@ -1056,8 +1063,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-alignment-right.png</normaloff>:/edit-alignment-right.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-alignment-right.png</normaloff>:/resources/edit-alignment-right.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1070,7 +1077,7 @@ position.</string>
                   <item>
                    <widget class="QPushButton" name="blockJustify">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Set alignment justified for style</string>
@@ -1079,8 +1086,8 @@ position.</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset resource="resources/resources.qrc">
-                      <normaloff>:/edit-alignment-justify-distribute.png</normaloff>:/edit-alignment-justify-distribute.png</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/resources/edit-alignment-justify-distribute.png</normaloff>:/resources/edit-alignment-justify-distribute.png</iconset>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
@@ -1093,7 +1100,7 @@ position.</string>
                   <item>
                    <widget class="QSpinBox" name="blockLineSpace">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Set line spacing as proportion of font height (ie 200% for double space)</string>
@@ -1112,7 +1119,7 @@ position.</string>
                   <item>
                    <spacer name="horizontalSpacer_2">
                     <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
+                     <enum>Qt::Orientation::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -1136,7 +1143,7 @@ position.</string>
                   <item row="0" column="1">
                    <widget class="QDoubleSpinBox" name="fontspaceInInch">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Average character width of font, use this to estimate indent and margin positions. Less accurate with proportional fonts.</string>
@@ -1145,7 +1152,7 @@ position.</string>
                      <bool>true</bool>
                     </property>
                     <property name="buttonSymbols">
-                     <enum>QAbstractSpinBox::NoButtons</enum>
+                     <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
                     </property>
                     <property name="keyboardTracking">
                      <bool>true</bool>
@@ -1165,7 +1172,7 @@ position.</string>
                   <item row="1" column="1">
                    <widget class="QDoubleSpinBox" name="blockTextIndent">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Specify text indent in inches relative to page margin</string>
@@ -1194,7 +1201,7 @@ position.</string>
                   <item row="2" column="1">
                    <widget class="QDoubleSpinBox" name="blockTabStop">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Specify position of tab stop</string>
@@ -1220,7 +1227,7 @@ position.</string>
                   <item row="3" column="1">
                    <widget class="QDoubleSpinBox" name="blockLeftMargin">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Specify paragraph margin relative to left page margin</string>
@@ -1249,7 +1256,7 @@ position.</string>
                   <item row="4" column="1">
                    <widget class="QDoubleSpinBox" name="blockRightMargin">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Specify right margin relative to right page margin</string>
@@ -1278,7 +1285,7 @@ position.</string>
                   <item row="5" column="1">
                    <widget class="QDoubleSpinBox" name="blockTopMargin">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Specify padding for top of paragraph</string>
@@ -1307,7 +1314,7 @@ position.</string>
                   <item row="6" column="1">
                    <widget class="QDoubleSpinBox" name="blockBottomMargin">
                     <property name="focusPolicy">
-                     <enum>Qt::ClickFocus</enum>
+                     <enum>Qt::FocusPolicy::ClickFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Specify padding for bottom of paragraph</string>
@@ -1336,10 +1343,13 @@ position.</string>
                   <item row="7" column="1">
                    <widget class="QComboBox" name="blockParentStyle">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Select parent style for style</string>
+                    </property>
+                    <property name="placeholderText">
+                     <string>(None)</string>
                     </property>
                    </widget>
                   </item>
@@ -1353,7 +1363,7 @@ position.</string>
                   <item row="8" column="1">
                    <widget class="QComboBox" name="blockNextStyle">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Select style of next paragraph</string>
@@ -1373,7 +1383,7 @@ position.</string>
                      <bool>false</bool>
                     </property>
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="toolTip">
                      <string>Specify heading level of style</string>
@@ -1438,7 +1448,7 @@ position.</string>
                   <item row="10" column="1">
                    <widget class="QPushButton" name="editCurrentStyle">
                     <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
+                     <enum>Qt::FocusPolicy::NoFocus</enum>
                     </property>
                     <property name="text">
                      <string>Modify Current Style</string>
@@ -1450,7 +1460,7 @@ position.</string>
                 <item>
                  <spacer name="verticalSpacer_5">
                   <property name="orientation">
-                   <enum>Qt::Vertical</enum>
+                   <enum>Qt::Orientation::Vertical</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -1471,8 +1481,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="page_format_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/document-resize-actual.png</normaloff>:/document-resize-actual.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/document-resize-actual.png</normaloff>:/resources/document-resize-actual.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Page Format</string>
@@ -1491,8 +1501,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>329</width>
-              <height>379</height>
+              <width>351</width>
+              <height>396</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1750,7 +1760,7 @@ position.</string>
                <item>
                 <widget class="QLineEdit" name="header_left">
                  <property name="focusPolicy">
-                  <enum>Qt::ClickFocus</enum>
+                  <enum>Qt::FocusPolicy::ClickFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Header text to be aligned left. Use %p for page number.</string>
@@ -1763,7 +1773,7 @@ position.</string>
                <item>
                 <widget class="QLineEdit" name="header_center">
                  <property name="focusPolicy">
-                  <enum>Qt::ClickFocus</enum>
+                  <enum>Qt::FocusPolicy::ClickFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Header text to be centered. Use %p for page number.</string>
@@ -1776,7 +1786,7 @@ position.</string>
                <item>
                 <widget class="QLineEdit" name="header_right">
                  <property name="focusPolicy">
-                  <enum>Qt::ClickFocus</enum>
+                  <enum>Qt::FocusPolicy::ClickFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Header text to be aligned right. Use %p for page number.</string>
@@ -1800,7 +1810,7 @@ position.</string>
                <item>
                 <widget class="QLineEdit" name="footer_left">
                  <property name="focusPolicy">
-                  <enum>Qt::ClickFocus</enum>
+                  <enum>Qt::FocusPolicy::ClickFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Footer text to be aligned left. Use %p for page number.</string>
@@ -1813,7 +1823,7 @@ position.</string>
                <item>
                 <widget class="QLineEdit" name="footer_center">
                  <property name="focusPolicy">
-                  <enum>Qt::ClickFocus</enum>
+                  <enum>Qt::FocusPolicy::ClickFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Footer text to be aligned center. Use %p for page number.</string>
@@ -1826,7 +1836,7 @@ position.</string>
                <item>
                 <widget class="QLineEdit" name="footer_right">
                  <property name="focusPolicy">
-                  <enum>Qt::ClickFocus</enum>
+                  <enum>Qt::FocusPolicy::ClickFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Footer text to be aligned right. Use %p for page number.</string>
@@ -1841,7 +1851,7 @@ position.</string>
              <item>
               <spacer name="verticalSpacer_2">
                <property name="orientation">
-                <enum>Qt::Vertical</enum>
+                <enum>Qt::Orientation::Vertical</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -1859,8 +1869,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="find_replace_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/magnifier.png</normaloff>:/magnifier.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/magnifier.png</normaloff>:/resources/magnifier.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Find and Replace</string>
@@ -1879,8 +1889,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>329</width>
-              <height>252</height>
+              <width>351</width>
+              <height>254</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_30">
@@ -1893,7 +1903,7 @@ position.</string>
                 <item>
                  <widget class="QRadioButton" name="search_text">
                   <property name="focusPolicy">
-                   <enum>Qt::NoFocus</enum>
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
                   </property>
                   <property name="toolTip">
                    <string>Search visible text for match</string>
@@ -1909,7 +1919,7 @@ position.</string>
                 <item>
                  <widget class="QRadioButton" name="search_untrans">
                   <property name="focusPolicy">
-                   <enum>Qt::NoFocus</enum>
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
                   </property>
                   <property name="toolTip">
                    <string>Search what appears to be untranslated chords in visible text</string>
@@ -1922,7 +1932,7 @@ position.</string>
                 <item>
                  <widget class="QRadioButton" name="search_steno">
                   <property name="focusPolicy">
-                   <enum>Qt::NoFocus</enum>
+                   <enum>Qt::FocusPolicy::NoFocus</enum>
                   </property>
                   <property name="toolTip">
                    <string>Search strokes, find text has to match stroke completely</string>
@@ -1954,7 +1964,7 @@ position.</string>
                <item>
                 <widget class="QPushButton" name="search_backward">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Search backwards</string>
@@ -1963,15 +1973,15 @@ position.</string>
                   <string>Previous</string>
                  </property>
                  <property name="icon">
-                  <iconset resource="resources/resources.qrc">
-                   <normaloff>:/arrow-skip-180.png</normaloff>:/arrow-skip-180.png</iconset>
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/resources/arrow-skip-180.png</normaloff>:/resources/arrow-skip-180.png</iconset>
                  </property>
                 </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="search_forward">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Search forward</string>
@@ -1980,15 +1990,15 @@ position.</string>
                   <string>Next</string>
                  </property>
                  <property name="icon">
-                  <iconset resource="resources/resources.qrc">
-                   <normaloff>:/arrow-skip.png</normaloff>:/arrow-skip.png</iconset>
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/resources/arrow-skip.png</normaloff>:/resources/arrow-skip.png</iconset>
                  </property>
                 </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="find_all">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Find all matches</string>
@@ -2005,7 +2015,7 @@ position.</string>
                <item>
                 <widget class="QCheckBox" name="search_case">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Case sensitive search</string>
@@ -2018,7 +2028,7 @@ position.</string>
                <item>
                 <widget class="QCheckBox" name="search_whole">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Text in find has to match text as a whole word/stroke</string>
@@ -2031,7 +2041,7 @@ position.</string>
                <item>
                 <widget class="QCheckBox" name="search_wrap">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Search will continue from top/bottom if a match is not found in forward/back search</string>
@@ -2058,7 +2068,7 @@ position.</string>
                <item>
                 <widget class="QPushButton" name="replace_selected">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Replace the found match with the text in the replace textbox</string>
@@ -2071,7 +2081,7 @@ position.</string>
                <item>
                 <widget class="QPushButton" name="replace_all">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Replace all matches with text in replace textbox</string>
@@ -2098,8 +2108,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="paragraph_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/edit-pilcrow.png</normaloff>:/resources/edit-pilcrow.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Paragraph</string>
@@ -2118,8 +2128,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>342</width>
-              <height>239</height>
+              <width>363</width>
+              <height>247</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -2152,7 +2162,7 @@ position.</string>
                <item row="1" column="1">
                 <widget class="QDateTimeEdit" name="editorCreationTime">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Modifies creation time of paragraph</string>
@@ -2175,7 +2185,7 @@ position.</string>
                <item row="2" column="1">
                 <widget class="QDateTimeEdit" name="editorEditTime">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Read only. Displays edit time of paragraph. Will change upon any cursor movement.</string>
@@ -2201,7 +2211,7 @@ position.</string>
                <item row="3" column="1">
                 <widget class="QTimeEdit" name="editorAudioStart">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Modifies audio start time of paragraph.</string>
@@ -2210,7 +2220,7 @@ position.</string>
                   <bool>false</bool>
                  </property>
                  <property name="currentSection">
-                  <enum>QDateTimeEdit::HourSection</enum>
+                  <enum>QDateTimeEdit::Section::HourSection</enum>
                  </property>
                  <property name="displayFormat">
                   <string>hh:mm:ss.zzz</string>
@@ -2227,7 +2237,7 @@ position.</string>
                <item row="4" column="1">
                 <widget class="QTimeEdit" name="editorAudioEnd">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Sets audio end time for this paragraph. </string>
@@ -2250,7 +2260,7 @@ position.</string>
                <item row="5" column="1">
                 <widget class="QLineEdit" name="editorNotes">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="toolTip">
                   <string>Custom notes attached to paragraph</string>
@@ -2265,7 +2275,7 @@ position.</string>
                 <bool>false</bool>
                </property>
                <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
+                <enum>Qt::FocusPolicy::NoFocus</enum>
                </property>
                <property name="toolTip">
                 <string>Enable with checkbox in order to submit edits</string>
@@ -2278,7 +2288,7 @@ position.</string>
              <item>
               <spacer name="verticalSpacer_7">
                <property name="orientation">
-                <enum>Qt::Vertical</enum>
+                <enum>Qt::Orientation::Vertical</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -2296,8 +2306,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="spellcheck_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/spell-check.png</normaloff>:/spell-check.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/spell-check.png</normaloff>:/resources/spell-check.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Spellcheck</string>
@@ -2316,8 +2326,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>342</width>
-              <height>239</height>
+              <width>363</width>
+              <height>247</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_36">
@@ -2331,7 +2341,7 @@ position.</string>
                  <item>
                   <widget class="QPushButton" name="spell_search">
                    <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
+                    <enum>Qt::FocusPolicy::NoFocus</enum>
                    </property>
                    <property name="text">
                     <string>Search</string>
@@ -2341,7 +2351,7 @@ position.</string>
                  <item>
                   <widget class="QPushButton" name="spell_skip">
                    <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
+                    <enum>Qt::FocusPolicy::NoFocus</enum>
                    </property>
                    <property name="text">
                     <string>Skip</string>
@@ -2351,7 +2361,7 @@ position.</string>
                  <item>
                   <widget class="QPushButton" name="spell_ignore_all">
                    <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
+                    <enum>Qt::FocusPolicy::NoFocus</enum>
                    </property>
                    <property name="text">
                     <string>Ignore All</string>
@@ -2361,7 +2371,7 @@ position.</string>
                  <item>
                   <widget class="QPushButton" name="spell_change">
                    <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
+                    <enum>Qt::FocusPolicy::NoFocus</enum>
                    </property>
                    <property name="text">
                     <string>Change</string>
@@ -2371,7 +2381,7 @@ position.</string>
                  <item>
                   <spacer name="verticalSpacer_4">
                    <property name="orientation">
-                    <enum>Qt::Vertical</enum>
+                    <enum>Qt::Orientation::Vertical</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
@@ -2402,19 +2412,19 @@ position.</string>
                  <item>
                   <widget class="QListWidget" name="spellcheck_suggestions">
                    <property name="focusPolicy">
-                    <enum>Qt::NoFocus</enum>
+                    <enum>Qt::FocusPolicy::NoFocus</enum>
                    </property>
                    <property name="contextMenuPolicy">
-                    <enum>Qt::NoContextMenu</enum>
+                    <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
                    </property>
                    <property name="toolTip">
                     <string>Double click on choice to replace</string>
                    </property>
                    <property name="editTriggers">
-                    <set>QAbstractItemView::DoubleClicked</set>
+                    <set>QAbstractItemView::EditTrigger::DoubleClicked</set>
                    </property>
                    <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectColumns</enum>
+                    <enum>QAbstractItemView::SelectionBehavior::SelectColumns</enum>
                    </property>
                   </widget>
                  </item>
@@ -2430,8 +2440,8 @@ position.</string>
        </widget>
        <widget class="QWidget" name="stenospell_pane">
         <attribute name="icon">
-         <iconset resource="resources/resources.qrc">
-          <normaloff>:/spell-check-error.png</normaloff>:/spell-check-error.png</iconset>
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/spell-check-error.png</normaloff>:/resources/spell-check-error.png</iconset>
         </attribute>
         <attribute name="title">
          <string>Steno Search</string>
@@ -2447,8 +2457,8 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>342</width>
-              <height>239</height>
+              <width>363</width>
+              <height>247</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -2464,14 +2474,14 @@ position.</string>
                <item>
                 <widget class="QLineEdit" name="steno_outline">
                  <property name="focusPolicy">
-                  <enum>Qt::ClickFocus</enum>
+                  <enum>Qt::FocusPolicy::ClickFocus</enum>
                  </property>
                 </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="steno_spellcheck">
                  <property name="focusPolicy">
-                  <enum>Qt::NoFocus</enum>
+                  <enum>Qt::FocusPolicy::NoFocus</enum>
                  </property>
                  <property name="text">
                   <string>Search</string>
@@ -2483,13 +2493,167 @@ position.</string>
              <item>
               <widget class="QListWidget" name="stenospell_res">
                <property name="focusPolicy">
-                <enum>Qt::NoFocus</enum>
+                <enum>Qt::FocusPolicy::NoFocus</enum>
                </property>
               </widget>
              </item>
             </layout>
            </widget>
           </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tts_pane">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <attribute name="title">
+         <string>Text to Speech</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <widget class="QGroupBox" name="tts_settings_group">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="title">
+            <string>Text to Speech Settings</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <item>
+             <layout class="QFormLayout" name="formLayout">
+              <item row="1" column="1">
+               <widget class="QComboBox" name="tts_locale"/>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_16">
+                <property name="text">
+                 <string>Language:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>Voice:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QComboBox" name="tts_voice"/>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>Engine:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="tts_engine"/>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_19">
+                <property name="text">
+                 <string>Volume:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QSlider" name="tts_volume">
+                <property name="minimum">
+                 <number>0</number>
+                </property>
+                <property name="maximum">
+                 <number>10</number>
+                </property>
+                <property name="value">
+                 <number>7</number>
+                </property>
+                <property name="sliderPosition">
+                 <number>7</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QLabel" name="label_20">
+                <property name="text">
+                 <string>Rate:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QSlider" name="tts_rate">
+                <property name="minimum">
+                 <number>-10</number>
+                </property>
+                <property name="maximum">
+                 <number>10</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_22">
+                <property name="text">
+                 <string>Pitch:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QSlider" name="tts_pitch">
+                <property name="minimum">
+                 <number>-10</number>
+                </property>
+                <property name="maximum">
+                 <number>10</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_19">
+           <item>
+            <widget class="QPushButton" name="tts_play">
+             <property name="text">
+              <string>Play</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="tts_pause">
+             <property name="text">
+              <string>Pause</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="tts_resume">
+             <property name="text">
+              <string>Resume</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="tts_stop">
+             <property name="text">
+              <string>Stop</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -2560,10 +2724,10 @@ position.</string>
        <item>
         <widget class="QUndoView" name="undoView">
          <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
+          <enum>Qt::FocusPolicy::NoFocus</enum>
          </property>
          <property name="contextMenuPolicy">
-          <enum>Qt::NoContextMenu</enum>
+          <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
          </property>
          <property name="toolTip">
           <string>Session actions for undo/redo</string>
@@ -2593,28 +2757,28 @@ position.</string>
      <item>
       <widget class="QListWidget" name="parSteno">
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
        </property>
        <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
+        <enum>Qt::ContextMenuPolicy::NoContextMenu</enum>
        </property>
        <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
+        <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
        </property>
        <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
+        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
        </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
        </property>
        <property name="flow">
-        <enum>QListView::LeftToRight</enum>
+        <enum>QListView::Flow::LeftToRight</enum>
        </property>
        <property name="isWrapping" stdset="0">
         <bool>true</bool>
        </property>
        <property name="itemAlignment">
-        <set>Qt::AlignLeading</set>
+        <set>Qt::AlignmentFlag::AlignLeading</set>
        </property>
       </widget>
      </item>
@@ -2632,15 +2796,15 @@ position.</string>
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="resources/resources.qrc">
-           <normaloff>:/arrow-270-medium.png</normaloff>:/arrow-270-medium.png</iconset>
+          <iconset resource="resources.qrc">
+           <normaloff>:/resources/arrow-270-medium.png</normaloff>:/resources/arrow-270-medium.png</iconset>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="reveal_steno_refresh">
          <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
+          <enum>Qt::FocusPolicy::NoFocus</enum>
          </property>
          <property name="toolTip">
           <string>Refresh reveal steno display</string>
@@ -2649,8 +2813,8 @@ position.</string>
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="resources/resources.qrc">
-           <normaloff>:/arrow-circle-double-135.png</normaloff>:/arrow-circle-double-135.png</iconset>
+          <iconset resource="resources.qrc">
+           <normaloff>:/resources/arrow-circle-double-135.png</normaloff>:/resources/arrow-circle-double-135.png</iconset>
          </property>
         </widget>
        </item>
@@ -2692,16 +2856,16 @@ position.</string>
      <item>
       <widget class="QListWidget" name="navigationList">
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
        </property>
        <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
+        <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
        </property>
        <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
+        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
        </property>
        <property name="textElideMode">
-        <enum>Qt::ElideRight</enum>
+        <enum>Qt::TextElideMode::ElideRight</enum>
        </property>
       </widget>
      </item>
@@ -2710,8 +2874,8 @@ position.</string>
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/folder-open-document-text.png</normaloff>:/folder-open-document-text.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/folder-open-document-text.png</normaloff>:/resources/folder-open-document-text.png</iconset>
    </property>
    <property name="text">
     <string>Open...</string>
@@ -2733,8 +2897,8 @@ position.</string>
   </action>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/document.png</normaloff>:/document.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/document.png</normaloff>:/resources/document.png</iconset>
    </property>
    <property name="text">
     <string>New</string>
@@ -2748,8 +2912,8 @@ position.</string>
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/disk-black.png</normaloff>:/disk-black.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/disk-black.png</normaloff>:/resources/disk-black.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -2782,8 +2946,8 @@ position.</string>
   </action>
   <action name="actionAddCustomDict">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/plus-button.png</normaloff>:/plus-button.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/plus-button.png</normaloff>:/resources/plus-button.png</iconset>
    </property>
    <property name="text">
     <string>Add Custom Dict</string>
@@ -2818,8 +2982,8 @@ position.</string>
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/scissors-blue.png</normaloff>:/scissors-blue.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/scissors-blue.png</normaloff>:/resources/scissors-blue.png</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -2833,8 +2997,8 @@ position.</string>
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/clipboard--plus.png</normaloff>:/clipboard--plus.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/clipboard--plus.png</normaloff>:/resources/clipboard--plus.png</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -2848,8 +3012,8 @@ position.</string>
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/clipboard-paste-document-text.png</normaloff>:/clipboard-paste-document-text.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/clipboard-paste-document-text.png</normaloff>:/resources/clipboard-paste-document-text.png</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -2863,11 +3027,11 @@ position.</string>
   </action>
   <action name="actionOpenAudio">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/folder-open-document-music.png</normaloff>:/folder-open-document-music.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/folder-open-document-music.png</normaloff>:/resources/folder-open-document-music.png</iconset>
    </property>
    <property name="text">
-    <string>Open Audiovisual</string>
+    <string>Open Media</string>
    </property>
    <property name="toolTip">
     <string>Select an audiovisual file on computer to play</string>
@@ -2881,8 +3045,8 @@ position.</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-skip-180.png</normaloff>:/control-skip-180.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-skip-180.png</normaloff>:/resources/control-skip-180.png</iconset>
    </property>
    <property name="text">
     <string>Skip Back</string>
@@ -2899,8 +3063,8 @@ position.</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-skip.png</normaloff>:/control-skip.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-skip.png</normaloff>:/resources/control-skip.png</iconset>
    </property>
    <property name="text">
     <string>Skip Forward</string>
@@ -2917,8 +3081,8 @@ position.</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-stop-square.png</normaloff>:/control-stop-square.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-stop-square.png</normaloff>:/resources/control-stop-square.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -2963,8 +3127,8 @@ position.</string>
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-stop.png</normaloff>:/control-stop.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-stop.png</normaloff>:/resources/control-stop.png</iconset>
    </property>
    <property name="text">
     <string>Play/Pause</string>
@@ -2978,8 +3142,8 @@ position.</string>
   </action>
   <action name="actionMergeParagraphs">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/arrow-join.png</normaloff>:/arrow-join.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/arrow-join.png</normaloff>:/resources/arrow-join.png</iconset>
    </property>
    <property name="text">
     <string>Merge Paragraphs</string>
@@ -2990,8 +3154,8 @@ position.</string>
   </action>
   <action name="actionSplitParagraph">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/arrow-split.png</normaloff>:/arrow-split.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/arrow-split.png</normaloff>:/resources/arrow-split.png</iconset>
    </property>
    <property name="text">
     <string>Split Paragraph</string>
@@ -3002,8 +3166,8 @@ position.</string>
   </action>
   <action name="actionWindowFont">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/edit.png</normaloff>:/edit.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/edit.png</normaloff>:/resources/edit.png</iconset>
    </property>
    <property name="text">
     <string>Window Font</string>
@@ -3022,8 +3186,8 @@ position.</string>
   </action>
   <action name="actionNormalCopy">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/clipboard.png</normaloff>:/clipboard.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/clipboard.png</normaloff>:/resources/clipboard.png</iconset>
    </property>
    <property name="text">
     <string>Normal Copy</string>
@@ -3037,8 +3201,8 @@ position.</string>
   </action>
   <action name="actionFindReplacePane">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/magnifier.png</normaloff>:/magnifier.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/magnifier.png</normaloff>:/resources/magnifier.png</iconset>
    </property>
    <property name="text">
     <string>Find/Replace</string>
@@ -3063,8 +3227,8 @@ position.</string>
   </action>
   <action name="actionRecordPause">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/microphone.png</normaloff>:/microphone.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/microphone.png</normaloff>:/resources/microphone.png</iconset>
    </property>
    <property name="text">
     <string>Record/Pause</string>
@@ -3100,8 +3264,8 @@ position.</string>
   </action>
   <action name="actionRemoveTranscriptDict">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/minus-button.png</normaloff>:/minus-button.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/minus-button.png</normaloff>:/resources/minus-button.png</iconset>
    </property>
    <property name="text">
     <string>Remove Transcript Dict</string>
@@ -3123,8 +3287,8 @@ position.</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/lock.png</normaloff>:/lock.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/lock.png</normaloff>:/resources/lock.png</iconset>
    </property>
    <property name="text">
     <string>Lock Cursor At End</string>
@@ -3146,8 +3310,8 @@ position.</string>
   </action>
   <action name="actionUserManual">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/book-question.png</normaloff>:/book-question.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/book-question.png</normaloff>:/resources/book-question.png</iconset>
    </property>
    <property name="text">
     <string>Online User Manual</string>
@@ -3232,8 +3396,8 @@ position.</string>
   </action>
   <action name="actionClearParagraph">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/cross.png</normaloff>:/cross.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/cross.png</normaloff>:/resources/cross.png</iconset>
    </property>
    <property name="text">
     <string>Reset Paragraph</string>
@@ -3244,8 +3408,8 @@ position.</string>
   </action>
   <action name="actionRetroactiveDefine">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/card--plus.png</normaloff>:/card--plus.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/card--plus.png</normaloff>:/resources/card--plus.png</iconset>
    </property>
    <property name="text">
     <string>Retroactive Define</string>
@@ -3259,8 +3423,8 @@ position.</string>
   </action>
   <action name="actionDefineLast">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/arrow-stop-180.png</normaloff>:/arrow-stop-180.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/arrow-stop-180.png</normaloff>:/resources/arrow-stop-180.png</iconset>
    </property>
    <property name="text">
     <string>Define Last Untrans</string>
@@ -3274,8 +3438,8 @@ position.</string>
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/information.png</normaloff>:/information.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/information.png</normaloff>:/resources/information.png</iconset>
    </property>
    <property name="text">
     <string>About</string>
@@ -3292,8 +3456,8 @@ position.</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/wand.png</normaloff>:/wand.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/wand.png</normaloff>:/resources/wand.png</iconset>
    </property>
    <property name="text">
     <string>Autocompletion</string>
@@ -3353,8 +3517,8 @@ position.</string>
   </action>
   <action name="actionInsertNormalText">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/control-cursor.png</normaloff>:/control-cursor.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/control-cursor.png</normaloff>:/resources/control-cursor.png</iconset>
    </property>
    <property name="text">
     <string>Normal Text</string>
@@ -3371,8 +3535,8 @@ position.</string>
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/edit-pilcrow.png</normaloff>:/resources/edit-pilcrow.png</iconset>
    </property>
    <property name="text">
     <string>Show All Characters</string>
@@ -3399,8 +3563,8 @@ position.</string>
   </action>
   <action name="actionAddAutocompletionTerm">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/lightning.png</normaloff>:/lightning.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/lightning.png</normaloff>:/resources/lightning.png</iconset>
    </property>
    <property name="text">
     <string>Add Autocompletion Term</string>
@@ -3435,8 +3599,8 @@ position.</string>
   </action>
   <action name="actionInsertImage">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/image--plus.png</normaloff>:/image--plus.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/image--plus.png</normaloff>:/resources/image--plus.png</iconset>
    </property>
    <property name="text">
     <string>Image</string>
@@ -3447,8 +3611,8 @@ position.</string>
   </action>
   <action name="actionBackgroundColor">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/palette.png</normaloff>:/palette.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/palette.png</normaloff>:/resources/palette.png</iconset>
    </property>
    <property name="text">
     <string>Background Color</string>
@@ -3602,8 +3766,8 @@ position.</string>
   </action>
   <action name="actionSpellcheck">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/spell-check.png</normaloff>:/spell-check.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/spell-check.png</normaloff>:/resources/spell-check.png</iconset>
    </property>
    <property name="text">
     <string>Spellcheck</string>
@@ -3614,8 +3778,8 @@ position.</string>
   </action>
   <action name="actionStenoSearch">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/spell-check-error.png</normaloff>:/spell-check-error.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/spell-check-error.png</normaloff>:/resources/spell-check-error.png</iconset>
    </property>
    <property name="text">
     <string>Steno Search</string>
@@ -3626,8 +3790,8 @@ position.</string>
   </action>
   <action name="actionStyling">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/edit-style.png</normaloff>:/edit-style.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/edit-style.png</normaloff>:/resources/edit-style.png</iconset>
    </property>
    <property name="text">
     <string>Styling</string>
@@ -3638,8 +3802,8 @@ position.</string>
   </action>
   <action name="actionPageFormat">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/document-resize-actual.png</normaloff>:/document-resize-actual.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/document-resize-actual.png</normaloff>:/resources/document-resize-actual.png</iconset>
    </property>
    <property name="text">
     <string>Page Format</string>
@@ -3650,8 +3814,8 @@ position.</string>
   </action>
   <action name="actionParagraph">
    <property name="icon">
-    <iconset resource="resources/resources.qrc">
-     <normaloff>:/edit-pilcrow.png</normaloff>:/edit-pilcrow.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/edit-pilcrow.png</normaloff>:/resources/edit-pilcrow.png</iconset>
    </property>
    <property name="text">
     <string>Paragraph</string>
@@ -3745,7 +3909,7 @@ position.</string>
   </action>
  </widget>
  <resources>
-  <include location="resources/resources.qrc"/>
+  <include location="resources.qrc"/>
  </resources>
  <connections>
   <connection>

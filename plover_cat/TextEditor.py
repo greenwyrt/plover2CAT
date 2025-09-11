@@ -9,12 +9,11 @@ from dulwich.errors import NotGitRepository
 from dulwich import porcelain
 from spylls.hunspell import Dictionary
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument, QColor
-from PyQt5.QtCore import QFile, QStringListModel, Qt, QModelIndex, pyqtSignal, QUrl, QSettings
-from PyQt5.QtWidgets import QCompleter, QTextEdit, QUndoStack, QMessageBox, QApplication
-from PyQt5.QtMultimedia import (QMediaContent, QMediaPlayer, QMediaRecorder, 
-QAudioRecorder)
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument, QColor, QUndoStack
+from PySide6.QtCore import QFile, QStringListModel, Qt, QModelIndex, Signal, QUrl, QSettings
+from PySide6.QtWidgets import QCompleter, QTextEdit,  QMessageBox, QApplication
+from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder, QMediaDevices, QMediaCaptureSession, QMediaFormat, QAudioOutput)
 
 _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 
@@ -63,18 +62,19 @@ class PloverCATEditor(QTextEdit):
     :ivar dictionary_name: name of ``dictionary``, usually the language code
     :ivar audio_file: path to file being played/recorded
     :ivar player: ``QMediaPlayer``
-    :ivar recorder: ``QAudioRecorder``
+    :ivar media_recorder: ``QMediaCaptureSession`` that manages audio input for recording
+    :ivar recorder: ``QMediaCaptureSession`` attached to ``media_recorder``
     :ivar int audio_position: current position of media being played
     :ivar int audio_delay: offset to subtract from ``audio_position``
 
     """
-    send_message = pyqtSignal(str)
+    send_message = Signal(str)
     """Signal to send with message to display."""
-    send_tape = pyqtSignal(str)
+    send_tape = Signal(str)
     """Signal to send with tape contents."""
-    audio_position_changed = pyqtSignal(int)
+    audio_position_changed = Signal(int)
     """Signal to send with new audio position."""
-    audio_length_changed = pyqtSignal(int)
+    audio_length_changed = Signal(int)
     """Signal to send with new audio duration."""
     def __init__(self, widget):
         super().__init__(widget)
@@ -119,9 +119,15 @@ class PloverCATEditor(QTextEdit):
         # media
         self.audio_file = ""
         self.player = QMediaPlayer()
+        output = QAudioOutput(self.player)
+        self.player.setAudioOutput(output)
         self.player.durationChanged.connect(self.update_audio_duration)
         self.player.positionChanged.connect(self.update_audio_position)
-        self.recorder = QAudioRecorder()
+        self.media_recorder = QMediaCaptureSession()
+        self.recorder = QMediaRecorder()
+        self.media_recorder.setRecorder(self.recorder)
+        self.recorder.errorOccurred.connect(self.recorder_error)
+        self.recorder.recorderStateChanged.connect(log.debug)
         self.audio_position = 0
         self.audio_delay = 0
 
@@ -179,6 +185,8 @@ class PloverCATEditor(QTextEdit):
                     self.mock_type(event.text())
             # print(event.key())
             QTextEdit.keyPressEvent(self, event)
+    def recorder_error(self, error, message):
+        log.debug(f"{error}: {message}")
 
     def load(self, path, engine, load_transcript = True):
         """Load transcript and associated data.
@@ -191,14 +199,14 @@ class PloverCATEditor(QTextEdit):
         """
         self.send_message.emit("Loading data")
         self.file_name = pathlib.Path(path)
-        self.file_name.mkdir(parents = True, exist_ok=True)
+        self.file_name.mkdir(parents = True, exist_ok = True)
         self.load_config_file(self.file_name, engine)
         self.load_dicts(engine, self.config["dictionaries"])
         self.load_check_styles(self.file_name / self.config["style"])
         self.get_highlight_colors()
         self.load_spellcheck_dict()
         export_path = self.file_name / "export"
-        pathlib.Path(export_path).mkdir(parents = True, exist_ok=True)
+        pathlib.Path(export_path).mkdir(parents = True, exist_ok = True)
         try:
             self.repo = Repo(self.file_name)
             self.dulwich_save()
@@ -223,6 +231,8 @@ class PloverCATEditor(QTextEdit):
         self.backup_document = deepcopy(json_document)
         self.send_message.emit("Loading transcript data.")
         # check if json document is older format
+        if not json_document:
+            return
         if "data" in json_document[next(iter(json_document))]:
             self.backup_document = import_version_one(json_document)
         else:
@@ -256,7 +266,7 @@ class PloverCATEditor(QTextEdit):
                     self.document().addResource(
                         QTextDocument.ImageResource,
                         imageUri,
-                        QVariant(image)
+                        image
                     )
                     imageFormat = QTextImageFormat()
                     imageFormat.setWidth(image.width())
@@ -320,6 +330,9 @@ class PloverCATEditor(QTextEdit):
         if self.file_name.joinpath("dict").exists():
             dict_dir = transcript_dir / "dict"
             copytree(self.file_name.joinpath("dict"), dict_dir)
+        if self.file_name.joinpath("audio").exists():
+            audio_dir = transcript_dir / "audio"
+            copytree(self.file_name.joinpath("audio"), audio_dir)            
 
     def save_transcript(self, path): 
         """Extract transcript steno data and save.
@@ -352,6 +365,8 @@ class PloverCATEditor(QTextEdit):
             for num in range(self.document().blockCount(), len(json_document)):
                 self.send_message.emit(f"Extra paragraphs in backup document. Removing {num}.")
                 json_document.pop(str(num), None)
+        if not json_document:
+            json_document = {}
         save_json(json_document, path)
         QApplication.restoreOverrideCursor()
         return True
@@ -384,7 +399,7 @@ class PloverCATEditor(QTextEdit):
                 log.debug("Abort project close because of unsaved changes.")
                 return False
         self.restore_dictionary_from_backup(self.engine)
-        if self.recorder.status() == QMediaRecorder.RecordingState:
+        if self.recorder.recorderState() == QMediaRecorder.RecordingState:
             self.recorder.stop()
         return True        
 
@@ -572,7 +587,7 @@ class PloverCATEditor(QTextEdit):
         """Obtain element highlight colors from saved settings.
         """
         self.highlight_colors = {}
-        settings = QSettings("Plover2CAT", "OpenCAT")
+        settings = QSettings("Plover2CAT-4", "OpenCAT")
         el_names = ["stroke", "text", "automatic", "field", "index"]
         for el in el_names:
             key = f"color{el.title()}"
@@ -675,10 +690,14 @@ class PloverCATEditor(QTextEdit):
         :param bool paragraph: obtain attribute from paragraphproperties
         :param bool text: obtain attribute from textproperties 
         """
+        styles_json = self.styles
+        for k, v in styles_json.items():
+            style_par = recursive_style_format(styles_json, k, prop = "paragraphproperties")
+            style_txt = recursive_style_format(styles_json, k, prop = "textproperties")        
         if paragraph:
-            return(self.styles[name]["paragraphproperties"][attribute])
+            return(style_par[name][attribute])
         elif text:
-            return(self.styles[name]["textproperties"][attribute])
+            return(style_txt[name][attribute])
         else:
             return(self.styles[name][attribute])
 
@@ -1229,9 +1248,9 @@ class PloverCATEditor(QTextEdit):
         :return: timestamp if ``convert = True``, or milliseconds if ``False``
         """
         real_time = None
-        if self.player.state() == QMediaPlayer.PlayingState or self.player.state() == QMediaPlayer.PausedState:
+        if self.player.playbackState() == QMediaPlayer.PlayingState or self.player.playbackState() == QMediaPlayer.PausedState:
             real_time = self.player.position() - self.audio_delay
-        elif self.recorder.state() == QMediaRecorder.RecordingState:
+        elif self.recorder.recorderState() == QMediaRecorder.RecordingState:
             real_time = self.recorder.duration() - self.audio_delay
         if not real_time:
             return("")
@@ -1248,18 +1267,18 @@ class PloverCATEditor(QTextEdit):
         :param str path: path to media file
         """
         self.audio_file = pathlib.Path(path)
-        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(str(self.audio_file))))
+        self.player.setSource(QUrl.fromLocalFile(str(self.audio_file)))
         self.send_message.emit(f"Player set to selected audio {str(path)}.")
 
     def play_pause_audio(self):
         """Play or pause media.
         """
-        if self.recorder.state() == QMediaRecorder.StoppedState:
+        if self.recorder.recorderState() == QMediaRecorder.StoppedState:
             pass
         else:
             self.send_message.emit("Recording in progress.")
             return
-        if self.player.state() == QMediaPlayer.PlayingState:
+        if self.player.playbackState() == QMediaPlayer.PlayingState:
             self.player.pause()
             self.send_message.emit("Paused audio")
         else:

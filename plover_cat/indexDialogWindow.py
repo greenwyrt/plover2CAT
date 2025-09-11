@@ -1,7 +1,7 @@
 from copy import deepcopy
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QTableWidgetItem, QDialog
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QTableWidgetItem, QDialog
 from plover_cat.index_dialog_ui import Ui_indexDialog
 from plover_cat.steno_objects import index_text
 
@@ -16,9 +16,9 @@ class indexDialogWindow(QDialog, Ui_indexDialog):
     :param index_dict: dict with {index_name: {prefix: str, hidden: bool, entries: {name: description, ...}}, ..}
     :type index_dict: dict    
     """
-    index_insert = pyqtSignal(object)
+    index_insert = Signal(object)
     """Signal emitted when user has selected an entry to insert into text"""
-    updated_dict = pyqtSignal()
+    updated_dict = Signal()
     """Signal emitted when the index dictionary has been updated"""
     def __init__(self, index_dict):
         super().__init__()

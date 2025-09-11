@@ -1,16 +1,10 @@
-#!/usr/bin/env python3
-
 from setuptools import setup
+from plover_build_utils.setup import BuildPy, BuildUi
 
-from plover_build_utils.setup import BuildPy, BuildUi, Develop
-
-BuildPy.build_dependencies.append('build_ui')
-BuildUi.hooks = ['plover_build_utils.pyqt:fix_icons']
-Develop.build_dependencies.append('build_py')
-cmdclass = {
-    'build_py': BuildPy,
-    'build_ui': BuildUi,
-    'develop': Develop,
+BuildPy.build_dependencies.append("build_ui")
+CMDCLASS = {
+  "build_py": BuildPy,
+  "build_ui": BuildUi,
 }
 
-setup(cmdclass=cmdclass)
+setup(cmdclass=CMDCLASS)

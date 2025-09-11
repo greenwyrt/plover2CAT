@@ -2,6 +2,7 @@
 exclude plover_cat/*_rc.py
 exclude plover_cat/*_ui.py
 include plover_cat/*.ui
+include plover_cat/*.qrc
 recursive-include plover_cat/resources *
 exclude *.rmd
 

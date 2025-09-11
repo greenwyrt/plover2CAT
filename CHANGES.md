@@ -1,5 +1,26 @@
 # CHANGES
 
+## Ver 4.0.0-alpha
+
+Port to using Qt6 through PySide6. Thanks to mkrnr for doing pretty much everything.
+
+Changes:
+
+- Audio recording code is now dependent on file container selected. See docs on setting up audio recording for more explanation.
+
+- Added combobox for the audio device for audio playback.
+
+- Renamed "Audiovisual" to Media
+
+Bug fix:
+- Fix where a change is made to page setup or style, and not saved, switching tabs erases the change
+
+Internal changes: 
+
+- test for changing highlight colors
+- API changes for `QMediaCaptureSession`, `QMediaPlayer` and `QMediaRecorder`
+- Window settings are stored under a new name `Plover2CAT-4`. Previous layouts, docs, and highlight colors have to be set again.
+
 
 ## Ver 3.1.0:
 

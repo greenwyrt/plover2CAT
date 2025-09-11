@@ -4,8 +4,8 @@ import html
 from datetime import datetime
 from dulwich.repo import Repo
 from math import trunc
-from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtGui import QFontMetrics
+from PySide6.QtCore import QObject, Signal
+from PySide6.QtGui import QFontMetrics
 from time import sleep
 from plover import log
 from plover_cat.helpers import save_json, ms_to_hours, return_commits, inch_to_spaces, write_command
@@ -32,9 +32,9 @@ class documentWorker(QObject):
     :param config: transcript configuration
     :param home_dir: transcript home directory
     """
-    progress = pyqtSignal(int)
+    progress = Signal(int)
     """Signal sent progress based on export of paragraph."""
-    finished = pyqtSignal()
+    finished = Signal()
     """Signal sent when export is finished."""
     def __init__(self, document, path, config, styles, user_field_dict, home_dir):
         QObject.__init__(self)  

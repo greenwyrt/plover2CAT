@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QDialog, QTableWidgetItem, QMessageBox
-from PyQt5.QtCore import Qt, pyqtSignal
+from PySide6.QtWidgets import QDialog, QTableWidgetItem, QMessageBox
+from PySide6.QtCore import Qt, Signal
 from collections import Counter
 from plover import log
 from plover.steno import normalize_steno
@@ -22,7 +22,7 @@ class suggestDialogWindow(QDialog, Ui_suggestDialog):
     :param scowl_dict: SCOWL word list packaged with Plover
     :type scowl_dict: dict
     """
-    # insert_autocomplete = pyqtSignal(tuple)
+    # insert_autocomplete = Signal(tuple)
     def __init__(self, text, engine, scowl_dict):
         """Sets up connections for analysis with dialog UI"""
         super().__init__()

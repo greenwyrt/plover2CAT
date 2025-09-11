@@ -56,9 +56,9 @@ Used to set parameters for audio recording on computer.
 
 - Input Device:  Choices will be any audio inputs available to the computer such as a microphone. If the computer has a microphone, and the headphone also has mic input, these will be different choices in the menu.
 
-- Audio Codec: Windows systems like have PCM WAV at a minimum.
+- File Container: Choose the file container (type) desired. **Choose this before selecting an audio codec**.
 
-- File Container: A guess on the file format for the audio will be made based on the audio codec. If the codec is not one of the common ones, the audio file will not have a file extension, and users have to manually adding a file extension after recording is done.
+- Audio Codec: The audio codec available will depend on the file container chosen. For some container types, such as `FLAC`, the only codec will be `FLAC`. Others, such as `MP4` will have multiple codecs available.
 
 - Sample Rate and Channels can be left on default, and the software will pick the best fit.
 

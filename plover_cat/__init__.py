@@ -1,5 +1,5 @@
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QMainWindow, QHBoxLayout
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtWidgets import QMainWindow, QHBoxLayout
 
 from plover.gui_qt.tool import Tool
 
@@ -13,7 +13,7 @@ class PloverCAT(Tool):
 
     TITLE = "Plover2CAT"
     ROLE = "plover2cat"
-    ICON = ':/icon.svg'
+    ICON = ':/resources/icon.svg'
     SHORTCUT = "Ctrl+P"
 
     def __init__(self, engine):

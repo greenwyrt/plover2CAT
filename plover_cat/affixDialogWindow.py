@@ -1,6 +1,5 @@
-
 from plover_cat.affix_dialog_ui import Ui_affixDialog
-from PyQt5.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog
 from copy import deepcopy
 
 class affixDialogWindow(QDialog, Ui_affixDialog):
