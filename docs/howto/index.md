@@ -25,6 +25,7 @@ Import RTF/CRE transcript file <importrtf.md>
 Enable autocompletion and add terms <autocompletion.md>
 Translate tape files <translatetape.md>
 Set up and display captions <captions.md>
+Set up Text-to-Speech <tts.md>
 ```
 
 ## Configure the editor
@@ -60,7 +61,7 @@ Revert to previously saved version <revert.md>
 Navigate with headings <navigate.md>
 ```
 
-## Play and Record Audiovisual files
+## Play and Record Media files
 
 ```{toctree}
 :maxdepth: 1

@@ -15,9 +15,12 @@ The sections below list things that could be part of future versions. They are n
 ## Possible improvements
 
 - [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
-- [ ] text to speech
 - [ ] merge/split tests with new style
 - [ ] sequentially process tape to translation
+    - [ ] before dialog, clean undostack and set to 50 (max undos)
+    - [ ] reset undostack after tape completely and make unlimited (default) again
+    - [ ] connect actionUndo to the tape dialog undo, make sure to disconnect in transcript teardown
+    - [ ] clean translator after dialog close
 - [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
 - [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
 - [ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
@@ -105,7 +108,7 @@ Data retrieval and storage are likely as fast for the limitations, considering t
 
 ~~Some funtions are called upon every cursor change: updating the steno and style display, updating the block data display, and moving the tape to the proper spot. Responsiveness will speed up if all three are inactivated (set disabled) at the cost of less information visible.~~
 
-Docks nwo do not update unless they are open and visible. Closing all docks could be set as a "writing mode" with all docks hidden vs editing mode with docks set visible.
+Docks now do not update unless they are open and visible. Closing all docks could be set as a "writing mode" with all docks hidden vs editing mode with docks set visible.
 
 ## Editor memory
 

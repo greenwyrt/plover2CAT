@@ -69,4 +69,4 @@ Used to set parameters for audio recording on computer.
 
 By default, the audio recording is saved into the `audio` folder. 
 
-See [how to set up and start audio recording](../howto/audiorecording.md), and relevant playback settings in [how to skip forward and back in an audiovisual file](../howto/audioseeking.md), [how to set up a time offset for syncing with writing](../howto/audiosync.md).
+See [how to set up and start audio recording](../howto/audiorecording.md), and relevant playback settings in [how to skip forward and back in an media file](../howto/audioseeking.md), [how to set up a time offset for syncing with writing](../howto/audiosync.md).

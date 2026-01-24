@@ -60,11 +60,11 @@ This menu is for steno-related menu items.
 - Edit Fields: Activates dialog to create and edit field variables
 - Edit Indices: Activates dialog to create and manage indexes and index entries
 
-### The Audiovisual Menu
+### The Media Menu
 
-This menu contains items related to audiovisual files.
+This menu contains items related to media files.
 
-- Open Audiovisual: Open a file dialog to select an audio file.
+- Open Media: Open a file dialog to select a media file.
 - Play/Pause: Play and pause the audio depending on the present state.
 - Stop: Stop the audio, returning to the beginning.
 - Skip Forward: Skip the audio forward by 5 seconds.
@@ -187,11 +187,11 @@ This section documents each menu item under its menu section with the identifier
 | Edit Fields          | `actionEditFields`       |              |
 | Edit Indices         | `actionEditIndices`      |              |
 
-### Audiovisual
+### Media
 
 | Item             | Action Identifier     | Shortcut     |
 |------------------|-----------------------|--------------|
-| Open Audiovisual | `actionOpenAudio`     | Ctrl+Shift+O |
+| Open Media       | `actionOpenAudio`     | Ctrl+Shift+O |
 | Play/Pause       | `actionPlayPause`     | Ctrl+P       |
 | Stop             | `actionStopAudio`     | Ctrl+W       |
 | Skip Foward      | `actionSkipForward`   | Ctrl+L       |
@@ -203,6 +203,8 @@ This section documents each menu item under its menu section with the identifier
 | Stop Recording   | `actionStopRecording` |              |
 | Captioning       | `actionCaptioning`    |              |
 | Flush Caption    | `actionFlushCaption`  |              |
+| Play (TTS)       | `actionPlayTTS`       |              |
+| Stop (TTS)       | `actionStopTTS`       |              |
 
 ### Styling
 

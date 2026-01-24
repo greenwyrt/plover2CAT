@@ -4,22 +4,28 @@
 
 Port to using Qt6 through PySide6. Thanks to mkrnr for doing pretty much everything.
 
+New:
+
+- Text to speech: Use the system's TTS engine to speak text/transcript aloud. See docs on how to use.
+
 Changes:
 
 - Audio recording code is now dependent on file container selected. See docs on setting up audio recording for more explanation.
 
-- Added combobox for the audio device for audio playback.
+- Added combobox for selecting audio device for audio playback.
 
-- Renamed "Audiovisual" to Media
+- Renamed "Audiovisual" to Media in menu (and also for related tooltips)
 
 Bug fix:
+
 - Fix where a change is made to page setup or style, and not saved, switching tabs erases the change
+- Fix to not close Plover2CAT window when `ESC` key is pressed (dialogs of Plover2CAT itself can still be closed in this way)
 
 Internal changes: 
 
 - test for changing highlight colors
 - API changes for `QMediaCaptureSession`, `QMediaPlayer` and `QMediaRecorder`
-- Window settings are stored under a new name `Plover2CAT-4`. Previous layouts, docs, and highlight colors have to be set again.
+- Window settings are stored under a new name `Plover2CAT-4`. Previous layouts, docks, and highlight colors have to be set again.
 
 
 ## Ver 3.1.0:

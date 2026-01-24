@@ -9,32 +9,23 @@ from collections import Counter, deque
 from copy import deepcopy
 from sys import platform
 from tempfile import gettempdir, TemporaryDirectory
-
-
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtGui import (QBrush, QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
-QCursor, QStandardItem, QStandardItemModel, QPageSize, QTextBlock, QTextFormat, QTextBlockFormat, 
-QTextOption, QTextCharFormat, QKeySequence, QPalette, QDesktopServices, QPixmap, QAction, QIcon)
+from PySide6.QtGui import (QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
+QStandardItem, QStandardItemModel, QPageSize,
+QTextOption, QKeySequence, QPalette, QDesktopServices, QPixmap, QAction, QIcon)
 from PySide6.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
-QStyle, QStyleFactory, QMessageBox, QDialog, QFontDialog, QColorDialog, QLabel, QMenu, 
+QMessageBox, QDialog, QFontDialog, QColorDialog, QLabel, QMenu, 
 QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar,  QToolButton, QDockWidget)
 from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder, QMediaFormat, QMediaDevices, QAudioInput)
 from PySide6.QtMultimediaWidgets import QVideoWidget
-from PySide6.QtCore import Qt, QFile, QTextStream, QUrl, QTime, QDateTime, QSettings, QRegularExpression, QSize, QStringListModel, QSizeF, QTimer, QThread
-_ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
+from PySide6.QtCore import Qt, QFile, QLocale, QUrl, QTime, QDateTime, QSettings, QRegularExpression, QSize, QStringListModel, QSizeF, QTimer, QThread
 from PySide6.QtTextToSpeech import QTextToSpeech
-
 import plover
-
-from plover.engine import StenoEngine
 from plover.steno import Stroke, normalize_steno, normalize_stroke
-from plover.dictionary.base import load_dictionary
 from plover.system.english_stenotype import DICTIONARIES_ROOT, ORTHOGRAPHY_WORDLIST
 from plover.system import _load_wordlist
 from plover import log
-
 from plover_cat.__version__ import __version__
-
 from plover_cat.plover_cat_ui import Ui_PloverCAT
 from plover_cat.TextEditor import PloverCATEditor
 from plover_cat.fieldDialogWindow import fieldDialogWindow
@@ -44,8 +35,8 @@ from plover_cat.indexDialogWindow import indexDialogWindow
 from plover_cat.suggestDialogWindow import suggestDialogWindow
 from plover_cat.captionDialogWindow import captionDialogWindow
 from plover_cat.recorderDialogWindow import recorderDialogWindow
+from plover_cat.tapeDialogWindow import tapeDialogWindow
 from plover_cat.testDialogWindow import testDialogWindow
-
 from plover_cat.rtf_parsing import *
 from plover_cat.constants import *
 from plover_cat.qcommands import *
@@ -56,6 +47,8 @@ from plover_cat.export_helpers import *
 from plover_cat.FlowLayout import FlowLayout
 from plover_cat.documentWorker import documentWorker
 from plover_cat.captionWorker import captionWorker
+
+_ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 
 scowl = _load_wordlist(ORTHOGRAPHY_WORDLIST, DICTIONARIES_ROOT)
 
@@ -92,6 +85,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     :ivar textEdit: hold current transcript 
     :ivar index_dialog: instance of ``indexDialogWindow``
     :ivar caption_dialog: instance of ``captionDialogWindow``
+    :ivar tape_dialog: instance of ``tapeDialogWindow``
     :ivar suggest_dialog: instance of ``suggestDialogWindow``
     :ivar cap_worker: instance of ``capWorker``
     :ivar autosave_time: autosave timer as ``QTimer``
@@ -152,6 +146,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.index_dialog = indexDialogWindow({})
         self.caption_dialog = captionDialogWindow() 
         self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
+        self.tape_dialog = tapeDialogWindow()
+        self.tape_dialog.translate_stroke_from_tape.connect(self.tape_stroke_translate)
         self.cap_worker = None
         self.autosave_time = QTimer()
         self.cutcopy_storage = deque(maxlen = 5)
@@ -1529,7 +1525,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             self.close_file()
         self.display_message("Closing window.")
-        self.parent().close()
+        self.parent().done(1)
 
     def close_file(self, tab_index = None):
         """Close transcript tab, checking for changes.
@@ -1859,10 +1855,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         self.textEdit.log_to_tape(stroke)             
 
-    def on_send_string(self, string):
+    def on_send_string(self, txt_string):
         """Set string sent by Plover in transcript.
         """
-        self.textEdit.last_string_sent = string
+        self.textEdit.last_string_sent = txt_string
 
     def count_backspaces(self, backspace):
         """Set number of backspaces sent by Plover in transcript.
@@ -1888,6 +1884,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_captions()
         self.textEdit.on_stroke(stroke_pressed, self.actionCursorAtEnd.isChecked())
 
+    def reconnect_keyboard(self):
+        self.engine._keyboard_emulation = self.kc
+
     def tape_translate(self):
         """Translate tape contents into transcript.
         """
@@ -1897,71 +1896,40 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 self.engine.set_output(True)
             else:
                 return
-        # do not erase any content before, case of too many asterisks for example
         self.engine.clear_translator_state()
-        # bit of a hack since triggering stroked hook through code
-        selected_file = QFileDialog.getOpenFileName(
-            self,
-            _("Select tape file to translate"),
-            str(self.textEdit.file_name), _("Tape (*.tape *.txt)"))[0]
-        if not selected_file:
-            return
-        transcript_dir = self.textEdit.file_name 
-        if pathlib.Path(selected_file) == transcript_dir.joinpath(transcript_dir.stem).with_suffix(".tape"):
-            self.statusBar.showMessage("Cannot translate from own transcript tape.")
-            return
-        selected_file = pathlib.Path(selected_file)   
-        paper_format, ok = QInputDialog.getItem(self, "Translate Tape", "Format of tape file:", ["Plover2CAT", "Plover (raw)", "Plover (paper)"], editable = False)
-        log.debug(f"Translating tape from {selected_file} with {paper_format} format.")
-        self.mainTabs.hide()
-        self.textEdit.blockSignals(True)
-        self.textEdit.document().blockSignals(True)
         self.kc = self.engine._keyboard_emulation
         self.engine._keyboard_emulation = mock_output()        
-        count = 0
-        if paper_format == "Plover (raw)":
-            with open(selected_file) as f:
-                for line in f:
-                    stroke = Stroke(normalize_stroke(line.strip().replace(" ", "")))
-                    self.engine._translator.translate(stroke)
-                    self.engine._trigger_hook('stroked', stroke)
-                    count += 1
-                    if count > 100:
-                        self.textEdit.undo_stack.clear()
-                        count = 0
-        elif paper_format == "Plover2CAT":
-            with open(selected_file) as f:
-                for line in f:
-                    stroke_contents = line.strip().split("|")[3]
-                    keys = []
-                    for i in range(len(stroke_contents)):
-                        if not stroke_contents[i].isspace() and i < len(plover.system.KEYS):
-                            keys.append(plover.system.KEYS[i])                    
-                    self.engine._translator.translate(Stroke(keys))
-                    self.engine._trigger_hook('stroked', Stroke(keys))
-                    count += 1
-                    if count > 100:
-                        self.textEdit.undo_stack.clear()
-                        count = 0
-        elif paper_format == "Plover (paper)":
-            with open(selected_file) as f:
-                for line in f:
-                    keys = []
-                    for i in range(len(line)):
-                        if not line[i].isspace() and i < len(plover.system.KEYS):
-                            keys.append(plover.system.KEYS[i])
-                    self.engine._translator.translate(Stroke(keys))
-                    self.engine._trigger_hook('stroked', Stroke(keys))
-                    count += 1
-                    if count > 100:
-                        self.textEdit.undo_stack.clear()
-                        count = 0
-        self.textEdit.undo_stack.clear()
+        self.tape_dialog.open()
+        self.tape_dialog.finished.connect(self.reconnect_keyboard)
+        # # do not erase any content before, case of too many asterisks for example
+        # self.engine.clear_translator_state()
+        # self.mainTabs.hide()
+        # self.textEdit.blockSignals(True)
+        # self.textEdit.document().blockSignals(True)
+
+        # self.textEdit.undo_stack.clear()
+        # self.textEdit.document().blockSignals(False)
+        # self.textEdit.blockSignals(False)
+        # self.mainTabs.show()
+        # self.engine._keyboard_emulation = self.kc
+        # todo, if format has time data, that should be inserted into stroke data of editor too
+
+    def tape_stroke_translate(self, strokes = 1):
+        if strokes > 50:
+            self.mainTabs.hide()
+        self.textEdit.blockSignals(True)
+        self.textEdit.document().blockSignals(True)
+        selected_row = self.tape_dialog.tape_view.currentIndex().row()
+        for idx in range(selected_row, selected_row + strokes):
+            if idx >= self.tape_dialog.tape_model.rowCount():
+                break
+            stroke_data = self.tape_dialog.tape_model.item(idx)
+            print(stroke_data.data(Qt.UserRole))
+            self.engine._translator.translate(Stroke(stroke_data.data(Qt.UserRole)))
         self.textEdit.document().blockSignals(False)
         self.textEdit.blockSignals(False)
-        self.mainTabs.show()
-        self.engine._keyboard_emulation = self.kc
-        # todo, if format has time data, that should be inserted into stroke data of editor too
+        if strokes > 50:
+            self.mainTabs.show()
 
     def reset_paragraph(self):
         """Remove all data from paragraph block, and erase action history.
@@ -2772,42 +2740,117 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.recorder.durationChanged.disconnect()
 
     def tts_synthesize(self):
-        pass
+        """TTS synthesize from selection or cursor position"""
+        self.tts_play.setEnabled(False)
+        current_cursor = self.textEdit.textCursor()
+        if current_cursor.hasSelection():
+            document_text = current_cursor.selectedText()
+        else:
+            document_text = self.textEdit.toPlainText()
+            document_text = document_text[current_cursor.position():]
+        print(document_text)
+        if document_text.strip():            
+            self.tts_instance.enqueue(document_text)
+
 
     def tts_setup(self):
+        """Set up TTS engine and connections"""
         self.tts_instance = QTextToSpeech(self)
-        for engine in QTextToSpeech.availableEngines():
-            if engine != "mock":
-                self.tts_engine.addItem(engine)
-        self.tts_engine.setCurrentIndex(0)
-        self.tts_instance.setEngine(self.tts_engine.currentText())
+        self.tts_pop_engine()
+        if self.tts_instance.engineCapabilities() & QTextToSpeech.Capability.PauseResume:
+            self.tts_pause.setVisible(True)
+            self.tts_resume.setVisible(True)
+        else:
+            self.tts_pause.setVisible(False)
+            self.tts_resume.setVisible(False)            
         self.tts_pitch.valueChanged.connect(self.tts_set_pitch)
         self.tts_volume.valueChanged.connect(self.tts_set_volume)
         self.tts_rate.valueChanged.connect(self.tts_set_rate)
-        self.tts_locale.currentIndexChanged.connect(self.tts_set_locale)
-        self.tts_voice.currentIndexChanged.connect(self.tts_set_voice)
         self.tts_engine.currentIndexChanged.connect(self.tts_set_engine)
+        self.tts_locale.currentIndexChanged.connect(self.tts_set_locale)
+        self.tts_voice.currentIndexChanged.connect(self.tts_set_voice)    
+        self.tts_play.clicked.connect(self.tts_synthesize)
+        self.tts_stop.clicked.connect(self.tts_end)
+        self.tts_pause.clicked.connect(lambda: self.tts_instance.pause())
+        self.tts_resume.clicked.connect(lambda: self.tts_instance.resume())
+        self.tts_instance.stateChanged.connect(self.tts_state_manage)
+        self.tts_set_engine()
 
-    def tts_set_engine(self, index):
-        pass
+    def tts_end(self):
+        """Stop TTS playback"""
+        self.tts_instance.stop()
+        self.tts_play.setEnabled(True)
+
+    def tts_pop_engine(self, index=None):
+        """Populate TTS engine choices"""
+        self.tts_engine.blockSignals(True)
+        self.tts_engine.clear()
+        for engine in QTextToSpeech.availableEngines():
+            if engine != "mock":
+                self.tts_engine.addItem(engine)
+        self.tts_engine.blockSignals(False)
+        if index:
+            self.tts_engine.setCurrentIndex(index)
+        else:
+            self.tts_engine.setCurrentIndex(0)
+
+    def tts_state_manage(self, state):
+        """Respond to changes in TTS state"""
+        if state == QTextToSpeech.State.Ready:
+            self.tts_play.setEnabled(True)
+        elif state == QTextToSpeech.State.Error:
+            self.display_message(self.tts_instance.errorString())
+
+    def tts_set_engine(self, index = None):
+        """Set TTS engine"""
+        user_select = self.tts_engine.currentText()
+        self.tts_instance.setEngine(user_select)
+        self.tts_pop_locale()
+
+    def tts_pop_locale(self):
+        """Populate locales in ui for selected TTS engine"""
+        self.tts_locale.blockSignals(True)
+        self.tts_locale.clear()
+        for loc in self.tts_instance.availableLocales():
+            self.tts_locale.addItem(f"{QLocale.languageToString(loc.language())} ({QLocale.territoryToString(loc.territory())})", loc)
+        self.tts_locale.blockSignals(False)
+        self.tts_locale.setCurrentIndex(0)
+        self.tts_pop_voice()
 
     def tts_set_locale(self, index):
-        pass
+        """Set locale for present TTS engine"""
+        user_select = self.tts_locale.currentData()
+        self.tts_instance.setLocale(user_select)
+        self.tts_pop_voice()
+
+    def tts_pop_voice(self):
+        """Populate voices in ui for selected TTS engine"""
+        self.tts_voice.blockSignals(True)
+        self.tts_voice.clear()
+        for voice in self.tts_instance.availableVoices():
+            self.tts_voice.addItem(voice.name(), voice)
+        self.tts_voice.blockSignals(False)
+        self.tts_voice.setCurrentIndex(0)
 
     def tts_set_voice(self, index):
-        pass
+        """Set voice for present TTS engine"""
+        user_select = self.tts_voice.currentData()
+        self.tts_instance.setVoice(user_select)
 
     def tts_set_pitch(self, pitch):
+        """Set TTS pitch"""
         pitch = pitch / 10
         if self.tts_instance:
             self.tts_instance.setPitch(pitch)
 
     def tts_set_volume(self, volume):
+        """Set TTS volume"""
         volume = volume / 10
         if self.tts_instance:
             self.tts_instance.setVolume(volume)
 
     def tts_set_rate(self, rate):
+        """Set TTS rate"""
         rate = rate / 10
         if self.tts_instance:
             self.tts_instance.setRate(rate)

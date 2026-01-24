@@ -1,5 +1,5 @@
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QMainWindow, QHBoxLayout
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QHBoxLayout
 
 from plover.gui_qt.tool import Tool
 
@@ -18,12 +18,14 @@ class PloverCAT(Tool):
 
     def __init__(self, engine):
         super().__init__(engine)
-
         self.setWindowFlags(Qt.Window | Qt.WindowMinMaxButtonsHint)
         self.layout = QHBoxLayout()
-        self.layout.addWidget(PloverCATWindow(engine))
+        self.everything = PloverCATWindow(engine)
+        self.layout.addWidget(self.everything)
         self.layout.setContentsMargins(0,0,0,0)
         self.setLayout(self.layout)
-
         #what does this do?
         self.finished.connect(lambda: None)
+    def reject(self):
+        pass
+

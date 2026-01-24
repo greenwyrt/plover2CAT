@@ -10,8 +10,8 @@ from plover_cat.constants import user_field_dict
 from PySide6.QtCore import QByteArray, QBuffer, QIODevice
 from PySide6.QtGui import QImage, QImageReader
 from odf.teletype import addTextToElement
-from odf.text import P, UserFieldDecls, UserFieldDecl, UserFieldGet, UserIndexMarkStart, UserIndexMarkEnd
-from odf.draw import Frame, TextBox, Image
+from odf.text import UserFieldDecls, UserFieldDecl, UserFieldGet, UserIndexMarkStart, UserIndexMarkEnd
+from odf.draw import Frame, Image
 
 _whitespace = '\u2029\t\n\x0b\x0c\r '
 whitespace = r'[%s]' % re.escape(_whitespace)
@@ -339,7 +339,7 @@ class text_field(text_element):
         user_declares = document.text.getElementsByType(UserFieldDecls)
         if user_declares:
             field_names = [i.getAttribute("name") for i in document.text.getElementsByType(UserFieldDecl)]
-            if not self.name in field_names:
+            if self.name not in field_names:
                 user_declares = document.text.getElementsByType(UserFieldDecls)[0]
                 user_dec = UserFieldDecl(name = self.name, stringvalue = self.data, valuetype = "string")
                 user_declares.addElement(user_dec)                
@@ -573,18 +573,19 @@ class element_factory:
         """
         # default is always a text element
         element = text_element()
-        if element_dict["element"] == "stroke":
-            element = stroke_text()
+        match element_dict["element"]:
+            case "stroke":
+                element = stroke_text()
         # elif element_dict["element"] == "dummy":
         #     element = dummy_element()
-        elif element_dict["element"] == "image":
-            element = image_text()
-        elif element_dict["element"] == "field":
-            element = text_field(user_dict = user_field_dict)
-        elif element_dict["element"] == "automatic":
-            element = automatic_text()
-        elif element_dict["element"] == "index":
-            element = index_text()
+            case "image":
+                element = image_text()
+            case "field":
+                element = text_field(user_dict = user_field_dict)
+            case "automatic":
+                element = automatic_text()
+            case "index":
+                element = index_text()
         element.from_dict(element_dict)
         return(element)
 
@@ -651,12 +652,12 @@ class element_collection(UserList):
             if first_whole == last_whole:
                 el_part.append(data[last_whole][first_remain:last_remain])
                 return(el_part)
-            if not start in el_lengths:
+            if start not in el_lengths:
                 el_part.append(data[first_whole][first_remain:])
             if (first_whole + 1) != last_whole:
                 for i in data[(first_whole + 1): last_whole]:
                     el_part.append(i)
-            if not end in el_lengths:
+            if end not in el_lengths:
                 el_part.append(data[last_whole][:last_remain])
             else:
                 el_part.append(data[last_whole])

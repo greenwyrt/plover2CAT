@@ -6,7 +6,7 @@ Plover2CAT can display input text in a separate window as captions.
 
 ## Caption set up
 
-Click `Audiovisual > Captioning` to activate the captioning settings dialog, use or set the settings below, and then click `OK`.
+Click `Media > Captioning` to activate the captioning settings dialog, use or set the settings below, and then click `OK`.
 
 ### Buffer Type
 
@@ -54,11 +54,11 @@ Click button to change font family and size for window.
 
 Once the caption window appears, it can be resized as desired, and as writing is done into the editor, formatted captions will appear.
 
-At the end, click `Audiovisual > Captioning` again to turn captioning off. 
+At the end, click **Media > Captioning** again to turn captioning off. 
 
 ## Flushing
 
-At certain times, such as when captions are ending, or there is a long pause, some text will be left in the "buffer" and won't appear in the captions. Use `Audiovisual > Flush Captions` to send the remaining text to be formatted and displayed.
+At certain times, such as when captions are ending, or there is a long pause, some text will be left in the "buffer" and won't appear in the captions. Use **Media > Flush Captions** to send the remaining text to be formatted and displayed.
 
 ## Remote captions
 
@@ -98,7 +98,7 @@ Basic setup:
 6. (Remote only) Enter `ssh -R 80:localhost:4455 nokey@localhost.run` and hit the Enter key. If it works, you should get a series of messages followed by a QR code. This uses the default `4455` port. Change if OBS websocket server is set to a different port.
 7. (Remote only) Look for the text `authenticated as anonymous user`. Right after it should be your tunnel address, taking the form of a bunch of letters and numbers (indicated in image as "tunnel_ID") followed by `.lhr.life`. For free users, this link will change each session.
 8. On the machine that will be doing the captioning (same machine if local captions), open Plover and the Plover2CAT plugin.
-9. Create a new transcript or open an existing one. Open **Audiovisual > Captioning**.
+9. Create a new transcript or open an existing one. Open **Media > Captioning**.
 10. In the Remote Endpoint dropdown menu in the Captioning Settings menu, click OBS.
 
 ![Screenshot of caption settings for remote OBS](images/caption_obs.png)

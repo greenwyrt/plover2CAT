@@ -1,4 +1,3 @@
-import string
 import pathlib
 import json
 import os
@@ -9,13 +8,11 @@ from dulwich.errors import NotGitRepository
 from dulwich import porcelain
 from spylls.hunspell import Dictionary
 
-from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtGui import QCursor, QKeySequence, QTextCursor, QTextDocument, QColor, QUndoStack
-from PySide6.QtCore import QFile, QStringListModel, Qt, QModelIndex, Signal, QUrl, QSettings
+from PySide6 import QtCore, QtGui
+from PySide6.QtGui import QTextCursor, QTextDocument, QColor, QUndoStack
+from PySide6.QtCore import Qt, Signal, QUrl, QSettings
 from PySide6.QtWidgets import QCompleter, QTextEdit,  QMessageBox, QApplication
-from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder, QMediaDevices, QMediaCaptureSession, QMediaFormat, QAudioOutput)
-
-_ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
+from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder, QMediaCaptureSession, QAudioOutput)
 
 import plover
 
@@ -28,6 +25,8 @@ from plover_cat.rtf_parsing import *
 from plover_cat.export_helpers import load_odf_styles, recursive_style_format, parprop_to_blockformat, txtprop_to_textformat
 from plover_cat.helpers import ms_to_hours, save_json, backup_dictionary_stack, add_custom_dicts, load_dictionary_stack_from_backup, return_commits, hide_file
 from plover_cat.constants import default_styles, default_config, default_dict
+
+_ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 
 class PloverCATEditor(QTextEdit):
     """Editor object for a transcript.
@@ -185,6 +184,7 @@ class PloverCATEditor(QTextEdit):
                     self.mock_type(event.text())
             # print(event.key())
             QTextEdit.keyPressEvent(self, event)
+
     def recorder_error(self, error, message):
         log.debug(f"{error}: {message}")
 
