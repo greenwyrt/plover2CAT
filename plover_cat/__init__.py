@@ -25,7 +25,4 @@ class PloverCAT(Tool):
         self.layout.setContentsMargins(0,0,0,0)
         self.setLayout(self.layout)
         #what does this do?
-        self.finished.connect(lambda: None)
-    def reject(self):
-        pass
-
+        # self.finished.connect(lambda: None)

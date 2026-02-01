@@ -1,6 +1,10 @@
 # CHANGES
 
-## Ver 4.0.0-alpha
+## Ver 4.0.1
+
+Bug fix to revert rejecting ESCAPE key and causing Plover2cat to stay open when Plover quits.
+
+## Ver 4.0.0
 
 Port to using Qt6 through PySide6. Thanks to mkrnr for doing pretty much everything.
 
