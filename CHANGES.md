@@ -1,5 +1,9 @@
 # CHANGES
 
+## Ver 4.0.2
+
+Bug fix: event filter for ESCAPE key, should now close properly
+
 ## Ver 4.0.1
 
 Bug fix to revert rejecting ESCAPE key and causing Plover2cat to stay open when Plover quits.

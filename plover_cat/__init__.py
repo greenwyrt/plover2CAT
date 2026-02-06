@@ -26,3 +26,6 @@ class PloverCAT(Tool):
         self.setLayout(self.layout)
         #what does this do?
         # self.finished.connect(lambda: None)
+    def keyPressEvent(self, event):
+        if event.key() != Qt.Key_Escape:
+            Tool.keyPressEvent(self, event)
