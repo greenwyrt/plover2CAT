@@ -1,5 +1,9 @@
 # CHANGES
 
+## Ver 4.0.4
+
+Minor bug fixes, tests and devel.
+
 ## Ver 4.0.3
 
 Bug fix for normal copy, will store in system clipboard to be pasted outside Plover2CAT.

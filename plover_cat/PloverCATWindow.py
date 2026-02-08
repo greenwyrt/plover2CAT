@@ -187,6 +187,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionOpenAudio.triggered.connect(lambda: self.open_audio())
         self.actionRecordPause.triggered.connect(lambda: self.record_or_pause())
         self.actionStopRecording.triggered.connect(lambda: self.stop_record())
+        self.actionSyncMediaPosition.triggered.connect(lambda: self.sync_media_pos())
         self.actionShowVideo.triggered.connect(lambda: self.show_hide_video())
         self.actionCaptioning.triggered.connect(self.setup_captions)
         self.actionFlushCaption.triggered.connect(self.flush_caption)
@@ -1900,19 +1901,19 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.engine.clear_translator_state()
         self.kc = self.engine._keyboard_emulation
         self.engine._keyboard_emulation = mock_output()        
-        self.tape_dialog.open()
-        self.tape_dialog.finished.connect(self.reconnect_keyboard)
+        # self.tape_dialog.open()
+        # self.tape_dialog.finished.connect(self.reconnect_keyboard)
         # # do not erase any content before, case of too many asterisks for example
-        # self.engine.clear_translator_state()
-        # self.mainTabs.hide()
-        # self.textEdit.blockSignals(True)
-        # self.textEdit.document().blockSignals(True)
+        self.engine.clear_translator_state()
+        self.mainTabs.hide()
+        self.textEdit.blockSignals(True)
+        self.textEdit.document().blockSignals(True)
 
-        # self.textEdit.undo_stack.clear()
-        # self.textEdit.document().blockSignals(False)
-        # self.textEdit.blockSignals(False)
-        # self.mainTabs.show()
-        # self.engine._keyboard_emulation = self.kc
+        self.textEdit.undo_stack.clear()
+        self.textEdit.document().blockSignals(False)
+        self.textEdit.blockSignals(False)
+        self.mainTabs.show()
+        self.engine._keyboard_emulation = self.kc
         # todo, if format has time data, that should be inserted into stroke data of editor too
 
     def tape_stroke_translate(self, strokes = 1):
@@ -2745,6 +2746,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_message("Recording stopped.")
         self.textEdit.recorder.durationChanged.disconnect()
 
+    def sync_media_pos(self):
+        """Sync media to time at cursor position
+        """
+        pass
+    
     def tts_synthesize(self):
         """TTS synthesize from selection or cursor position"""
         self.tts_play.setEnabled(False)

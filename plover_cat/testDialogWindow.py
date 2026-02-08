@@ -100,8 +100,8 @@ class TestStenoData(unittest.TestCase):
     def test_element_collection(self):
         stroke_data = [text_element(text = "ABC"),  
                         text_element(text = "2 ", time = "2000-01-23T00:00:00.111"), 
-                        stroke_text(stroke = "EUFS", text = "I was ", time = "2100-01-24T00:00:00.111"), 
-                        stroke_text(stroke = "TAO", text = "too "), 
+                        stroke_text(stroke = "EUFS", text = "I was ", time = "2100-01-24T00:00:00.111", audiotime = "00:00:01.123"), 
+                        stroke_text(stroke = "TAO", text = "too ", audiotime = "00:00:05.567"), 
                         index_text(description = "index descript", text = " index name")]
         sc = element_collection(stroke_data)
         self.assertEqual(sc.element_count(), 5)
@@ -117,6 +117,13 @@ class TestStenoData(unittest.TestCase):
         new_data = [text_element(text = "ABCD"), text_element(text = "123")]
         sc.insert_steno(4, element_collection(new_data))
         self.assertEqual(sc.to_text(), "ABC ABCD123was too ")
+        self.assertEqual(sc.closest_audiotime_at_pos(3), "")
+        self.assertEqual(sc.closest_audiotime_at_pos(7), "00:00:01.123")
+        self.assertEqual(sc.closest_audiotime_at_pos(9), "00:00:01.123")
+        self.assertEqual(sc.closest_audiotime_at_pos(11), "00:00:01.123")
+        self.assertEqual(sc.closest_audiotime_at_pos(13), "00:00:01.123")
+        self.assertEqual(sc.closest_audiotime_at_pos(15), "00:00:01.123")
+        self.assertEqual(sc.closest_audiotime_at_pos(13), "00:00:05.567")
 
 class TestTextEdit(unittest.TestCase):
     def __init__(self, testname, editor, selection):

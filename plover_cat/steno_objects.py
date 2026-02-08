@@ -738,6 +738,17 @@ class element_collection(UserList):
             pos_index = pos_index - 1
             start_pos = cum_len[pos_index - 1]
         return((start_pos, cum_len[pos_index]))
+    def closest_audiotime_at_pos(self, pos):
+        lengths = self.lens()
+        cum_len = list(accumulate(lengths))
+        # pos_index = bisect(cum_len, pos)
+        preceding_time = ""
+        for ind, el in enumerate(self.data):
+            if el.element == "stroke" and el.audiotime != "":
+                preceding_time = el.audiotime
+            if pos < cum_len[ind]:
+                break
+        return(preceding_time)
     def element_pos(self, index):
         """Returns tuple of text start, stop for element at ``index`` in collection."""
         lengths = self.lens()

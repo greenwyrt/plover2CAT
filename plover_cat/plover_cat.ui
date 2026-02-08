@@ -117,7 +117,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Welcome to Plover2CAT. Create a new transcript or select a recent transcript below.</string>
+             <string>Welcome to Plover2CAT. View the online user manual through the Help Menu. Create a new transcript or select a recent transcript below. </string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
@@ -236,6 +236,7 @@
     <addaction name="actionSkipBack"/>
     <addaction name="actionSpeedUp"/>
     <addaction name="actionSlowDown"/>
+    <addaction name="actionSyncMediaPosition"/>
     <addaction name="separator"/>
     <addaction name="actionShowVideo"/>
     <addaction name="separator"/>
@@ -3932,6 +3933,11 @@ position.</string>
     <string>Stop (TTS)</string>
    </property>
   </action>
+  <action name="actionSyncMediaPosition">
+   <property name="text">
+    <string>Sync Media Position</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>
@@ -4200,8 +4206,8 @@ position.</string>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>666</x>
-     <y>235</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>516</x>

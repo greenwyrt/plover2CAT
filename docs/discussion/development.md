@@ -14,6 +14,18 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
+- [ ] phonetic system for CART
+- [ ] non-breaking space for indexes
+- [ ] text templates (non-formatted, importing)
+- [ ] hot key mode
+- [ ] move audio to cursor position
+    - [ ] toggle menu item
+    - [ ] update move as part of update_gui
+    - [ ] only move when media paused
+    - [ ] add function to element_collection to get closest audiotime, convert to milliseconds, then set textedit player
+- [ ] pause audio when stop writing for amount of time
+- [ ] during playback, skip silence (or threshold)
+- [ ] have cursor follow playback
 - [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
 - [ ] merge/split tests with new style
 - [ ] sequentially process tape to translation
