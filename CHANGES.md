@@ -1,5 +1,9 @@
 # CHANGES
 
+## Ver 4.0.3
+
+Bug fix for normal copy, will store in system clipboard to be pasted outside Plover2CAT.
+
 ## Ver 4.0.2
 
 Bug fix: event filter for ESCAPE key, should now close properly

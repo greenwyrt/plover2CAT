@@ -197,6 +197,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
         self.actionCopy.triggered.connect(lambda: self.cut_steno(cut = False))
         self.actionCut.triggered.connect(lambda: self.cut_steno())
+        self.actionNormalCopy.triggered.connect(lambda: self.normal_copy())
         self.actionPaste.triggered.connect(lambda: self.paste_steno())
         self.menuClipboard.triggered.connect(self.paste_steno)
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
@@ -1951,6 +1952,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Cut/copy selection and generate menu item.
         """
         res = self.textEdit.cut_steno(cut = cut)
+        if not res:
+            return
         self.cutcopy_storage.appendleft(res)
         self.clipboard_menu()
 
@@ -1973,7 +1976,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         ea = element_actions()
         current_cursor = self.textEdit.textCursor()
         current_block_num = current_cursor.blockNumber()
-        # current_block = self.textEdit.document().findBlockByNumber(current_block_num)
+        current_block = self.textEdit.document().findBlockByNumber(current_block_num)
         start_pos = current_cursor.selectionStart() - current_block.position()
         self.textEdit.undo_stack.beginMacro(f"Paste: {store_data.to_text()}")
         self.textEdit.blockSignals(True)
@@ -1985,6 +1988,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.blockSignals(False)
         self.textEdit.undo_stack.endMacro()
         self.display_message(f"Pasting to paragraph {current_block_num} at position {start_pos}.")  
+
+    def normal_copy(self):
+        self.textEdit.copy()
 
     def define_retroactive(self):
         """Define outline for selected text and update transcript.
