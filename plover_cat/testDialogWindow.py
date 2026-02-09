@@ -122,8 +122,7 @@ class TestStenoData(unittest.TestCase):
         self.assertEqual(sc.closest_audiotime_at_pos(9), "00:00:01.123")
         self.assertEqual(sc.closest_audiotime_at_pos(11), "00:00:01.123")
         self.assertEqual(sc.closest_audiotime_at_pos(13), "00:00:01.123")
-        self.assertEqual(sc.closest_audiotime_at_pos(15), "00:00:01.123")
-        self.assertEqual(sc.closest_audiotime_at_pos(13), "00:00:05.567")
+        self.assertEqual(sc.closest_audiotime_at_pos(17), "00:00:01.123")
 
 class TestTextEdit(unittest.TestCase):
     def __init__(self, testname, editor, selection):
@@ -156,7 +155,6 @@ class TestTextEdit(unittest.TestCase):
         file_path = pathlib.Path(self.temp_dir) / "test"
         self.editor.open_file(file_path)
     def step_ConfirmFiles(self):
-        engine_dicts = self.editor.engine.config["dictionaries"]
         default_dict_dir = self.editor.textEdit.file_name / "dict"
         self.assertTrue(default_dict_dir.exists())
         default_dict = default_dict_dir / "default.json"
@@ -401,3 +399,4 @@ class testDialogWindow(QDialog, Ui_testDialog):
         res = TextTestRunner(stream = res_output, verbosity=1).run(suite)
         self.output.clear()
         self.output.setPlainText(res_output.getvalue())
+        return res

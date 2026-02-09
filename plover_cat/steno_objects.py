@@ -744,10 +744,11 @@ class element_collection(UserList):
         # pos_index = bisect(cum_len, pos)
         preceding_time = ""
         for ind, el in enumerate(self.data):
+            if cum_len[ind] > pos and ind != 0:
+                break            
             if el.element == "stroke" and el.audiotime != "":
                 preceding_time = el.audiotime
-            if pos < cum_len[ind]:
-                break
+            
         return(preceding_time)
     def element_pos(self, index):
         """Returns tuple of text start, stop for element at ``index`` in collection."""
@@ -945,7 +946,7 @@ class element_collection(UserList):
         if times:
             return(sorted(times, reverse = reverse)[0])
         else:
-            return None
+            return ""
     def replace_initial_tab(self, tab_replace = "    "):
         """Replace initial tab in place within collection.
 
