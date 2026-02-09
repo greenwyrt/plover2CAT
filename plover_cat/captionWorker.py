@@ -9,18 +9,19 @@ from datetime import datetime
 import obsws_python as obs
 from obsws_python.error import OBSSDKRequestError
 
+
 class captionWorker(QObject):
-    """Generate captions based on user settings and endpoint parameters 
-    for caption display and to send to endpoints. 
-    
+    """Generate captions based on user settings and endpoint parameters
+    for caption display and to send to endpoints.
+
     ``captionWorker`` is put into another thread and doesn't run on the main event thread.
     Text gets ingested and then sent out as formatted caption lines.
-    
+
     :param roll_caps: boolean, whether to use incremental captions or transcript-like
-    :param max_length: maximum number of characters for each caption line, 
+    :param max_length: maximum number of characters for each caption line,
         suggested value 32, default None
     :type max_length: int, optional
-    :max_lines: maximum number of captions lines to display, 
+    :max_lines: maximum number of captions lines to display,
         suggested value 3, default None
     :type max_lines: int, optional
     :param remote: name of remote endpoint, can only be one of supported, default None
@@ -32,14 +33,25 @@ class captionWorker(QObject):
     :type port: str, optional
     :param password: password to use along with other fields above, default None
     :type password: str, optional
-    """    
+    """
+
     capSend = Signal(str)
     """Signal sent with formatted caption line."""
     finished = Signal()
     """Signal sent when worker is done."""
     postMessage = Signal(str)
     """Signal sent with message to display."""
-    def __init__(self, roll_caps = True, max_length = None, max_lines = None, remote = None, endpoint = None, port = None, password = None):
+
+    def __init__(
+        self,
+        roll_caps=True,
+        max_length=None,
+        max_lines=None,
+        remote=None,
+        endpoint=None,
+        port=None,
+        password=None,
+    ):
         QObject.__init__(self)
         self.roll_caps = roll_caps
         self.max_length = max_length
@@ -53,15 +65,17 @@ class captionWorker(QObject):
                 self.port = "4455"
             if not self.endpoint:
                 self.endpoint = "localhost"
-            self.obs = obs.ReqClient(host=self.endpoint, port=self.port, password=self.password, timeout=3) 
-            self.obs_queue = deque(maxlen = self.max_lines)
+            self.obs = obs.ReqClient(
+                host=self.endpoint, port=self.port, password=self.password, timeout=3
+            )
+            self.obs_queue = deque(maxlen=self.max_lines)
         if self.remote == "Zoom":
             self.zoom_seq = 1
             zoom_url = urlparse(self.endpoint)
             zoom_params = zoom_url._replace(path="/closedcaption/seq")
             seq_url = urlunparse(zoom_params)
-            req = request.Request(seq_url, method = "GET")
-            r = request.urlopen(req)   
+            req = request.Request(seq_url, method="GET")
+            r = request.urlopen(req)
             if r.status == 200:
                 string_seq = r.read()
                 self.zoom_seq = int(string_seq.decode()) + 1
@@ -70,13 +84,13 @@ class captionWorker(QObject):
         if not self.roll_caps:
             self.cap_queue = Queue()
         else:
-            self.cap_queue = deque(maxlen = max_lines)
+            self.cap_queue = deque(maxlen=max_lines)
         """Queue containing formatted caption lines ready for display."""
-        self.next_word = "" 
+        self.next_word = ""
         """Line number for caption, required for Zoom captions."""
         self.cap_line = ""
         """Buffer for holding caption, when non-rolling"""
-        
+
     def intake(self, text):
         """Receive text from main editor and create work chunks for captions
         :param text: text written into editor
@@ -91,10 +105,14 @@ class captionWorker(QObject):
             self.make_caps()
         else:
             self.make_roll_caps()
+
     def make_caps(self):
         while not self.word_queue.empty():
             self.next_word, text_time = self.word_queue.get()
-            if self.max_length != 0 and (len(self.cap_line) + len(self.next_word)) > self.max_length:
+            if (
+                self.max_length != 0
+                and (len(self.cap_line) + len(self.next_word)) > self.max_length
+            ):
                 self.cap_queue.put((self.cap_line, text_time))
                 self.cap_line = self.next_word
                 # self.send_cap()
@@ -104,11 +122,11 @@ class captionWorker(QObject):
                 self.cap_line = ""
                 # self.send_cap()
             else:
-                self.cap_line += self.next_word       
-            self.send_cap()  
+                self.cap_line += self.next_word
+            self.send_cap()
+
     def make_roll_caps(self):
-        """Ingest word chunks from queue and put lines into caption queue.
-        """
+        """Ingest word chunks from queue and put lines into caption queue."""
         while not self.word_queue.empty():
             self.next_word, text_time = self.word_queue.get()
             try:
@@ -124,9 +142,9 @@ class captionWorker(QObject):
             else:
                 self.cap_queue.append((last_cap + self.next_word, text_time))
             self.send_cap()
+
     def send_cap(self):
-        """Take caption from queue and send to display, and also if endpoint is defined.
-        """
+        """Take caption from queue and send to display, and also if endpoint is defined."""
         try:
             if not self.roll_caps:
                 cap, time = self.cap_queue.get_nowait()
@@ -143,39 +161,49 @@ class captionWorker(QObject):
                     self.send_obs(cap)
         except Empty:
             pass
+
     def clean_and_stop(self):
-        """Clean up instance and emit signal for finish
-        """
+        """Clean up instance and emit signal for finish"""
         self.finished.emit()
+
     def send_msteams(self, cap):
-        """Take caption and send post to Microsoft Teams session
-        """
-        req = request.Request(self.endpoint, method = "POST")
+        """Take caption and send post to Microsoft Teams session"""
+        req = request.Request(self.endpoint, method="POST")
         req.data = cap.encode()
-        req.add_header('Content-Type', 'text/plain')
-        req.add_header('Content-Length', len(cap)) 
+        req.add_header("Content-Type", "text/plain")
+        req.add_header("Content-Length", len(cap))
         try:
             r = request.urlopen(req)
         except HTTPError as err:
-            self.postMessage.emit(f"Captioning: send to Microsoft Teams failed with error code {err.code}.")
+            self.postMessage.emit(
+                f"Captioning: send to Microsoft Teams failed with error code {err.code}."
+            )
+
     def send_zoom(self, cap):
-        """Take caption and send post to Zoom session
-        """
-        req = request.Request(self.endpoint + f"&seq={self.zoom_seq}&lang=en-US", method = "POST")      
+        """Take caption and send post to Zoom session"""
+        req = request.Request(
+            self.endpoint + f"&seq={self.zoom_seq}&lang=en-US", method="POST"
+        )
         self.zoom_seq += 1
-        req.data = cap.encode()  
-        req.add_header('Content-Type', 'text/plain')
-        req.add_header('Content-Length', len(cap)) 
+        req.data = cap.encode()
+        req.add_header("Content-Type", "text/plain")
+        req.add_header("Content-Length", len(cap))
         try:
             r = request.urlopen(req)
         except HTTPError as err:
-            self.postMessage.emit(f"Captioning: send to Zoom failed with error code {err.code}.")  
+            self.postMessage.emit(
+                f"Captioning: send to Zoom failed with error code {err.code}."
+            )
+
     def send_obs(self, cap):
-        """Take caption and send to OBS using obsws_python
-        """
+        """Take caption and send to OBS using obsws_python"""
         try:
             res = self.obs.send_stream_caption(cap)
         except OBSSDKRequestError as err:
-            self.postMessage.emit(f"Captioning: send to OBS failed with error code {err.code}")
+            self.postMessage.emit(
+                f"Captioning: send to OBS failed with error code {err.code}"
+            )
         except Exception as e:
-            self.postMessage.emit(f"Captioning: send to OBS failed. Error message is {e}")
+            self.postMessage.emit(
+                f"Captioning: send to OBS failed. Error message is {e}"
+            )

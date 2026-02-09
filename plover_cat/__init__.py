@@ -7,13 +7,11 @@ from plover_cat.plover_cat_ui import Ui_PloverCAT
 
 from plover_cat.PloverCATWindow import PloverCATWindow
 
-from . __version__ import __version__
 
 class PloverCAT(Tool):
-
     TITLE = "Plover2CAT"
     ROLE = "plover2cat"
-    ICON = ':/resources/icon.svg'
+    ICON = ":/resources/icon.svg"
     SHORTCUT = "Ctrl+P"
 
     def __init__(self, engine):
@@ -22,10 +20,11 @@ class PloverCAT(Tool):
         self.layout = QHBoxLayout()
         self.everything = PloverCATWindow(engine)
         self.layout.addWidget(self.everything)
-        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.layout)
-        #what does this do?
+        # what does this do?
         # self.finished.connect(lambda: None)
+
     def keyPressEvent(self, event):
         if event.key() != Qt.Key_Escape:
             Tool.keyPressEvent(self, event)

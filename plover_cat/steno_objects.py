@@ -965,7 +965,6 @@ class element_collection(UserList):
         """Collapse collection elements using ``__add__`` method.
         """
         new_ec = []
-        last_el_type = ""
         for ind, el in enumerate(self.data):
             if ind == 0:
                 new_ec.append(el)

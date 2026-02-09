@@ -2,7 +2,7 @@ import pathlib
 import json
 import os
 import time
-from plover.config import Config, DictionaryConfig
+from plover.config import DictionaryConfig
 from plover.oslayer.keyboardcontrol import KeyboardEmulation
 from plover import log
 from dulwich.porcelain import open_repo_closing

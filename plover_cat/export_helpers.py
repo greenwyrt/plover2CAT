@@ -1,12 +1,15 @@
 import bisect
 import re 
+import textwrap
+from json import load
 from PySide6.QtGui import QTextBlockFormat, QFont, QTextCharFormat, QTextOption
 from PySide6.QtCore import Qt
-from plover_cat.steno_objects import *
-from plover_cat.helpers import *
+from plover import log
+from plover_cat.steno_objects import element_collection, steno_wrapper
+from plover_cat.helpers import inch_to_spaces, in_to_pixel, remove_empty_from_dict
 from copy import deepcopy
-from odf.style import (Style, TextProperties, ParagraphProperties, FontFace, PageLayout, 
-PageLayoutProperties, MasterPage, TabStops, TabStop, GraphicProperties, Header, Footer)
+from odf.style import (Style, TextProperties, ParagraphProperties, TabStops, TabStop)
+from odf.office import Styles
 
 def format_odf_text(block_data, style, chars_in_inch, page_width, line_num = 0):
     """Format a string into wrapped lines for ODF.

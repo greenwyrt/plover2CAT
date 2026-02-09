@@ -1,10 +1,8 @@
-import codecs
 import struct
 import re
-from PySide6.QtGui import QFont, QFontDatabase
-from PySide6.QtWidgets import QProgressBar, QApplication
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QApplication
 from copy import deepcopy
-from datetime import datetime
 from pyparsing import (
     Literal, 
     Word, 
@@ -16,8 +14,6 @@ from pyparsing import (
     White,
     replace_with,
     Opt, 
-    Or,
-    one_of,
     Combine, 
     OneOrMore, 
     Group,
@@ -28,7 +24,7 @@ from pyparsing import (
 
 from plover import log
 
-from plover_cat.steno_objects import *
+from plover_cat.steno_objects import element_collection, stroke_text, automatic_text
 
 # control chars \ { }
 
@@ -188,7 +184,7 @@ class rtf_steno:
                 if control_word == "creatim":
                     select_dict = i
                     break
-            except:
+            except Exception:
                 pass
         for i in select_dict:
             if i["control"] == "yr":
@@ -235,7 +231,7 @@ class rtf_steno:
     def parse_steno(self, element):
         try:
             stroke = element[1]["value"]
-        except:
+        except Exception:
             stroke = ""
         self.steno = stroke
     def parse_text(self, element):
@@ -341,7 +337,7 @@ class rtf_steno:
 def rtf_to_qfont(font):
     font_dict = {}
     if "text" in font:
-        qt_font = QFont(text)
+        qt_font = QFont(font)
     else:
         qt_font = QFont()
     if "froman" in font:

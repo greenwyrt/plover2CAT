@@ -1,12 +1,20 @@
 import collections
-import time
 import pathlib
+from copy import deepcopy
 from shutil import copyfile
 from plover import log
-from PySide6.QtGui import QTextBlockUserData, QTextDocument, QTextCursor, QTextBlock, QImage, QImageReader, QTextImageFormat,QUndoCommand
+from PySide6.QtGui import (
+    QTextBlockUserData,
+    QTextDocument,
+    QTextCursor,
+    QImage,
+    QImageReader,
+    QTextImageFormat,
+    QUndoCommand,
+)
 from PySide6.QtCore import QUrl
-from datetime import datetime, timezone
-from plover_cat.steno_objects import *
+from datetime import datetime
+from plover_cat.steno_objects import element_collection, stroke_text, automatic_text
 
 class BlockUserData(QTextBlockUserData):
     """Representation of the data for a block.
@@ -315,7 +323,7 @@ class split_steno_par(QUndoCommand):
         # update creationtime
         try:
             second_data = update_user_data(second_data, key = "creationtime", value = second_part.data[0].time)
-        except:
+        except Exception:
             second_data = update_user_data(second_data, key = "creationtime")
         second_data["strokes"] = second_part
         second_data["style"] = first_data["style"]
@@ -699,7 +707,7 @@ class update_entries(QUndoCommand):
         super().__init__()
         self.document = document
         self.block = block
-        self.position_in_block = position
+        self.position_in_block = position_in_block
         self.new_dict = deepcopy(new_dict)
         # second one is the copy to be kept for undos
         self.store_dict = deepcopy(old_dict)

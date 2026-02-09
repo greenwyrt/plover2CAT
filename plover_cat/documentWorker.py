@@ -1,24 +1,22 @@
 import pathlib
 import xml.etree.ElementTree as ET
-import html
+import textwrap
 from datetime import datetime
 from dulwich.repo import Repo
 from math import trunc
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QFontMetrics
-from time import sleep
 from plover import log
-from plover_cat.helpers import save_json, ms_to_hours, return_commits, inch_to_spaces, write_command
-from plover_cat.steno_objects import *
-from plover_cat.rtf_parsing import *
-from plover_cat.export_helpers import *
+from plover_cat.helpers import ms_to_hours, return_commits, inch_to_spaces, write_command, pixel_to_in
+from plover_cat.steno_objects import element_collection, element_factory
+from plover_cat.rtf_parsing import in_to_twip
+from plover_cat.export_helpers import recursive_style_format, format_text, txtprop_to_textformat, format_odf_text, format_srt_text
 from odf.opendocument import OpenDocumentText, load
-from odf.office import FontFaceDecls, Styles
 from odf.style import (Style, TextProperties, ParagraphProperties, FontFace, PageLayout, 
 PageLayoutProperties, MasterPage, TabStops, TabStop, GraphicProperties, Header, Footer)
-from odf.text import H, P, Span, Tab, LinenumberingConfiguration, PageNumber, UserFieldDecls, UserFieldDecl, UserFieldGet
+from odf.text import H, P, LinenumberingConfiguration, PageNumber
 from odf.teletype import addTextToElement
-from odf.draw import Frame, TextBox, Image
+from odf.draw import Frame, TextBox
 
 class documentWorker(QObject):
     """Create exported files.
@@ -233,7 +231,7 @@ class documentWorker(QObject):
                         # better than stuffing all attributes in as a dict
                         try:
                             text_prop.setAttribute(attribute, value)
-                        except:
+                        except Exception:
                             pass
                     new_style.addElement(text_prop)
                 if "paragraphproperties" in style:
@@ -241,7 +239,7 @@ class documentWorker(QObject):
                     for attribute, value in style["paragraphproperties"].items():
                         try:
                             par_prop.setAttribute(attribute, value)
-                        except:
+                        except Exception:
                             pass
                     if "tabstop" in style["paragraphproperties"]:
                         tab_list = style["paragraphproperties"]["tabstop"]
@@ -258,7 +256,7 @@ class documentWorker(QObject):
                         pass
                     try:
                         new_style.setAttribute(attribute, value)
-                    except:
+                    except Exception:
                         pass
                 new_style.attributes
                 s.addElement(new_style)

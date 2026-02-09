@@ -10,10 +10,9 @@ from PySide6.QtWidgets import QDialog, QListWidgetItem
 from PySide6.QtGui import QTextCursor, QColor
 from PySide6.QtCore import Qt, QSettings
 from plover.oslayer.config import CONFIG_DIR
-from plover.steno import Stroke, normalize_stroke, normalize_steno
+from plover.steno import Stroke
 from plover_cat.helpers import save_json
-from plover_cat.steno_objects import *
-from plover_cat.TextEditor import PloverCATEditor
+from plover_cat.steno_objects import text_element, stroke_text, text_field, image_text, automatic_text, index_text, element_collection
 from plover_cat.test_dialog_ui import Ui_testDialog
 
 class TestStenoData(unittest.TestCase):

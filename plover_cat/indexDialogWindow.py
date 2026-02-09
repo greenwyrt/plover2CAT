@@ -1,5 +1,3 @@
-from copy import deepcopy
-from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QTableWidgetItem, QDialog
 from plover_cat.index_dialog_ui import Ui_indexDialog

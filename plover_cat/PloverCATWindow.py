@@ -1,5 +1,4 @@
 import subprocess
-import string
 import re
 import pathlib
 import json
@@ -21,7 +20,7 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import Qt, QFile, QLocale, QUrl, QTime, QDateTime, QSettings, QRegularExpression, QSize, QStringListModel, QSizeF, QTimer, QThread
 from PySide6.QtTextToSpeech import QTextToSpeech
 import plover
-from plover.steno import Stroke, normalize_steno, normalize_stroke
+from plover.steno import Stroke, normalize_steno
 from plover.system.english_stenotype import DICTIONARIES_ROOT, ORTHOGRAPHY_WORDLIST
 from plover.system import _load_wordlist
 from plover import log
@@ -37,13 +36,13 @@ from plover_cat.captionDialogWindow import captionDialogWindow
 from plover_cat.recorderDialogWindow import recorderDialogWindow
 from plover_cat.tapeDialogWindow import tapeDialogWindow
 from plover_cat.testDialogWindow import testDialogWindow
-from plover_cat.rtf_parsing import *
-from plover_cat.constants import *
-from plover_cat.qcommands import *
-from plover_cat.helpers import * 
-from plover_cat.steno_objects import *
-from plover_cat.spellcheck import *
-from plover_cat.export_helpers import * 
+from plover_cat.rtf_parsing import rtf_steno, load_rtf_styles
+from plover_cat.constants import re_strokes, clippy_strokes
+from plover_cat.qcommands import BlockUserData, element_actions
+from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output
+from plover_cat.steno_objects import index_text
+from plover_cat.spellcheck import get_sorted_suggestions, multi_gen_alternative
+from plover_cat.export_helpers import recursive_style_format, load_odf_styles
 from plover_cat.FlowLayout import FlowLayout
 from plover_cat.documentWorker import documentWorker
 from plover_cat.captionWorker import captionWorker
@@ -54,7 +53,7 @@ scowl = _load_wordlist(ORTHOGRAPHY_WORDLIST, DICTIONARIES_ROOT)
 
 try:
     from os import startfile
-except:
+except Exception:
     pass
 
 
@@ -306,7 +305,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             try:
                 select_action = self.findChild(QAction, identifier)
                 select_action.setShortcut(QKeySequence(keysequence)) 
-            except:
+            except Exception:
                 pass  
 
     def edit_shortcuts(self):
@@ -675,7 +674,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug("Trying to load tapey tape from default location.")
         if not tapey_tape_location.exists():
             return
-        stroke_search = [re.findall(re_strokes,line) for line in open(tapey_tape_location)]
+        stroke_search = [re.findall(re_strokes, line) for line in open(tapey_tape_location)]
         stroke_search = [x[0] for x in stroke_search if x]
         ## number maybe adjusted in future? both number of occurrences and number of words to place into table
         ## this uses frequency order
@@ -998,7 +997,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         width = float(self.textEdit.config["page_width"])
         height = float(self.textEdit.config["page_height"])
         width_pt = int(in_to_pt(width))
-        height_pt = int(in_to_pt(height))
         self.textEdit.setLineWrapMode(QTextEdit.FixedPixelWidth)
         self.textEdit.setLineWrapColumnOrWidth(width_pt)
         page_size = QPageSize(QSizeF(width, height), QPageSize.Inch, matchPolicy = QPageSize.FuzzyMatch) 
@@ -1055,7 +1053,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         block = self.textEdit.document().begin()
         for i in range(self.textEdit.document().blockCount()):
             block_data = block.userData()
-            if not block_data: continue
+            if not block_data:
+                continue
             if block_data["style"] in self.textEdit.styles and "defaultoutlinelevel" in self.textEdit.styles[block_data["style"]]:
                 item = QListWidgetItem()
                 level = int(self.textEdit.styles[block_data["style"]]["defaultoutlinelevel"])
@@ -1087,7 +1086,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                 edit_cursor.movePosition(QTextCursor.NextCharacter)
             self.textEdit.setTextCursor(edit_cursor)
             log.debug("Move text cursor to tape position.")
-        except:
+        except Exception:
             pass
         self.textEdit.blockSignals(False)
 
@@ -1126,7 +1125,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.strokeList.setTextCursor(stroke_cursor)
             self.strokeList.setCursorWidth(5)
             self.strokeList.ensureCursorVisible()
-        except:
+        except Exception:
             pass
         self.strokeList.blockSignals(False)
 
@@ -1638,7 +1637,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         rtf_paragraphs = parse_results.paragraphs
         for ind, par in rtf_paragraphs.items():
             par["style"] = renamed_indiv_style[int(ind)]
-        file_path = pathlib.Path(pathlib.Path(selected_file[0]).name).with_suffix(".transcript")
         transcript_dir = self.textEdit.file_name
         new_file_path = transcript_dir.joinpath(transcript_dir.stem).with_suffix(".transcript")
         save_json(rtf_paragraphs, new_file_path)
@@ -2044,6 +2042,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         log.debug("Scan to redefine.")
         search_result = self.untrans_search(-1)
+        if not search_result:
+            return        
         self.define_retroactive()
 
     def delete_scan(self):
@@ -2241,7 +2241,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         log.debug("Perform spellcheck.")
         current_cursor = self.textEdit.textCursor()
-        old_cursor_position = current_cursor.block().position()
         self.textEdit.setTextCursor(current_cursor)
         while not current_cursor.atEnd():
             current_cursor.movePosition(QTextCursor.NextWord)
@@ -2750,7 +2749,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Sync media to time at cursor position
         """
         pass
-    
+
     def tts_synthesize(self):
         """TTS synthesize from selection or cursor position"""
         self.tts_play.setEnabled(False)
@@ -3073,7 +3072,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         )
         if not selected_file[0]:
             return
-        block = self.textEdit.document().begin()
         if self.thread and self.thread.isRunning():
             QMessageBox.warning(self, "Plover2CAT", "Another export is in process.")
             return        

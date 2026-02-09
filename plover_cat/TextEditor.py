@@ -1,7 +1,10 @@
 import pathlib
 import json
 import os
+import re
 from shutil import copyfile, copytree
+from copy import deepcopy
+from datetime import datetime
 from collections import deque
 from dulwich.repo import Repo
 from dulwich.errors import NotGitRepository
@@ -9,7 +12,7 @@ from dulwich import porcelain
 from spylls.hunspell import Dictionary
 
 from PySide6 import QtCore, QtGui
-from PySide6.QtGui import QTextCursor, QTextDocument, QColor, QUndoStack
+from PySide6.QtGui import QTextCursor, QTextDocument, QColor, QUndoStack, QImage, QImageReader, QTextImageFormat
 from PySide6.QtCore import Qt, Signal, QUrl, QSettings
 from PySide6.QtWidgets import QCompleter, QTextEdit,  QMessageBox, QApplication
 from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder, QMediaCaptureSession, QAudioOutput)
@@ -19,9 +22,9 @@ import plover
 from plover.oslayer.config import CONFIG_DIR
 from plover import log
 
-from plover_cat.qcommands import *
-from plover_cat.steno_objects import *
-from plover_cat.rtf_parsing import *
+from plover_cat.qcommands import steno_insert, BlockUserData, update_config_value, steno_remove, update_style, set_par_style, set_par_property, merge_steno_par, split_steno_par, update_user_data, update_entries, update_field, image_insert
+from plover_cat.steno_objects import element_collection, element_factory, text_element, stroke_text, automatic_text, image_text, text_field, user_field_dict, backtrack_coord
+from plover_cat.rtf_parsing import import_version_one, import_version_two
 from plover_cat.export_helpers import load_odf_styles, recursive_style_format, parprop_to_blockformat, txtprop_to_textformat
 from plover_cat.helpers import ms_to_hours, save_json, backup_dictionary_stack, add_custom_dicts, load_dictionary_stack_from_backup, return_commits, hide_file
 from plover_cat.constants import default_styles, default_config, default_dict
@@ -280,7 +283,7 @@ class PloverCATEditor(QTextEdit):
                     document_cursor.insertText(el.to_text(), current_format)
             self.send_message.emit(f"Loading paragraph {document_cursor.blockNumber()} of {len(json_document)}")
             QApplication.processEvents()
-        if document_cursor.block().userData() == None:
+        if document_cursor.block().userData() is None:
             document_cursor.block().setUserData(BlockUserData())
             self.to_next_style()
         self.undo_stack.clear()
@@ -1119,7 +1122,7 @@ class PloverCATEditor(QTextEdit):
         start_pos = current_cursor.positionInBlock()
         current_block = current_cursor.blockNumber()
         self.undo_stack.beginMacro("Insert: index entry")
-        if current_cursor.hasSelection() and el == None:
+        if current_cursor.hasSelection() and el is None:
             self.cut_steno(store = False)
             self.setTextCursor(current_cursor)
             start_pos = current_cursor.positionInBlock()
