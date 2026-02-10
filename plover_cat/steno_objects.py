@@ -25,7 +25,8 @@ class text_element(UserString):
     :param time: time element is created in ISO milliseconds format
     :type time: str
     """
-    def __init__(self, text = "", time = None):
+
+    def __init__(self, text="", time=None):
         super().__init__(text)
         self.element = "text"
         """type of element, ``text``"""
@@ -447,9 +448,9 @@ class index_text(text_element):
         return(1)
     def to_text(self):
         if self.hidden:
-            return(f"{self.prefix}\u0020{self.data}")
+            return(f"{self.prefix}\u00a0{self.data}")
         else:
-            return(f"{self.prefix}\u0020{self.data}{self.description}")
+            return(f"{self.prefix}\u00a0{self.data}{self.description}")
     def to_display(self):
         return(f"\U0001F154\n\n{self.to_text()}")
     def to_odt(self, paragraph, document):

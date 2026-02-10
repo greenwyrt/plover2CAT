@@ -1,6 +1,6 @@
 # How to play, pause and stop media files
 
-When an existing media file is selected, the file location will show up in the audio control dock. 
+When an existing media file is selected, the file location will show up in the Media Controls dock. 
 
 ## Play/Pause
 

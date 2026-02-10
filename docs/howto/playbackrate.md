@@ -2,7 +2,7 @@
 
 The playback rate is the rate that the media file is being played at. 
 
-Plover2CAT displays the playback rate in the Audio Controls dock, `1.0x` by default.
+Plover2CAT displays the playback rate in the Media Controls dock, `1.0x` by default.
 
 ## Change playback rate
 
