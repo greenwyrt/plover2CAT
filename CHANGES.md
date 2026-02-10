@@ -1,5 +1,21 @@
 # CHANGES
 
+## Ver 4.0.5
+
+New:
+
+- Media seeking to cursor position (+ documentation)
+
+Change:
+
+- Index text now uses a non-breaking space 
+
+Internal:
+
+- tests for getting closest audiotime
+- make return from getting audiotime in `element_collection` empty string to be consistent
+
+
 ## Ver 4.0.4
 
 Minor bug fixes, tests and devel.

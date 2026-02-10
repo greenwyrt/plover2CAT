@@ -1264,6 +1264,16 @@ class PloverCATEditor(QTextEdit):
         else:
             return(real_time)
     
+    def set_audio_time(self, milliseconds):
+        """
+        Set media playback position
+        
+        :param int milliseconds: position
+        """    
+        adjusted_time = milliseconds + self.audio_delay
+        self.player.setPosition(adjusted_time)
+        self.send_message.emit("Media position changed.")
+
     def load_audio(self, path):
         """Load media file.
 
@@ -1283,10 +1293,10 @@ class PloverCATEditor(QTextEdit):
             return
         if self.player.playbackState() == QMediaPlayer.PlayingState:
             self.player.pause()
-            self.send_message.emit("Paused audio")
+            self.send_message.emit("Paused media.")
         else:
             self.player.play()
-            self.send_message.emit("Playing audio")
+            self.send_message.emit("Playing media.")
     
     def update_audio_duration(self, duration):
         """Send new duration to GUI.
@@ -1302,3 +1312,15 @@ class PloverCATEditor(QTextEdit):
         """
         self.audio_position = position
         self.audio_position_changed.emit(position)
+
+    def get_audio_timestamp_position(self):
+        """Get preceding audio timestamp by cursor position
+        """
+        current_cursor = self.textCursor()
+        current_pos = current_cursor.positionInBlock()
+        current_block = current_cursor.block()
+        block_data = current_block.userData()["strokes"]
+        audio_time = block_data.closest_audiotime_at_pos(current_pos)
+        if audio_time:
+            log.debug(f"Audio: Set media time to {audio_time}")
+        return(audio_time)

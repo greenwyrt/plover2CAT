@@ -57,7 +57,7 @@ class TestStenoData(unittest.TestCase):
         index_name = "0"
         index_dict = indices[index_name]
         entry_text = "A"
-        correct_txt = "Exhibit A"
+        correct_txt = "Exhibit\u00a0A"
         el = index_text(prefix = index_dict["prefix"], indexname = index_name, description = index_dict["entries"][entry_text], hidden = index_dict["hidden"], text = entry_text)
         self.assertEqual(el.element, "index")
         self.assertEqual(el.to_text(), correct_txt)
@@ -68,7 +68,7 @@ class TestStenoData(unittest.TestCase):
         index_name = "1"
         index_dict = indices[index_name]
         entry_text = "1"
-        correct_txt = "Index 1 The first."
+        correct_txt = "Index\u00a01 The first."
         el = index_text(prefix = index_dict["prefix"], indexname = index_name, description = index_dict["entries"][entry_text], hidden = index_dict["hidden"], text = entry_text)
         self.assertEqual(el.to_text(), correct_txt)
         self.assertEqual(len(el), len(correct_txt))

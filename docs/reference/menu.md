@@ -71,6 +71,7 @@ This menu contains items related to media files.
 - Skip Back: Skip the audio back by 5 seconds.
 - Speed Up: Increase the playback rate by 0.02.
 - Slow Down: Decrease the playback rate by 0.02.
+- Sync Media Position: move media position to recorded position based on cursor position
 - Show/Hide Video: If a video file is selected to be played, then a video window will pop-up. This will show/hide the video window.
 - Record/Pause: Start recording using the settings in the audio recording box. If already recording, pressing this will pause recording, which is not the same as to press Stop Recording.
 - Stop Recording: Stop any recording in progress.  If Record/Pause is pressed again, the present audio file is overwritten.
@@ -189,22 +190,23 @@ This section documents each menu item under its menu section with the identifier
 
 ### Media
 
-| Item             | Action Identifier     | Shortcut     |
-|------------------|-----------------------|--------------|
-| Open Media       | `actionOpenAudio`     | Ctrl+Shift+O |
-| Play/Pause       | `actionPlayPause`     | Ctrl+P       |
-| Stop             | `actionStopAudio`     | Ctrl+W       |
-| Skip Foward      | `actionSkipForward`   | Ctrl+L       |
-| Skip Back        | `actionSkipBack`      | Ctrl+J       |
-| Speed Up         | `actionSpeedUp`       | Ctrl+Shift+G |
-| Slow Down        | `actionSlowDown`      | Ctrl+Shift+S |
-| Show/Hide Video  | `actionShowVideo`     |              |
-| Record/Pause     | `actionRecordPause`   | Ctrl+Shift+P |
-| Stop Recording   | `actionStopRecording` |              |
-| Captioning       | `actionCaptioning`    |              |
-| Flush Caption    | `actionFlushCaption`  |              |
-| Play (TTS)       | `actionPlayTTS`       |              |
-| Stop (TTS)       | `actionStopTTS`       |              |
+| Item                | Action Identifier             | Shortcut     |
+|---------------------|-------------------------------|--------------|
+| Open Media          | `actionOpenAudio`             | Ctrl+Shift+O |
+| Play/Pause          | `actionPlayPause`             | Ctrl+P       |
+| Stop                | `actionStopAudio`             | Ctrl+W       |
+| Skip Foward         | `actionSkipForward`           | Ctrl+L       |
+| Skip Back           | `actionSkipBack`              | Ctrl+J       |
+| Speed Up            | `actionSpeedUp`               | Ctrl+Shift+G |
+| Slow Down           | `actionSlowDown`              | Ctrl+Shift+S |
+| Sync Media Position | `actionSyncMediaPosition`     |              |
+| Show/Hide Video     | `actionShowVideo`             |              |
+| Record/Pause        | `actionRecordPause`           | Ctrl+Shift+P |
+| Stop Recording      | `actionStopRecording`         |              |
+| Captioning          | `actionCaptioning`            |              |
+| Flush Caption       | `actionFlushCaption`          |              |
+| Play (TTS)          | `actionPlayTTS`               |              |
+| Stop (TTS)          | `actionStopTTS`               |              |
 
 ### Styling
 

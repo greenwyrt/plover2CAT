@@ -39,7 +39,7 @@ from plover_cat.testDialogWindow import testDialogWindow
 from plover_cat.rtf_parsing import rtf_steno, load_rtf_styles
 from plover_cat.constants import re_strokes, clippy_strokes
 from plover_cat.qcommands import BlockUserData, element_actions
-from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output
+from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output, hours_to_ms
 from plover_cat.steno_objects import index_text
 from plover_cat.spellcheck import get_sorted_suggestions, multi_gen_alternative
 from plover_cat.export_helpers import recursive_style_format, load_odf_styles
@@ -2748,7 +2748,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def sync_media_pos(self):
         """Sync media to time at cursor position
         """
-        pass
+        audio_time = self.textEdit.get_audio_timestamp_position()
+        if audio_time:
+            self.textEdit.set_audio_time(audio_time)
 
     def tts_synthesize(self):
         """TTS synthesize from selection or cursor position"""
