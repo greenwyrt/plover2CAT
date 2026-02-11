@@ -1038,19 +1038,27 @@ class PloverCATEditor(QTextEdit):
                 self.cut_steno(store = False)  
 
     def insert_text(self, text = None):
-        """Insert text element at cursor.
+        """Insert text at cursor.
 
-        :param str text: text for text element.
+        :param list text: list of text to insert
         """
-        current_cursor = self.textCursor()
-        current_block_num = current_cursor.blockNumber()
-        current_block = current_cursor.block()
-        start_pos = current_cursor.selectionStart() - current_block.position()
-        self.undo_stack.beginMacro(f"Insert: {text}")
-        fake_steno = text_element(text = text)
-        insert_cmd = steno_insert(current_cursor, self, current_block_num, start_pos, fake_steno)
-        self.undo_stack.push(insert_cmd)
+        # todo: loop so that multi line text 
+        old_affix_setting = self.config["enable_automatic_affix"]
+        self.config["enable_automatic_affix"] = False
+        self.undo_stack.beginMacro(f"Insert: {" ".join(text)}")
+        for ind, line in enumerate(text):
+            if line.strip():
+                current_cursor = self.textCursor()
+                current_block_num = current_cursor.blockNumber()
+                current_block = current_cursor.block()
+                start_pos = current_cursor.selectionStart() - current_block.position()
+                fake_steno = text_element(text = line.strip())
+                insert_cmd = steno_insert(current_cursor, self, current_block_num, start_pos, fake_steno)
+                self.undo_stack.push(insert_cmd)
+            if len(text) > 1 and ind != len(text) - 1:
+                self.split_paragraph()
         self.undo_stack.endMacro()   
+        self.config["enable_automatic_affix"] = old_affix_setting
 
     def insert_field(self, name):
         """Insert field at cursor.
@@ -1219,7 +1227,7 @@ class PloverCATEditor(QTextEdit):
         if self.engine.output:
             return          
         if len(text) > 0:
-            self.insert_text(text)        
+            self.insert_text([text])        
 
     def mock_bks(self):
         """Mock one backspace.

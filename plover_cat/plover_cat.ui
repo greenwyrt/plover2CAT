@@ -211,8 +211,10 @@
     <addaction name="actionCopy"/>
     <addaction name="actionCut"/>
     <addaction name="actionPaste"/>
-    <addaction name="actionNormalCopy"/>
     <addaction name="menuClipboard"/>
+    <addaction name="separator"/>
+    <addaction name="actionNormalCopy"/>
+    <addaction name="actionNormalPaste"/>
     <addaction name="separator"/>
     <addaction name="actionJumpToParagraph"/>
     <addaction name="actionClearParagraph"/>
@@ -378,6 +380,7 @@
     <addaction name="actionInsertImage"/>
     <addaction name="actionInsertNormalText"/>
     <addaction name="actionRedact"/>
+    <addaction name="actionTextFromFile"/>
     <addaction name="separator"/>
     <addaction name="actionEditFields"/>
     <addaction name="actionEditIndices"/>
@@ -837,7 +840,7 @@ position.</string>
         <enum>QTabWidget::TabPosition::East</enum>
        </property>
        <property name="currentIndex">
-        <number>6</number>
+        <number>0</number>
        </property>
        <property name="elideMode">
         <enum>Qt::TextElideMode::ElideNone</enum>
@@ -876,7 +879,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>351</width>
+              <width>345</width>
               <height>472</height>
              </rect>
             </property>
@@ -1505,7 +1508,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>351</width>
+              <width>345</width>
               <height>396</height>
              </rect>
             </property>
@@ -1893,7 +1896,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>351</width>
+              <width>345</width>
               <height>254</height>
              </rect>
             </property>
@@ -2132,7 +2135,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>363</width>
+              <width>357</width>
               <height>247</height>
              </rect>
             </property>
@@ -2330,7 +2333,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>363</width>
+              <width>357</width>
               <height>247</height>
              </rect>
             </property>
@@ -2461,7 +2464,7 @@ position.</string>
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>363</width>
+              <width>357</width>
               <height>247</height>
              </rect>
             </property>
@@ -3936,6 +3939,19 @@ position.</string>
   <action name="actionSyncMediaPosition">
    <property name="text">
     <string>Sync Media Position</string>
+   </property>
+  </action>
+  <action name="actionTextFromFile">
+   <property name="text">
+    <string>Text From File</string>
+   </property>
+  </action>
+  <action name="actionNormalPaste">
+   <property name="text">
+    <string>Normal Paste</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste into editor from system clipboard</string>
    </property>
   </action>
  </widget>

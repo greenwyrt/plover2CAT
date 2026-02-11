@@ -27,9 +27,10 @@ This menu contains items related to transcript file management, import and expor
 - Redo: Redo undone action if available.
 - Copy: Copy text (and underlying steno) from paragraph.
 - Cut: Cut text (and underlying steno) from paragraph.
+- *Clipboard*: Last 5 snippets from cut/copy
 - Paste: Paste text (and underlying steno) into paragraph.
 - Normal Copy: Copy the text only for use in other applications.
-- *Clipboard*: Last 5 snippets from cut/copy
+- Normal Paste: Paste into editor from system clipboard.
 - Jump to Paragraph...: Activates a dialog window to select a paragraph to nagivate to.
 - Reset Paragraph: Removes all paragraph text and steno data from paragraph. Used as the last option when text and steno data go out of sync.
 - Autosave: Enable autosave to backup file at defined time intervals
@@ -157,6 +158,7 @@ This section documents each menu item under its menu section with the identifier
 | Cut                  | `actionCut`              | Ctrl+X       |
 | Paste                | `actionPaste`            | Ctrl+V       |
 | Normal Copy          | `actionNormalCopy`       | Ctrl+Shift+C |
+| Normal Paste         | `actionNormalPaste`      |              |
 | Jump to Paragraph... | `actionJumpToParagraph`  |              |
 | Insert Normal Text   | `actionInsertNormalText` | Insert       |
 | Reset Paragraph      | `actionClearParagraph`   |              |

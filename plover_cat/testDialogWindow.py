@@ -337,6 +337,16 @@ class TestTextEdit(unittest.TestCase):
         cursor.setPosition(0)        
         self.assertTrue(self.editor.blockFontUnderline.isChecked())
         # not working
+    def step_insertText(self):
+        self.editor.textEdit.clear_transcript()
+        self.editor.insert_text("This is one line.")
+        self.assertEqual(self.editor.textEdit.toPlainText(), "This is one line.")
+        self.editor.textEdit.clear_transcript()
+        self.editor.textEdit.insert_text(["This is one line.", "This is the second."])
+        self.assertEqual(self.editor.textEdit.toPlainText(), "This is one line.\nThis is the second.")
+        self.editor.textEdit.clear_transcript()
+        self.editor.textEdit.insert_text(["This is one line.", "This is the second.", "This is 3?"])
+        self.assertEqual(self.editor.textEdit.toPlainText(), "This is one line.\nThis is the second.\nThis is 3?")
 
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
@@ -358,7 +368,8 @@ class testDialogWindow(QDialog, Ui_testDialog):
                     "step_CheckStyleAttr": "Text properly styled when loaded",
                     "step_ChangeStyle": "Text properly styled when style changed manually",
                     "step_ColorHighlight": "Change highlight color",
-                    "step_SwitchTranscriptsPage": "Change page param with transcript switch"}
+                    "step_SwitchTranscriptsPage": "Change page param with transcript switch",
+                    "step_insertText": "Inserting normal text"}
         last = len(self.selection)
         counter = 0
         for i, des in self.selection.items():

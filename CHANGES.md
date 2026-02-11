@@ -5,7 +5,8 @@
 New:
 
 - Media seeking to cursor position (+ documentation)
-
+- Insert text from file
+- Normal Paste: Insert text through copying from another application 
 Change:
 
 - Index text now uses a non-breaking space 

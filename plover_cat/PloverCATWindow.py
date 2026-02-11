@@ -9,17 +9,70 @@ from copy import deepcopy
 from sys import platform
 from tempfile import gettempdir, TemporaryDirectory
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtGui import (QColor, QTextCursor, QFont, QFontMetrics, QTextDocument, 
-QStandardItem, QStandardItemModel, QPageSize,
-QTextOption, QKeySequence, QPalette, QDesktopServices, QPixmap, QAction, QIcon)
-from PySide6.QtWidgets import (QMainWindow, QFileDialog, QInputDialog, QListWidgetItem, QTableWidgetItem, 
-QMessageBox, QDialog, QFontDialog, QColorDialog, QLabel, QMenu, 
-QCompleter, QApplication, QTextEdit, QPlainTextEdit, QProgressBar,  QToolButton, QDockWidget)
-from PySide6.QtMultimedia import (QMediaPlayer, QMediaRecorder, QMediaFormat, QMediaDevices, QAudioInput)
+from PySide6.QtGui import (
+    QColor,
+    QTextCursor,
+    QFont,
+    QFontMetrics,
+    QTextDocument,
+    QStandardItem,
+    QStandardItemModel,
+    QPageSize,
+    QTextOption,
+    QKeySequence,
+    QPalette,
+    QDesktopServices,
+    QPixmap,
+    QAction,
+    QIcon
+)
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QFileDialog,
+    QInputDialog,
+    QListWidgetItem,
+    QTableWidgetItem,
+    QMessageBox,
+    QDialog,
+    QFontDialog,
+    QColorDialog,
+    QLabel,
+    QMenu,
+    QCompleter,
+    QApplication,
+    QTextEdit,
+    QPlainTextEdit,
+    QProgressBar,
+    QToolButton,
+    QDockWidget,
+)
+from PySide6.QtMultimedia import (
+    QMediaPlayer,
+    QMediaRecorder,
+    QMediaFormat,
+    QMediaDevices,
+    QAudioInput,
+)
 from PySide6.QtMultimediaWidgets import QVideoWidget
-from PySide6.QtCore import Qt, QFile, QLocale, QUrl, QTime, QDateTime, QSettings, QRegularExpression, QSize, QStringListModel, QSizeF, QTimer, QThread
+from PySide6.QtCore import (
+    Qt,
+    QFile,
+    QLocale,
+    QUrl,
+    QTime,
+    QDateTime,
+    QSettings,
+    QRegularExpression,
+    QSize,
+    QStringListModel,
+    QSizeF,
+    QTimer,
+    QThread,
+)
 from PySide6.QtTextToSpeech import QTextToSpeech
+
 import plover
+
 from plover.steno import Stroke, normalize_steno
 from plover.system.english_stenotype import DICTIONARIES_ROOT, ORTHOGRAPHY_WORDLIST
 from plover.system import _load_wordlist
@@ -39,7 +92,7 @@ from plover_cat.testDialogWindow import testDialogWindow
 from plover_cat.rtf_parsing import rtf_steno, load_rtf_styles
 from plover_cat.constants import re_strokes, clippy_strokes
 from plover_cat.qcommands import BlockUserData, element_actions
-from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output, hours_to_ms
+from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output
 from plover_cat.steno_objects import index_text
 from plover_cat.spellcheck import get_sorted_suggestions, multi_gen_alternative
 from plover_cat.export_helpers import recursive_style_format, load_odf_styles
@@ -197,8 +250,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionClearParagraph.triggered.connect(lambda: self.reset_paragraph())
         self.actionCopy.triggered.connect(lambda: self.cut_steno(cut = False))
         self.actionCut.triggered.connect(lambda: self.cut_steno())
-        self.actionNormalCopy.triggered.connect(lambda: self.normal_copy())
         self.actionPaste.triggered.connect(lambda: self.paste_steno())
+        self.actionNormalCopy.triggered.connect(lambda: self.normal_copy())
+        self.actionNormalPaste.triggered.connect(lambda: self.normal_paste())
         self.menuClipboard.triggered.connect(self.paste_steno)
         self.actionJumpToParagraph.triggered.connect(self.jump_par)
         self.navigationList.itemDoubleClicked.connect(self.heading_navigation)
@@ -207,6 +261,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionInsertImage.triggered.connect(lambda: self.insert_image())
         self.actionInsertNormalText.triggered.connect(self.insert_text)
         self.actionEditFields.triggered.connect(self.edit_fields)
+        self.actionTextFromFile.triggered.connect(self.insert_file_text)
         self.menuField.triggered.connect(self.insert_field)
         self.reveal_steno_refresh.clicked.connect(self.refresh_steno_display)
         self.actionAutomaticAffixes.toggled.connect(self.enable_affix)
@@ -1991,6 +2046,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def normal_copy(self):
         self.textEdit.copy()
 
+    def normal_paste(self):
+        clipboard_contents = QtGui.QGuiApplication.clipboard().text()
+        if clipboard_contents:
+            self.textEdit.insert_text(clipboard_contents.split("\n"))
+
     def define_retroactive(self):
         """Define outline for selected text and update transcript.
         """
@@ -2114,8 +2174,26 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if not ok:
                 return
         self.display_message(f"Inserting normal text {text}.")
-        self.textEdit.insert_text(text)
+        self.textEdit.insert_text([text])
 
+    def insert_file_text(self):
+        """
+        Insert text (possibly multi-line) from plain text file.
+        """    
+
+        selected_file = QFileDialog.getOpenFileName(
+            self,
+            _("Select Text File"),
+            str(self.textEdit.file_name),
+            _("Text File (*.txt)"),
+        )
+        if not selected_file:
+            self.display_message("No file selected, aborting.")
+            return
+        self.display_message(f"Importing text content from {selected_file}")
+        with open(selected_file, "r") as f:
+            content = f.readLines()
+        self.textEdit.insert_text(content)
     def insert_image(self):
         """Insert image.
         """
