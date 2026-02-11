@@ -2190,10 +2190,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not selected_file:
             self.display_message("No file selected, aborting.")
             return
-        self.display_message(f"Importing text content from {selected_file}")
-        with open(selected_file, "r") as f:
-            content = f.readLines()
+        self.display_message(f"Importing text content from {selected_file[0]}")
+        with open(selected_file[0], "r") as f:
+            content = f.readlines()
         self.textEdit.insert_text(content)
+    
     def insert_image(self):
         """Insert image.
         """

@@ -14,19 +14,21 @@ The sections below list things that could be part of future versions. They are n
 
 ## Possible improvements
 
-- [ ] phonetic system for CART
-- [ ] text templates (non-formatted, importing)
-- [ ] pause audio when stop writing for amount of time
-- [ ] hot key mode
-- [ ] during playback, skip silence (or threshold)
-- [ ] have cursor follow playback
-- [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
-- [ ] merge/split tests with new style
+- [ ] page breaks for text and odf export formats
 - [ ] sequentially process tape to translation
     - [ ] before dialog, clean undostack and set to 50 (max undos)
     - [ ] reset undostack after tape completely and make unlimited (default) again
     - [ ] connect actionUndo to the tape dialog undo, make sure to disconnect in transcript teardown
     - [ ] clean translator after dialog close
+- [ ] phonetic system for CART
+- [ ] hot key mode
+- [ ] conditional page break
+- need QAudioProbe equivalent
+    - [ ] pause audio when stop writing for amount of time
+    - [ ] during playback, skip silence (or threshold)
+- [ ] have cursor follow playback
+- [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
+- [ ] merge/split tests with new style
 - [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
 - [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
 - [ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
@@ -40,6 +42,18 @@ The sections below list things that could be part of future versions. They are n
 - [ ] control timestamp position
 - [ ] switch between plain text and wysiwyg editors
 - [ ] custom scripts for keyboard editing shortcuts
+
+
+## Comments/Track Changes
+
+See `<office:annotation>` and `<office:annotation-end>` in the ODF spec for comments.
+
+Might be implemented as functional length 1 elements. Separate dialog pane to show all comments, move cursor to location if clicked.
+
+`<office:annotation>` has creator, date, and unique id in `office:name`.
+
+`<text:tracked-changes>` is used in ODF spec for tracked changes.
+
 
 ## Simultaneous editing and writing
 
@@ -143,3 +157,4 @@ Category of tests:
 - Load transcript, new and old format
 - Copy/paste between transcript
 - Switch between transcripts (use recent file tab)
+
