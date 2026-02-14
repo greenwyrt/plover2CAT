@@ -1047,12 +1047,12 @@ class PloverCATEditor(QTextEdit):
         self.config["enable_automatic_affix"] = False
         self.undo_stack.beginMacro(f"Insert: {" ".join(text)}")
         for ind, line in enumerate(text):
-            if line.strip():
+            if line == " " or line.strip():
                 current_cursor = self.textCursor()
                 current_block_num = current_cursor.blockNumber()
                 current_block = current_cursor.block()
                 start_pos = current_cursor.selectionStart() - current_block.position()
-                fake_steno = text_element(text = line.strip())
+                fake_steno = text_element(text = line)
                 insert_cmd = steno_insert(current_cursor, self, current_block_num, start_pos, fake_steno)
                 self.undo_stack.push(insert_cmd)
             if len(text) > 1 and ind != len(text) - 1:
