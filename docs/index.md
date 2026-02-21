@@ -4,28 +4,28 @@ plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 
 ```{toctree}
 :maxdepth: 1
-:caption: Getting Started
-Install Plover <tutorials/install-plover.md>
-Install Plover2CAT as a Plover plugin <tutorials/install-plover2cat.md>
-Create new transcript in Plover2CAT <tutorials/create-transcript.md>
-Write in the Plover2CAT editor <tutorials/writing-editor.md>
-Export to text and Open Document Format <tutorials/export-file.md>
-```
-
-## Next Steps
-
-The user should know what stenography is at this point, and can set up a machine / keyboard for writing through Plover before exploring and using the features of plover2CAT.
-
-How to guides for plover2CAT's features (summarized below) can be accessed on the How To page. More in-depth overviews of the editor layout and menu items are located in References. 
-
-```{toctree}
-:maxdepth: 1
 :caption: Contents
+Getting Started <tutorials/index.md>
 How To ___ <howto/index.md>
 Reference <reference/index.md>
 Development <discussion/development.md>
 Code <api/index.md>
 ```
+
+New users are recommended to follow the [Getting Started](tutorials/index.md) tutorials first, which cover installation of Plover, Plover2CAT, writing into the editor, adding formatting, and exporting the transcript.
+
+## Get Started
+
+Start with #3 if you already have Plover installed and know how to install Plover2CAT from the command line.
+
+1. [Install Plover](tutorials/install-plover.md)
+2. [Install Plover2CAT as a Plover plugin](tutorials/install-plover2cat.md)
+3. [Create new transcript in Plover2CAT](tutorials/create-transcript.md)
+4. [Write in the Plover2CAT editor](tutorials/writing-editor.md)
+5. [Export to text and Open Document Format](tutorials/export-file.md)
+
+
+How to guides for plover2CAT's features (summarized below) can be accessed on the [How To](howto/index.md) page. More in-depth overviews of the editor layout and menu items are located in References. 
 
 
 ```{include} ../README.md
@@ -35,14 +35,23 @@ Code <api/index.md>
 
 ## Getting help
 
-Two ways: 1) Send a message over Discord. I am plants#4820 or 2) Open an issue on the [Github repository](https://github.com/greenwyrt/plover2CAT/issues).
+### Read the documentation
+
+The [how to ___](howto/index.md) articles contain instructions on how to use different features of Plover2CAT.
+
+The [reference](reference/index.md) articles contain useful information on how Plover2CAT data is organized and saved. 
+
+### Contact information
+
+1. Send a message over Discord. I am plants#4820
+2. Open an issue on the [Github repository](https://github.com/greenwyrt/plover2CAT/issues)
+3. Email greenwyrt@gmail.com
 
 Helpful things to do: 
 - Go to `Help` --> `About` to view the version number.
 - Compress and attach the entire transcript directory, or the `*.tape` and `*.transcript` files. 
 - If possible, add steps to reproduce the problem. 
 - Add the log output from running Plover (debug) and attempt to cause the exact error.
-
 
 ## Development and Contribute
 

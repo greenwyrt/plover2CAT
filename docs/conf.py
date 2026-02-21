@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'plover2CAT'
-copyright = '2024, plants'
+copyright = '2026, plants'
 author = 'plants'
-release = '3.0.0'
+release = '4.0.7'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -24,7 +24,22 @@ source_suffix = {
     '.md': 'markdown',
 }
 
-autodoc_mock_imports = ["plover", "PySide6", "dulwich", "plover_cat.plover_cat_ui", "plover_cat.affix_dialog_ui", "plover_cat.caption_dialog_ui", "plover_cat.create_dialog_ui", "plover_cat.field_dialog_ui", "plover_cat.index_dialog_ui", "plover_cat.recorder_dialog_ui", "plover_cat.shortcut_dialog_ui", "plover_cat.suggest_dialog_ui", "plover_cat.tape_dialog_ui", "plover_cat.test_dialog_ui"]
+autodoc_mock_imports = [
+    "plover",
+    "PySide6",
+    "dulwich",
+    "plover_cat",
+    "plover_cat.affix_dialog_ui",
+    "plover_cat.caption_dialog_ui",
+    "plover_cat.create_dialog_ui",
+    "plover_cat.field_dialog_ui",
+    "plover_cat.index_dialog_ui",
+    "plover_cat.recorder_dialog_ui",
+    "plover_cat.shortcut_dialog_ui",
+    "plover_cat.suggest_dialog_ui",
+    "plover_cat.tape_dialog_ui",
+    "plover_cat.test_dialog_ui",
+]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

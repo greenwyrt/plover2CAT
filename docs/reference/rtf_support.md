@@ -2,6 +2,10 @@
 
 Plover2CAT supports importing and exporting in RTF/CRE (Rich Text Format Court Reporting Extension) though only for a subset of features.
 
+The last capture of the original RTF spec exists at:
+
+https://web.archive.org/web/20201017075356/http://www.legalxml.org/workgroups/substantive/transcripts/cre-spec.htm
+
 ## RTF/CRE import
 
 Import of RTF/CRE transcript files produced by other CAT software is not fully supported (due to different companies using their vendor specific flags).

@@ -2,6 +2,21 @@
 
 Plover2CAT is a plugin for Plover, the open-source stenography engine. If the only user requirement is to write steno on the computer, this plugin is not needed as Plover is more than sufficient. Plover2CAT supplements Plover by providing some features of a computer-aided-transcription (CAT) program.
 
+## Get Started
+
+Documentation is linked online [here](https://plover2cat.readthedocs.io/en/latest/)
+
+Start with #3 if you already have Plover installed and know how to install Plover2CAT from the command line.
+
+1. [Install Plover](docs/tutorials/install-plover.md)
+2. [Install Plover2CAT as a Plover plugin](docs/tutorials/install-plover2cat.md)
+3. [Create new transcript in Plover2CAT](docs/tutorials/create-transcript.md)
+4. [Write in the Plover2CAT editor](docs/tutorials/writing-editor.md)
+5. [Export to text and Open Document Format](docs/tutorials/export-file.md)
+
+Then review the available [how to ____](docs/README.md) articles.
+
+
 ## Features Overview
 
 - a rich text editor with steno hidden underneath:
@@ -52,20 +67,6 @@ This plugin is built on Plover and inspired by [plover_cat](https://github.com/L
 
 New features are generally added over time when requested.
 
-
-## Get Started
-
-Documentation is linked online [here](https://plover2cat.readthedocs.io/en/latest/)
-
-Start with #3 if you already have Plover installed and know how to install Plover2CAT from the command line.
-
-1. [Install Plover](docs/tutorials/install-plover.md)
-2. [Install Plover2CAT as a Plover plugin](docs/tutorials/install-plover2cat.md)
-3. [Create new transcript in Plover2CAT](docs/tutorials/create-transcript.md)
-4. [Write in the Plover2CAT editor](docs/tutorials/writing-editor.md)
-5. [Export to text and Open Document Format](docs/tutorials/export-file.md)
-
-Then review the available [how to ____](docs/README.md) articles.
 
 ## Getting help
 
