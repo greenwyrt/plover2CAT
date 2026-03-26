@@ -12,37 +12,6 @@ Transcript data formats <transcriptdata.md>
 
 The sections below list things that could be part of future versions. They are not listed in order of priority.
 
-## Possible improvements
-
-- [ ] page breaks for text and odf export formats
-- [ ] sequentially process tape to translation
-    - [ ] before dialog, clean undostack and set to 50 (max undos)
-    - [ ] reset undostack after tape completely and make unlimited (default) again
-    - [ ] connect actionUndo to the tape dialog undo, make sure to disconnect in transcript teardown
-    - [ ] clean translator after dialog close
-- [ ] phonetic system for CART
-- [ ] hot key mode
-- [ ] conditional page break
-- need QAudioProbe equivalent
-    - [ ] pause audio when stop writing for amount of time
-    - [ ] during playback, skip silence (or threshold)
-- [ ] have cursor follow playback
-- [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
-- [ ] merge/split tests with new style
-- [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
-- [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
-- [ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
-- [ ] a/an search
-- [ ] replace punctuation as needed, include "--" and "..."
-- [ ] diff compare versions
-- [ ] downgrade element, use `el.__class__.__mro__[1]()` which returns new instance, construct element from dict, only do if `el.__class__.__name__` is not "text_element"
-- [ ] other things to add to insert menu, checkable for export in supported format (table of contents, table of figures/exhibits), number ranges for autonumbering, special characters (more dialog)
-- [ ] different time code formats
-- [ ] control line numbering position
-- [ ] control timestamp position
-- [ ] switch between plain text and wysiwyg editors
-- [ ] custom scripts for keyboard editing shortcuts
-
 
 ## Comments/Track Changes
 
@@ -75,6 +44,10 @@ Alternatively, set up separate threads to digest and report back the counter dic
 The log messages are not formatted consistently or easy to decipher.
 
 Then one could reconstruct transcript from logs.
+
+## Task manager
+
+Hook into either the action logs to replay
 
 ## RTF/CRE
 
@@ -157,4 +130,73 @@ Category of tests:
 - Load transcript, new and old format
 - Copy/paste between transcript
 - Switch between transcripts (use recent file tab)
+
+## Docstrings 
+
+Functions and class methods should be fully documented. 
+
+`PloverCATWindow` should accept arguments for methods that need dialog input. Modification should be handed off to `TextEditor` 
+
+## Possible improvements list
+
+- [ ] standardize log debug and info messages with statusbar messages
+    - info messages should also be json parsable
+
+- [ ] menu items should generate info log messages
+
+- [ ] user preferences file
+    - [ ] switch from saving directly in system settings
+    - [ ] can import initially
+    - [ ] end goal: multiple profiles for same computer
+    - [ ] some `QSettings` should remain so, others into user profile
+
+- [ ] add to reveal steno view
+    - version with show strokes
+    - link to cursor
+
+- [ ] media controls do not collapse well, should be using flowLayout to move duration and track to new
+
+- [ ] should manual backspace collapse paragraphs
+
+- [ ] page breaks for text and odf export formats
+    - unicode ↡ is used for line feed
+    - for odf
+        - needs `<office:text text:use-soft-page-breaks="true">` in the body
+        - odf uses fo-break-before/fo-break after with a custom style for line before/after the page break
+    - for text
+        - need as many new lines as possible before/after paragraph
+        - within `format_text`, do regex for ↡, and check if it is page-break element
+        - create empty \n lines as needed
+    - for rtf, insert \page command
+    - for srt, remove page-break element
+ 
+- [ ] conditional page break
+- [ ] sequentially process tape to translation
+    - [ ] before dialog, clean undostack and set to 50 (max undos)
+    - [ ] reset undostack after tape completely and make unlimited (default) again
+    - [ ] connect actionUndo to the tape dialog undo, make sure to disconnect in transcript teardown
+    - [ ] clean translator after dialog close
+- [ ] phonetic system for CART
+- [ ] hot key mode
+- need QAudioProbe equivalent
+    - [ ] pause audio when stop writing for amount of time
+    - [ ] during playback, skip silence (or threshold)
+- [ ] have cursor follow playback
+- [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
+- [ ] merge/split tests with new style
+- [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
+- [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes
+- [ ] change `__getitem__(key)` behaviour in `element_collection` to return the element, not `element_collection` instance, mimics default behaviour of list
+- [ ] a/an search
+- [ ] replace punctuation as needed, include "--" and "..."
+- [ ] diff compare versions
+- [ ] downgrade element, use `el.__class__.__mro__[1]()` which returns new instance, construct element from dict, only do if `el.__class__.__name__` is not "text_element"
+- [ ] other things to add to insert menu, checkable for export in supported format (table of contents, table of figures/exhibits), number ranges for autonumbering, special characters (more dialog)
+- [ ] different time code formats
+- [ ] control line numbering position
+- [ ] control timestamp position
+- [ ] switch between plain text and wysiwyg editors
+- [ ] custom scripts for keyboard editing shortcuts
+
+
 
