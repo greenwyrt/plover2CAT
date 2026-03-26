@@ -119,6 +119,11 @@ class text_element(UserString):
     def to_text(self):
         """Return "text" representation as imagined for ``QTextEdit``."""
         return(self.data)
+    def to_export(self):
+        """
+        Return text string for exported formats
+        """
+        return(self.to_text())
     def to_rtf(self):
         """Return string representation with control groups from RTF/CRE spec as necessary."""
         time_string = datetime.strptime(self.time, "%Y-%m-%dT%H:%M:%S.%f").strftime('%H:%M:%S')      
@@ -154,6 +159,26 @@ class dummy_element(text_element):
         """type of element, ```dummy```"""
     def length(self):
         return(1)
+
+class pagebreak_element(text_element):
+    """Page break element for editor"""
+    def __init__(self, **kargs):
+        super().__init__(**kargs)
+        self.data = "\u21a1"
+        self.element = "pagebreak"
+    def __add__(self, other):
+        return NotImplemented
+    def length(self):
+        return(1)
+    def to_display(self):
+        return("\U000021A1\n\n")
+    def to_rtf(self):
+        string = write_command("page")
+        return(string)
+    def to_text(self):
+        return("\u21a1Page Break\u21a1")
+    def to_odt(self, paragraph, document):
+        pass
 
 class stroke_text(text_element):
     """Stroke element used in editor.
@@ -587,6 +612,8 @@ class element_factory:
                 element = automatic_text()
             case "index":
                 element = index_text()
+            case "pagebreak":
+                element = pagebreak_element()
         element.from_dict(element_dict)
         return(element)
 

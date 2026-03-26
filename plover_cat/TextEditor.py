@@ -177,6 +177,14 @@ class PloverCATEditor(QTextEdit):
         super(PloverCATEditor, self).focusInEvent(e)
 
     def keyPressEvent(self, event):
+        """Control and filter keyboard input
+
+        :param event: keyPressEvent
+
+        Normal letter keys have to be suppressed when Plover output is enabled.
+        Same with Backspace key.
+        Deletion is allowed even when output is enabled.
+        """
         if event.key() == Qt.Key_Delete:
             self.mock_del()
         elif event.key() == Qt.Key_Backspace:

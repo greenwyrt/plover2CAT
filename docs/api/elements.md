@@ -28,14 +28,15 @@ Indexing of class ie `collection[1]` is used to access each element of the colle
 
 1.  Determine element functional length
 2.  Add any new attributes, check if ODF spec has corresponding equivalent, and use same names if possible
-3.  Create 
-    1. text representation and
-    2. letter to use in steno display
-4.  Check if RTF spec or RTF/CRE spec has corresponding equivalent, then create formatted string by overriding, otherwise, just simple text
-5.  Create ODF element by overriding, otherwise just simple text
+3.  Create:
+    1. QTextEdit representation (`to_text`),
+    2. letter to use in steno display (`to_display`),
+    3. export text (if different from text) (`to_export`)
+4.  Check if RTF spec or RTF/CRE spec has corresponding equivalent, then create formatted string by overriding, otherwise, just simple text (`to_rtf`)
+5.  Create ODF element by overriding, otherwise just simple text (`to_odf`)
 6.  Determine if element needs updating methods or not.
 7.  Add to `element_factory` so able to generate element
-8.  Create `QUndoCommand` if necessary, and add to `element_action` generator
+8.  Create `QUndoCommand` if necessary, and add to `element_actions` generator
 9.  Create GUI/shortcuts/functions for insertion
 
 ## Element Classes

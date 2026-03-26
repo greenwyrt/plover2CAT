@@ -50,16 +50,31 @@ class documentWorker(QObject):
         for block_num, block_data in self.document.items():
             style_name = block_data["style"]
             block_style = {
-                    "paragraphproperties": recursive_style_format(self.styles, style_name),
-                    "textproperties": recursive_style_format(self.styles, style_name, prop = "textproperties")
-                }
-            page_hspan = inch_to_spaces(self.config["page_width"]) - inch_to_spaces(self.config["page_left_margin"]) - inch_to_spaces(self.config["page_right_margin"])
-            page_vspan = inch_to_spaces(self.config["page_height"], 6) - inch_to_spaces(self.config["page_top_margin"], 6) - inch_to_spaces(self.config["page_bottom_margin"], 6)
+                "paragraphproperties": recursive_style_format(self.styles, style_name),
+                "textproperties": recursive_style_format(
+                    self.styles, style_name, prop="textproperties"
+                ),
+            }
+            page_hspan = (
+                inch_to_spaces(self.config["page_width"])
+                - inch_to_spaces(self.config["page_left_margin"])
+                - inch_to_spaces(self.config["page_right_margin"])
+            )
+            page_vspan = (
+                inch_to_spaces(self.config["page_height"], 6)
+                - inch_to_spaces(self.config["page_top_margin"], 6)
+                - inch_to_spaces(self.config["page_bottom_margin"], 6)
+            )
             if self.config["page_max_char"] != 0:
                 page_hspan = self.config["page_max_char"]
             if self.config["page_max_line"] != 0:
                 page_vspan = self.config["page_max_line"]
-            el_list = element_collection([ef.gen_element(element_dict = i, user_field_dict = self.user_field_dict) for i in block_data["strokes"]])
+            el_list = element_collection(
+                [
+                    ef.gen_element(element_dict=i, user_field_dict=self.user_field_dict)
+                    for i in block_data["strokes"]
+                ]
+            )
             par_dict = format_text(el_list, block_style, page_hspan, line)
             doc_lines.update(par_dict)
             line = line + len(par_dict)
