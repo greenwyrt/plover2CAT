@@ -972,7 +972,7 @@ class PloverCATEditor(QTextEdit):
         action = "Cut" if cut else "Copy"
         current_cursor = self.textCursor()
         if not current_cursor.hasSelection():
-            self.send_message.emit("No text selected, select text for {action}")
+            self.send_message.emit(f"No text selected, select text for {action}")
             return False
         current_block_num = current_cursor.blockNumber()
         current_block = self.document().findBlockByNumber(current_block_num)
