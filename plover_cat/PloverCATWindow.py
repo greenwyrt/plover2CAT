@@ -518,23 +518,23 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_block_steno(block_strokes)
 
     def refresh_editor_styles(self):
-        """Reapply styles to every paragraph.
-        """
-        if self.textEdit.document().blockCount() > 1000:
-            user_choice = QMessageBox.question(self, "Plover2CAT", f"There are {self.textEdit.document().blockCount()} paragraphs. Style refreshing may take some time. Continue?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        """Reapply styles to every paragraph."""
+        if self.textEdit.document().blockCount() > 200:
+            user_choice = QMessageBox.question(
+                self,
+                "Plover2CAT",
+                f"There are {self.textEdit.document().blockCount()} paragraphs. Style refreshing may take some time. Continue?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
             if user_choice == QMessageBox.No:
                 return
         self.textEdit.gen_style_formats()
-        # self.progressBar = QProgressBar(self)
-        # self.progressBar.setMaximum(self.textEdit.document().blockCount())
-        # self.progressBar.setFormat("Re-style paragraph %v")
-        # self.statusBar.addWidget(self.progressBar)
-        # self.progressBar.show()
         self.mainTabs.hide()
+        self.textEdit.save()
         self.textEdit.setUpdatesEnabled(False)
         self.textEdit.document().blockSignals(True)
         self.textEdit.blockSignals(True)
-        # todo: make tempfile, use with, then autosave to tempfile, then reload from tempfile with load_transcript
         with TemporaryDirectory() as f:
             temp_path = pathlib.Path(f, "temp.transcript")
             self.textEdit.save_transcript(temp_path)
@@ -2843,7 +2843,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         print(document_text)
         if document_text.strip():            
             self.tts_instance.enqueue(document_text)
-
 
     def tts_setup(self):
         """Set up TTS engine and connections"""

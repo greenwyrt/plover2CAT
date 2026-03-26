@@ -1,5 +1,13 @@
 # CHANGES
 
+## Ver 4.0.7
+
+Change:
+- Revert max paragraphs before styling warning to 200
+
+Bugfix:
+- Save transcript before refresh styles
+- Fix failed build of docs on readthedocs
 
 ## Ver 4.0.6
 
