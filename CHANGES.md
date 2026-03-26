@@ -9,6 +9,7 @@ Bugfix:
 - Save transcript before refresh styles
 - Fix failed build of docs on readthedocs
 - Fix string template for cut/copy
+- Stop both recorder and media player before closing transcript
 
 ## Ver 4.0.6
 

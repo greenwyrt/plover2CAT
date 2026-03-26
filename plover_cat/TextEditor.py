@@ -410,8 +410,10 @@ class PloverCATEditor(QTextEdit):
                 log.debug("Abort project close because of unsaved changes.")
                 return False
         self.restore_dictionary_from_backup(self.engine)
-        if self.recorder.recorderState() == QMediaRecorder.RecordingState:
+        if self.recorder.recorderState() != QMediaRecorder.StoppedState:
             self.recorder.stop()
+        if self.player.playbackState() != QMediaPlayer.StoppedState:
+            self.player.stop() 
         return True        
 
     def clear_transcript(self):
