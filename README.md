@@ -6,6 +6,8 @@ Plover2CAT is a plugin for Plover, the open-source stenography engine. If the on
 
 Documentation is linked online [here](https://plover2cat.readthedocs.io/en/latest/)
 
+Stable release is on [PyPI](https://pypi.org/project/plover2cat/) while development is at [GitHub](https://github.com/greenwyrt/plover2CAT)
+
 Start with #3 if you already have Plover installed and know how to install Plover2CAT from the command line.
 
 1. [Install Plover](docs/tutorials/install-plover.md)

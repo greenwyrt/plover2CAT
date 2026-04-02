@@ -9,6 +9,8 @@ from plover_cat.PloverCATWindow import PloverCATWindow
 
 
 class PloverCAT(Tool):
+    __doc__ = "Write and create transcripts."
+    
     TITLE = "Plover2CAT"
     ROLE = "plover2cat"
     ICON = ":/resources/icon.svg"
