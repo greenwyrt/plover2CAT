@@ -650,6 +650,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionSaveAs.setEnabled(not value)
         self.actionOpenTranscriptFolder.setEnabled(not value)
         self.actionClose.setEnabled(not value)
+        # self.actionShowAllCharacters.setEnabled(not value)
 
     def audio_menu_enabling(self, value = True):
         """Disable (or enable) GUI options for when audio is loaded and make signal/slot connections.
@@ -860,7 +861,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def change_window_font(self):
         """Change window font.
         """
-        font, valid = QFontDialog.getFont()
+        valid, font = QFontDialog.getFont()
         if valid:
             self.setFont(font)
             log.debug("User set window font.")   
@@ -914,6 +915,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def show_invisible_char(self):
         """Show/hide invisible chars in current transcript.
         """
+        if not self.textEdit:
+            return
         doc_options = self.textEdit.document().defaultTextOption()
         if self.actionShowAllCharacters.isChecked():
             self.display_message("User enabled show invisible characters.")      

@@ -7,11 +7,13 @@ Change:
 
 Bugfix:
 - Save transcript before refresh styles
-- Fix failed build of docs on readthedocs
-- Fix string template for cut/copy
+- Failed build of docs on readthedocs
+- String template for cut/copy
 - Stop both recorder and media player before closing transcript
-- Fix refresh_par_styles failing on empty paragraph (likely cause of #24)
-- Fix error on closing transcript after closing video widget
+- `refresh_par_styles` failing on empty paragraph (likely cause of #24)
+- Error on closing transcript after closing video widget (qt already garbage collected)
+- Set font for window
+- Do not show invisible characters if no transcript is open
 
 
 ## Ver 4.0.6
