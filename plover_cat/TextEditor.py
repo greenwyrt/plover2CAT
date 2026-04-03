@@ -399,16 +399,20 @@ class PloverCATEditor(QTextEdit):
             hide_file(str(transcript))
             self.send_message.emit("Autosave complete.")
          
-    def close_transcript(self):
-        """Clean up transcript for close."""
-        if not self.undo_stack.isClean():
-            user_choice = QMessageBox.question(self, "Plover2CAT", "Are you sure you want to close without saving changes?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            if user_choice == QMessageBox.Yes:
-                log.debug("User choice to close without saving")
-                pass
-            else:
-                log.debug("Abort project close because of unsaved changes.")
-                return False
+    def close_transcript(self, force = False):
+        """Clean up transcript for close.
+        
+        :param bool force: force close, even if unsaved changes exist
+        """
+        if not force:
+            if not self.undo_stack.isClean():
+                user_choice = QMessageBox.question(self, "Plover2CAT", "Are you sure you want to close without saving changes?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                if user_choice == QMessageBox.Yes:
+                    log.debug("User choice to close without saving")
+                    pass
+                else:
+                    log.debug("Abort project close because of unsaved changes.")
+                    return False
         self.restore_dictionary_from_backup(self.engine)
         if self.recorder.recorderState() != QMediaRecorder.StoppedState:
             self.recorder.stop()
@@ -756,15 +760,23 @@ class PloverCATEditor(QTextEdit):
         """
         if not block:
             block = self.textCursor().block()
-        block_data = block.userData()["strokes"]
-        block_style = block.userData()["style"]
+        if block.userData():
+            block_data = block.userData()
+            block_style = block.userData()["style"]
+            stroke_data = block.userData()["strokes"]
+        else:
+            block_data = BlockUserData()  
+            block_style = block_data["style"]    
+            stroke_data = block_data["strokes"]  
+        if not block_style:
+            block_style = list(self.par_formats.keys())[0]
         current_cursor = self.textCursor()          
         current_cursor.setPosition(block.position())
         current_cursor.movePosition(QTextCursor.StartOfBlock)
         current_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
         current_cursor.setBlockFormat(self.par_formats[block_style])
         current_cursor.movePosition(QTextCursor.StartOfBlock)
-        for el in block_data:
+        for el in stroke_data:
             current_cursor.setPosition(current_cursor.position() + len(el), QTextCursor.KeepAnchor)
             temp_format = self.txt_formats[block_style]
             if el.element != "image":

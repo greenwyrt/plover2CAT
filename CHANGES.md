@@ -10,6 +10,9 @@ Bugfix:
 - Fix failed build of docs on readthedocs
 - Fix string template for cut/copy
 - Stop both recorder and media player before closing transcript
+- Fix refresh_par_styles failing on empty paragraph (likely cause of #24)
+- Fix error on closing transcript after closing video widget
+
 
 ## Ver 4.0.6
 

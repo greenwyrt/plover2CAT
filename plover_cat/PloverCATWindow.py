@@ -1559,8 +1559,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.textEdit.player.stop()
             self.audio_menu_enabling(False)
         if self.video:
-            self.videoLayout.removeWidget(self.video)
-            self.video.deleteLater()
+            try:
+                self.videoLayout.removeWidget(self.video)
+                self.video.deleteLater()
+            except RuntimeError as e:
+                log.debug(e)
         
     def action_close(self):
         """Close window after saving settings and checking for multiple transcripts.
@@ -1625,8 +1628,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not selected_name:
             return
         self.display_message(f"Creating project files at {str(selected_name)}")
-        self.textEdit.save_as(selected_name)
         self.textEdit.undo_stack.setClean()
+        self.textEdit.save_as(selected_name)
         success = self.close_file()
         if success:
             self.open_file(str(selected_name))
