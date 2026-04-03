@@ -4,6 +4,7 @@
 
 Change:
 - Revert max paragraphs before styling warning to 200
+- Backspace will now merge paragraphs if place at beginning of second paragraph and output is disabled.
 
 Bugfix:
 - Save transcript before refresh styles

@@ -15,7 +15,7 @@ There are several ways to insert normal text that does not have associated steno
 
 The keys `Enter`/`Return` cannot be used to create a new paragraph. Use `Split Paragraph` if necessary.
 
-`Backspace` will remove the character before the cursor, but only if the cursor is not at the start of the paragraph. In other words, `Backspace` cannot be used to combine paragraphs. Use `Merge Paragraphs` if necessary.
+`Backspace` will remove the character before the cursor, but only if the cursor is not at the start of the paragraph. `Backspace` will merge the present paragraph with the preceding one if at the start of the paragraph.
 
 ## Insert Normal Text
 

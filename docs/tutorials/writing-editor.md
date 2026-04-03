@@ -24,7 +24,7 @@ Click on the Paper Tape tab on the left. A paper tape similar to the one that Pl
 
 Now look to the right side. Click on the headings within the toolbar to open them. Open the "Style" page. Here, you will see that the present paragraph has the "Normal" style. The "Style Settings" below show the properties for the style. You can see that the font for the normal style is Courier New, at 12pt size, the text is left-aligned and so on. Scrolling down on the page, you can see that the "Normal" style has no parent style set, and that the "Next Style" is set to Normal.
 
-> Note: New lines in Plover should be set as \n and not {#Return}. Use the R-R stroke with \n to start a new paragraph.
+> Note: New lines in Plover should be set as `\n` and not {#Return}. Use the R-R stroke with \n to start a new paragraph. 
 
  When you create the second paragraph, you will notice that the paragraph style is still Normal.
 

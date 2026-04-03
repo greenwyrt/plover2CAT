@@ -1258,10 +1258,11 @@ class PloverCATEditor(QTextEdit):
             return      
         current_cursor = self.textCursor()
         if current_cursor.atBlockStart():
-            return
-        current_cursor.movePosition(QTextCursor.PreviousCharacter)
-        self.setTextCursor(current_cursor)
-        self.mock_del()
+            self.merge_paragraphs()
+        else:
+            current_cursor.movePosition(QTextCursor.PreviousCharacter)
+            self.setTextCursor(current_cursor)
+            self.mock_del()
 
     def navigate_to(self, block_number):
         """Move cursor to beginning of a block by number.
