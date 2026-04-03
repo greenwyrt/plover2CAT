@@ -24,8 +24,8 @@ class PloverCAT(Tool):
         self.layout.addWidget(self.everything)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.layout)
-        # what does this do?
-        # self.finished.connect(lambda: None)
+        self.restore_state()
+        self.finished.connect(self.save_state)
 
     def keyPressEvent(self, event):
         if event.key() != Qt.Key_Escape:
