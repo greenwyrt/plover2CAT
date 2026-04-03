@@ -70,6 +70,9 @@
   <property name="dockNestingEnabled">
    <bool>true</bool>
   </property>
+  <property name="dockOptions">
+   <set>QMainWindow::DockOption::AllowNestedDocks|QMainWindow::DockOption::AllowTabbedDocks|QMainWindow::DockOption::AnimatedDocks|QMainWindow::DockOption::VerticalTabs</set>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_24">
     <item>
