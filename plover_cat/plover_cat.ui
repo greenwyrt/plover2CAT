@@ -287,6 +287,8 @@
     <addaction name="actionPaperTapeFont"/>
     <addaction name="menuDocks"/>
     <addaction name="actionEditMenuShortcuts"/>
+    <addaction name="actionOpaqueness"/>
+    <addaction name="actionStayOnTop"/>
    </widget>
    <widget class="QMenu" name="menuDictionary">
     <property name="title">
