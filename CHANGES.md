@@ -1,6 +1,10 @@
 # CHANGES
 
-## Ver 4.0.7
+## Ver 4.1.0
+
+New: 
+
+- Media sync to position in tape (+ documentation)
 
 Change:
 - Revert max paragraphs before styling warning to 200

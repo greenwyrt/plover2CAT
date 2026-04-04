@@ -1302,8 +1302,9 @@ class PloverCATEditor(QTextEdit):
         :param int milliseconds: position
         """    
         adjusted_time = milliseconds + self.audio_delay
-        self.player.setPosition(adjusted_time)
-        self.send_message.emit("Media position changed.")
+        if adjusted_time < self.player.duration():
+            self.player.setPosition(adjusted_time)
+            self.send_message.emit("Media position changed.")
 
     def load_audio(self, path):
         """Load media file.

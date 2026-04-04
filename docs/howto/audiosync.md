@@ -6,10 +6,18 @@ Plover2CAT will keep track of the media time in addition to the real time of a s
 
 To add an offset to the recorded time, change the time offset located in the Media Controls dock. By default, the offset is `0ms`. This value can be changed using the arrow buttons in the box. When an offset is set, the recorded media time will be set off by the millisecond value. A positive offset value means the recorded time is x milliseconds behind than the real time, while a negative offset means the recorded time is x milliseconds ahead of the real time.
 
-## Seeking to cursor position
+## Sync to cursor position
 
 With **Media > Sync Media Position**, Plover2CAT will move the media track to the closest available time from the location of the text cursor. 
 
-If the media is playing when this is used, the media will start playing from the new position. For paused or stopped media, the media will not automatically play.
+
+## Sync to tape
+
+Using the Locate button in the Paper Tape, Plover2CAT will move the media track to the audio time of the selected line in addition to moving the cursor to the paragraph location.
+
+
+## Details
+
+If the media is playing when syncing to cursor position or tape is used, the media will start playing from the new position. For paused or stopped media, the media will not automatically play.
 
 Plover2CAT will jump to a time offset. This is controlled by the time offset in the Media Controls dock. When an offset is positive, Plover2CAT will move an additional x milliseconds from the media time. If an offset is negative, Plover2CAT will move a additional x milliseconds ahead of the media time. 

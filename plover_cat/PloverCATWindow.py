@@ -92,7 +92,7 @@ from plover_cat.testDialogWindow import testDialogWindow
 from plover_cat.rtf_parsing import rtf_steno, load_rtf_styles
 from plover_cat.constants import re_strokes, clippy_strokes
 from plover_cat.qcommands import BlockUserData, element_actions
-from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output
+from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output, hours_to_ms
 from plover_cat.steno_objects import index_text
 from plover_cat.spellcheck import get_sorted_suggestions, multi_gen_alternative
 from plover_cat.export_helpers import recursive_style_format, load_odf_styles
@@ -1131,9 +1131,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         stroke_cursor = self.strokeList.textCursor()
         edit_cursor = self.textEdit.textCursor()
         self.textEdit.blockSignals(True)
+        stroke_cursor.movePosition(QTextCursor.StartOfBlock)
+        stroke_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
         try:
-            stroke_cursor.movePosition(QTextCursor.StartOfBlock)
-            stroke_cursor.movePosition(QTextCursor.EndOfBlock, QTextCursor.KeepAnchor)
             cursor_position_stroke = stroke_cursor.selectedText().split("|")[2].split(",")
             par = int(cursor_position_stroke[0].replace("(", ""))
             col = int(cursor_position_stroke[1].replace(")", ""))
@@ -1147,6 +1147,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         except Exception:
             pass
         self.textEdit.blockSignals(False)
+        self.sync_media_tape(stroke_cursor.selectedText())
 
     def text_to_stroke_move(self):
         """Locate stroke line in tape based on cursor position in transcript.
@@ -2835,6 +2836,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         audio_time = self.textEdit.get_audio_timestamp_position()
         if audio_time:
+            self.textEdit.set_audio_time(audio_time)
+
+    def sync_media_tape(self, tape_line):
+        """Sync media to time at selected tape line
+        """
+        audio_pos = tape_line.split("|")[1]
+        if audio_pos:
+            audio_time = hours_to_ms(audio_pos)
+            log.debug(f"Trying to sync media to {audio_time}")
             self.textEdit.set_audio_time(audio_time)
 
     def tts_synthesize(self):

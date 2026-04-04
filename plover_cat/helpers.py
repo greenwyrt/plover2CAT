@@ -63,7 +63,7 @@ def hours_to_ms(hour_str):
     """Convert formatted hour:min:sec.milli to milliseconds."""
     hours, minutes, sec_ms = hour_str.split(":")
     seconds, milliseconds = sec_ms.split(".")
-    total_ms = milliseconds + seconds * 1000 + minutes * 60000 + hours * 3600000
+    total_ms = int(milliseconds) + int(seconds) * 1000 + int(minutes) * 60000 + int(hours) * 3600000
     return(total_ms)
 
 def in_to_pt(inch):
