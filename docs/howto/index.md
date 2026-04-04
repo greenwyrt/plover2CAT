@@ -35,6 +35,8 @@ Set up Text-to-Speech <tts.md>
 Organize, show, and hide docks <dockmanagement.md>
 Organize, show, and hide toolbars <toolbarmanagement.md>
 Set window font <windowfont.md>
+Set window opaqueness <windowopaqueness.md>
+Set window on top <windowontop.md>
 Set background color <backgroundcolor.md>
 Set highlight color <highlightcolor.md>
 Set paper tape font <papertapefont.md>

@@ -293,6 +293,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionWindowFont.triggered.connect(lambda: self.change_window_font())
         self.actionBackgroundColor.triggered.connect(lambda: self.change_backgrounds())
         self.actionShowAllCharacters.triggered.connect(lambda: self.show_invisible_char())
+        self.actionOpaqueness.triggered.connect(self.change_window_opaqueness)
+        self.actionStayOnTop.toggled.connect(self.change_stay_on_top)
         self.actionPaperTapeFont.triggered.connect(lambda: self.change_tape_font())
         self.menuHighlightColors.triggered.connect(self.change_highlight_colors)
         ## tools
@@ -925,6 +927,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.display_message("User disabled show invisible characters.")      
             doc_options.setFlags(doc_options.flags() & ~QTextOption.ShowTabsAndSpaces & ~QTextOption.ShowLineAndParagraphSeparators)
         self.textEdit.document().setDefaultTextOption(doc_options)
+
+    def change_window_opaqueness(self):
+        log.debug("Setting Opacity.")
+        input, ok = QInputDialog().getInt(self, "Set Opaque", "0-100 (Invisible to Opaque)", 100, 0, 100)
+        if ok:
+            self.parent().setWindowOpacity(input / 100)
+
+    def change_stay_on_top(self, value):
+        log.debug("Setting stay on top.")
+        if value:
+            self.parent().setWindowFlags(self.parent().windowFlags() | Qt.WindowStaysOnTopHint)
+        else:
+            self.parent().setWindowFlags(self.parent().windowFlags() & ~Qt.WindowStaysOnTopHint)
+        self.parent().show()
 
     def calculate_space_width(self, font):
         """Calculate approximate width of a font character in inches and set in GUI.
@@ -2388,6 +2404,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         cursor.movePosition(QTextCursor.Start)
         search_status = True
         log.debug("Search all, starting from beginning.")
+        self.searchResults.clear()
         while search_status:
             search_status = self.search()
             if search_status is None:

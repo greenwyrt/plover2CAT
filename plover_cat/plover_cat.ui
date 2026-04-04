@@ -3963,6 +3963,19 @@ position.</string>
     <string>Page Break</string>
    </property>
   </action>
+  <action name="actionOpaqueness">
+   <property name="text">
+    <string>Opaqueness</string>
+   </property>
+  </action>
+  <action name="actionStayOnTop">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Stay On Top</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>

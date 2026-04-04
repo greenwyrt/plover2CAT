@@ -139,6 +139,10 @@ Functions and class methods should be fully documented.
 
 ## Possible improvements list
 
+- [ ] stroke count (status bar/dock window)
+
+- [ ] edit window title along with tab title
+
 - [ ] standardize log debug and info messages with statusbar messages
     - info messages should also be json parsable
 
@@ -150,13 +154,16 @@ Functions and class methods should be fully documented.
     - [ ] end goal: multiple profiles for same computer
     - [ ] some `QSettings` should remain so, others into user profile
 
+- [ ] package help into app
+    - [x] generate qhp files using sphinx
+    - [ ] use qhelpgenerator within env/Library/lib/qt6 to create collection file
+    - [ ] test load within plugin
+
 - [ ] add to reveal steno view
     - version with show strokes
     - link to cursor
 
 - [ ] media controls do not collapse well, should be using flowLayout to move duration and track to new
-
-- [ ] should manual backspace collapse paragraphs
 
 - [ ] page breaks for text and odf export formats
     - unicode ↡ is used for line feed

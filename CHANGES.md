@@ -1,5 +1,11 @@
 # CHANGES
 
+## Ver 4.1.1
+
+New:
+
+- Set window opaqueness and whether to stay on top (+ documentation)
+
 ## Ver 4.1.0
 
 New: 
