@@ -112,6 +112,8 @@ This menu contains items related to window layout, views, and shortcuts
 - Paper Tape Font: Set the font and size for the paper tape. This is savd when exiting and will be maintained across sessions.
 - Docks: Submenu with items to toggle the visibility of each dock. A user can also right click on the toolbar and toggle dock visibility that way.
 - Edit Menu Shortcuts: Activates dialog for setting key shortcuts for available menu items
+- Opaqueness: Set opaqueness of entire window (0 (fully transparent) - 100 (fully opaque))
+- Stay on Top: Keep window on top
 
 ### The Help Menu
 
@@ -252,6 +254,8 @@ This section documents each menu item under its menu section with the identifier
 | Docks \> Audio Controls | `actionAudioControls`     |          |
 | Docks \> Toolbox        | `actionToolbox`           |          |
 | Edit Menu Shortcuts     | `actionEditMenuShortcuts` |          |
+| Opaqueness              | `actionOpaqueness`        |          |
+| Stay On Top             | `actionStayOnTop`         |          |
 
 ### Help
 
