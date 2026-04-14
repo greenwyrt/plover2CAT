@@ -45,6 +45,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QToolButton,
     QDockWidget,
+    QVBoxLayout
 )
 from PySide6.QtMultimedia import (
     QMediaPlayer,
@@ -152,7 +153,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.engine = engine
         # ui and widgets setup
         self.setupUi(self)
-        self.recentfileflow = FlowLayout()
+        self.recentfileflow = QVBoxLayout()
         self.recentfileflow.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
         self.recentfileflow.setObjectName("recentfileflow")
         self.flowparent.addLayout(self.recentfileflow)
@@ -842,8 +843,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             icon.addFile(":/resources/document-text-large.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             tb.setDefaultAction(action)
             tb.setIcon(icon)
-            tb.setIconSize(QSize(32, 32))
-            tb.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+            tb.setIconSize(QSize(16, 16))
+            tb.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
             tb.setAutoRaise(True)
             tb.setToolTip(str(dir_path))
             self.recentfileflow.addWidget(tb)
