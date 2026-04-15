@@ -69,6 +69,7 @@ from PySide6.QtCore import (
     QSizeF,
     QTimer,
     QThread,
+    Slot
 )
 from PySide6.QtTextToSpeech import QTextToSpeech
 
@@ -91,7 +92,7 @@ from plover_cat.recorderDialogWindow import recorderDialogWindow
 from plover_cat.tapeDialogWindow import tapeDialogWindow
 from plover_cat.testDialogWindow import testDialogWindow
 from plover_cat.rtf_parsing import rtf_steno, load_rtf_styles
-from plover_cat.constants import re_strokes, clippy_strokes
+from plover_cat.constants import re_strokes, clippy_strokes, blockState
 from plover_cat.qcommands import BlockUserData, element_actions
 from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output, hours_to_ms
 from plover_cat.steno_objects import index_text
@@ -2027,7 +2028,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         current_cursor = self.textEdit.textCursor()
         current_block = current_cursor.block()
         current_block.setUserData(BlockUserData())
-        current_block.setUserState(1)
+        current_block.setUserState(current_block.userState() | blockState.CHANGE)
         current_cursor.select(QTextCursor.BlockUnderCursor)
         current_cursor.removeSelectedText()
 

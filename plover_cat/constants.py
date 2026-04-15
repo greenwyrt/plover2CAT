@@ -1,3 +1,5 @@
+from enum import IntFlag
+
 import re
 re_strokes = re.compile(r"\s\s>{1,5}(.*)$") #: Find strokes in Tapey Tape file
 steno_untrans = re.compile(r"(?=[STKPWHRAO*EUFBLGDZ])S?T?K?P?W?H?R?A?O?\*?E?U?F?R?P?B?L?G?T?S?D?Z?")
@@ -128,3 +130,8 @@ stopwords = ['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'a
             "we've", 'were', "weren't", 'what', "what's", 'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's",
             'whom', 'why', "why's", 'with', "won't", 'would', "wouldn't", 'you', "you'd", "you'll", "you're", "you've", 'your',
             'yours', 'yourself', 'yourselves']
+
+class blockState(IntFlag):
+    DEFAULT = 0
+    CHANGE = 1
+    READONLY = 2

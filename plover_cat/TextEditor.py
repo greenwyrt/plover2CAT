@@ -27,7 +27,7 @@ from plover_cat.steno_objects import element_collection, element_factory, text_e
 from plover_cat.rtf_parsing import import_version_one, import_version_two
 from plover_cat.export_helpers import load_odf_styles, recursive_style_format, parprop_to_blockformat, txtprop_to_textformat
 from plover_cat.helpers import ms_to_hours, save_json, backup_dictionary_stack, add_custom_dicts, load_dictionary_stack_from_backup, return_commits, hide_file
-from plover_cat.constants import default_styles, default_config, default_dict
+from plover_cat.constants import default_styles, default_config, default_dict, blockState
 
 _ = lambda txt: QtCore.QCoreApplication.translate("Plover2CAT", txt)
 
@@ -263,6 +263,7 @@ class PloverCATEditor(QTextEdit):
                 block_data[k] = v
             block_data["strokes"] = element_collection()
             document_cursor.block().setUserData(block_data)
+            document_cursor.block().setUserState(blockState.DEFAULT)
             block_data["strokes"] = element_collection(el_list)
             if block_data["style"] not in self.par_formats:
                 block_data["style"] = next(iter(self.par_formats))
@@ -357,7 +358,7 @@ class PloverCATEditor(QTextEdit):
         block = self.document().begin()
         status = 0
         for i in range(self.document().blockCount()):
-            if block.userState() == 1:
+            if block.userState() & blockState.CHANGE:
                 status = 1
             if status == 1:
                 if block.userData():
@@ -367,7 +368,7 @@ class PloverCATEditor(QTextEdit):
                 block_num = block.blockNumber()
                 block_dict["strokes"] = block_dict["strokes"].to_json()
                 json_document[str(block_num)] = block_dict
-                block.setUserState(-1)
+                block.setUserState(blockState.DEFAULT)
             if block == self.document().lastBlock():
                 break
             block = block.next()      

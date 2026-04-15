@@ -15,6 +15,7 @@ from PySide6.QtGui import (
 from PySide6.QtCore import QUrl
 from datetime import datetime
 from plover_cat.steno_objects import element_collection, stroke_text, automatic_text
+from plover_cat.constants import blockState
 
 class BlockUserData(QTextBlockUserData):
     """Representation of the data for a block.
@@ -118,7 +119,7 @@ class steno_insert(QUndoCommand):
             cursor_format.setForeground(self.document.highlight_colors[el.element])
             # current_cursor.setCharFormat(cursor_format)
             current_cursor.insertText(el.to_text(), cursor_format)
-        current_block.setUserState(1)
+        current_block.setUserState(current_block.userState() | blockState.CHANGE)
         self.document.setTextCursor(current_cursor)
         log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.steno.to_json()}
         log.info(f"Insert: {log_dict}")
@@ -172,7 +173,7 @@ class steno_remove(QUndoCommand):
         self.document.setTextCursor(current_cursor)        
         current_block.setUserData(block_data)
         current_cursor.removeSelectedText()
-        current_block.setUserState(1)
+        current_block.setUserState(current_block.userState() | blockState.CHANGE)
         self.document.setTextCursor(current_cursor)
         log_dict = {"action": "remove", "block": self.block, "position_in_block": self.position_in_block, "end": self.position_in_block + self.length}
         log.info(f"Remove: {log_dict}")
@@ -245,7 +246,7 @@ class image_insert(QUndoCommand):
         log_dict = {"action": "insert", "block": self.block, "position_in_block": self.position_in_block, "steno": self.image_element.to_json()}
         log.info(f"Insert: {log_dict}")
         current_cursor.insertImage(imageFormat)
-        current_block.setUserState(1)
+        current_block.setUserState(current_block.userState() | blockState.CHANGE)
         self.setText("Insert: image object")
         self.document.setTextCursor(current_cursor)
     def undo(self):
@@ -334,12 +335,12 @@ class split_steno_par(QUndoCommand):
         new_block = current_block.next()
         current_block.setUserData(first_data)
         new_block.setUserData(second_data)
-        new_block.setUserState(1)
+        new_block.setUserState(current_block.userState() | blockState.CHANGE)
         self.setText("Split: paragraph %d at %d" % (self.block, self.position_in_block))
         log_dict = {"action": "split", "block": self.block, "position_in_block": self.position_in_block}
         log.info(f"Split: {log_dict}")
         self.block_state = current_block.userState()
-        current_block.setUserState(1)
+        current_block.setUserState(current_block.userState() | blockState.CHANGE)
         current_cursor.movePosition(QTextCursor.StartOfBlock)
         self.document.setTextCursor(current_cursor)       
     def undo(self):
@@ -426,7 +427,7 @@ class merge_steno_par(QUndoCommand):
             first_data = update_user_data(first_data, key = "audioendtime", value = second_data["audioendtime"])
         first_block.setUserData(first_data)
         self.block_state = first_block.userState()
-        first_block.setUserState(1)
+        first_block.setUserState(first_block.userState() | blockState.CHANGE)
         current_cursor.deleteChar()
         current_cursor.setPosition(first_block.position() + self.position_in_block)
         log_dict = {"action": "merge", "block": self.block}
@@ -460,7 +461,7 @@ class merge_steno_par(QUndoCommand):
         for key, item in self.second_data_dict.items():
             second_data = update_user_data(second_data, key = key, value = item)
         second_block.setUserData(second_data)
-        second_block.setUserState(1)
+        second_block.setUserState(second_block.userState() | blockState.CHANGE)
         log_dict = {"action": "split", "block": self.block, "position_in_block": self.position_in_block}
         log.info(f"Merge (undo): {log_dict}")        
         self.document.setTextCursor(current_cursor)
@@ -506,7 +507,7 @@ class set_par_style(QUndoCommand):
         self.setText(f"Format: set paragraph {self.block} style to {self.style}")
         self.document.refresh_par_style(current_block)
         self.block_state = current_block.userState()
-        current_block.setUserState(1)
+        current_block.setUserState(current_block.userState() | blockState.CHANGE)
         log_dict = {"action": "set_style", "block": self.block, "style": self.style}
         log.info(f"Style: {log_dict}")
     def undo(self):
@@ -645,7 +646,7 @@ class update_field(QUndoCommand):
         for i in range(self.document.document().blockCount()):     
             block_strokes = block.userData()["strokes"]
             if any([el.element == "field" for el in block_strokes]):
-                block.setUserState(1)
+                block.setUserState(current_block.userState() | blockState.CHANGE)
                 for ind, el in enumerate(block_strokes):
                     # print(ind)
                     if el.element == "field":
@@ -719,7 +720,7 @@ class update_entries(QUndoCommand):
         for i in range(self.document.document().blockCount()):    
             block_strokes = block.userData()["strokes"]
             if any([el.element == "index" for el in block_strokes]):
-                block.setUserState(1)
+                block.setUserState(current_block.userState() | blockState.CHANGE)
                 for ind, el in enumerate(block_strokes):
                     # print(ind)
                     if el.element == "index":
