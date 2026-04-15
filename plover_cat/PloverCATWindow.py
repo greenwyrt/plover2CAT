@@ -345,6 +345,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.statusBar.addPermanentWidget(self.cursor_status)
         self.display_message("Create New Transcript or Open Existing...")
         # self.setStyle(QStyleFactory.create("fusion"))
+        # menu bar
+        self.menubar.triggered.connect(self.log_menu)
+
+    def log_menu(self, action):
+        self.display_message(f"Menu item activated: {action.text()}")
 
     def set_shortcuts(self):
         """Set shortcuts for menu items using keysequence strings.
