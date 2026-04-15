@@ -217,9 +217,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.update_highlight_color()
         # connections:
         ## engine connections
-        engine.signal_connect("stroked", self.on_stroke) 
+        engine.signal_connect("stroked", self.plover_stroke) 
         engine.signal_connect("stroked", self.log_to_tape) 
-        engine.signal_connect("send_string", self.on_send_string)
+        engine.signal_connect("send_string", self.plover_send_string)
         engine.signal_connect("send_backspaces", self.count_backspaces)     
         ## file setting/saving
         self.actionQuit.triggered.connect(lambda: self.action_close())
@@ -1939,19 +1939,22 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if not self.textEdit.isActiveWindow() and not self.actionCaptureAllOutput.isChecked():
             return
         self.textEdit.log_to_tape(stroke)             
-
-    def on_send_string(self, txt_string):
+    
+    @Slot(str)
+    def plover_send_string(self, txt_string):
         """Set string sent by Plover in transcript.
         """
         self.textEdit.last_string_sent = txt_string
 
+    @Slot(int)
     def count_backspaces(self, backspace):
         """Set number of backspaces sent by Plover in transcript.
         """
         log.debug(f"Plover engine sent {backspace} backspace(s)")
         self.textEdit.last_backspaces_sent = backspace
 
-    def on_stroke(self, stroke_pressed):
+    @Slot(str)
+    def plover_stroke(self, stroke_pressed):
         """Send stroke from Plover to transcript.
 
         This will also trigger displaying captions, managing capturing output and window focus.

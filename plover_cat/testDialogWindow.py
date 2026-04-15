@@ -163,7 +163,7 @@ class TestTextEdit(unittest.TestCase):
     def step_Stroke(self):
         self.editor.engine.clear_translator_state()
         # test append
-        self.editor.on_send_string("THE")
+        self.editor.plover_send_string("THE")
         self.assertEqual(self.editor.textEdit.last_string_sent, "THE")
         self.editor.textEdit.on_stroke(Stroke("-T"))
         self.assertEqual(self.editor.textEdit.toPlainText().strip(), "THE")
@@ -180,7 +180,7 @@ class TestTextEdit(unittest.TestCase):
         self.editor.textEdit.clear_transcript()
     def step_WriteTwoLine(self):
         # todo: create mock tape to read instead
-        self.editor.on_send_string("ABC\\nDEF")
+        self.editor.plover_send_string("ABC\\nDEF")
         self.editor.textEdit.on_stroke(Stroke("S"))
         self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\\nDEF")
         self.editor.textEdit.clear_transcript()        
