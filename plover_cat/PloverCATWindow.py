@@ -75,7 +75,7 @@ from PySide6.QtTextToSpeech import QTextToSpeech
 
 import plover
 
-from plover.steno import Stroke, normalize_steno
+from plover.steno import Stroke, normalize_steno, normalize_stroke
 from plover.system.english_stenotype import DICTIONARIES_ROOT, ORTHOGRAPHY_WORDLIST
 from plover.system import _load_wordlist
 from plover import log
@@ -201,7 +201,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.caption_dialog = captionDialogWindow() 
         self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
         self.tape_dialog = tapeDialogWindow()
-        self.tape_dialog.translate_stroke_from_tape.connect(self.tape_stroke_translate)
         self.cap_worker = None
         self.autosave_time = QTimer()
         self.cutcopy_storage = deque(maxlen = 5)
@@ -439,6 +438,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.test_dialog = testDialogWindow(self)
         self.test_dialog.show()
         self.test_dialog.activateWindow()  
+
+    @Slot(str)            
     def display_message(self, txt):
         """Display message in status bar.
 
@@ -1993,9 +1994,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.display_captions()
         self.textEdit.on_stroke(stroke_pressed, self.actionCursorAtEnd.isChecked())
 
-    def reconnect_keyboard(self):
-        self.engine._keyboard_emulation = self.kc
-
     def tape_translate(self):
         """Translate tape contents into transcript.
         """
@@ -2004,41 +2002,52 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             if choice == QMessageBox.Yes:
                 self.engine.set_output(True)
             else:
-                return
+                return 
         self.engine.clear_translator_state()
-        self.kc = self.engine._keyboard_emulation
-        self.engine._keyboard_emulation = mock_output()        
-        # self.tape_dialog.open()
-        # self.tape_dialog.finished.connect(self.reconnect_keyboard)
+        # bit of a hack since triggering stroked hook through code
+        self.tape_dialog.translate_stroke_from_tape.connect(self.tape_stroke_translate)
+        self.tape_dialog.undo_from_tape.connect(lambda: self.actionUndo.trigger())   
+        self.tape_dialog.finished.connect(self.break_tape_connections)           
+        self.tape_dialog.open()
         # # do not erase any content before, case of too many asterisks for example
         self.engine.clear_translator_state()
-        self.mainTabs.hide()
-        self.textEdit.blockSignals(True)
-        self.textEdit.document().blockSignals(True)
-
-        self.textEdit.undo_stack.clear()
-        self.textEdit.document().blockSignals(False)
-        self.textEdit.blockSignals(False)
-        self.mainTabs.show()
-        self.engine._keyboard_emulation = self.kc
         # todo, if format has time data, that should be inserted into stroke data of editor too
 
+    def break_tape_connections(self):
+        self.tape_dialog.translate_stroke_from_tape.disconnect()
+        self.tape_dialog.undo_from_tape.disconnect()
+
     def tape_stroke_translate(self, strokes = 1):
+        self.kc = self.engine._keyboard_emulation
+        self.engine._keyboard_emulation = mock_output()
+        capture_status = self.actionCaptureAllOutput.isChecked()  
+        self.actionCaptureAllOutput.setChecked(True)    
         if strokes > 50:
             self.mainTabs.hide()
         self.textEdit.blockSignals(True)
         self.textEdit.document().blockSignals(True)
-        selected_row = self.tape_dialog.tape_view.currentIndex().row()
-        for idx in range(selected_row, selected_row + strokes):
-            if idx >= self.tape_dialog.tape_model.rowCount():
+        selected_row = self.tape_dialog.tape_view.currentRow()
+        for idx in range(selected_row, min(selected_row + strokes, self.tape_dialog.tape_view.count())):
+            if idx >= self.tape_dialog.tape_view.count():
                 break
-            stroke_data = self.tape_dialog.tape_model.item(idx)
-            print(stroke_data.data(Qt.UserRole))
-            self.engine._translator.translate(Stroke(stroke_data.data(Qt.UserRole)))
+            stroke_data = self.tape_dialog.tape_view.item(idx).data(Qt.UserRole)
+            if self.tape_dialog.paper_format == "Plover (raw)":
+                stroke = Stroke(normalize_stroke(stroke_data.strip().replace(" ", "")))
+                self.engine._translator.translate(stroke)
+                self.engine._trigger_hook('stroked', stroke)
+            else:
+                keys = []
+                for i in range(len(stroke_data)):
+                    if not stroke_data[i].isspace() and i < len(plover.system.KEYS):
+                        keys.append(plover.system.KEYS[i])                  
+                self.engine._translator.translate(Stroke(keys))
+                self.engine._trigger_hook('stroked', Stroke(keys))
         self.textEdit.document().blockSignals(False)
         self.textEdit.blockSignals(False)
         if strokes > 50:
             self.mainTabs.show()
+        self.engine._keyboard_emulation = self.kc
+        self.actionCaptureAllOutput.setChecked(capture_status)
 
     def reset_paragraph(self):
         """Remove all data from paragraph block, and erase action history.
