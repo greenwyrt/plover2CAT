@@ -830,11 +830,13 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             log.debug("Unknown suggestion source %s!" % self.suggest_source.currentText())
 
+    @Slot(int)
     def update_record_time(self):
         """Display recording time in status bar.
         """
         self.display_message(f"Recorded {ms_to_hours(self.textEdit.recorder.duration())}")
 
+    @Slot()
     def open_root(self):
         """Open root directory of current transcript.
         """
@@ -888,7 +890,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     widget.deleteLater()
                 else:
                     self.clearLayout(item.layout())
-
+    @Slot()
     def change_window_font(self):
         """Change window font.
         """
@@ -897,6 +899,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.setFont(font)
             log.debug("User set window font.")   
 
+    @Slot()
     def change_backgrounds(self):
         """Change window background color.
         """
@@ -909,6 +912,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.setPalette(palette)
             log.debug("User set background color.")
 
+    @Slot()
     def change_tape_font(self):
         """Change paper tape font.
         """
@@ -917,7 +921,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.strokeList.setFont(font)
             log.debug("User set paper tape font.")
 
+    @Slot()
     def change_highlight_colors(self, action):
+        """Set text color for different elements"""
         key = action.data()
         el_color = QSettings("Plover2CAT-4", "OpenCAT").value(key, "black")
         new_color = QColorDialog.getColor(QColor(el_color))
@@ -929,6 +935,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.refresh_editor_styles()
     
     def update_highlight_color(self):
+        """Updates element menu action with new colors for element"""
         settings = QSettings("Plover2CAT-4", "OpenCAT")
         el_names = ["stroke", "text", "automatic", "field", "index"]
         self.menuHighlightColors.clear()
@@ -942,7 +949,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             ic = QIcon(pix)
             action.setIcon(ic)
             self.menuHighlightColors.addAction(action)
-            
+
+    @Slot()        
     def show_invisible_char(self):
         """Show/hide invisible chars in current transcript.
         """
@@ -957,13 +965,21 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             doc_options.setFlags(doc_options.flags() & ~QTextOption.ShowTabsAndSpaces & ~QTextOption.ShowLineAndParagraphSeparators)
         self.textEdit.document().setDefaultTextOption(doc_options)
 
+    @Slot()
     def change_window_opaqueness(self):
+        """User set opacity of window.
+        """
         log.debug("Setting Opacity.")
-        input, ok = QInputDialog().getInt(self, "Set Opaque", "0-100 (Invisible to Opaque)", 100, 0, 100)
+        input, ok = QInputDialog().getInt(self, "Set Opaque", "0-100 (Invisible to Opaque)", 100, 0, 100, 5)
         if ok:
             self.parent().setWindowOpacity(input / 100)
 
+    @Slot()
     def change_stay_on_top(self, value):
+        """Keep window on top.
+        
+        :param bool value: boolean state
+        """
         log.debug("Setting stay on top.")
         if value:
             self.parent().setWindowFlags(self.parent().windowFlags() | Qt.WindowStaysOnTopHint)
@@ -971,6 +987,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.parent().setWindowFlags(self.parent().windowFlags() & ~Qt.WindowStaysOnTopHint)
         self.parent().show()
 
+    @Slot()
     def calculate_space_width(self, font):
         """Calculate approximate width of a font character in inches and set in GUI.
 

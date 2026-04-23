@@ -111,6 +111,15 @@ While it has not yet occurred, it is very likely that at some time, memory could
 
 The `userState` for each `QTextEdit` block holds one integer. Right now, it holds a 1 if the paragraph has been modified since opening, and -1 (Qt default.) It may be possible to assign more states by using binary, similar to the Qt enums.
 
+- [ ] future: use new enum to set paragraph to read-only while still navigable by cursor
+    - possibly using cursor to move forward and back blocks
+    - some actions, such as normal copy should work, others like copy/cut should not
+    - color paragraph with qbrush for texture
+- [ ] tests for saving
+    - [ ] set transcript_data and textEdit are different, make sure everything after userState changed is saved
+    - [ ] toggle first paragraph
+
+
 ## Transcript JSON format
 
 An alternative to the regular JSON format would be using JSONL, with each line per paragraph. This would facilitate reading subsets of a file, and reducing memory when loading a transcript. 
@@ -139,14 +148,18 @@ Functions and class methods should be fully documented.
 
 ## Possible improvements list
 
+- [ ] log names for each test
+
+- [ ] find all not working with wrap, does seem to find above
+
+- [ ] slots for methods
+
 - [ ] stroke count (status bar/dock window)
 
 - [ ] edit window title along with tab title
 
 - [ ] standardize log debug and info messages with statusbar messages
     - info messages should also be json parsable
-
-- [ ] menu items should generate info log messages
 
 - [ ] user preferences file
     - [ ] switch from saving directly in system settings
@@ -178,11 +191,12 @@ Functions and class methods should be fully documented.
     - for srt, remove page-break element
  
 - [ ] conditional page break
-- [ ] sequentially process tape to translation
-    - [ ] before dialog, clean undostack and set to 50 (max undos)
-    - [ ] reset undostack after tape completely and make unlimited (default) again
-    - [ ] connect actionUndo to the tape dialog undo, make sure to disconnect in transcript teardown
-    - [ ] clean translator after dialog close
+
+- [ ] tape dialog improvements:
+    - render translated strokes unselectable
+    - the undo should re-enable undone stroke
+
+
 - [ ] phonetic system for CART
 - [ ] hot key mode
 - need QAudioProbe equivalent

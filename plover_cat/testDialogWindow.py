@@ -179,7 +179,7 @@ class TestTextEdit(unittest.TestCase):
         self.assertNotEqual(len(self.editor.strokeList.toPlainText()), 0)
         self.editor.textEdit.clear_transcript()
     def step_WriteTwoLine(self):
-        # todo: create mock tape to read instead
+        # TODO: create mock tape to read instead
         self.editor.plover_send_string("ABC\\nDEF")
         self.editor.textEdit.on_stroke(Stroke("S"))
         self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\\nDEF")

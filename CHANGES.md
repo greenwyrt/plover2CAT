@@ -5,6 +5,7 @@
 New:
 
 - Set window opaqueness and whether to stay on top (+ documentation)
+- Translate tape now controllable: translate one stroke, 10, or all remaining 
 
 Change:
 
@@ -14,10 +15,12 @@ Change:
 Bugfix:
 
 - position indicator in status bar now updates all the time, not just when tape is open
+- weird edgecase when more backspaces than document text (occurs if have been writing outside editor)
 
 Internal:
 
 - use new enum blockState for userState in QTextEdit
+- refactored string insertion for single vs multi-lines
 
 ## Ver 4.1.0
 

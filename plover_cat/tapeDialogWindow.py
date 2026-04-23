@@ -34,7 +34,6 @@ class tapeDialogWindow(QDialog, Ui_tapeDialog):
         current = self.tape_view.currentRow()
         if current == -1:
             return
-        min(current + strokes, self.tape_view.count() - 1)
         self.translate_stroke_from_tape.emit(strokes)
         self.tape_view.setCurrentRow(current + strokes)
         print(current)
