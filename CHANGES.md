@@ -6,6 +6,19 @@ New:
 
 - Set window opaqueness and whether to stay on top (+ documentation)
 
+Change:
+
+- Recent Files now has smaller icons and text to side (more like a list)
+- Clicks on menu items now logged in status bar
+
+Bugfix:
+
+- position indicator in status bar now updates all the time, not just when tape is open
+
+Internal:
+
+- use new enum blockState for userState in QTextEdit
+
 ## Ver 4.1.0
 
 New: 

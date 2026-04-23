@@ -84,7 +84,7 @@ The nested JSON object holds the data on the paragraph itself.
 
 The keys for the nested JSON object are: 
 - `creationtime`: timestamp for when the paragraph was created
-- `edittime`: timestamp whn paragraph was last updated
+- `edittime`: timestamp when paragraph was last updated
 - `audiostarttime`: timestamp of audio when paragraph was created (if available)
 - `audioendtime`: timestamp of audio if audio was stopped when cursor was in paragraph (if available)
 - `style`: string stating the style of the paragraph (should be one of the keys in the style file)
