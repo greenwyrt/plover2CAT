@@ -160,6 +160,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.flowparent.addLayout(self.recentfileflow)
         self.flowparent.addStretch()
         self.video = None
+        self.textEdit = None
         self.dock_status = {}
         for doc in self.findChildren(QDockWidget):
             self.dock_status[doc.objectName()] = False
@@ -195,7 +196,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.suggest_source.setCurrentIndex(settings.value("suggestionsource"))
         if settings.contains("recentfiles"):
             self.recent_file_menu()
-        self.textEdit = None
         self.test_dialog = None
         self.index_dialog = indexDialogWindow({})
         self.caption_dialog = captionDialogWindow() 
@@ -349,6 +349,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         # menu bar
         self.menubar.triggered.connect(self.log_menu)
 
+    @Slot(QAction)
     def log_menu(self, action):
         self.display_message(f"Menu item activated: {action.text()}")
 
@@ -372,6 +373,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             except Exception:
                 pass  
 
+    @Slot()
     def edit_shortcuts(self):
         """Edit menu shortcuts from dialog.
 
@@ -399,6 +401,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             save_json(remove_empty_from_dict(shortcuts), shortcut_file)
             self.set_shortcuts()
 
+    @Slot()
     def about(self):
         """Display version info in dialog.
         """
@@ -406,6 +409,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         QMessageBox.about(self, "Plover2CAT",
                 "This is Plover2CAT version %s, a computer aided transcription plugin for Plover." % __version__)
 
+    @Slot()
     def acknowledge(self):
         """Display acknowledgements in dialog.
         """
@@ -416,6 +420,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                         "PySide6 is licensed under the LGPL and Plover is licensed under the GPL. "
                         "Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
 
+    @Slot()
     def open_help(self):
         """Link to Readthedocs help pages.
         """
@@ -423,16 +428,17 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         user_manual_link = QUrl("https://plover2cat.readthedocs.io/en/latest/")
         QtGui.QDesktopServices.openUrl(user_manual_link)
 
+    @Slot()
     def view_log(self):
         self.open_tester()
         self.test_dialog.display_log()
 
+    @Slot()
     def open_tester(self):
         if not self.test_dialog:
             self.test_dialog = testDialogWindow(self)
         self.test_dialog.show()
         self.test_dialog.activateWindow()  
-                  
     def display_message(self, txt):
         """Display message in status bar.
 
@@ -445,6 +451,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Update dock visibility status"""
         self.dock_status[name] = status
 
+    @Slot()
     def update_gui(self):
         """Wrapper for updating parts of GUI when cursor changes position.
         """
@@ -455,9 +462,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.text_to_stroke_move()
             self.refresh_steno_display(current_cursor)
             self.display_block_data()
+            self.display_position()
             self.update_style_display(self.textEdit.textCursor().block().userData()["style"])
             self.update_navigation()    
 
+
+    def display_position(self):
+        current_cursor = self.textEdit.textCursor()
+        self.cursor_status.setText("Par, Char: {line}, {char}".format(line = current_cursor.blockNumber(), char = current_cursor.positionInBlock())) 
+
+    @Slot(str)
     def update_tape(self, txt):
         """Update tape with new stroke(s).
         :param str txt: line(s) from tape
@@ -512,6 +526,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.style_selector.setCurrentText(block_data["style"])
         self.textEdit.showPossibilities()
 
+    @Slot()
+    @Slot(QTextCursor)
     def refresh_steno_display(self, cursor = None):
         """Refresh steno display with data from cursor paragraph.
 
@@ -526,6 +542,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         block_strokes = cursor.block().userData()["strokes"]
         self.display_block_steno(block_strokes)
 
+    @Slot()
     def refresh_editor_styles(self):
         """Reapply styles to every paragraph."""
         if self.textEdit.document().blockCount() > 200:
@@ -622,6 +639,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             self.blockNextStyle.setCurrentIndex(-1)
 
+    @Slot()
     def context_menu(self, pos):
         """Create right-click menu at cursor click position.
 
@@ -714,6 +732,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     def set_audio_output(self):
         self.textEdit.player.audioOutput().setDevice(self.audio_output.currentData())
 
+    @Slot(int)
     def update_duration(self, duration):
         """Update duration label in GUI with duration of media.
 
@@ -721,7 +740,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         self.audio_seeker.setMaximum(duration)
         self.audio_duration.setText(ms_to_hours(duration))
-
+    
+    @Slot(int)
     def update_seeker_track(self, position):
         """Update position on seeker and label to position of media.
 
@@ -794,6 +814,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.suggestTable.setItem(row, 1, QTableWidgetItem(", ".join(combined_stroke_search[most_common_strokes[row]])))
         self.suggestTable.resizeColumnsToContents()
 
+    @Slot()
     def get_suggestions(self):
         """Wrapper to get suggestions from Tapey Tape or plover-clippy-2
         """
@@ -1186,7 +1207,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.strokeList.blockSignals(True)
         stroke_text = self.strokeList.document().toPlainText().split("\n")
         pos = edit_cursor.positionInBlock()
-        self.cursor_status.setText("Par,Char: {line},{char}".format(line = edit_cursor.blockNumber(), char = pos)) 
+        self.cursor_status.setText("Par, Char: {line}, {char}".format(line = edit_cursor.blockNumber(), char = pos)) 
         try:
             if edit_cursor.atBlockStart():
                 stroke_time = block_data["strokes"].data[0].time
