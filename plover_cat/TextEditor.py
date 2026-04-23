@@ -820,6 +820,7 @@ class PloverCATEditor(QTextEdit):
         :param bool end: always append writing to end of transcript
         """
         current_cursor = self.textCursor()
+        # if cursor should be locked to end
         if end:
             current_cursor.movePosition(QTextCursor.End)
             self.setTextCursor(current_cursor)
@@ -827,17 +828,21 @@ class PloverCATEditor(QTextEdit):
         current_block = current_cursor.block()        
         stroke_time = datetime.now().isoformat("T", "milliseconds")
         self.update_block_times(current_block, stroke_time)
+        # gather info from Plover hooks
         string_sent = self.last_string_sent
         backspaces_sent = self.last_backspaces_sent
         self.cursor_block = current_cursor.blockNumber()
-        self.cursor_block_position = current_cursor.positionInBlock()        
+        self.cursor_block_position = current_cursor.positionInBlock()  
+        # do nothing if this was a command with no text action      
         self.stroke_time = stroke_time
         if len(current_block.text()) == 0 and not string_sent and backspaces_sent > 0 and current_block.blockNumber() == 0:
             return
+        # combine underlying strokes if backspace is going to erase
         if string_sent and backspaces_sent > 0 and self.track_lengths[-1] > 0 and backspaces_sent >= self.track_lengths[-1]:
             self.last_raw_steno = self.last_raw_steno + "/" + stroke_pressed.rtfcre
         else:
             self.last_raw_steno = stroke_pressed.rtfcre
+        # perform text removal
         if backspaces_sent != 0:
             cursor_pos = current_cursor.positionInBlock()
             self.track_lengths.append(-1 * backspaces_sent)
@@ -846,6 +851,7 @@ class PloverCATEditor(QTextEdit):
             start_pos = backtrack_coord(current_cursor.positionInBlock(), backspaces_sent, 
                         current_strokes.lens(), current_strokes.lengths())
             self.undo_stack.beginMacro(f"Remove: {backspaces_sent} backspaces(s).") 
+            # does backspace extend before present paragraph?
             if start_pos < 0:
                 log.debug(f"{start_pos} backspaces than exists on current paragraph.")
                 while start_pos < 0:
@@ -859,6 +865,9 @@ class PloverCATEditor(QTextEdit):
                     holding_space -= 1
                     current_cursor = self.textCursor()
                     cursor_pos = current_cursor.positionInBlock()
+                    if current_cursor.atStart():
+                        start_pos = 0
+                        break
                     current_strokes = current_cursor.block().userData()["strokes"]
                     start_pos = backtrack_coord(current_cursor.positionInBlock(), holding_space, current_strokes.lens(), current_strokes.lengths())
                     log.debug(f"New starting position: {start_pos}.")
@@ -874,45 +883,35 @@ class PloverCATEditor(QTextEdit):
             self.undo_stack.endMacro()
             current_cursor = self.textCursor()
             self.cursor_block = current_cursor.blockNumber()
-            self.cursor_block_position = current_cursor.positionInBlock()  
-        if "\n" in string_sent and string_sent != "\n":
-            list_segments = string_sent.splitlines(True)
+            self.cursor_block_position = current_cursor.positionInBlock()
+        if string_sent:
+            list_segments = string_sent.splitlines(True) 
             self.track_lengths.append(len(self.last_string_sent))
             self.undo_stack.beginMacro(f"Insert: {string_sent}")
             for i, segment in enumerate(list_segments):
                 stroke = stroke_text(time = stroke_time, stroke = self.last_raw_steno, text = segment.rstrip("\n"))
-                # because this is all occurring in one stroke, only first segment gets the stroke
+                # only first segment of text gets steno data
                 if i == 0:
                     self.last_raw_steno = ""
                 stroke.audiotime = self.get_audio_time(convert = False)
+                # add prefix/suffix
+                if self.config["enable_automatic_affix"]:
+                    if self.last_string_sent == "\n":
+                        stroke = self.add_end_auto_affix(stroke, current_block.userData()["style"])
+                    if current_block.userData()["strokes"].element_count() == 0:
+                        stroke = self.add_begin_auto_affix(stroke, current_block.userData()["style"])   
                 if len(stroke) != 0:
                     insert_cmd = steno_insert(current_cursor, self, self.cursor_block, self.cursor_block_position, stroke)
-                    self.undo_stack.push(insert_cmd)
-                if (i != (len(list_segments) - 1)) or (len(list_segments) == 1) or segment == "\n":
+                    self.undo_stack.push(insert_cmd)                                             
+                if segment.endswith("\n"):
                     self.split_paragraph(remove_space = False)
                 current_cursor = self.textCursor()
                 # update cursor position for next loop
                 self.cursor_block = current_cursor.blockNumber()
                 self.cursor_block_position = current_cursor.positionInBlock()
-                self.to_next_style()
+                self.to_next_style()   
             self.last_string_sent = ""
-            self.undo_stack.endMacro()
-            return 
-        if string_sent:
-            self.track_lengths.append(len(self.last_string_sent))
-            stroke = stroke_text(stroke = self.last_raw_steno, text = string_sent)
-            stroke.audiotime = self.get_audio_time(convert = False)
-            if self.config["enable_automatic_affix"]:
-                if self.last_string_sent == "\n":
-                    stroke = self.add_end_auto_affix(stroke, current_block.userData()["style"])
-                if current_block.userData()["strokes"].element_count() == 0:
-                    stroke = self.add_begin_auto_affix(stroke, current_block.userData()["style"])            
-            if not current_cursor.atBlockEnd() and self.last_string_sent == "\n":
-                self.split_paragraph()
-            else:
-                insert_cmd = steno_insert(current_cursor, self, current_block.blockNumber(), current_cursor.positionInBlock(), stroke)
-                self.undo_stack.push(insert_cmd)
-            self.last_string_sent = ""
+            self.undo_stack.endMacro()                                                   
 
     def log_to_tape(self, stroke):
         """Log stroke to transcript tape.
