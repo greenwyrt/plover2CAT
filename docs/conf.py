@@ -9,12 +9,13 @@
 project = 'plover2CAT'
 copyright = '2026, plants'
 author = 'plants'
-release = '4.0.7'
+release = '4.1.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['myst_parser', "sphinx.ext.autodoc"]
+
+extensions = ['myst_parser', "sphinx.ext.autodoc", "sphinxcontrib.qthelp"]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'README.md']
