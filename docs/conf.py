@@ -26,20 +26,20 @@ source_suffix = {
 }
 
 autodoc_mock_imports = [
-    "plover",
+    # "plover",
     "PySide6",
     "dulwich",
-    "plover_cat",
-    "plover_cat.affix_dialog_ui",
-    "plover_cat.caption_dialog_ui",
-    "plover_cat.create_dialog_ui",
-    "plover_cat.field_dialog_ui",
-    "plover_cat.index_dialog_ui",
-    "plover_cat.recorder_dialog_ui",
-    "plover_cat.shortcut_dialog_ui",
-    "plover_cat.suggest_dialog_ui",
-    "plover_cat.tape_dialog_ui",
-    "plover_cat.test_dialog_ui",
+    # "plover_cat",
+    # "plover_cat.affix_dialog_ui",
+    # "plover_cat.caption_dialog_ui",
+    # "plover_cat.create_dialog_ui",
+    # "plover_cat.field_dialog_ui",
+    # "plover_cat.index_dialog_ui",
+    # "plover_cat.recorder_dialog_ui",
+    # "plover_cat.shortcut_dialog_ui",
+    # "plover_cat.suggest_dialog_ui",
+    # "plover_cat.tape_dialog_ui",
+    # "plover_cat.test_dialog_ui",
 ]
 
 # -- Options for HTML output -------------------------------------------------
