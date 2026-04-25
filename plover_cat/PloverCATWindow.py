@@ -8,7 +8,7 @@ from collections import Counter, deque
 from copy import deepcopy
 from sys import platform
 from tempfile import gettempdir, TemporaryDirectory
-from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets, QtHelp
 from PySide6.QtGui import (
     QColor,
     QTextCursor,
@@ -89,6 +89,7 @@ from plover_cat.indexDialogWindow import indexDialogWindow
 from plover_cat.suggestDialogWindow import suggestDialogWindow
 from plover_cat.captionDialogWindow import captionDialogWindow
 from plover_cat.recorderDialogWindow import recorderDialogWindow
+from plover_cat.helpDialogWindow import helpDialogWindow
 from plover_cat.tapeDialogWindow import tapeDialogWindow
 from plover_cat.testDialogWindow import testDialogWindow
 from plover_cat.rtf_parsing import rtf_steno, load_rtf_styles
@@ -201,6 +202,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.caption_dialog = captionDialogWindow() 
         self.suggest_dialog = suggestDialogWindow(None, self.engine, scowl)
         self.tape_dialog = tapeDialogWindow()
+        self.help_dialog = helpDialogWindow()
         self.cap_worker = None
         self.autosave_time = QTimer()
         self.cutcopy_storage = deque(maxlen = 5)
@@ -333,7 +335,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionRTF.triggered.connect(lambda: self.export_rtf())
         self.actionTape.triggered.connect(lambda: self.export_tape())
         # help
-        self.actionUserManual.triggered.connect(lambda: self.open_help())
+        self.actionUserManual.triggered.connect(lambda: self.open_qt_help())
         self.actionAbout.triggered.connect(lambda: self.about())
         self.actionAcknowledgements.triggered.connect(lambda: self.acknowledge())
         self.actionEditMenuShortcuts.triggered.connect(self.edit_shortcuts)
@@ -428,6 +430,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         QtGui.QDesktopServices.openUrl(user_manual_link)
 
     @Slot()
+    def open_qt_help(self):
+        self.help_dialog.open()
+
+    @Slot()
     def view_log(self):
         self.open_tester()
         self.test_dialog.display_log()
@@ -466,7 +472,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.display_position()
             self.update_style_display(self.textEdit.textCursor().block().userData()["style"])
             self.update_navigation()    
-
 
     def display_position(self):
         current_cursor = self.textEdit.textCursor()
@@ -2930,7 +2935,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         else:
             document_text = self.textEdit.toPlainText()
             document_text = document_text[current_cursor.position():]
-        print(document_text)
         if document_text.strip():            
             self.tts_instance.enqueue(document_text)
 
