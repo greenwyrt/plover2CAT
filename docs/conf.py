@@ -27,8 +27,8 @@ source_suffix = {
 
 autodoc_mock_imports = [
     # "plover",
-    "PySide6",
-    "dulwich",
+    # "PySide6",
+    # "dulwich",
     # "plover_cat",
     # "plover_cat.affix_dialog_ui",
     # "plover_cat.caption_dialog_ui",

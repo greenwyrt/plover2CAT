@@ -99,8 +99,6 @@ The other processes that scan the whole document again and again are fields (on 
 
 Data retrieval and storage are likely as fast for the limitations, considering that text and steno data have to be linked, and custom data storage for paragraphs would mean cleanup of data that Qt does automatically. If loading from file, the original dict is kept in memory. Blocks that are modified are marked using `userState`. For saving, each paragraph's state is checked, and at the first block with `userState`, all subsequent paragraphs get data extracted and stored. 
 
-~~Some funtions are called upon every cursor change: updating the steno and style display, updating the block data display, and moving the tape to the proper spot. Responsiveness will speed up if all three are inactivated (set disabled) at the cost of less information visible.~~
-
 Docks now do not update unless they are open and visible. Closing all docks could be set as a "writing mode" with all docks hidden vs editing mode with docks set visible.
 
 ## Editor memory
@@ -109,12 +107,13 @@ While it has not yet occurred, it is very likely that at some time, memory could
 
 ## `userState` in editor
 
-The `userState` for each `QTextEdit` block holds one integer. Right now, it holds a 1 if the paragraph has been modified since opening, and -1 (Qt default.) It may be possible to assign more states by using binary, similar to the Qt enums.
+An enum class have been created for `userState`. Right now, only `CHANGE` is being used for saving.
 
-- [ ] future: use new enum to set paragraph to read-only while still navigable by cursor
+- [ ] use new enum to set paragraph to read-only while still navigable by cursor
     - possibly using cursor to move forward and back blocks
     - some actions, such as normal copy should work, others like copy/cut should not
     - color paragraph with qbrush for texture
+- [ ] state should be updated before being saved into transcript data, and then converted when imported
 - [ ] tests for saving
     - [ ] set transcript_data and textEdit are different, make sure everything after userState changed is saved
     - [ ] toggle first paragraph
@@ -126,33 +125,29 @@ An alternative to the regular JSON format would be using JSONL, with each line p
 
 Also, rather than keeping the backup document in memory, re-read the saved file until the first par with changed state, saving each line to new file, and then writing the new data before replacing old saved file with new one.
 
-## Unit tests 
+
+## Ongoing
+
+### Unit tests 
 
 *In progress*
 
 Tests should run from a dialog in editor using `unittest`. See this [link](https://stackoverflow.com/questions/20433333/can-python-unittest-return-the-single-tests-result-code) for returning a `TestResult`. Output should be redirected by specifying the `stream` argument for a `StringIO`.
 
-Category of tests:
-
-- Default config/style/dict
-- Try writing
-- Load transcript, new and old format
-- Copy/paste between transcript
-- Switch between transcripts (use recent file tab)
-
-## Docstrings 
+### Docstrings 
 
 Functions and class methods should be fully documented. 
 
 `PloverCATWindow` should accept arguments for methods that need dialog input. Modification should be handed off to `TextEditor` 
 
+### Slots
+
+PySide6 decorators improve memory/performance
+
+
 ## Possible improvements list
 
-- [ ] log names for each test
-
 - [ ] find all not working with wrap, does seem to find above
-
-- [ ] slots for methods
 
 - [ ] stroke count (status bar/dock window)
 
@@ -166,11 +161,6 @@ Functions and class methods should be fully documented.
     - [ ] can import initially
     - [ ] end goal: multiple profiles for same computer
     - [ ] some `QSettings` should remain so, others into user profile
-
-- [ ] package help into app
-    - [x] generate qhp files using sphinx
-    - [ ] use qhelpgenerator within env/Library/lib/qt6 to create collection file
-    - [ ] test load within plugin
 
 - [ ] add to reveal steno view
     - version with show strokes
@@ -189,13 +179,11 @@ Functions and class methods should be fully documented.
         - create empty \n lines as needed
     - for rtf, insert \page command
     - for srt, remove page-break element
- 
-- [ ] conditional page break
+    - conditional page break
 
 - [ ] tape dialog improvements:
     - render translated strokes unselectable
     - the undo should re-enable undone stroke
-
 
 - [ ] phonetic system for CART
 - [ ] hot key mode
@@ -221,3 +209,14 @@ Functions and class methods should be fully documented.
 
 
 
+# Build and bundle docs
+
+```
+source ~/plover2CAT/.venv/bin/activate
+cd docs
+make qthelp
+/usr/lib/qt6/libexec/qhelpgenerator _build/qthelp/plover2CAT.qhp
+/usr/lib/qt6/libexec/qhelpgenerator _build/qthelp/plover2CAT.qhcp
+cp _build/qthelp/plover2CAT.qch ../plover_cat/data
+cp _build/qthelp/plover2CAT.qhc ../plover_cat/data
+```

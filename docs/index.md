@@ -29,7 +29,7 @@ How to guides for plover2CAT's features (summarized below) can be accessed on th
 
 
 ```{include} ../README.md
-:start-after: program.
+:start-after: articles.
 :end-before: New features
 ```
 
