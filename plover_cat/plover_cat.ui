@@ -3339,11 +3339,14 @@ position.</string>
      <normaloff>:/resources/book-question.png</normaloff>:/resources/book-question.png</iconset>
    </property>
    <property name="text">
-    <string>Online User Manual</string>
+    <string>User Manual</string>
    </property>
    <property name="toolTip">
     <string>Open online user manual on GitHub</string>
    </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>   
   </action>
   <action name="actionAcknowledgements">
    <property name="text">
@@ -3471,9 +3474,6 @@ position.</string>
    </property>
    <property name="toolTip">
     <string>Show version information</string>
-   </property>
-   <property name="shortcut">
-    <string>F1</string>
    </property>
   </action>
   <action name="actionAutocompletion">

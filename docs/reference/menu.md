@@ -120,7 +120,7 @@ This menu contains items related to window layout, views, and shortcuts
 This menu contains help:
 
 - About: Dialog displaying name and version number.
-- Online User Manual: Directs to the online user manual (this document).
+- User Manual: Opens bundled user manual
 - Acknowledgements
 - View Plover Log: Show most recent messages from Plover log
 - Run Tests: Run unit tests 
@@ -262,7 +262,7 @@ This section documents each menu item under its menu section with the identifier
 | Item                           | Action Identifier         | Shortcut |
 |--------------------------------|---------------------------|----------|
 | About                          | `actionAbout`             |          |
-| Online User Manual             | `actionUserManual`        | F1       |
+| User Manual                    | `actionUserManual`        | F1       |
 | Acknowledgements               | `actionAcknowledgements`  |          |
 | Diagnostics \> View Plover Log | `actionViewPloverLog`     |          |
 | Diagnostics \> Run Tests       | `actionRunTests`          |          |
