@@ -11,6 +11,7 @@ from PySide6.QtGui import QTextCursor, QColor
 from PySide6.QtCore import Qt, QSettings
 from plover.oslayer.config import CONFIG_DIR
 from plover.steno import Stroke
+from plover import log
 from plover_cat.helpers import save_json
 from plover_cat.steno_objects import text_element, stroke_text, text_field, image_text, automatic_text, index_text, element_collection
 from plover_cat.test_dialog_ui import Ui_testDialog
@@ -154,6 +155,7 @@ class TestTextEdit(unittest.TestCase):
         file_path = pathlib.Path(self.temp_dir) / "test"
         self.editor.open_file(file_path)
     def step_ConfirmFiles(self):
+        log.debug("Test: ConfirmFiles")
         default_dict_dir = self.editor.textEdit.file_name / "dict"
         self.assertTrue(default_dict_dir.exists())
         default_dict = default_dict_dir / "default.json"
@@ -161,6 +163,7 @@ class TestTextEdit(unittest.TestCase):
         style_file = self.editor.textEdit.file_name / "styles" / "default.json"
         self.assertTrue(style_file.exists())
     def step_Stroke(self):
+        log.debug("Test: Stroke")
         self.editor.engine.clear_translator_state()
         # test append
         self.editor.plover_send_string("THE")
@@ -179,12 +182,14 @@ class TestTextEdit(unittest.TestCase):
         self.assertNotEqual(len(self.editor.strokeList.toPlainText()), 0)
         self.editor.textEdit.clear_transcript()
     def step_WriteTwoLine(self):
+        log.debug("Test: WriteTwoLine")
         # TODO: create mock tape to read instead
         self.editor.plover_send_string("ABC\\nDEF")
         self.editor.textEdit.on_stroke(Stroke("S"))
         self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\\nDEF")
         self.editor.textEdit.clear_transcript()        
     def step_AddRemoveDict(self):
+        log.debug("Test: AddRemoveDict")
         dict_dir = self.editor.textEdit.file_name / "dict"
         handle, new_dict = mkstemp(suffix = ".json")
         new_dict_contents = {"S": "Success"}
@@ -199,6 +204,7 @@ class TestTextEdit(unittest.TestCase):
         os.close(handle)
         pathlib.Path(new_dict).unlink()
     def step_SplitPar(self):
+        log.debug("Test: SplitPar")
         one_text = {0: {"style": "Normal", "strokes": [{"data": "ABCDEF", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"}]}}
         self.editor.textEdit.undo_stack.setClean()
         save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
@@ -214,6 +220,7 @@ class TestTextEdit(unittest.TestCase):
         stroke_data = self.editor.textEdit.textCursor().block().userData()["strokes"]
         self.assertEqual(len(stroke_data.data), 1)
     def step_SplitParSpace(self):
+        log.debug("Test: SplitParSpace")
         one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC DEF", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"}]}}
         self.editor.textEdit.undo_stack.setClean()
         save_json(one_text, self.editor.textEdit.file_name.joinpath(self.editor.textEdit.file_name.stem).with_suffix(".transcript"))
@@ -230,6 +237,7 @@ class TestTextEdit(unittest.TestCase):
         self.editor.textEdit.split_paragraph(remove_space = False)
         self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\n DEF")
     def step_MergePar(self):
+        log.debug("Test: MergePar")
         one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
                                                          {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
                     1: {"style": "Normal", "strokes": [{"data": "DEF", "element": "stroke", "stroke": "-T", "time": "2000-01-01T00:00:00.002"}]}}
@@ -249,6 +257,7 @@ class TestTextEdit(unittest.TestCase):
         self.editor.textEdit.undo_stack.undo()
         self.assertEqual(self.editor.textEdit.toPlainText(), "ABC\nDEF")
     def step_CheckStyleAttr(self):
+        log.debug("Test: CheckStyleAttr")
         one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
                                                          {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
                     1: {"style": "Question", "strokes": [{"data": "DEF", "element": "stroke", "stroke": "-T", "time": "2000-01-01T00:00:00.002"}]}}
@@ -262,6 +271,7 @@ class TestTextEdit(unittest.TestCase):
         cursor.setPosition(5)
         self.assertEqual(cursor.block().userData()["style"], "Question")
     def step_ChangeStyle(self):
+        log.debug("Test: ChangeStyle")
         one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
                                                          {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
                     1: {"style": "Question", "strokes": [{"data": "DEF", "element": "stroke", "stroke": "-T", "time": "2000-01-01T00:00:00.002"}]}}
@@ -279,6 +289,7 @@ class TestTextEdit(unittest.TestCase):
         tabs = [tab.position for tab in cursor.block().blockFormat().tabPositions()]
         self.assertEqual(96 in tabs, True)
     def step_ColorHighlight(self):
+        log.debug("Test: ColorHighlight")
         one_text = {0: {"style": "Normal", "strokes": [{"data": "ABC", "element": "stroke", "stroke": "S-", "time": "2000-01-01T00:00:00.001"},
                                                          {"data": "\n", "element": "stroke", "stroke": "R-R", "time": "2000-01-01T00:00:00.002"}]},
                     1: {"style": "Question", "strokes": [{"data": "DEF", "element": "text", "time": "2000-01-01T00:00:00.002"}]}}
@@ -300,6 +311,7 @@ class TestTextEdit(unittest.TestCase):
     def step_loadNewStyle(self):
         pass      
     def step_SwitchTranscriptsPage(self):
+        log.debug("Test: SwitchTranscriptPage")
         #change style param
         self.editor.page_max_lines.setValue(20)
         self.editor.textEdit.set_config_value("page_max_line", 20)
@@ -317,6 +329,7 @@ class TestTextEdit(unittest.TestCase):
         self.editor.textEdit.undo_stack.setClean()
         self.editor.close_file()     
     def step_SwitchTranscripts(self):
+        log.debug("Test: SwitchTranscripts")
         #change style param and mock click to set 
         self.editor.blockFontUnderline.setChecked(True)
         self.editor.style_edit()
@@ -337,7 +350,8 @@ class TestTextEdit(unittest.TestCase):
         cursor.setPosition(0)        
         self.assertTrue(self.editor.blockFontUnderline.isChecked())
         # not working
-    def step_insertText(self):
+    def step_InsertText(self):
+        log.debug("Test: InsertText")
         self.editor.textEdit.clear_transcript()
         self.editor.insert_text("This is one line.")
         self.assertEqual(self.editor.textEdit.toPlainText(), "This is one line.")
@@ -369,7 +383,7 @@ class testDialogWindow(QDialog, Ui_testDialog):
                     "step_ChangeStyle": "Text properly styled when style changed manually",
                     "step_ColorHighlight": "Change highlight color",
                     "step_SwitchTranscriptsPage": "Change page param with transcript switch",
-                    "step_insertText": "Inserting normal text"}
+                    "step_InsertText": "Inserting normal text"}
         last = len(self.selection)
         counter = 0
         for i, des in self.selection.items():

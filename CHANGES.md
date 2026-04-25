@@ -1,11 +1,12 @@
 # CHANGES
 
-## Ver 4.1.1
+## Ver 4.2.0
 
 New:
 
 - Set window opaqueness and whether to stay on top (+ documentation)
 - Translate tape now controllable: translate one stroke, 10, or all remaining 
+- User manual is now bundled, can be viewed directly
 
 Change:
 
@@ -21,6 +22,7 @@ Internal:
 
 - use new enum blockState for userState in QTextEdit
 - refactored string insertion for single vs multi-lines
+- tests should have a log debug with their name
 
 ## Ver 4.1.0
 

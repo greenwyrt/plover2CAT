@@ -138,6 +138,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
     :ivar engine: Plover engine instance
     :ivar video: holds a ``QVideoWidget`` if one exists for media in transcript
     :ivar textEdit: hold current transcript 
+    :ivar dock_status: dict, key: dock Object Name, value: visibility status
     :ivar index_dialog: instance of ``indexDialogWindow``
     :ivar caption_dialog: instance of ``captionDialogWindow``
     :ivar tape_dialog: instance of ``tapeDialogWindow``
@@ -352,6 +353,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     @Slot(QAction)
     def log_menu(self, action):
+        """Log every action clicked."""
         self.display_message(f"Menu item activated: {action.text()}")
 
     def set_shortcuts(self):
@@ -422,28 +424,23 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                         "Fugue icons are by Yusuke Kamiyamane, under the Creative Commons Attribution 3.0 License.")
 
     @Slot()
-    def open_help(self):
-        """Link to Readthedocs help pages.
-        """
-        log.debug("User activated 'User Manual' link.")
-        user_manual_link = QUrl("https://plover2cat.readthedocs.io/en/latest/")
-        QtGui.QDesktopServices.openUrl(user_manual_link)
-
-    @Slot()
     def open_qt_help(self):
+        """Open bundled user manual."""
         self.help_dialog.open()
 
     @Slot()
     def view_log(self):
+        """Displays existing Plover log in test dialog."""
         self.open_tester()
         self.test_dialog.display_log()
 
     @Slot()
     def open_tester(self):
+        """Opens test dialog."""
         if not self.test_dialog:
             self.test_dialog = testDialogWindow(self)
         self.test_dialog.show()
-        self.test_dialog.activateWindow()  
+        self.test_dialog.activateWindow()
 
     @Slot(str)            
     def display_message(self, txt):
@@ -460,8 +457,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     @Slot()
     def update_gui(self):
-        """Wrapper for updating parts of GUI when cursor changes position.
-        """
+        """Wrapper for updating parts of GUI when cursor changes position."""
         if not self.textEdit:
             return
         current_cursor = self.textEdit.textCursor()
@@ -470,16 +466,24 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.refresh_steno_display(current_cursor)
             self.display_block_data()
             self.display_position()
-            self.update_style_display(self.textEdit.textCursor().block().userData()["style"])
-            self.update_navigation()    
+            self.update_style_display(
+                self.textEdit.textCursor().block().userData()["style"]
+            )
+            self.update_navigation()
 
     def display_position(self):
+        """Updates cursor position on status bar."""
         current_cursor = self.textEdit.textCursor()
-        self.cursor_status.setText("Par, Char: {line}, {char}".format(line = current_cursor.blockNumber(), char = current_cursor.positionInBlock())) 
+        self.cursor_status.setText(
+            "Par, Char: {line}, {char}".format(
+                line=current_cursor.blockNumber(), char=current_cursor.positionInBlock()
+            )
+        )
 
     @Slot(str)
     def update_tape(self, txt):
         """Update tape with new stroke(s).
+
         :param str txt: line(s) from tape
         """
         # todo: if ever tape format changes, alter here
@@ -499,11 +503,10 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             item.setText(el.to_text())
             item.setData(Qt.ToolTipRole, el.to_display())
             item.setData(Qt.UserRole, ind)
-            self.parSteno.addItem(item)     
+            self.parSteno.addItem(item)
 
     def display_block_data(self):
-        """Display paragraph attributes and set style if necessary.
-        """
+        """Display paragraph attributes and set style if necessary."""
         current_cursor = self.textEdit.textCursor()
         block_number = current_cursor.blockNumber()
         block_data = current_cursor.block().userData()
@@ -512,15 +515,25 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         self.editorParagraphLabel.setText(str(block_number))
         if block_data["creationtime"]:
-            self.editorCreationTime.setDateTime(QDateTime.fromString(block_data["creationtime"],  "yyyy-MM-ddTHH:mm:ss.zzz")) 
+            self.editorCreationTime.setDateTime(
+                QDateTime.fromString(
+                    block_data["creationtime"], "yyyy-MM-ddTHH:mm:ss.zzz"
+                )
+            )
         if block_data["edittime"]:
-            self.editorEditTime.setDateTime(QDateTime.fromString(block_data["edittime"],  "yyyy-MM-ddTHH:mm:ss.zzz"))
+            self.editorEditTime.setDateTime(
+                QDateTime.fromString(block_data["edittime"], "yyyy-MM-ddTHH:mm:ss.zzz")
+            )
         if block_data["audiostarttime"]:
-            self.editorAudioStart.setTime(QTime.fromString(block_data["audiostarttime"], "HH:mm:ss.zzz"))
+            self.editorAudioStart.setTime(
+                QTime.fromString(block_data["audiostarttime"], "HH:mm:ss.zzz")
+            )
         else:
             self.editorAudioStart.setTime(QTime(0, 0, 0, 0))
         if block_data["audioendtime"]:
-            self.editorAudioEnd.setTime(QTime.fromString(block_data["audioendtime"], "HH:mm:ss.zzz"))
+            self.editorAudioEnd.setTime(
+                QTime.fromString(block_data["audioendtime"], "HH:mm:ss.zzz")
+            )
         else:
             self.editorAudioEnd.setTime(QTime(0, 0, 0, 0))
         if block_data["notes"]:
@@ -534,7 +547,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     @Slot()
     @Slot(QTextCursor)
-    def refresh_steno_display(self, cursor = None):
+    def refresh_steno_display(self, cursor=None):
         """Refresh steno display with data from cursor paragraph.
 
         :param cursor: a ``QTextCursor``, default ``None`` for current cursor
@@ -621,7 +634,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         right_margin = block_style.rightMargin() if block_style.rightMargin() else 0
         top_margin = block_style.topMargin() if block_style.topMargin() else 0
         bottom_margin = block_style.bottomMargin() if block_style.bottomMargin() else 0
-        line_spacing = int(block_style.lineHeight() if block_style.lineHeight() else 100)
+        line_spacing = int(
+            block_style.lineHeight() if block_style.lineHeight() else 100
+        )
         self.blockTextIndent.setValue(pixel_to_in(text_indent))
         self.blockLeftMargin.setValue(pixel_to_in(left_margin))
         self.blockRightMargin.setValue(pixel_to_in(right_margin))
@@ -631,17 +646,23 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.blockParentStyle.clear()
         self.blockParentStyle.addItems([*self.textEdit.styles])
         if "defaultoutlinelevel" in self.textEdit.styles[style]:
-            self.blockHeadingLevel.setCurrentText(self.textEdit.styles[style]["defaultoutlinelevel"])
+            self.blockHeadingLevel.setCurrentText(
+                self.textEdit.styles[style]["defaultoutlinelevel"]
+            )
         else:
             self.blockHeadingLevel.setCurrentIndex(0)
         if "parentstylename" in self.textEdit.styles[style]:
-            self.blockParentStyle.setCurrentText(self.textEdit.styles[style]["parentstylename"])
+            self.blockParentStyle.setCurrentText(
+                self.textEdit.styles[style]["parentstylename"]
+            )
         else:
             self.blockParentStyle.setCurrentIndex(-1)
         self.blockNextStyle.clear()
         self.blockNextStyle.addItems([*self.textEdit.styles])
         if "nextstylename" in self.textEdit.styles[style]:
-            self.blockNextStyle.setCurrentText(self.textEdit.styles[style]["nextstylename"])
+            self.blockNextStyle.setCurrentText(
+                self.textEdit.styles[style]["nextstylename"]
+            )
         else:
             self.blockNextStyle.setCurrentIndex(-1)
 
@@ -661,7 +682,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         menu.addAction(self.actionPaste)
         menu.exec_(self.textEdit.viewport().mapToGlobal(pos))
 
-    def menu_enabling(self, value = True):
+    def menu_enabling(self, value=True):
         """Disable (or enable) GUI options for transcript.
 
         :param bool value: default ``True`` to disable all menus not needed when no transcript open
@@ -685,7 +706,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionClose.setEnabled(not value)
         # self.actionShowAllCharacters.setEnabled(not value)
 
-    def audio_menu_enabling(self, value = True):
+    def audio_menu_enabling(self, value=True):
         """Disable (or enable) GUI options for when audio is loaded and make signal/slot connections.
 
         :param bool value: default ``True`` for when audio is present and GUI should change
@@ -713,8 +734,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.audio_seeker.sliderMoved.connect(self.textEdit.player.setPosition)
             self.textEdit.audio_position_changed.connect(self.update_seeker_track)
             self.textEdit.audio_length_changed.connect(self.update_duration)
-            self.actionSkipForward.triggered.connect(lambda: self.textEdit.player.setPosition(self.textEdit.player.position() + 5000))
-            self.actionSkipBack.triggered.connect(lambda: self.textEdit.player.setPosition(self.textEdit.player.position() - 5000))
+            self.actionSkipForward.triggered.connect(
+                lambda: self.textEdit.player.setPosition(
+                    self.textEdit.player.position() + 5000
+                )
+            )
+            self.actionSkipBack.triggered.connect(
+                lambda: self.textEdit.player.setPosition(
+                    self.textEdit.player.position() - 5000
+                )
+            )
             self.playRate.valueChanged.connect(self.textEdit.player.setPlaybackRate)
             self.audioDelay.setValue(self.textEdit.audio_delay)
             self.audioDelay.valueChanged.connect(self.set_audio_delay)
@@ -735,6 +764,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.audioDelay.setValue(0)
             self.audio_output.currentIndexChanged.disconnect()
 
+    @Slot()
     def set_audio_output(self):
         self.textEdit.player.audioOutput().setDevice(self.audio_output.currentData())
 
@@ -746,7 +776,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         self.audio_seeker.setMaximum(duration)
         self.audio_duration.setText(ms_to_hours(duration))
-    
+
     @Slot(int)
     def update_seeker_track(self, position):
         """Update position on seeker and label to position of media.
@@ -757,40 +787,55 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.audio_curr_pos.setText(ms_to_hours(position))
 
     def get_tapey_tape(self):
-        """Obtain suggestions from Tapey Tape file.
-        """
+        """Obtain suggestions from Tapey Tape file."""
         ## from tapeytape default, maybe make selectable in future?
         config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
-        tapey_tape_location = config_dir.joinpath('tapey_tape.txt')
+        tapey_tape_location = config_dir.joinpath("tapey_tape.txt")
         log.debug("Trying to load tapey tape from default location.")
         if not tapey_tape_location.exists():
             return
-        stroke_search = [re.findall(re_strokes, line) for line in open(tapey_tape_location)]
+        stroke_search = [
+            re.findall(re_strokes, line) for line in open(tapey_tape_location)
+        ]
         stroke_search = [x[0] for x in stroke_search if x]
         ## number maybe adjusted in future? both number of occurrences and number of words to place into table
         ## this uses frequency order
         if self.suggest_sort.isChecked():
-            most_common_strokes = [word for word, word_count in Counter(stroke_search).items() if word_count > 2]
-            most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
+            most_common_strokes = [
+                word
+                for word, word_count in Counter(stroke_search).items()
+                if word_count > 2
+            ]
+            most_common_strokes = most_common_strokes[
+                : min(11, len(most_common_strokes) + 1)
+            ]
             most_common_strokes = most_common_strokes[::-1]
-        else: 
-            most_common_strokes= [word for word, word_count in Counter(stroke_search).most_common(10) if word_count > 2]
+        else:
+            most_common_strokes = [
+                word
+                for word, word_count in Counter(stroke_search).most_common(10)
+                if word_count > 2
+            ]
         first_stroke = [stroke.split()[0] for stroke in most_common_strokes]
-        words = [self.engine.lookup(tuple(stroke.split("/"))) for stroke in first_stroke]
+        words = [
+            self.engine.lookup(tuple(stroke.split("/"))) for stroke in first_stroke
+        ]
         self.suggestTable.clearContents()
         self.suggestTable.setRowCount(len(words))
         self.suggestTable.setColumnCount(2)
         for row in range(len(words)):
             self.suggestTable.setItem(row, 0, QTableWidgetItem(words[row]))
-            self.suggestTable.setItem(row, 1, QTableWidgetItem(most_common_strokes[row]))
+            self.suggestTable.setItem(
+                row, 1, QTableWidgetItem(most_common_strokes[row])
+            )
         self.suggestTable.resizeColumnsToContents()
 
     def get_clippy(self):
-        """Obtain suggestions from plover-clippy-2 file by parsing 
+        """Obtain suggestions from plover-clippy-2 file by parsing
         default clippy output based on color codes.
         """
         config_dir = pathlib.Path(plover.oslayer.config.CONFIG_DIR)
-        clippy_location = config_dir.joinpath('clippy_2.org')
+        clippy_location = config_dir.joinpath("clippy_2.org")
         log.debug("Trying to load clippy from default location")
         if not clippy_location.exists():
             # log.debug("Clippy load failed")
@@ -805,25 +850,43 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         combined_stroke_search = dict(zip(first_stroke_search, stroke_search))
         log.debug("stroke_search = " + str(stroke_search))
         if self.suggest_sort.isChecked():
-            most_common_strokes = [word for word, word_count in reversed(Counter(first_stroke_search).items()) if word_count > 2]
-            most_common_strokes = most_common_strokes[:min(11, len(most_common_strokes) + 1)]
+            most_common_strokes = [
+                word
+                for word, word_count in reversed(Counter(first_stroke_search).items())
+                if word_count > 2
+            ]
+            most_common_strokes = most_common_strokes[
+                : min(11, len(most_common_strokes) + 1)
+            ]
         else:
-            most_common_strokes = [word for word, word_count in Counter(first_stroke_search).most_common(10) if word_count > 2]
+            most_common_strokes = [
+                word
+                for word, word_count in Counter(first_stroke_search).most_common(10)
+                if word_count > 2
+            ]
         log.debug("most_common_strokes = " + str(most_common_strokes))
-        words = [self.engine.lookup(tuple(stroke.split("/"))).strip() for stroke in most_common_strokes]
+        words = [
+            self.engine.lookup(tuple(stroke.split("/"))).strip()
+            for stroke in most_common_strokes
+        ]
         log.debug("words = " + str(words))
         self.suggestTable.clearContents()
         self.suggestTable.setRowCount(len(words))
         self.suggestTable.setColumnCount(2)
         for row in range(len(words)):
             self.suggestTable.setItem(row, 0, QTableWidgetItem(words[row]))
-            self.suggestTable.setItem(row, 1, QTableWidgetItem(", ".join(combined_stroke_search[most_common_strokes[row]])))
+            self.suggestTable.setItem(
+                row,
+                1,
+                QTableWidgetItem(
+                    ", ".join(combined_stroke_search[most_common_strokes[row]])
+                ),
+            )
         self.suggestTable.resizeColumnsToContents()
 
     @Slot()
     def get_suggestions(self):
-        """Wrapper to get suggestions from Tapey Tape or plover-clippy-2
-        """
+        """Wrapper to get suggestions from Tapey Tape or plover-clippy-2"""
         if not self.textEdit:
             return
         if not self.dock_status["dockSuggest"]:
@@ -833,7 +896,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         elif self.suggest_source.currentText() == "clippy_2":
             self.get_clippy()
         else:
-            log.debug("Unknown suggestion source %s!" % self.suggest_source.currentText())
+            log.debug(
+                "Unknown suggestion source %s!" % self.suggest_source.currentText()
+            )
 
     @Slot(int)
     def update_record_time(self):
@@ -843,22 +908,22 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     @Slot()
     def open_root(self):
-        """Open root directory of current transcript.
-        """
+        """Open root directory of current transcript."""
         selected_folder = pathlib.Path(self.textEdit.file_name)
         self.display_message(f"User open file directory {str(selected_folder)}")
         if platform.startswith("win"):
             startfile(selected_folder)
         elif platform.startswith("linux"):
-            subprocess.call(['xdg-open', selected_folder])
+            subprocess.call(["xdg-open", selected_folder])
         elif platform.startswith("darwin"):
-            subprocess.call(['open', selected_folder])
+            subprocess.call(["open", selected_folder])
         else:
-            self.display_message("Unknown operating system. Not opening file directory.")
+            self.display_message(
+                "Unknown operating system. Not opening file directory."
+            )
 
     def recent_file_menu(self):
-        """Generate menu items for recent files.
-        """
+        """Generate menu items for recent files."""
         log.debug("Updating recent files menu.")
         self.menuRecentFiles.clear()
         self.clear_layout(self.recentfileflow)
@@ -875,7 +940,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.menuRecentFiles.addAction(action)
             tb = QToolButton()
             icon = QtGui.QIcon()
-            icon.addFile(":/resources/document-text-large.png", QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            icon.addFile(
+                ":/resources/document-text-large.png",
+                QtCore.QSize(),
+                QtGui.QIcon.Normal,
+                QtGui.QIcon.Off,
+            )
             tb.setDefaultAction(action)
             tb.setIcon(icon)
             tb.setIconSize(QSize(16, 16))
@@ -885,8 +955,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.recentfileflow.addWidget(tb)
 
     def clear_layout(self, layout):
-        """Clear flow layout for recent files.
-        """
+        """Clear flow layout for recent files."""
         if layout is not None:
             while layout.count():
                 item = layout.takeAt(0)
@@ -895,19 +964,18 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
                     widget.deleteLater()
                 else:
                     self.clearLayout(item.layout())
+
     @Slot()
     def change_window_font(self):
-        """Change window font.
-        """
+        """Change window font."""
         valid, font = QFontDialog.getFont()
         if valid:
             self.setFont(font)
-            log.debug("User set window font.")   
+            log.debug("User set window font.")
 
     @Slot()
     def change_backgrounds(self):
-        """Change window background color.
-        """
+        """Change window background color."""
         palette = self.palette()
         old_color = palette.color(QPalette.Base)
         color = QColorDialog.getColor(old_color)
@@ -919,8 +987,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     @Slot()
     def change_tape_font(self):
-        """Change paper tape font.
-        """
+        """Change paper tape font."""
         font, valid = QFontDialog.getFont()
         if valid:
             self.strokeList.setFont(font)
@@ -938,7 +1005,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if self.textEdit:
             self.textEdit.get_highlight_colors()
             self.refresh_editor_styles()
-    
+
     def update_highlight_color(self):
         """Updates element menu action with new colors for element"""
         settings = QSettings("Plover2CAT-4", "OpenCAT")
@@ -955,41 +1022,53 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             action.setIcon(ic)
             self.menuHighlightColors.addAction(action)
 
-    @Slot()        
+    @Slot()
     def show_invisible_char(self):
-        """Show/hide invisible chars in current transcript.
-        """
+        """Show/hide invisible chars in current transcript."""
         if not self.textEdit:
             return
         doc_options = self.textEdit.document().defaultTextOption()
         if self.actionShowAllCharacters.isChecked():
-            self.display_message("User enabled show invisible characters.")      
-            doc_options.setFlags(doc_options.flags() | QTextOption.ShowTabsAndSpaces | QTextOption.ShowLineAndParagraphSeparators)
+            self.display_message("User enabled show invisible characters.")
+            doc_options.setFlags(
+                doc_options.flags()
+                | QTextOption.ShowTabsAndSpaces
+                | QTextOption.ShowLineAndParagraphSeparators
+            )
         else:
-            self.display_message("User disabled show invisible characters.")      
-            doc_options.setFlags(doc_options.flags() & ~QTextOption.ShowTabsAndSpaces & ~QTextOption.ShowLineAndParagraphSeparators)
+            self.display_message("User disabled show invisible characters.")
+            doc_options.setFlags(
+                doc_options.flags()
+                & ~QTextOption.ShowTabsAndSpaces
+                & ~QTextOption.ShowLineAndParagraphSeparators
+            )
         self.textEdit.document().setDefaultTextOption(doc_options)
 
     @Slot()
     def change_window_opaqueness(self):
-        """User set opacity of window.
-        """
+        """User set opacity of window."""
         log.debug("Setting Opacity.")
-        input, ok = QInputDialog().getInt(self, "Set Opaque", "0-100 (Invisible to Opaque)", 100, 0, 100, 5)
+        input, ok = QInputDialog().getInt(
+            self, "Set Opaque", "0-100 (Invisible to Opaque)", 100, 0, 100, 5
+        )
         if ok:
             self.parent().setWindowOpacity(input / 100)
 
     @Slot()
     def change_stay_on_top(self, value):
         """Keep window on top.
-        
+
         :param bool value: boolean state
         """
         log.debug("Setting stay on top.")
         if value:
-            self.parent().setWindowFlags(self.parent().windowFlags() | Qt.WindowStaysOnTopHint)
+            self.parent().setWindowFlags(
+                self.parent().windowFlags() | Qt.WindowStaysOnTopHint
+            )
         else:
-            self.parent().setWindowFlags(self.parent().windowFlags() & ~Qt.WindowStaysOnTopHint)
+            self.parent().setWindowFlags(
+                self.parent().windowFlags() & ~Qt.WindowStaysOnTopHint
+            )
         self.parent().show()
 
     @Slot()
@@ -1011,13 +1090,12 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         :param pane: a ``QWidget`` in the Toolbox dock's ``QTabWidget``
         """
         if not self.dock_status["dockProp"]:
-            self.dockProp.setVisible(True)    
+            self.dockProp.setVisible(True)
         self.tabWidget.setCurrentWidget(pane)
-        log.debug(f"User set {pane.objectName()} pane.") 
+        log.debug(f"User set {pane.objectName()} pane.")
 
     def show_find_replace(self):
-        """Show Find/Replace pane in toolbox, and fill search field with text if selection.
-        """
+        """Show Find/Replace pane in toolbox, and fill search field with text if selection."""
         if self.textEdit.textCursor().hasSelection() and self.search_text.isChecked():
             self.search_term.setText(self.textEdit.textCursor().selectedText())
         if not self.dock_status["dockProp"]:
@@ -1026,21 +1104,26 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug("User set find pane visible.")
 
     def show_stenospell(self):
-        """Show Stenospell pane in toolbox, and fill search field with text if selection.
-        """
+        """Show Stenospell pane in toolbox, and fill search field with text if selection."""
         current_cursor = self.textEdit.textCursor()
         if current_cursor.hasSelection():
             current_block = current_cursor.block()
             start_pos = current_cursor.selectionStart() - current_block.position()
             end_pos = current_cursor.selectionEnd() - current_block.position()
-            start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(start_pos)
-            end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(end_pos)
-            underlying_strokes = current_block.userData()["strokes"].extract_steno(start_stroke_pos[0], end_stroke_pos[1])
+            start_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(
+                start_pos
+            )
+            end_stroke_pos = current_block.userData()["strokes"].stroke_pos_at_pos(
+                end_pos
+            )
+            underlying_strokes = current_block.userData()["strokes"].extract_steno(
+                start_stroke_pos[0], end_stroke_pos[1]
+            )
             underlying_steno = underlying_strokes.to_strokes()
             self.steno_outline.setText(underlying_steno)
         if not self.dock_status["dockProp"]:
-            self.dockProp.setVisible(True) 
-        self.tabWidget.setCurrentWidget(self.stenospell_pane)  
+            self.dockProp.setVisible(True)
+        self.tabWidget.setCurrentWidget(self.stenospell_pane)
         log.debug("User set steno spell pane visible.")
 
     def search_online(self, link):
@@ -1056,6 +1139,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             return
         QDesktopServices.openUrl(QUrl(link.format(current_cursor.selectedText())))
 
+    @Slot(QListWidgetItem)
     def heading_navigation(self, item):
         """Jump to paragraph from navigation dock.
 
@@ -1065,13 +1149,20 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         log.debug(f"User navigating to block {block_number}.")
         self.textEdit.navigate_to(block_number)
 
+    @Slot()
     def jump_par(self):
-        """Jump to paragraph based on user-input paragraph number.
-        """
+        """Jump to paragraph based on user-input paragraph number."""
         current_cursor = self.textEdit.textCursor()
         max_blocks = self.textEdit.document().blockCount()
         current_block_num = current_cursor.blockNumber()
-        block_num, ok = QInputDialog().getInt(self, "Jump to paragraph...", "Paragraph (0-based): ", current_block_num, 0, max_blocks)
+        block_num, ok = QInputDialog().getInt(
+            self,
+            "Jump to paragraph...",
+            "Paragraph (0-based): ",
+            current_block_num,
+            0,
+            max_blocks,
+        )
         if ok:
             log.debug(f"User set jump to block {block_num}")
             self.textEdit.navigate_to(block_num)
