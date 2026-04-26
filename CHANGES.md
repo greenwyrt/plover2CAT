@@ -7,11 +7,13 @@ New:
 - Set window opaqueness and whether to stay on top (+ documentation)
 - Translate tape now controllable: translate one stroke, 10, or all remaining 
 - User manual is now bundled, can be viewed directly
+- Added Wiktionary to available online lookups
 
 Change:
 
 - Recent Files now has smaller icons and text to side (more like a list)
 - Clicks on menu items now logged in status bar
+- Spellcheck now starts with word under cursor rather than first word after cursor
 
 Bugfix:
 
