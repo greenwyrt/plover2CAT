@@ -387,6 +387,22 @@ class TestTextEdit(unittest.TestCase):
         final_count = self.editor.dict_selection.count()
         self.assertEqual(initial_count + 1, final_count)
 
+    def step_VerifyOnlineUrls(self):
+        log.debug("Test: VerifyOnlineUrls")
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
+        }
+        for url in [
+            "https://en.wiktionary.org/wiki/Special:Search/{0}",
+            "https://en.wikipedia.org/wiki/Special:Search/{0}",
+            "http://www.merriam-webster.com/dictionary/{0}",
+            "https://www.oed.com/search/dictionary/?scope=Entries&q={0}",
+            "https://www.google.com/search?q={0}",
+            "https://duckduckgo.com/?q={0}",
+        ]:
+            res = requests.get(url.format("test"), headers=headers)
+            self.assertIn(res.status_code, [200, 202])
+
         
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
@@ -410,7 +426,8 @@ class testDialogWindow(QDialog, Ui_testDialog):
                     "step_ColorHighlight": "Change highlight color",
                     "step_SwitchTranscriptsPage": "Change page param with transcript switch",
                     "step_InsertText": "Inserting normal text",
-                    "step_VerifyLoadSpellCheck": "Load spellchecking*"}
+                    "step_VerifyLoadSpellCheck": "Load spellchecking*",
+                    "step_VerifyOnlineUrls": "Online lookup links*"}
         last = len(self.selection)
         counter = 0
         for i, des in self.selection.items():

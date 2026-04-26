@@ -308,6 +308,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionParagraph.triggered.connect(lambda: self.show_toolbox_pane(self.paragraph_pane))
         self.actionSpellcheck.triggered.connect(lambda: self.show_toolbox_pane(self.spellcheck_pane))
         self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
+        self.actionSearchWiktionary.triggered.connect(lambda: self.search_online("https://en.wiktionary.org/wiki/Special:Search/{0}"))
         self.actionSearchWikipedia.triggered.connect(lambda: self.search_online("https://en.wikipedia.org/wiki/Special:Search/{0}"))
         self.actionSearchMerriamWebster.triggered.connect(lambda: self.search_online("http://www.merriam-webster.com/dictionary/{0}"))
         self.actionSearchOED.triggered.connect(lambda: self.search_online("https://www.oed.com/search/dictionary/?scope=Entries&q={0}"))
@@ -1167,15 +1168,24 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             log.debug(f"User set jump to block {block_num}")
             self.textEdit.navigate_to(block_num)
 
+    @Slot(int)
     def check_undo_stack(self, index):
         """Refresh config and style GUI based on labels in ``QUndoStack``.
+
+        :param int index: ``indexChanged`` emitted by ``QUndoStack``
         """
         ## bit of hack because it depends on display text of a ``QUndoAction``
-        if self.textEdit.undo_stack.undoText().startswith("Config") or self.textEdit.undo_stack.redoText().startswith("Config"):
+        if self.textEdit.undo_stack.undoText().startswith(
+            "Config"
+        ) or self.textEdit.undo_stack.redoText().startswith("Config"):
             self.update_config_gui()
-        if self.textEdit.undo_stack.undoText().startswith("Style:") or self.textEdit.undo_stack.redoText().startswith("Style:"):
+        if self.textEdit.undo_stack.undoText().startswith(
+            "Style:"
+        ) or self.textEdit.undo_stack.redoText().startswith("Style:"):
             self.refresh_editor_styles()
-        if self.textEdit.undo_stack.undoText().startswith("Fields:") or self.textEdit.undo_stack.redoText().startswith("Fields:"):
+        if self.textEdit.undo_stack.undoText().startswith(
+            "Fields:"
+        ) or self.textEdit.undo_stack.redoText().startswith("Fields:"):
             self.update_config_gui()
 
     def update_config_gui(self):
@@ -2483,8 +2493,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         for candidate in res:
             self.stenospell_res.addItem(candidate[0])
 
+    @Slot(int)
     def set_sp_dict(self, index):
         """Load selected spellchecking dictionary.
+
+        :param int index: index of selection in spellcheck dictionary combobox
         """
         lang = self.dict_selection.itemText(index)
         log.debug("Selecting %s dictionary for spellcheck" % lang)
@@ -2493,23 +2506,35 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
 
     def sp_check(self, word):
         """Perform spellcheck for a word.
+
+        :param word: word string to check
         """
         return self.textEdit.dictionary.lookup(word)
 
     def spellcheck(self):
-        """Scan text word by word and spellcheck.
-        """
+        """Scan text word by word and spellcheck."""
         log.debug("Perform spellcheck.")
         current_cursor = self.textEdit.textCursor()
         self.textEdit.setTextCursor(current_cursor)
         while not current_cursor.atEnd():
-            current_cursor.movePosition(QTextCursor.NextWord)
+            current_cursor.movePosition(QTextCursor.StartOfWord)
             current_cursor.movePosition(QTextCursor.EndOfWord, QTextCursor.KeepAnchor)
             result = self.sp_check(current_cursor.selectedText())
-            if not result and current_cursor.selectedText() not in self.textEdit.spell_ignore:
+            if (
+                not result
+                and current_cursor.selectedText() not in self.textEdit.spell_ignore
+            ):
                 self.textEdit.setTextCursor(current_cursor)
-                log.debug("Spellcheck: this word %s not in dictionary." % current_cursor.selectedText())
-                suggestions = [sug for sug in self.textEdit.dictionary.suggest(current_cursor.selectedText())]
+                log.debug(
+                    "Spellcheck: this word %s not in dictionary."
+                    % current_cursor.selectedText()
+                )
+                suggestions = [
+                    sug
+                    for sug in self.textEdit.dictionary.suggest(
+                        current_cursor.selectedText()
+                    )
+                ]
                 self.spellcheck_result.setText(current_cursor.selectedText())
                 self.spellcheck_suggestions.clear()
                 self.spellcheck_suggestions.addItems(suggestions)
@@ -2517,15 +2542,16 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         if current_cursor.atEnd():
             QMessageBox.information(self, "Plover2CAT", "End of document.")
 
+    @Slot()
     def sp_ignore_all(self):
-        """Add word to be ignored by spellchecking.
-        """
+        """Add word to be ignored by spellchecking."""
         if self.spellcheck_result.text() != "":
             self.textEdit.spell_ignore.append(self.spellcheck_result.text())
             log.debug("Ignored spellcheck words: %s" % self.textEdit.spell_ignore)
         self.spellcheck()
 
-    def sp_insert_suggest(self, item = None):
+    @Slot(QListWidgetItem)
+    def sp_insert_suggest(self, item=None):
         """Perform spellcheck replacement.
 
         :param item: a ``QListWidgetItem``, if ``None``, use selected from GUI
@@ -2534,8 +2560,8 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             item = self.spellcheck_suggestions.currentItem()
         log.debug("Spellcheck correction: %s" % item.text())
         self.textEdit.undo_stack.beginMacro("Spellcheck: correct to %s" % item.text())
-        self.replace(to_next = False, steno = "", replace_term= item.text())
-        self.textEdit.undo_stack.endMacro()  
+        self.replace(to_next=False, steno="", replace_term=item.text())
+        self.textEdit.undo_stack.endMacro()
 
     def search(self, direction = 1):
         """Search wrapper.
