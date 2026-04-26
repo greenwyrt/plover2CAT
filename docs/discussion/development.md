@@ -147,6 +147,14 @@ PySide6 decorators improve memory/performance
 
 ## Possible improvements list
 
+- [ ] writing aids
+    - languagetool (https://pypi.org/project/language_tool_python/)
+        - returns JSON format
+        - need to retrieve response and format into something to apply
+    - dictionary (Stardict, see python library: https://github.com/lig/pystardict)
+    - thesaurus (libreoffice: MyThes)
+
+
 - [ ] find all not working with wrap, does seem to find above
 
 - [ ] stroke count (status bar/dock window)
@@ -191,7 +199,6 @@ PySide6 decorators improve memory/performance
     - [ ] pause audio when stop writing for amount of time
     - [ ] during playback, skip silence (or threshold)
 - [ ] have cursor follow playback
-- [ ] writing aids (grammar with languagetool, more work on dictionary/thesaurus)
 - [ ] merge/split tests with new style
 - [ ] do "reset" of paragraphs based on block_stroke data, edit using SequenceMatcher (not plausible to use for all edits?)
 - [ ] find all display navigation will not be correct if document modified, but also cannot use isClean of undo stack to track changes

@@ -510,7 +510,8 @@ class PloverCATEditor(QTextEdit):
         
         :param str dic_path: language code or path to dic files
         """
-        self.dictionary = Dictionary.from_files(dic_path)
+        stemmed_path = str(dic_path).removesuffix(".dic")
+        self.dictionary = Dictionary.from_files(stemmed_path)
         self.dictionary_name = pathlib.Path(dic_path).stem
 
     def load_dicts(self, engine, dictionaries = None):

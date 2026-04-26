@@ -1356,6 +1356,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             dics = [file for file in default_spellcheck_path.iterdir() if str(file).endswith("dic")]
             for dic in dics:
                     self.dict_selection.addItem(dic.stem, dic)
+        plover2cat_spellcheck_path = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "spellcheck"
+        if plover2cat_spellcheck_path.exists():
+            dics = [file for file in plover2cat_spellcheck_path.iterdir() if str(file).endswith("dic")]
+            for dic in dics:
+                    self.dict_selection.addItem(dic.stem, dic)            
         self.dict_selection.setCurrentText(self.textEdit.dictionary_name)
 
     def clipboard_menu(self):
