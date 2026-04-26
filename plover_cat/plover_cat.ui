@@ -2521,6 +2521,10 @@ position.</string>
         <property name="enabled">
          <bool>true</bool>
         </property>
+        <attribute name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/headphone.png</normaloff>:/resources/headphone.png</iconset>
+        </attribute>
         <attribute name="title">
          <string>Text to Speech</string>
         </attribute>

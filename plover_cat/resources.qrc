@@ -57,5 +57,6 @@
     <file>resources/arrow-split.png</file>
     <file>resources/arrow-join.png</file>
     <file>resources/icon.svg</file>
+    <file>resources/headphone.png</file>
   </qresource>
 </RCC>
