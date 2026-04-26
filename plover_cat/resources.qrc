@@ -58,5 +58,6 @@
     <file>resources/arrow-join.png</file>
     <file>resources/icon.svg</file>
     <file>resources/headphone.png</file>
+    <file>resources/address-book-blue.png</file>
   </qresource>
 </RCC>

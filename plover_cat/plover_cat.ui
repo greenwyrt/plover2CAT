@@ -74,7 +74,7 @@
    <set>QMainWindow::DockOption::AllowNestedDocks|QMainWindow::DockOption::AllowTabbedDocks|QMainWindow::DockOption::AnimatedDocks|QMainWindow::DockOption::VerticalTabs</set>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_24">
+   <layout class="QHBoxLayout" name="horizontalLayout_20">
     <item>
      <widget class="QTabWidget" name="mainTabs">
       <property name="focusPolicy">
@@ -120,7 +120,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Welcome to Plover2CAT. View the online user manual through the Help Menu. Create a new transcript or select a recent transcript below. </string>
+             <string>Welcome to Plover2CAT. View the user manual through the Help Menu. Create a new transcript or select a recent transcript below. </string>
             </property>
             <property name="textFormat">
              <enum>Qt::TextFormat::PlainText</enum>
@@ -404,6 +404,7 @@
     <addaction name="actionParagraph"/>
     <addaction name="actionSpellcheck"/>
     <addaction name="actionStenoSearch"/>
+    <addaction name="actionTextToSpeech"/>
     <addaction name="separator"/>
     <addaction name="actionSearchWiktionary"/>
     <addaction name="actionSearchMerriamWebster"/>
@@ -2687,6 +2688,41 @@ position.</string>
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="stardict_pane">
+        <attribute name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/resources/address-book-blue.png</normaloff>:/resources/address-book-blue.png</iconset>
+        </attribute>
+        <attribute name="title">
+         <string>Word Lookup</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_21">
+             <item>
+              <widget class="QComboBox" name="stardict"/>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="stardictQuery"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="stardictSearch">
+               <property name="text">
+                <string>Search</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QTextBrowser" name="stardictDisplay"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -3986,6 +4022,15 @@ position.</string>
   <action name="actionSearchWiktionary">
    <property name="text">
     <string>Wiktionary</string>
+   </property>
+  </action>
+  <action name="actionTextToSpeech">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/headphone.png</normaloff>:/resources/headphone.png</iconset>
+   </property>
+   <property name="text">
+    <string>Text to Speech</string>
    </property>
   </action>
  </widget>
