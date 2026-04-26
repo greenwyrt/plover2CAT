@@ -17,6 +17,7 @@ Bugfix:
 
 - position indicator in status bar now updates all the time, not just when tape is open
 - weird edgecase when more backspaces than document text (occurs if have been writing outside editor)
+- spellcheck dicts from plover2cat dir were not being added correctly
 
 Internal:
 

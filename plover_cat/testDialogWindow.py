@@ -1,6 +1,7 @@
 import unittest
 import pathlib
 import os
+import requests
 from tempfile import mkdtemp, mkstemp
 from shutil import rmtree
 from io import StringIO
@@ -362,6 +363,31 @@ class TestTextEdit(unittest.TestCase):
         self.editor.textEdit.insert_text(["This is one line.", "This is the second.", "This is 3?"])
         self.assertEqual(self.editor.textEdit.toPlainText(), "This is one line.\nThis is the second.\nThis is 3?")
 
+    def step_VerifyLoadSpellCheck(self):
+        log.debug("Test: VerifyLoadSpellCheck")
+        transcript_path = self.editor.textEdit.file_name
+        spellcheck_path = transcript_path / "spellcheck"
+        if not spellcheck_path.exists():
+            spellcheck_path.mkdir(exist_ok = True)
+        # these urls could change if libreoffice changes repo
+        # ta_IN does not have Plover system yet? bad choice if language is already being used
+        # unfortunately needs internet connection
+        aff_url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/refs/heads/master/ta_IN/ta_IN.aff"
+        dic_url = "https://raw.githubusercontent.com/LibreOffice/dictionaries/refs/heads/master/ta_IN/ta_IN.dic"
+        aff_path = spellcheck_path / "ta_IN.aff"
+        dic_path = spellcheck_path / "ta_IN.dic"
+        aff_data = requests.get(aff_url)
+        with open(aff_path, "wb") as f:
+            f.write(aff_data.content)
+        dic_data = requests.get(dic_url)
+        with open(dic_path, "wb") as f:
+            f.write(dic_data.content)
+        initial_count = self.editor.dict_selection.count()
+        self.editor.update_spell_gui()
+        final_count = self.editor.dict_selection.count()
+        self.assertEqual(initial_count + 1, final_count)
+
+        
 class testDialogWindow(QDialog, Ui_testDialog):
     """Dialog to run selected tests for editor and transcript.
     """
@@ -383,7 +409,8 @@ class testDialogWindow(QDialog, Ui_testDialog):
                     "step_ChangeStyle": "Text properly styled when style changed manually",
                     "step_ColorHighlight": "Change highlight color",
                     "step_SwitchTranscriptsPage": "Change page param with transcript switch",
-                    "step_InsertText": "Inserting normal text"}
+                    "step_InsertText": "Inserting normal text",
+                    "step_VerifyLoadSpellCheck": "Load spellchecking*"}
         last = len(self.selection)
         counter = 0
         for i, des in self.selection.items():
