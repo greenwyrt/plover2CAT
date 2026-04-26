@@ -51,9 +51,9 @@ From left to right, the UI elements are:
 
 The Toolbox dock contains several tabs, of which only one can be open at any time. 
 
-### Styling
+### Style
 
-The Styling tab contains UI controls for paragraph and text properties for the current paragraph style.
+The Style tab contains UI controls for paragraph and text properties for the current paragraph style.
 
 The first dropdown list shows the current style for the paragraph. Change the style for the paragraph by selecting another from the list.
 
@@ -119,7 +119,7 @@ The next text input is to hold the string to replace the match with, and buttons
 
 The three options that can be applied are `Match Case`, `Whole Word/Stroke` and `Wrap` may be disabled based on the kind of search selected.
 
-### Paragraph Properties
+### Paragraph
 
 This tab holds inputs for the common paragraph properties that are saved as second-level keys in the `transcript-{timestampe}.transcript` file, namely `creationtime`, `edittime`, `audiostarttime`, `audioendtime` and `notes`.
 
@@ -138,3 +138,23 @@ The `Search` button starts off a search for any words which do not pass spellche
 `Ignore All` will ignore this result in other parts of the document, only for the session.
 
 `Change` will change the detected result to the highlighted choice among the suggestions.
+
+### Steno Search
+
+This tab is used to search for the most similar outlines to the selected outline, based on edit distance.
+
+### Text to Speech
+
+This tab contains the settings for using the operating system's text to speech.
+
+Engine, language, voice are selections dependent on what the operating system provides. 
+
+Volume, rate, and pitch are also dependent on the voice provided as voices may differ in their base rates.
+
+`Play` starts the synthesis of the audio starting at cursor position. 
+
+`Pause` pauses audio if the option is available.
+
+`Resume` resumes audio if the option is available.
+
+`Stop` stops audio synthesis.
