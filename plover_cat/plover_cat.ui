@@ -398,6 +398,17 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
+    <widget class="QMenu" name="menuOnlineSearch">
+     <property name="title">
+      <string>Online Search</string>
+     </property>
+     <addaction name="actionSearchMerriamWebster"/>
+     <addaction name="actionSearchOED"/>
+     <addaction name="actionSearchWiktionary"/>
+     <addaction name="actionSearchWikipedia"/>
+     <addaction name="actionSearchGoogle"/>
+     <addaction name="actionSearchDuckDuckGo"/>
+    </widget>
     <addaction name="actionStyling"/>
     <addaction name="actionPageFormat"/>
     <addaction name="actionFindReplacePane"/>
@@ -406,12 +417,7 @@
     <addaction name="actionStenoSearch"/>
     <addaction name="actionTextToSpeech"/>
     <addaction name="separator"/>
-    <addaction name="actionSearchWiktionary"/>
-    <addaction name="actionSearchMerriamWebster"/>
-    <addaction name="actionSearchOED"/>
-    <addaction name="actionSearchWikipedia"/>
-    <addaction name="actionSearchGoogle"/>
-    <addaction name="actionSearchDuckDuckGo"/>
+    <addaction name="menuOnlineSearch"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
