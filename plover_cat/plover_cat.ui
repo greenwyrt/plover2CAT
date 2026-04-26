@@ -405,9 +405,10 @@
     <addaction name="actionSpellcheck"/>
     <addaction name="actionStenoSearch"/>
     <addaction name="separator"/>
-    <addaction name="actionSearchWikipedia"/>
+    <addaction name="actionSearchWiktionary"/>
     <addaction name="actionSearchMerriamWebster"/>
     <addaction name="actionSearchOED"/>
+    <addaction name="actionSearchWikipedia"/>
     <addaction name="actionSearchGoogle"/>
     <addaction name="actionSearchDuckDuckGo"/>
    </widget>
@@ -3976,6 +3977,11 @@ position.</string>
    </property>
    <property name="text">
     <string>Stay On Top</string>
+   </property>
+  </action>
+  <action name="actionSearchWiktionary">
+   <property name="text">
+    <string>Wiktionary</string>
    </property>
   </action>
  </widget>
