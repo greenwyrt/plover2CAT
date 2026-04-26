@@ -12,6 +12,13 @@ Plover2CAT dialogs have their own UI and code files as they subclass `QDialog`. 
 ```
 
 ```{eval-rst}
+.. automodule:: captionDialogWindow
+    :members:
+    :show-inheritance:
+    :member-order: bysource
+```
+
+```{eval-rst}
 .. automodule:: fieldDialogWindow
     :members:
     :show-inheritance:
@@ -19,7 +26,7 @@ Plover2CAT dialogs have their own UI and code files as they subclass `QDialog`. 
 ```
 
 ```{eval-rst}
-.. automodule:: shortcutDialogWindow
+.. automodule:: helpDialogWindow
     :members:
     :show-inheritance:
     :member-order: bysource
@@ -33,7 +40,14 @@ Plover2CAT dialogs have their own UI and code files as they subclass `QDialog`. 
 ```
 
 ```{eval-rst}
-.. automodule:: captionDialogWindow
+.. automodule:: recorderDialogWindow
+    :members:
+    :show-inheritance:
+    :member-order: bysource
+```
+
+```{eval-rst}
+.. automodule:: shortcutDialogWindow
     :members:
     :show-inheritance:
     :member-order: bysource
@@ -47,7 +61,14 @@ Plover2CAT dialogs have their own UI and code files as they subclass `QDialog`. 
 ```
 
 ```{eval-rst}
-.. automodule:: recorderDialogWindow
+.. automodule:: tapeDialogWindow
+    :members:
+    :show-inheritance:
+    :member-order: bysource
+```
+
+```{eval-rst}
+.. automodule:: testDialogWindow
     :members:
     :show-inheritance:
     :member-order: bysource
