@@ -46,7 +46,7 @@ This menu is for steno-related menu items.
 - Autocompletion: Toggle to enable autocompletion in editor. Requires a `wordlist.json` in a `sources/` dictionary.
 - Add Autocompletion Term: Activates dialog to add candidate text and steno for autocompletion.
 - Retroactive Define: Set new translation for strokes under selected text, replaces all occurrences of text.
-- Define Last: Define last preceding untranslate before cursor.
+- Define Last Untrans: Define last preceding untranslate before cursor.
 - Delete Last Untrans: Find last preceding untranslate, if exists, and delete.
 - Lock Cursor at End: If checked, the cursor will be placed at end during writing, and all text is "appended" to end of document. 
 - Capture All Steno Input: If checked, all writing through Plover will be tracked, and text emitted into editor, regardless of whether editor window is in focus. By default, no writing to editor when window is not in focus.
@@ -54,10 +54,11 @@ This menu is for steno-related menu items.
 
 ## The Insert Menu
 
-- Insert Image: Activates a file selector to select image to insert
-- Insert Normal Text: Activates a dialog window to insert normal text
+- Image: Activates a file selector to select image to insert
+- Normal Text: Activates a dialog window to insert normal text
 - *Insert Field*: sub-menu for defined fields to insert
 - *Index Entry*: sub-menu for quick insert of index entries
+- Text From File: select text file to import contents
 - Edit Fields: Activates dialog to create and edit field variables
 - Edit Indices: Activates dialog to create and manage indexes and index entries
 
@@ -78,6 +79,8 @@ This menu contains items related to media files.
 - Stop Recording: Stop any recording in progress.  If Record/Pause is pressed again, the present audio file is overwritten.
 - Captioning: Setup caption display and remote sending
 - Flush Caption: Flush text in buffer to captions
+- Play (TTS): Start synthesizing text to speech audio
+- Stop (TTS): Stop playing text to speech audio
 
 ### The Styling Menu
 
@@ -98,9 +101,14 @@ This menu is for transcript dictionary management.
 
 ### The Tools Menu
 
-- Find/Replace Pane: Shows Find and Replace pane if hidden.
-- Spellcheck: Shows Spellcheck pane if hidden
-- Steno Search: Shows Steno Search pane if hidden
+- Styling: Show Styling pane if hidden.
+- Page Format: Show Page Format pane if hidden.
+- Find/Replace Pane: Show Find and Replace pane if hidden.
+- Paragraph: Show Paragraph pane if hidden.
+- Spellcheck: Show Spellcheck pane if hidden.
+- Steno Search: Show Steno Search pane if hidden.
+- Text to Speech: Show Text to Speech pane if hidden.
+- *Online Search*: open browser with selected text to search for various services.
 
 ### The Preferences Menu
 
@@ -162,7 +170,6 @@ This section documents each menu item under its menu section with the identifier
 | Normal Copy          | `actionNormalCopy`       | Ctrl+Shift+C |
 | Normal Paste         | `actionNormalPaste`      |              |
 | Jump to Paragraph... | `actionJumpToParagraph`  |              |
-| Insert Normal Text   | `actionInsertNormalText` | Insert       |
 | Reset Paragraph      | `actionClearParagraph`   |              |
 | Autosave             | `actionEnableAutosave`   |              |
 | Set Autosave Time    | `actionSetAutosaveTime`  |              |
@@ -187,8 +194,9 @@ This section documents each menu item under its menu section with the identifier
 
 | Item                 | Action Identifier        | Shortcut     |
 |----------------------|--------------------------|--------------|
-| Insert Image         | `actionInsertImage`      |              |
-| Insert Normal Text   | `actionInsertNormalText` | Insert       |
+| Image                | `actionInsertImage`      |              |
+| Normal Text          | `actionInsertNormalText` | Insert       |
+| Text From File       | `actionTextFromFile`     |              |
 | Edit Fields          | `actionEditFields`       |              |
 | Edit Indices         | `actionEditIndices`      |              |
 
@@ -232,12 +240,22 @@ This section documents each menu item under its menu section with the identifier
 | Transcript Suggestions | `actionTranscriptSuggestions` |          |
 
 ### Tools
-
-| Item                 | Action Identifier        | Shortcut     |
-|----------------------|--------------------------|--------------|
-| Find/Replace Pane    | `actionFindReplacePane`  | Ctrl+F       |
-| Spellcheck           | `actionSpellcheck`       |              |
-| Steno Search         | `actionStenoSearch`      |              |
+            
+| Item                               | Action Identifier              | Shortcut     |
+|------------------------------------|--------------------------------|--------------|
+| Styling                            | `actionStyling`                |              |
+| Page Format                        | `actionPageFormat`             |              |
+| Find/Replace Pane                  | `actionFindReplacePane`        | Ctrl+F       |
+| Paragraph                          | `actionParagraph`              |              |
+| Spellcheck                         | `actionSpellcheck`             |              |
+| Steno Search                       | `actionStenoSearch`            |              |
+| Text to Speech                     | `actionTextToSpeech`           |              |
+| Online Search \> Merriam-Webster   | `actionSearchMerriamWebster`   |              |
+| Online Search \> OED               | `actionSearchOED`              |              |
+| Online Search \> Wiktionary        | `actionSearchWiktionary`       |              |
+| Online Search \> Wikipedia         | `actionSearchWikipedia`        |              |
+| Online Search \> Google            | `actionSearchGoogle`           |              |
+| Online Search \> Duck Duck Go      | `actionSearchDuckDuckGo`       |              |
 
 ### Preferences
 
@@ -245,8 +263,8 @@ This section documents each menu item under its menu section with the identifier
 |-------------------------|---------------------------|----------|
 | Show All Characters     | `actionShowAllCharacters` |          |
 | Window Font             | `actionWindowFont`        |          |
-| Paper Tape Font         | `actionPaperTapeFont`     |          |
 | Background Color        | `actionBackgroundColor`   |          |
+| Paper Tape Font         | `actionPaperTapeFont`     |          |
 | Docks \> Paper Tape     | `actionPaperTape`         |          |
 | Docks \> Suggestions    | `actionSuggestions`       |          |
 | Docks \> History        | `actionHistory`           |          |

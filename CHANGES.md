@@ -14,6 +14,7 @@ Change:
 - Recent Files now has smaller icons and text to side (more like a list)
 - Clicks on menu items now logged in status bar
 - Spellcheck now starts with word under cursor rather than first word after cursor
+- Online searches (Merriam-Webster, OED, etc) are now under the Online Search submenu in Tools menu
 
 Bugfix:
 
