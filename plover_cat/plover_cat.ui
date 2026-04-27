@@ -3389,7 +3389,7 @@ position.</string>
     <string>User Manual</string>
    </property>
    <property name="toolTip">
-    <string>Open online user manual on GitHub</string>
+    <string>Open user manual on GitHub</string>
    </property>
    <property name="shortcut">
     <string>F1</string>

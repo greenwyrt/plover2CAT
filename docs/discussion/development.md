@@ -151,9 +151,12 @@ PySide6 decorators improve memory/performance
     - languagetool (https://pypi.org/project/language_tool_python/)
         - returns JSON format
         - need to retrieve response and format into something to apply
-    - dictionary (Stardict, see python library: https://github.com/lig/pystardict)
+        - ~200mb installation?
     - thesaurus (libreoffice: MyThes)
 
+- [ ] dialogs should move to own folder (too many)
+
+- [ ] toolbox tabs should be refactored out if possible (TTS, paragraph, steno search)
 
 - [ ] find all not working with wrap, does seem to find above
 
