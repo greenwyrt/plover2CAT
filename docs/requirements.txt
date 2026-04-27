@@ -6,3 +6,5 @@ odfpy
 dulwich
 obsws-python
 pyparsing
+plover
+plover2cat
