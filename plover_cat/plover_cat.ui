@@ -2700,7 +2700,7 @@ position.</string>
           <normaloff>:/resources/address-book-blue.png</normaloff>:/resources/address-book-blue.png</iconset>
         </attribute>
         <attribute name="title">
-         <string>Word Lookup</string>
+         <string>Definition Lookup</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>

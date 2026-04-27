@@ -7,6 +7,7 @@ New:
 - Set window opaqueness and whether to stay on top (+ documentation)
 - Translate tape now controllable: translate one stroke, 10, or all remaining 
 - User manual is now bundled, can be viewed directly
+- Lookup definitions in local dictionary (must be StarDict format)
 - Added Wiktionary to available online lookups
 
 Change:
@@ -15,6 +16,7 @@ Change:
 - Clicks on menu items now logged in status bar
 - Spellcheck now starts with word under cursor rather than first word after cursor
 - Online searches (Merriam-Webster, OED, etc) are now under the Online Search submenu in Tools menu
+- Spellcheck dictionaries can now be placed as folders within the transcript or plover2cat spellcheck folders
 
 Bugfix:
 
@@ -295,7 +297,7 @@ Captioning interface and internals has been changed from 2.2.x versions with the
 
 - Feature: "Steno Search", use to find most likely translations based on steno outline
 
-- Feature: add online search for Wikipedia, DuckDuckGo, Google, Merriam-Webster, and Oxford English Dictionary
+- Feature: add online lookup for Wikipedia, DuckDuckGo, Google, Merriam-Webster, and Oxford English Dictionary
 
 ## Ver 2.2.2
 

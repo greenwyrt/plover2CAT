@@ -7,8 +7,9 @@ import time
 from collections import Counter, deque
 from copy import deepcopy
 from sys import platform
+from pystardict import Dictionary as stardict
 from tempfile import gettempdir, TemporaryDirectory
-from PySide6 import QtCore, QtGui, QtWidgets, QtHelp
+from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import (
     QColor,
     QTextCursor,
@@ -24,7 +25,7 @@ from PySide6.QtGui import (
     QDesktopServices,
     QPixmap,
     QAction,
-    QIcon
+    QIcon,
 )
 from PySide6.QtWidgets import (
     QMainWindow,
@@ -45,7 +46,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QToolButton,
     QDockWidget,
-    QVBoxLayout
+    QVBoxLayout,
 )
 from PySide6.QtMultimedia import (
     QMediaPlayer,
@@ -69,7 +70,7 @@ from PySide6.QtCore import (
     QSizeF,
     QTimer,
     QThread,
-    Slot
+    Slot,
 )
 from PySide6.QtTextToSpeech import QTextToSpeech
 
@@ -95,7 +96,15 @@ from plover_cat.testDialogWindow import testDialogWindow
 from plover_cat.rtf_parsing import rtf_steno, load_rtf_styles
 from plover_cat.constants import re_strokes, clippy_strokes, blockState
 from plover_cat.qcommands import BlockUserData, element_actions
-from plover_cat.helpers import save_json, remove_empty_from_dict, pixel_to_in, ms_to_hours, in_to_pt, mock_output, hours_to_ms
+from plover_cat.helpers import (
+    save_json,
+    remove_empty_from_dict,
+    pixel_to_in,
+    ms_to_hours,
+    in_to_pt,
+    mock_output,
+    hours_to_ms,
+)
 from plover_cat.steno_objects import index_text
 from plover_cat.spellcheck import get_sorted_suggestions, multi_gen_alternative
 from plover_cat.export_helpers import recursive_style_format, load_odf_styles
@@ -308,6 +317,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionParagraph.triggered.connect(lambda: self.show_toolbox_pane(self.paragraph_pane))
         self.actionSpellcheck.triggered.connect(lambda: self.show_toolbox_pane(self.spellcheck_pane))
         self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
+        self.actionTextToSpeech.triggered.connect(lambda: self.show_toolbox_pane(self.tts_pane))
         self.actionSearchWiktionary.triggered.connect(lambda: self.search_online("https://en.wiktionary.org/wiki/Special:Search/{0}"))
         self.actionSearchWikipedia.triggered.connect(lambda: self.search_online("https://en.wikipedia.org/wiki/Special:Search/{0}"))
         self.actionSearchMerriamWebster.triggered.connect(lambda: self.search_online("http://www.merriam-webster.com/dictionary/{0}"))
@@ -1136,7 +1146,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """
         current_cursor = self.textEdit.textCursor()
         if not current_cursor.hasSelection():
-            self.display_message("No text selected for online search.")
+            self.display_message("No text selected for online lookup.")
             return
         QDesktopServices.openUrl(QUrl(link.format(current_cursor.selectedText())))
 
@@ -1363,15 +1373,25 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.dict_selection.addItem("en_US", "en_US")
         default_spellcheck_path = pathlib.Path(self.textEdit.file_name) / "spellcheck"
         if default_spellcheck_path.exists():
-            dics = [file for file in default_spellcheck_path.iterdir() if str(file).endswith("dic")]
+            dics = [file for file in default_spellcheck_path.rglob("*.dic")]
             for dic in dics:
                     self.dict_selection.addItem(dic.stem, dic)
         plover2cat_spellcheck_path = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "spellcheck"
         if plover2cat_spellcheck_path.exists():
-            dics = [file for file in plover2cat_spellcheck_path.iterdir() if str(file).endswith("dic")]
+            dics = [file for file in plover2cat_spellcheck_path.rglob("*.dic")]
             for dic in dics:
                     self.dict_selection.addItem(dic.stem, dic)            
         self.dict_selection.setCurrentText(self.textEdit.dictionary_name)
+
+    def update_stardict_gui(self):
+        """List StarDict dictionaries in GUI
+        """
+        self.stardict.clear()
+        stardict_path = pathlib.Path(plover.oslayer.config.CONFIG_DIR) / "plover2cat" / "stardict"
+        if stardict_path.exists():
+            stardicts = [file for file in stardict_path.rglob("*.ifo")]
+            for dic in stardicts:
+                self.stardict.addItem(dic.stem, dic)
 
     def clipboard_menu(self):
         """Create menu items of data in storage for pasting.
@@ -1615,11 +1635,14 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.update_index_menu()
         self.update_tape(self.textEdit.tape)
         self.update_spell_gui()
+        self.update_stardict_gui()
         self.spell_search.clicked.connect(lambda: self.spellcheck())
         self.spell_skip.clicked.connect(lambda: self.spellcheck())
         self.spellcheck_suggestions.itemDoubleClicked.connect(self.sp_insert_suggest)
         self.spell_ignore_all.clicked.connect(lambda: self.sp_ignore_all())
         self.dict_selection.activated.connect(self.set_sp_dict)
+        self.stardict.activated.connect(self.set_stardict)
+        self.stardictSearch.clicked.connect(self.stardict_lookup)
         self.update_config_gui()
         self.page_width.valueChanged.connect(lambda value, key = "page_width": self.textEdit.set_config_value(key, value))
         self.page_height.valueChanged.connect(lambda value, key = "page_height": self.textEdit.set_config_value(key, value))
@@ -2562,6 +2585,30 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.textEdit.undo_stack.beginMacro("Spellcheck: correct to %s" % item.text())
         self.replace(to_next=False, steno="", replace_term=item.text())
         self.textEdit.undo_stack.endMacro()
+
+    @Slot(int)
+    def set_stardict(self, index = None):
+        """Load selected StarDict
+        
+        :param int index: index of selection
+        """
+        if index:
+            stardict_path = self.stardict.itemData(index).with_suffix("")
+        else:
+            stardict_path = self.stardict.itemData(self.stardict.currentIndex()).with_suffix("")
+        log.debug(f"Loading stardict from {stardict_path}")
+        self.stardict_index = stardict(stardict_path)
+
+    def stardict_lookup(self):
+        if not hasattr(self, "stardict_index"):
+            self.set_stardict()
+        query = self.stardictQuery.text()
+        res = self.stardict_index[query.strip()]
+        if res:
+            self.stardictDisplay.setHtml(res)
+        else:
+            self.stardictDisplay.setText("No results found.")
+
 
     def search(self, direction = 1):
         """Search wrapper.

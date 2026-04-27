@@ -158,3 +158,9 @@ Volume, rate, and pitch are also dependent on the voice provided as voices may d
 `Resume` resumes audio if the option is available.
 
 `Stop` stops audio synthesis.
+
+### Definition Lookup
+
+This tab contains the inputs for looking up definitions in dictionaries.
+
+The dropdown is for selecting an available dictionary.
