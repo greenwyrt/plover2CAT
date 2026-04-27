@@ -1,8 +1,19 @@
 # How to find and replace text
 
+Find and replace text is used to find exact matches and possibly replace them within the transcript.
+
+```{seealso}
+For searching for misspellings within the transcript, see [](spellcheck.md).
+For searching for closely related steno outlines, see [](stenosearch.md).
+For lookup up a dictionary definition for a word/phrase, see [](definitionlookup.md).
+For querying various online sources on a word/phrase, see [](onlinelookup.md).
+```
+
 There are three kinds of find: text, steno, and untranslated, each with different options available. Searches can be forward or backward, and wrap around if selected.
 
 Use `Ctrl+F` to move to the find and replace pane.
+
+
 
 ## Text Find
 

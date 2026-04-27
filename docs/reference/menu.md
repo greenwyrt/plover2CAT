@@ -250,12 +250,12 @@ This section documents each menu item under its menu section with the identifier
 | Spellcheck                         | `actionSpellcheck`             |              |
 | Steno Search                       | `actionStenoSearch`            |              |
 | Text to Speech                     | `actionTextToSpeech`           |              |
-| Online Search \> Merriam-Webster   | `actionSearchMerriamWebster`   |              |
-| Online Search \> OED               | `actionSearchOED`              |              |
-| Online Search \> Wiktionary        | `actionSearchWiktionary`       |              |
-| Online Search \> Wikipedia         | `actionSearchWikipedia`        |              |
-| Online Search \> Google            | `actionSearchGoogle`           |              |
-| Online Search \> Duck Duck Go      | `actionSearchDuckDuckGo`       |              |
+| Online Lookup \> Merriam-Webster   | `actionSearchMerriamWebster`   |              |
+| Online Lookup \> OED               | `actionSearchOED`              |              |
+| Online Lookup \> Wiktionary        | `actionSearchWiktionary`       |              |
+| Online Lookup \> Wikipedia         | `actionSearchWikipedia`        |              |
+| Online Lookup \> Google            | `actionSearchGoogle`           |              |
+| Online Lookup \> Duck Duck Go      | `actionSearchDuckDuckGo`       |              |
 
 ### Preferences
 

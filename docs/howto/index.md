@@ -61,6 +61,8 @@ Add extra language dictionaries <addspelldict.md>
 Reset paragraph <resetparagraph.md>
 Revert to previously saved version <revert.md>
 Navigate with headings <navigate.md>
+Lookup text/phrases online <onlinelookup.md>
+Lookup definitions in a local dictionary <definitionlookup.md>
 ```
 
 ## Play and Record Media files

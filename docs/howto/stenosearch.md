@@ -4,6 +4,13 @@
 
 `Steno Search` does not refer to finding steno in the underlying transcript. See [find/replace](findreplace.md) on how to do that.
 
+```{seealso}
+For searching for text within the transcript, see [](findreplace.md).
+For searching for misspellings within the transcript, see [](spellcheck.md).
+For lookup up a dictionary definition for a word/phrase, see [](definitionlookup.md).
+For querying various online sources on a word/phrase, see [](onlinelookup.md).
+```
+
 ## Usage
 
 1. Activate the `Steno Search` pane in the toolbox.

@@ -398,9 +398,9 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
-    <widget class="QMenu" name="menuOnlineSearch">
+    <widget class="QMenu" name="menuOnlineLookup">
      <property name="title">
-      <string>Online Search</string>
+      <string>Online Lookup</string>
      </property>
      <addaction name="actionSearchMerriamWebster"/>
      <addaction name="actionSearchOED"/>
@@ -417,7 +417,7 @@
     <addaction name="actionStenoSearch"/>
     <addaction name="actionTextToSpeech"/>
     <addaction name="separator"/>
-    <addaction name="menuOnlineSearch"/>
+    <addaction name="menuOnlineLookup"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>

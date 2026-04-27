@@ -59,3 +59,18 @@ The `{transcript_name}.transcript` file is a JSON holding stroke and styling inf
 For details on how these files are structured, refer to [data formats](dataformat.md)
 
 
+## `Plover2CAT` folder contents
+
+Plover2CAT will create a `plover2cat` folder in Plover's config folder. This can be used to hold certain settings and data that should apply across all transcripts.
+
+Access this folder through **Plover > File > Open Config Folder**
+
+This is the structure:
+
+```
+plover2cat/
+    shortcuts.json
+    spellcheck/ # hunspell dictionaries for spellcheck, two files with extensions .dic and .aff
+    stardict/ # stardict formatted dictionaries, 
+        example_stardict/ # folder contains at least three files, .ifo, .idx, and .dict
+```
