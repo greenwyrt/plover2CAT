@@ -17,6 +17,7 @@ Change:
 - Spellcheck now starts with word under cursor rather than first word after cursor
 - Online searches (Merriam-Webster, OED, etc) are now under the Online Search submenu in Tools menu
 - Spellcheck dictionaries can now be placed as folders within the transcript or plover2cat spellcheck folders
+- Max playback rate now set to 3
 
 Bugfix:
 

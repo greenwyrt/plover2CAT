@@ -108,6 +108,7 @@ This menu is for transcript dictionary management.
 - Spellcheck: Show Spellcheck pane if hidden.
 - Steno Search: Show Steno Search pane if hidden.
 - Text to Speech: Show Text to Speech pane if hidden.
+- Definition Lookup: Show Definition Lookup pane if hidden.
 - *Online Search*: open browser with selected text to search for various services.
 
 ### The Preferences Menu
@@ -250,6 +251,7 @@ This section documents each menu item under its menu section with the identifier
 | Spellcheck                         | `actionSpellcheck`             |              |
 | Steno Search                       | `actionStenoSearch`            |              |
 | Text to Speech                     | `actionTextToSpeech`           |              |
+| Definition Lookup                  | `actionDefinitionLookup`       |              |
 | Online Lookup \> Merriam-Webster   | `actionSearchMerriamWebster`   |              |
 | Online Lookup \> OED               | `actionSearchOED`              |              |
 | Online Lookup \> Wiktionary        | `actionSearchWiktionary`       |              |

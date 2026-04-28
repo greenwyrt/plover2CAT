@@ -416,6 +416,7 @@
     <addaction name="actionSpellcheck"/>
     <addaction name="actionStenoSearch"/>
     <addaction name="actionTextToSpeech"/>
+    <addaction name="actionDefinitionLookup"/>
     <addaction name="separator"/>
     <addaction name="menuOnlineLookup"/>
    </widget>
@@ -4037,6 +4038,15 @@ position.</string>
    </property>
    <property name="text">
     <string>Text to Speech</string>
+   </property>
+  </action>
+  <action name="actionDefinitionLookup">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/resources/address-book-blue.png</normaloff>:/resources/address-book-blue.png</iconset>
+   </property>
+   <property name="text">
+    <string>Definition Lookup</string>
    </property>
   </action>
  </widget>

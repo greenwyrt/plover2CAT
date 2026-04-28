@@ -318,6 +318,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.actionSpellcheck.triggered.connect(lambda: self.show_toolbox_pane(self.spellcheck_pane))
         self.actionStenoSearch.triggered.connect(lambda: self.show_stenospell())
         self.actionTextToSpeech.triggered.connect(lambda: self.show_toolbox_pane(self.tts_pane))
+        self.actionDefinitionLookup.triggered.connect(lambda: self.show_definition_lookup())
         self.actionSearchWiktionary.triggered.connect(lambda: self.search_online("https://en.wiktionary.org/wiki/Special:Search/{0}"))
         self.actionSearchWikipedia.triggered.connect(lambda: self.search_online("https://en.wikipedia.org/wiki/Special:Search/{0}"))
         self.actionSearchMerriamWebster.triggered.connect(lambda: self.search_online("http://www.merriam-webster.com/dictionary/{0}"))
@@ -1136,6 +1137,15 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.dockProp.setVisible(True)
         self.tabWidget.setCurrentWidget(self.stenospell_pane)
         log.debug("User set steno spell pane visible.")
+
+    def show_definition_lookup(self):
+        """Show Definition Lookup in Toolbox, and insert selected text into search field.
+        """
+        if self.textEdit.textCursor().hasSelection():
+            self.stardictQuery.setText(self.textEdit.textCursor().selectedText())
+        if not self.dock_status["dockProp"]:
+            self.dockProp.setVisible(True)
+        self.tabWidget.setCurrentWidget(self.stardict_pane)
 
     def search_online(self, link):
         """Search online with selected text using link source in default browser.
