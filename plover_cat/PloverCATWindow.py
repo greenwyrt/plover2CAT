@@ -554,6 +554,11 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.editorNotes.clear()
         if not block_data["style"]:
             self.textEdit.to_next_style()
+        block_state = current_cursor.block().userState()
+        if block_state & blockState.READONLY:
+            self.editorReadOnly.setChecked(True)
+        else:
+            self.editorReadOnly.setChecked(False)
         self.style_selector.setCurrentText(block_data["style"])
         self.textEdit.showPossibilities()
 
@@ -2515,6 +2520,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.textEdit.set_paragraph_property(block_number, "edittime", val)
         self.textEdit.set_paragraph_property(block_number, "notes", self.editorNotes.text())
         self.textEdit.undo_stack.endMacro()
+        self.textEdit.set_paragraph_state(block_number, self.editorReadOnly.isChecked())
 
     def spell_steno(self):
         """Search and display closest outlines.
@@ -2618,7 +2624,6 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             self.stardictDisplay.setHtml(res)
         else:
             self.stardictDisplay.setText("No results found.")
-
 
     def search(self, direction = 1):
         """Search wrapper.
