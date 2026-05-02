@@ -263,7 +263,8 @@ class PloverCATEditor(QTextEdit):
                 block_data[k] = v
             block_data["strokes"] = element_collection()
             document_cursor.block().setUserData(block_data)
-            document_cursor.block().setUserState(blockState.DEFAULT)
+            block_state = value.get("state", 0)
+            document_cursor.block().setUserState(blockState(block_state))
             block_data["strokes"] = element_collection(el_list)
             if block_data["style"] not in self.par_formats:
                 block_data["style"] = next(iter(self.par_formats))
@@ -367,8 +368,8 @@ class PloverCATEditor(QTextEdit):
                     continue
                 block_num = block.blockNumber()
                 block_dict["strokes"] = block_dict["strokes"].to_json()
+                block_dict["state"] = block.userState() & ~blockState.CHANGE
                 json_document[str(block_num)] = block_dict
-                block.setUserState(blockState.DEFAULT)
             if block == self.document().lastBlock():
                 break
             block = block.next()      
@@ -755,6 +756,18 @@ class PloverCATEditor(QTextEdit):
         prop_cmd = set_par_property(self, paragraph, prop, value)
         self.undo_stack.push(prop_cmd)
 
+    def set_paragraph_state(self, paragraph, state):
+        """Set paragraph read-only state.
+
+        :param int paragraph: block number in document
+        :param bool state: set paragraph to this read-only value 
+        """
+        block = self.document().findBlockByNumber(paragraph)
+        if state:
+            block.setUserState(block.userState() | blockState.READONLY)
+        else:
+            block.setUserState(block.userState() & ~blockState.READONLY)
+
     def refresh_par_style(self, block = None):
         """Update a paragraph's display styling.
 
@@ -954,7 +967,24 @@ class PloverCATEditor(QTextEdit):
             if audio_time:
                 block_dict = update_user_data(block_dict, key = "audiostarttime", value = audio_time)
         block.setUserData(block_dict)
- 
+
+    def get_next_block(self, block):
+        next_block = block.next()
+        # for split: next block cannot be read only
+        if not next_block.userState() & blockState.READONLY:
+            return(block)
+        else:
+            while next_block.isValid():
+                if next_block.userState() & blockState.READONLY:
+                    next_block = next_block.next()
+                else:
+                    return(next_block)
+        # if end of doc, just add new block
+        if not next_block.isValid():
+            current_cursor = self.textCursor()
+            current_cursor.insertBlock()
+            return(current_cursor.block())                
+
     def merge_paragraphs(self, add_space = True):
         """Merge two paragraphs.
 
@@ -1248,7 +1278,7 @@ class PloverCATEditor(QTextEdit):
         :param str text: text to insert
         """
         if self.engine.output:
-            return          
+            return
         if len(text) > 0:
             self.insert_text([text])        
 
