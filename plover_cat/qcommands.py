@@ -162,7 +162,10 @@ class steno_remove(QUndoCommand):
         self.cursor = cursor
     def redo(self):
         current_cursor = self.cursor
-        current_block = self.document.document().findBlockByNumber(self.block)
+        if current_cursor.blockNumber() == self.block:
+            current_block = current_cursor.block()
+        else:
+            current_block = self.document.document().findBlockByNumber(self.block)
         start_pos = current_block.position() + self.position_in_block
         current_cursor.setPosition(start_pos)
         block_data = current_block.userData()
@@ -292,7 +295,10 @@ class split_steno_par(QUndoCommand):
         self.space_removed = False
     def redo(self):
         current_cursor = self.cursor
-        current_block = self.document.document().findBlockByNumber(self.block)
+        if current_cursor.blockNumber() == self.block:
+            current_block = current_cursor.block()
+        else:
+            current_block = self.document.document().findBlockByNumber(self.block)
         current_cursor.setPosition(current_block.position() + self.position_in_block)
         self.block_data = deepcopy(current_block.userData().return_all())
         self.block_text = current_block.text()
@@ -493,7 +499,11 @@ class set_par_style(QUndoCommand):
         self.old_style = ""
         self.block_state = 1
     def redo(self):
-        current_block = self.document.document().findBlockByNumber(self.block)
+        current_cursor = self.cursor
+        if current_cursor.blockNumber() == self.block:
+            current_block = current_cursor.block()
+        else:
+            current_block = self.document.document().findBlockByNumber(self.block)
         block_data = current_block.userData()
         if not block_data:
             block_data = BlockUserData()

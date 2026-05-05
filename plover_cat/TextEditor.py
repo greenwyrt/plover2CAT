@@ -824,8 +824,9 @@ class PloverCATEditor(QTextEdit):
             previous_dict = previous_block.userData()
             previous_style = previous_dict["style"]
         if previous_style and "nextstylename" in style_data[previous_style]:
-            new_style = style_data[previous_style]["nextstylename"]
-        self.set_paragraph_style(new_style)
+            auto_new_style = style_data[previous_style]["nextstylename"]
+        if new_style != auto_new_style:
+            self.set_paragraph_style(auto_new_style)
         
     def on_stroke(self, stroke_pressed, end = False):
         """Write.
