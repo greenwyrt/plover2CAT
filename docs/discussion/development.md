@@ -109,11 +109,41 @@ While it has not yet occurred, it is very likely that at some time, memory could
 
 An enum class have been created for `userState`. Right now, only `CHANGE` is being used for saving.
 
+- [x] state should be updated before being saved into transcript data, and then converted when imported
+- [x] readonly should be editable in Paragraph properties
 - [ ] use new enum to set paragraph to read-only while still navigable by cursor
     - possibly using cursor to move forward and back blocks
     - some actions, such as normal copy should work, others like copy/cut should not
     - color paragraph with qbrush for texture
-- [ ] state should be updated before being saved into transcript data, and then converted when imported
+
+Methods that likely need checks:
+```
+split_paragraph: for read-only, should return next available non-readonly block, or make one if at end of document
+
+
+insert_text: depends on split_paragraph
+cut_steno
+
+
+mock_del
+mock_type
+mock_bks
+
+
+on_stroke
+
+merge_paragraphs
+
+keyPressEvent
+
+replace
+
+insert_field
+insert_image
+insert_index_entry
+insert_autocomplete
+```
+
 - [ ] tests for saving
     - [ ] set transcript_data and textEdit are different, make sure everything after userState changed is saved
     - [ ] toggle first paragraph
@@ -144,15 +174,14 @@ Functions and class methods should be fully documented.
 
 PySide6 decorators improve memory/performance
 
+### UI Information
+
+No consistent strings between reference docs, tooltips, what's this, and accessible description (last two pretty much empty in ui)
+
 
 ## Possible improvements list
 
-- [ ] writing aids
-    - languagetool (https://pypi.org/project/language_tool_python/)
-        - returns JSON format
-        - need to retrieve response and format into something to apply
-        - ~200mb installation?
-    - thesaurus (libreoffice: MyThes)
+- [ ] marked element - like comment, but for typos or such (see IV.C.6 on spec)
 
 - [ ] dialogs should move to own folder (too many)
 
@@ -176,6 +205,13 @@ PySide6 decorators improve memory/performance
 - [ ] add to reveal steno view
     - version with show strokes
     - link to cursor
+
+- [ ] writing aids
+    - languagetool (https://pypi.org/project/language_tool_python/)
+        - returns JSON format
+        - need to retrieve response and format into something to apply
+        - ~200mb installation?
+    - thesaurus (libreoffice: MyThes)
 
 - [ ] media controls do not collapse well, should be using flowLayout to move duration and track to new
 

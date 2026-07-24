@@ -9,7 +9,7 @@
 project = 'plover2CAT'
 copyright = '2026, plants'
 author = 'plants'
-release = '4.1.1'
+release = '4.2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

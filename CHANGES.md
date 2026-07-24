@@ -30,6 +30,8 @@ Internal:
 - use new enum blockState for userState in QTextEdit
 - refactored string insertion for single vs multi-lines
 - tests should have a log debug with their name
+- only apply next paragraph style if needed
+- get block by cursor rather than `findBlockByNumber` in qcommands, this and apply style should speed up tape translate (likely not apparent in normal writing)
 
 ## Ver 4.1.0
 
