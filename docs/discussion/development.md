@@ -255,7 +255,7 @@ No consistent strings between reference docs, tooltips, what's this, and accessi
 
 
 
-# Build and bundle docs
+## Build and bundle docs
 
 ```
 source ~/plover2CAT/.venv/bin/activate
