@@ -1,5 +1,9 @@
 # CHANGES
 
+## Ver 4.2.1
+
+- Change: require `PySide6` rather than Essentials and Add-Ons separately
+
 ## Ver 4.2.0
 
 New:
