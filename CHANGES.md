@@ -4,6 +4,8 @@
 
 - Change: require `PySide6` rather than Essentials and Add-Ons separately
 
+- Bugfix: correctly manage `recentfile` if empty
+
 ## Ver 4.2.0
 
 New:

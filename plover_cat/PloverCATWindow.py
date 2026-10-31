@@ -204,7 +204,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
             window_pal.setColor(QPalette.Base, back_color)
             self.setPalette(window_pal)
         if settings.contains("suggestionsource"):
-            self.suggest_source.setCurrentIndex(settings.value("suggestionsource"))
+            self.suggest_source.setCurrentIndex(int(settings.value("suggestionsource")))
         if settings.contains("recentfiles"):
             self.recent_file_menu()
         self.test_dialog = None
@@ -945,7 +945,9 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         self.menuRecentFiles.clear()
         self.clear_layout(self.recentfileflow)
         settings = QSettings("Plover2CAT-4", "OpenCAT")
-        recent_file_paths = settings.value("recentfiles", [])
+        recent_file_paths = settings.value("recentfiles", [], list)
+        if not recent_file_paths:
+            return
         for dir_path in recent_file_paths:
             transcript_path = pathlib.Path(dir_path)
             if not transcript_path.exists():
@@ -1570,7 +1572,7 @@ class PloverCATWindow(QMainWindow, Ui_PloverCAT):
         """Store transcript path in settings to open.
         """
         settings = QSettings("Plover2CAT-4", "OpenCAT")
-        recent_file_paths = settings.value("recentfiles", [])
+        recent_file_paths = settings.value("recentfiles", [], list)
         try:
             recent_file_paths.remove(path)
         except ValueError:
